@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Newlogic MlkitLibrary</string>
+    <string name="model_text">Downloading OCR models...</string>
+    <string name="connection_text">No connection to download OCR models</string>
+
+    <string name="required_perms_not_given">Error: Permissions denied.</string>
+    <string name="settings">Settings</string>
+    <string name="rectangle">Rectangle</string>
+
+    <string name="cd_close_button">Back</string>
+    <string name="cd_flash_button">Toggle camera flash</string>
+    <string name="mlkit">MLKit</string>
+    <string name="tesseract">Tesseract</string>
+</resources>
