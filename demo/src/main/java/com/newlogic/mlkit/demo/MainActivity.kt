@@ -1,90 +1,98 @@
-package com.newlogic.mlkit.demo;
+package com.newlogic.mlkit.demo
 
-import android.app.Activity;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.content.Intent
+import android.graphics.BitmapFactory
+import android.graphics.Paint
+import android.os.Bundle
+import android.util.Log
+import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.google.gson.JsonParser
+import com.newlogic.mlkit.R
+import com.newlogic.mlkit.demo.utils.AnimationUtils
+import com.newlogic.mlkitlib.newlogic.MLKitActivity
+import com.newlogic.mlkitlib.newlogic.config.Config
+import com.newlogic.mlkitlib.newlogic.config.Modes
+import com.newlogic.mlkitlib.newlogic.extension.empty
+import kotlinx.android.synthetic.main.activity_main.*
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.newlogic.mlkit.R;
-import com.newlogic.mlkitlib.newlogic.MLKitActivity;
-import com.newlogic.mlkitlib.newlogic.config.Config;
+class MainActivity : AppCompatActivity() {
 
-
-public class MainActivity extends AppCompatActivity {
-
-    private final int OP_MLKIT = 1001;
-
-    private static final String TAG = "Newlogic-MLkit";
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
-
+    public override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
+        super.onActivityResult(requestCode, resultCode, intent)
         if (requestCode == OP_MLKIT) {
-            Log.d(TAG, "Plugin post ML Activity resultCode " + resultCode);
-
-            if (resultCode == Activity.RESULT_OK) {
-                String returnedResult = intent.getStringExtra(MLKitActivity.MLKIT_RESULT);
-                JsonObject jsonObject = null;
-                if (returnedResult != null) {
-                    jsonObject = JsonParser.parseString(returnedResult).getAsJsonObject();
-                    if (jsonObject.get("imagePath") != null) {
-                        String path = jsonObject.get("imagePath").getAsString();
-                        Bitmap myBitmap = BitmapFactory.decodeFile(path);
-                        ImageView image = findViewById(R.id.imageView);
-                        image.setImageBitmap(myBitmap);
+            Log.d(TAG, "Plugin post ML Activity resultCode $resultCode")
+            if (resultCode == RESULT_OK) {
+                val returnedResult = intent?.getStringExtra(MLKitActivity.MLKIT_RESULT)
+                val originalHeight = 750 // Approx. 250dp for image and textview
+                returnedResult?.let {
+                    val result = JsonParser.parseString(it).asJsonObject
+                    if (result["imagePath"] != null) {
+                        val path = result["imagePath"].asString
+                        val myBitmap = BitmapFactory.decodeFile(path)
+                        imageView.setImageBitmap(myBitmap)
+                        txtImgAction.visibility = VISIBLE
+                        txtImgAction.paintFlags = txtImgAction.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+                        txtImgAction.setOnClickListener {
+                            AnimationUtils.expandCollapse(imageView, originalHeight)
+                            txtImgAction.text = if (imageView.visibility == GONE) getString(R.string.action_hide) else getString(R.string.action_show)
+                        }
                     }
-                    TextView text = findViewById(R.id.editTextTextMultiLine);
-                    text.setText(returnedResult);
+                    editTextTextMultiLine.setText(it)
+                    txtRawDataAction.visibility = VISIBLE
+                    txtRawDataAction.paintFlags = txtRawDataAction.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+                    txtRawDataAction.setOnClickListener {
+                        AnimationUtils.expandCollapse(editTextTextMultiLine, originalHeight)
+                        txtRawDataAction.text = if (editTextTextMultiLine.visibility == GONE) getString(R.string.action_hide) else getString(R.string.action_show)
+                    }
                 }
             }
         }
     }
 
-    public void startScanningActivity(@NonNull View view) {
-        Intent intent = new Intent(this, MLKitActivity.class);
-        Config config = getSampleConfig();
-        intent.putExtra(MLKitActivity.MLKIT_CONFIG, config);
-        startActivityForResult(intent, OP_MLKIT);
+    fun startScanningActivity(view: View) {
+        val intent = Intent(this, MLKitActivity::class.java)
+        intent.putExtra(MLKitActivity.MLKIT_CONFIG, sampleConfig(Modes.MRZ.value))
+        startActivityForResult(intent, OP_MLKIT)
     }
 
-    public void startPDF417ScanningActivity(@NonNull View view) {
-        Intent intent = new Intent(this, MLKitActivity.class);
-        intent.putExtra("mode", "pdf417");
-        startActivityForResult(intent, OP_MLKIT);
+    fun startPDF417ScanningActivity(view: View) {
+        val intent = Intent(this, MLKitActivity::class.java)
+        intent.putExtra(MODE, "pdf417")
+        startActivityForResult(intent, OP_MLKIT)
     }
 
-    public void startQRCodeScanningActivity(@NonNull View view) {
-        // TODO add QR implementation
+    fun startQRCodeScanningActivity(view: View) {
+        // TODO add QR implementation Modes.QR_CODE
+        Toast.makeText(this, "Not yet available!", Toast.LENGTH_LONG).show()
     }
 
-    public void startBarcodeScanningActivity(@NonNull View view) {
-        Intent intent = new Intent(this, MLKitActivity.class);
-        intent.putExtra("mode", "barcode");
-        startActivityForResult(intent, OP_MLKIT);
+    fun startBarcodeScanningActivity(view: View) {
+        val intent = Intent(this, MLKitActivity::class.java)
+        intent.putExtra(MLKitActivity.MLKIT_CONFIG, sampleConfig(Modes.BARCODE.value))
+        startActivityForResult(intent, OP_MLKIT)
     }
 
-    private Config getSampleConfig() {
-        return new Config(
-                "",
-                "", "",
-                "mrz",
-                true);
+    private fun sampleConfig(mode: String) = Config(
+        font = String.empty(),
+        language = String.empty(),
+        label = String.empty(),
+        mode = mode,
+        true
+    )
+
+    companion object {
+        private const val TAG = "Newlogic-MLkit"
+        private const val OP_MLKIT = 1001
+        private const val MODE = "mode"
     }
 }
