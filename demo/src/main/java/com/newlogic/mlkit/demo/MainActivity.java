@@ -71,9 +71,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void startQRCodeScanningActivity(@NonNull View view) {
-        /*Intent intent = new Intent(this, MLKitActivity.class);
-        intent.putExtra("mode", "pdf417");
-        startActivityForResult(intent, OP_MLKIT);*/
+        // TODO add QR implementation
     }
 
     public void startBarcodeScanningActivity(@NonNull View view) {
@@ -84,8 +82,8 @@ public class MainActivity extends AppCompatActivity {
 
     private Config getSampleConfig() {
         return new Config(
-                "NOTO_SANS_ARABIC",
-                "ARABIC", "الكرامة والحقوق. وقد وهبوا عقلاً",
+                "",
+                "", "",
                 "mrz",
                 true);
     }
