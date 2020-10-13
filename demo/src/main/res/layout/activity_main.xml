@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -10,61 +11,185 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <ImageView
-            android:id="@+id/imageView"
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="250dp"
-            tools:srcCompat="@tools:sample/avatars" />
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/newlogic_yellow"
+            app:layout_scrollFlags="scroll|enterAlways">
 
-        <EditText
-            android:id="@+id/editTextTextMultiLine"
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/toolbarTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center|start"
+                    android:text="@string/app_name"
+                    android:textColor="@color/newlogic_black"
+                    android:textSize="20sp" />
+            </FrameLayout>
+        </androidx.appcompat.widget.Toolbar>
+
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:ems="10"
-            android:fontFamily="monospace"
-            android:gravity="start|top"
-            android:inputType="textMultiLine"
-            android:textSize="12sp" />
+            android:layout_height="wrap_content">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-            <Button
-                android:id="@+id/button"
-                android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="56dp">
+
+                    <TextView
+                        android:id="@+id/textResultDetails"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center|start"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="8dp"
+                        android:text="Result Details:"
+                        android:textColor="@color/newlogic_black"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:visibility="invisible" />
+
+                    <TextView
+                        android:id="@+id/textName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center|start"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/label_name"
+                        android:textColor="@color/newlogic_black"
+                        android:textSize="16sp"
+                        android:visibility="invisible" />
+
+                    <TextView
+                        android:id="@+id/textSurName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center|start"
+                        android:layout_marginStart="16dp"
+                        android:text="@string/label_surname"
+                        android:textColor="@color/newlogic_black"
+                        android:textSize="16sp"
+                        android:visibility="invisible" />
+
+                    <TextView
+                        android:id="@+id/textBirthday"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center|start"
+                        android:layout_marginStart="16dp"
+                        android:text="@string/label_birthday"
+                        android:textColor="@color/newlogic_black"
+                        android:textSize="16sp"
+                        android:visibility="invisible" />
+
+                    <TextView
+                        android:id="@+id/textNationality"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center|start"
+                        android:layout_marginStart="16dp"
+                        android:text="@string/label_nationality"
+                        android:textColor="@color/newlogic_black"
+                        android:textSize="16sp"
+                        android:visibility="invisible" />
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/txtImgAction"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="24dp"
+                        android:layout_gravity="end"
+                        android:layout_marginTop="4dp"
+                        android:text="@string/action_show_hide"
+                        android:textColor="@color/newlogic_black"
+                        android:textSize="12sp"
+                        android:visibility="invisible" />
+
+                    <ImageView
+                        android:id="@+id/imageView"
+                        android:layout_width="match_parent"
+                        android:layout_height="250dp"
+                        android:scaleType="fitXY"
+                        tools:srcCompat="@tools:sample/avatars" />
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/txtRawDataAction"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="24dp"
+                        android:layout_gravity="end"
+                        android:layout_marginTop="4dp"
+                        android:text="@string/action_show_hide"
+                        android:textColor="@color/newlogic_black"
+                        android:textSize="12sp"
+                        android:visibility="invisible" />
+
+                    <EditText
+                        android:id="@+id/editTextTextMultiLine"
+                        android:layout_width="match_parent"
+                        android:layout_height="250dp"
+                        android:ems="10"
+                        android:focusable="false"
+                        android:fontFamily="monospace"
+                        android:gravity="start|top"
+                        android:inputType="textMultiLine"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </ScrollView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:onClick="startScanningActivity"
-                android:text="MRZ Code" />
+                android:layout_gravity="center|bottom"
+                android:layout_marginBottom="8dp"
+                android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/button2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:onClick="startPDF417ScanningActivity"
-                android:visibility="gone"
-                android:text="pdf417" />
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:onClick="startScanningActivity"
+                    android:text="@string/mode_mrz" />
 
-            <Button
-                android:id="@+id/button3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:onClick="startQRCodeScanningActivity"
-                android:text="QR Code" />
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/button2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:onClick="startQRCodeScanningActivity"
+                    android:text="@string/mode_qr" />
 
-            <Button
-                android:id="@+id/button4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:onClick="startBarcodeScanningActivity"
-                android:text="Barcode" />
-        </LinearLayout>
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/button3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:onClick="startBarcodeScanningActivity"
+                    android:text="@string/mode_barcode" />
 
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/button4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:onClick="startPDF417ScanningActivity"
+                    android:text="pdf417"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </FrameLayout>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

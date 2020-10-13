@@ -1,3 +1,20 @@
 <resources>
     <string name="app_name">Newlogic Smart Scanner </string>
+
+    <!--Action items-->
+    <string name="action_hide">HIDE</string>
+    <string name="action_show">SHOW</string>
+    <string name="action_show_hide">SHOW/HIDE</string>
+
+    <!--Modes-->
+    <string name="mode_mrz">MRZ Code</string>
+    <string name="mode_qr">QR Code</string>
+    <string name="mode_barcode">Barcode</string>
+
+    <!--Labels-->
+    <string name="label_name">Name: %1$s</string>
+    <string name="label_surname">Surname: %1$s</string>
+    <string name="label_birthday">Birthday: %1$s</string>
+    <string name="label_nationality">Nationality: %1$s</string>
+
 </resources>

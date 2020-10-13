@@ -18,6 +18,7 @@ import com.newlogic.mlkitlib.newlogic.config.Config
 import com.newlogic.mlkitlib.newlogic.config.Modes
 import com.newlogic.mlkitlib.newlogic.extension.empty
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -33,29 +34,52 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "Plugin post ML Activity resultCode $resultCode")
             if (resultCode == RESULT_OK) {
                 val returnedResult = intent?.getStringExtra(MLKitActivity.MLKIT_RESULT)
-                val originalHeight = 750 // Approx. 250dp for image and textview
-                returnedResult?.let {
-                    val result = JsonParser.parseString(it).asJsonObject
-                    if (result["imagePath"] != null) {
-                        val path = result["imagePath"].asString
-                        val myBitmap = BitmapFactory.decodeFile(path)
-                        imageView.setImageBitmap(myBitmap)
-                        txtImgAction.visibility = VISIBLE
-                        txtImgAction.paintFlags = txtImgAction.paintFlags or Paint.UNDERLINE_TEXT_FLAG
-                        txtImgAction.setOnClickListener {
-                            AnimationUtils.expandCollapse(imageView, originalHeight)
-                            txtImgAction.text = if (imageView.visibility == GONE) getString(R.string.action_hide) else getString(R.string.action_show)
-                        }
-                    }
-                    editTextTextMultiLine.setText(it)
-                    txtRawDataAction.visibility = VISIBLE
-                    txtRawDataAction.paintFlags = txtRawDataAction.paintFlags or Paint.UNDERLINE_TEXT_FLAG
-                    txtRawDataAction.setOnClickListener {
-                        AnimationUtils.expandCollapse(editTextTextMultiLine, originalHeight)
-                        txtRawDataAction.text = if (editTextTextMultiLine.visibility == GONE) getString(R.string.action_hide) else getString(R.string.action_show)
-                    }
-                }
+                returnedResult?.let { setupResultView(it) }
             }
+        }
+    }
+
+    private fun setupResultView(result: String) {
+        val resultObject = JsonParser.parseString(result).asJsonObject
+        val originalHeight = 750 // Approx. 250dp for image and textView
+        // Result Details
+        textResultDetails.visibility = VISIBLE
+        // Image
+        if (resultObject["imagePath"] != null) {
+            val path = resultObject["imagePath"].asString
+            val myBitmap = BitmapFactory.decodeFile(path)
+            imageView.setImageBitmap(myBitmap)
+            txtImgAction.visibility = VISIBLE
+            txtImgAction.paintFlags = txtImgAction.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+            txtImgAction.setOnClickListener {
+                AnimationUtils.expandCollapse(imageView, originalHeight)
+                txtImgAction.text = if (imageView.visibility == GONE) getString(R.string.action_show_hide) else getString(R.string.action_show)
+            }
+        }
+        // Simple Data
+        if (resultObject["givenNames"] != null) {
+            textName.visibility = VISIBLE
+            textName.text = getString(R.string.label_name, resultObject["givenNames"].asString.toLowerCase(Locale.ROOT).capitalize(Locale.ROOT))
+        }
+        if (resultObject["surname"] != null) {
+            textSurName.visibility = VISIBLE
+            textSurName.text = getString(R.string.label_surname, resultObject["surname"].asString.toLowerCase(Locale.ROOT).capitalize(Locale.ROOT))
+        }
+        if (resultObject["dateOfBirth"] != null) {
+            textBirthday.visibility = VISIBLE
+            textBirthday.text = getString(R.string.label_birthday, resultObject["dateOfBirth"].asString)
+        }
+        if (resultObject["nationality"] != null) {
+            textNationality.visibility = VISIBLE
+            textNationality.text = getString(R.string.label_nationality, resultObject["nationality"].asString)
+        }
+        //Raw Data
+        editTextTextMultiLine.setText(result)
+        txtRawDataAction.visibility = VISIBLE
+        txtRawDataAction.paintFlags = txtRawDataAction.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+        txtRawDataAction.setOnClickListener {
+            AnimationUtils.expandCollapse(editTextTextMultiLine, originalHeight)
+            txtRawDataAction.text = if (editTextTextMultiLine.visibility == GONE) getString(R.string.action_show_hide) else getString(R.string.action_show)
         }
     }
 
