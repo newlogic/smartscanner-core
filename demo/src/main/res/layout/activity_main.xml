@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".demo.MainActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -37,7 +37,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:onClick="startScanningActivity"
-                android:text="EXEC" />
+                android:text="MRZ Code" />
 
             <Button
                 android:id="@+id/button2"
@@ -45,6 +45,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:onClick="startPDF417ScanningActivity"
+                android:visibility="gone"
                 android:text="pdf417" />
 
             <Button
@@ -52,8 +53,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:onClick="startQRCodeScanningActivity"
+                android:text="QR Code" />
+
+            <Button
+                android:id="@+id/button4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:onClick="startBarcodeScanningActivity"
-                android:text="barcode" />
+                android:text="Barcode" />
         </LinearLayout>
 
     </LinearLayout>

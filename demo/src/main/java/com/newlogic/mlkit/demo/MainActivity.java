@@ -70,6 +70,12 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, OP_MLKIT);
     }
 
+    public void startQRCodeScanningActivity(@NonNull View view) {
+        /*Intent intent = new Intent(this, MLKitActivity.class);
+        intent.putExtra("mode", "pdf417");
+        startActivityForResult(intent, OP_MLKIT);*/
+    }
+
     public void startBarcodeScanningActivity(@NonNull View view) {
         Intent intent = new Intent(this, MLKitActivity.class);
         intent.putExtra("mode", "barcode");
