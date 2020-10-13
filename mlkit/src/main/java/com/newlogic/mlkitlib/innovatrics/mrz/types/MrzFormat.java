@@ -22,14 +22,14 @@ package com.newlogic.mlkitlib.innovatrics.mrz.types;
 import com.newlogic.mlkitlib.innovatrics.mrz.MrzParseException;
 import com.newlogic.mlkitlib.innovatrics.mrz.MrzRange;
 import com.newlogic.mlkitlib.innovatrics.mrz.MrzRecord;
-import com.newlogic.mlkitlib.innovatrics.mrz.records.FrenchIdCard;
 import com.newlogic.mlkitlib.innovatrics.mrz.records.MRP;
 import com.newlogic.mlkitlib.innovatrics.mrz.records.MrtdTd1;
 import com.newlogic.mlkitlib.innovatrics.mrz.records.MrtdTd2;
 import com.newlogic.mlkitlib.innovatrics.mrz.records.MrvA;
 import com.newlogic.mlkitlib.innovatrics.mrz.records.MrvB;
-import com.newlogic.mlkitlib.innovatrics.mrz.records.SenegalId;
-import com.newlogic.mlkitlib.innovatrics.mrz.records.SlovakId2_34;
+import com.newlogic.mlkitlib.innovatrics.mrz.records.countries.French_ID;
+import com.newlogic.mlkitlib.innovatrics.mrz.records.countries.Senegal_ID;
+import com.newlogic.mlkitlib.innovatrics.mrz.records.countries.Slovak_ID_2_34;
 
 /**
  * Lists all supported MRZ formats. Note that the order of the enum constants are important, see for example {@link  #FRENCH_ID}.
@@ -41,7 +41,7 @@ public enum MrzFormat {
      * Need to occur before the {@link #MRTD_TD1} enum constant because of the same values for row/column.
      * See below for the "if" test.
      */
-    SENEGAL_ID(3, 30, SenegalId.class) {
+    SENEGAL_ID(3, 30, Senegal_ID.class) {
 
         public boolean isFormatOf(String[] mrzRows) {
             if (!super.isFormatOf(mrzRows)) {
@@ -59,7 +59,7 @@ public enum MrzFormat {
      * Need to occur before the {@link #MRTD_TD2} enum constant because of the same values for row/column.
      * See below for the "if" test.
      */
-    FRENCH_ID(2, 36, FrenchIdCard.class) {
+    FRENCH_ID(2, 36, French_ID.class) {
 
         public boolean isFormatOf(String[] mrzRows) {
             if (!super.isFormatOf(mrzRows)) {
@@ -107,7 +107,7 @@ public enum MrzFormat {
     /**
      * Unknown 2 line/34 characters per line format, used with old Slovak ID cards.
      */
-    SLOVAK_ID_234(2, 34, SlovakId2_34.class);
+    SLOVAK_ID_234(2, 34, Slovak_ID_2_34.class);
     public final int rows;
     public final int columns;
     private final Class<? extends MrzRecord> recordClass;

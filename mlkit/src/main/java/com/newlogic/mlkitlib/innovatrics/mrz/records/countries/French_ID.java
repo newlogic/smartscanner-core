@@ -16,7 +16,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-package com.newlogic.mlkitlib.innovatrics.mrz.records;
+package com.newlogic.mlkitlib.innovatrics.mrz.records.countries;
 
 import com.newlogic.mlkitlib.innovatrics.mrz.MrzParser;
 import com.newlogic.mlkitlib.innovatrics.mrz.MrzRange;
@@ -33,11 +33,11 @@ import com.newlogic.mlkitlib.innovatrics.mrz.types.MrzFormat;
 Second line : {card number on 12 numbers}{Check digit}{given names separated by "<<" and maybe troncated if too long}{date of birth YYMMDD}{Check digit}{sex M/F}{1 number checksum}</pre>
  * @author Pierrick Martin, Marin Moulinier
  */
-public class FrenchIdCard extends MrzRecord {
+public class French_ID extends MrzRecord {
 
     private static final long serialVersionUID = 1L;
 
-    public FrenchIdCard() {
+    public French_ID() {
         super(MrzFormat.FRENCH_ID);
         code = MrzDocumentCode.TypeI;
         code1 = 'I';
@@ -72,7 +72,7 @@ public class FrenchIdCard extends MrzRecord {
 
     @Override
     public String toString() {
-        return "FrenchIdCard{" + super.toString() + ", optional=" + optional + '}';
+        return "French_ID{" + super.toString() + ", optional=" + optional + '}';
     }
 
     @Override

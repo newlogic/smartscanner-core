@@ -16,7 +16,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-package com.newlogic.mlkitlib.innovatrics.mrz.records;
+package com.newlogic.mlkitlib.innovatrics.mrz.records.countries;
 
 
 import com.newlogic.mlkitlib.innovatrics.mrz.MrzParser;
@@ -28,10 +28,10 @@ import com.newlogic.mlkitlib.innovatrics.mrz.types.MrzFormat;
  * Unknown 2 line/34 characters per line format, used with old Slovak ID cards.
  * @author Martin Vysny
  */
-public class SlovakId2_34 extends MrzRecord {
+public class Slovak_ID_2_34 extends MrzRecord {
     private static final long serialVersionUID = 1L;
 
-    public SlovakId2_34() {
+    public Slovak_ID_2_34() {
         super(MrzFormat.SLOVAK_ID_234);
     }
     /**
@@ -61,7 +61,7 @@ public class SlovakId2_34 extends MrzRecord {
 
     @Override
     public String toString() {
-        return "SlovakId2x34{" + super.toString() + ", optional=" + optional + '}';
+        return "Slovak_ID_2_34{" + super.toString() + ", optional=" + optional + '}';
     }
 
     @Override

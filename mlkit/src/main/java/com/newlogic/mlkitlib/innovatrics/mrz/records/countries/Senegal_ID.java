@@ -1,4 +1,4 @@
-package com.newlogic.mlkitlib.innovatrics.mrz.records;
+package com.newlogic.mlkitlib.innovatrics.mrz.records.countries;
 
 import com.newlogic.mlkitlib.innovatrics.mrz.MrzParser;
 import com.newlogic.mlkitlib.innovatrics.mrz.MrzRange;
@@ -8,10 +8,10 @@ import com.newlogic.mlkitlib.innovatrics.mrz.types.MrzFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SenegalId extends MrzRecord {
+public class Senegal_ID extends MrzRecord {
     private static final long serialVersionUID = 1L;
 
-    public SenegalId() {
+    public Senegal_ID() {
         super(MrzFormat.SENEGAL_ID);
     }
 
@@ -43,7 +43,7 @@ public class SenegalId extends MrzRecord {
 
     @Override
     public String toString() {
-        return "MRTD-TD1{" + super.toString() + ", optional=" + optional + ", optional2=" + optional2 + '}';
+        return "Senegal_ID{" + super.toString() + ", optional=" + optional + ", optional2=" + optional2 + '}';
     }
 
     @Override
