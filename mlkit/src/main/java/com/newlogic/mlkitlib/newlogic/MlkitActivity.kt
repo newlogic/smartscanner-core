@@ -19,6 +19,7 @@ import android.view.View.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
@@ -60,13 +61,6 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
         const val MLKIT_CONFIG = "MLKIT_CONFIG"
         private const val REQUEST_CODE_PERMISSIONS = 10
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-
-        private lateinit var modelLayoutView: View
-        private lateinit var CoordinatorLayoutView: View
-        private lateinit var context: Context
-
-        private var mode: String? = null
-        private var rectangle: View? = null
     }
 
     private var x = 0f
@@ -77,10 +71,14 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
     private var flashButton: View? = null
     private var closeButton: View? = null
     private var startScanTime: Long = 0
-    private var tessStartScanTime: Long = 0
+    private var mode: String? = null
+    private var rectangle: View? = null
 
     private lateinit var outputDirectory: File
     private lateinit var cameraExecutor: ExecutorService
+    private lateinit var modelLayoutView: View
+    private lateinit var coordinatorLayoutView: View
+    private lateinit var context: Context
 
     private val clickThreshold = 5
 
@@ -90,7 +88,7 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
         context = applicationContext
         // assign layout ids
         modelLayoutView = findViewById(R.id.viewLayout)
-        CoordinatorLayoutView =  findViewById(R.id.CoordinatorLayout)
+        coordinatorLayoutView =  findViewById(R.id.coordinatorLayout)
         flashButton = findViewById(R.id.flash_button)
         closeButton = findViewById(R.id.close_button)
         rectangle = findViewById(R.id.rectimage)
@@ -114,23 +112,34 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun setupConfiguration(readerConfig: Config?) {
         readerConfig?.let {
-            mode = it.mode
             flashButton?.visibility = if (it.withFlash) VISIBLE else GONE
             captureLabelText.text = it.label
             if (it.font == Fonts.NOTO_SANS_ARABIC.value) captureLabelText.typeface = ResourcesCompat.getFont(this, R.font.notosansarabic_bold)
+            val layoutParams = modelLayoutView.layoutParams as ConstraintLayout.LayoutParams
+            mode = it.mode
+            when (mode) {
+                PDF_417.value -> {
+                    layoutParams.dimensionRatio = "9:21"
+                    modelLayoutView.layoutParams = layoutParams
+                }
+                BARCODE.value -> {
+                    layoutParams.marginStart = 48 // Approx. 20dp
+                    layoutParams.marginEnd = 48 // Approx. 20dp
+                    modelLayoutView.layoutParams = layoutParams
+                }
+            }
         }
-
     }
 
-
     override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        requestCode: Int, permissions: Array<String>, grantResults: IntArray
+    ) {
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
             if (allPermissionsGranted()) {
                 startCamera()
             } else {
                 val snackBar: Snackbar = Snackbar.make(
-                    CoordinatorLayoutView,
+                    coordinatorLayoutView,
                     R.string.required_perms_not_given, Snackbar.LENGTH_INDEFINITE
                 )
                 snackBar.setAction(R.string.settings) { openSettingsApp() }
@@ -158,7 +167,6 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
 
             // Preview
             preview = Preview.Builder().build()
-
             var size = Size(480, 640)
             if (mode == PDF_417.value) size = Size(1080, 1920)
             imageAnalyzer = ImageAnalysis.Builder()
@@ -180,15 +188,14 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
                 Log.d(TAG, "Measured size: ${viewFinder.width}x${viewFinder.height}")
 
                 startScanTime = System.currentTimeMillis()
-                tessStartScanTime = startScanTime
-            } catch(exc: Exception) {
+            } catch (exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
             }
 
         }, ContextCompat.getMainExecutor(this))
     }
 
-    private fun getAnalyzerResult (analyzerType: AnalyzerType, result: String) {
+    private fun getAnalyzerResult(analyzerType: AnalyzerType, result: String) {
         runOnUiThread {
             when (analyzerType) {
                 AnalyzerType.MLKIT -> {
@@ -244,26 +251,26 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
                     when (mode) {
                         PDF_417.value -> {
                             options = BarcodeScannerOptions.Builder()
-                                    .setBarcodeFormats(Barcode.FORMAT_PDF417)
-                                    .build()
+                                .setBarcodeFormats(Barcode.FORMAT_PDF417)
+                                .build()
                         }
                         BARCODE.value -> {
                             options = BarcodeScannerOptions.Builder()
-                                    .setBarcodeFormats(
-                                            Barcode.FORMAT_CODE_128,
-                                            Barcode.FORMAT_CODE_39,
-                                            Barcode.FORMAT_CODE_93,
-                                            Barcode.FORMAT_CODABAR,
-                                            Barcode.FORMAT_DATA_MATRIX,
-                                            Barcode.FORMAT_EAN_13,
-                                            Barcode.FORMAT_EAN_8,
-                                            Barcode.FORMAT_ITF,
-                                            Barcode.FORMAT_QR_CODE,
-                                            Barcode.FORMAT_UPC_A,
-                                            Barcode.FORMAT_UPC_E,
-                                            Barcode.FORMAT_AZTEC
-                                    )
-                                    .build()
+                                .setBarcodeFormats(
+                                    Barcode.FORMAT_CODE_128,
+                                    Barcode.FORMAT_CODE_39,
+                                    Barcode.FORMAT_CODE_93,
+                                    Barcode.FORMAT_CODABAR,
+                                    Barcode.FORMAT_DATA_MATRIX,
+                                    Barcode.FORMAT_EAN_13,
+                                    Barcode.FORMAT_EAN_8,
+                                    Barcode.FORMAT_ITF,
+                                    Barcode.FORMAT_QR_CODE,
+                                    Barcode.FORMAT_UPC_A,
+                                    Barcode.FORMAT_UPC_E,
+                                    Barcode.FORMAT_AZTEC
+                                )
+                                .build()
                         }
                     }
                     val image = InputImage.fromBitmap(bf, imageProxy.imageInfo.rotationDegrees)
@@ -292,15 +299,18 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
                                     val currentDateTime = formatter.format(date)
                                     val imageCachePathFile = "${context.cacheDir}/Scanner-$currentDateTime.jpg"
                                     bf.cacheImageToLocal(
-                                            imageCachePathFile,
-                                            imageProxy.imageInfo.rotationDegrees
+                                        imageCachePathFile,
+                                        imageProxy.imageInfo.rotationDegrees
                                     )
                                     val gson = Gson()
-                                    val jsonString = gson.toJson(BarcodeResult(
+                                    val jsonString = gson.toJson(
+                                        BarcodeResult(
                                             imageCachePathFile,
                                             cornersString,
-                                            rawValue))
-                                    getAnalyzerResult (AnalyzerType.BARCODE, jsonString)
+                                            rawValue
+                                        )
+                                    )
+                                    getAnalyzerResult(AnalyzerType.BARCODE, jsonString)
                                 } else {
                                     Log.d("$TAG/MLKit", "barcode: nothing detected")
                                 }
@@ -341,19 +351,19 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
 
                                 try {
                                     Log.d(
-                                            "$TAG/MLKit",
-                                            "Before cleaner: [${
-                                                URLEncoder.encode(rawFullRead, "UTF-8")
-                                                        .replace("%3C", "<").replace("%0A", "↩")
-                                            }]"
+                                        "$TAG/MLKit",
+                                        "Before cleaner: [${
+                                            URLEncoder.encode(rawFullRead, "UTF-8")
+                                                .replace("%3C", "<").replace("%0A", "↩")
+                                        }]"
                                     )
                                     val mrz = MRZCleaner.clean(rawFullRead)
                                     Log.d(
-                                            "$TAG/MLKit",
-                                            "After cleaner = [${
-                                                URLEncoder.encode(mrz, "UTF-8")
-                                                        .replace("%3C", "<").replace("%0A", "↩")
-                                            }]"
+                                        "$TAG/MLKit",
+                                        "After cleaner = [${
+                                            URLEncoder.encode(mrz, "UTF-8")
+                                                .replace("%3C", "<").replace("%0A", "↩")
+                                        }]"
                                     )
                                     val record = MRZCleaner.parseAndClean(mrz)
                                     val date = Calendar.getInstance().time
@@ -365,29 +375,29 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
                                     // record to json
                                     val gson = Gson()
                                     val jsonString = gson.toJson(MRZResult(
-                                            imagePathFile,
-                                            record.code.toString(),
-                                            record.code1.toShort(),
-                                            record.code2.toShort(),
-                                            record.dateOfBirth?.toString()?.replace(Regex("[{}]"), ""),
-                                            record.documentNumber.toString(),
-                                            record.expirationDate?.toString()?.replace(Regex("[{}]"), ""),
-                                            record.format.toString(),
-                                            record.givenNames,
-                                            record.issuingCountry,
-                                            record.nationality,
-                                            record.sex.toString(),
-                                            record.surname,
-                                            record.toMrz()
+                                        imagePathFile,
+                                        record.code.toString(),
+                                        record.code1.toShort(),
+                                        record.code2.toShort(),
+                                        record.dateOfBirth?.toString()?.replace(Regex("[{}]"), ""),
+                                        record.documentNumber.toString(),
+                                        record.expirationDate?.toString()?.replace(Regex("[{}]"), ""),
+                                        record.format.toString(),
+                                        record.givenNames,
+                                        record.issuingCountry,
+                                        record.nationality,
+                                        record.sex.toString(),
+                                        record.surname,
+                                        record.toMrz()
                                     ))
                                     getAnalyzerResult (AnalyzerType.MLKIT, jsonString)
                                 } catch (e: Exception) { // MrzParseException, IllegalArgumentException
                                     Log.d("$TAG/MLKit", e.toString())
                                 }
                                 getAnalyzerStat (
-                                        AnalyzerType.MLKIT,
-                                        mlStartTime,
-                                        System.currentTimeMillis()
+                                    AnalyzerType.MLKIT,
+                                    mlStartTime,
+                                    System.currentTimeMillis()
                                 )
                                 mlkitBusy = false
                             }
@@ -400,9 +410,9 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
                                 }
                                 modelLayoutView.modelText.visibility = VISIBLE
                                 getAnalyzerStat (
-                                        AnalyzerType.MLKIT,
-                                        mlStartTime,
-                                        System.currentTimeMillis()
+                                    AnalyzerType.MLKIT,
+                                    mlStartTime,
+                                    System.currentTimeMillis()
                                 )
                                 mlkitBusy = false
                             }

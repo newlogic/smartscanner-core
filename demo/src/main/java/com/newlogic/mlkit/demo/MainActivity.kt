@@ -1,5 +1,6 @@
 package com.newlogic.mlkit.demo
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.Paint
@@ -8,8 +9,10 @@ import android.util.Log
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.JsonParser
 import com.newlogic.mlkit.R
 import com.newlogic.mlkit.demo.utils.AnimationUtils
@@ -23,12 +26,12 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate (savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
     }
 
-    public override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
+    public override fun onActivityResult (requestCode: Int, resultCode: Int, intent: Intent?) {
         super.onActivityResult(requestCode, resultCode, intent)
         if (requestCode == OP_MLKIT) {
             Log.d(TAG, "Plugin post ML Activity resultCode $resultCode")
@@ -39,7 +42,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupResultView(result: String) {
+    private fun setupResultView (result: String) {
         val resultObject = JsonParser.parseString(result).asJsonObject
         val originalHeight = 750 // Approx. 250dp for image and textView
         // Result Details
@@ -83,30 +86,41 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun startScanningActivity(view: View) {
+    fun startScanningActivity (view: View) {
         val intent = Intent(this, MLKitActivity::class.java)
         intent.putExtra(MLKitActivity.MLKIT_CONFIG, sampleConfig(Modes.MRZ.value))
         startActivityForResult(intent, OP_MLKIT)
     }
 
-    fun startPDF417ScanningActivity(view: View) {
-        val intent = Intent(this, MLKitActivity::class.java)
-        intent.putExtra(MODE, "pdf417")
-        startActivityForResult(intent, OP_MLKIT)
-    }
-
-    fun startQRCodeScanningActivity(view: View) {
+    fun startQRCodeScanningActivity (view: View) {
         // TODO add QR implementation Modes.QR_CODE
         Toast.makeText(this, "Not yet available!", Toast.LENGTH_LONG).show()
     }
 
-    fun startBarcodeScanningActivity(view: View) {
+    @SuppressLint("InflateParams")
+    fun startBarcodeScanningActivity (view: View)  {
+        val bottomSheetDialog = BottomSheetDialog(this)
+        val sheetViewBarcode = layoutInflater.inflate(R.layout.bottom_sheet_barcode, null)
+        bottomSheetDialog.setContentView(sheetViewBarcode)
+
+        val btnPdf417 = sheetViewBarcode.findViewById<LinearLayout>(R.id.btnPdf417)
+        val btnBarcode = sheetViewBarcode.findViewById<LinearLayout>(R.id.btnBarcode)
+        val btnCancel = sheetViewBarcode.findViewById<LinearLayout>(R.id.btnCancel)
+
+        btnPdf417.setOnClickListener { startBarcode(Modes.PDF_417.value) }
+        btnBarcode.setOnClickListener { startBarcode(Modes.BARCODE.value) }
+        btnCancel.setOnClickListener { bottomSheetDialog.dismiss() }
+
+        bottomSheetDialog.show()
+    }
+
+    private fun startBarcode (mode: String) {
         val intent = Intent(this, MLKitActivity::class.java)
-        intent.putExtra(MLKitActivity.MLKIT_CONFIG, sampleConfig(Modes.BARCODE.value))
+        intent.putExtra(MLKitActivity.MLKIT_CONFIG, sampleConfig(mode))
         startActivityForResult(intent, OP_MLKIT)
     }
 
-    private fun sampleConfig(mode: String) = Config(
+    private fun sampleConfig (mode: String) = Config(
         font = String.empty(),
         language = String.empty(),
         label = String.empty(),
