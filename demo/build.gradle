@@ -22,6 +22,14 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        android.applicationVariants.all { variant ->
+            variant.outputs.all {
+                def date = new Date().format('MMddyyyy')
+                def buildType = variant.buildType.name
+                def buildNumber = sprintf("%02d", variant.versionCode)
+                outputFileName = "mlkit-demo-${buildType}-${buildNumber}_${date}.apk"
+            }
+        }
     }
 
     compileOptions {
