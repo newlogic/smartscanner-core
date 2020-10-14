@@ -70,7 +70,7 @@
                         android:text="@string/label_name"
                         android:textColor="@color/newlogic_black"
                         android:textSize="16sp"
-                        android:visibility="invisible" />
+                        android:visibility="gone" />
 
                     <TextView
                         android:id="@+id/textSurName"
@@ -81,7 +81,7 @@
                         android:text="@string/label_surname"
                         android:textColor="@color/newlogic_black"
                         android:textSize="16sp"
-                        android:visibility="invisible" />
+                        android:visibility="gone" />
 
                     <TextView
                         android:id="@+id/textBirthday"
@@ -92,7 +92,7 @@
                         android:text="@string/label_birthday"
                         android:textColor="@color/newlogic_black"
                         android:textSize="16sp"
-                        android:visibility="invisible" />
+                        android:visibility="gone" />
 
                     <TextView
                         android:id="@+id/textNationality"
@@ -103,7 +103,7 @@
                         android:text="@string/label_nationality"
                         android:textColor="@color/newlogic_black"
                         android:textSize="16sp"
-                        android:visibility="invisible" />
+                        android:visibility="gone" />
 
                     <androidx.appcompat.widget.AppCompatButton
                         android:id="@+id/txtImgAction"

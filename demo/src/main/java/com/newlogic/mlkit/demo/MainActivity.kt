@@ -107,8 +107,14 @@ class MainActivity : AppCompatActivity() {
         val btnBarcode = sheetViewBarcode.findViewById<LinearLayout>(R.id.btnBarcode)
         val btnCancel = sheetViewBarcode.findViewById<LinearLayout>(R.id.btnCancel)
 
-        btnPdf417.setOnClickListener { startBarcode(Modes.PDF_417.value) }
-        btnBarcode.setOnClickListener { startBarcode(Modes.BARCODE.value) }
+        btnPdf417.setOnClickListener {
+            startBarcode(Modes.PDF_417.value)
+            bottomSheetDialog.dismiss()
+        }
+        btnBarcode.setOnClickListener {
+            startBarcode(Modes.BARCODE.value)
+            bottomSheetDialog.dismiss()
+        }
         btnCancel.setOnClickListener { bottomSheetDialog.dismiss() }
 
         bottomSheetDialog.show()
@@ -131,6 +137,5 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "Newlogic-MLkit"
         private const val OP_MLKIT = 1001
-        private const val MODE = "mode"
     }
 }
