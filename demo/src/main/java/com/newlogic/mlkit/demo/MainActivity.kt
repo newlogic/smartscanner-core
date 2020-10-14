@@ -37,6 +37,7 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "Plugin post ML Activity resultCode $resultCode")
             if (resultCode == RESULT_OK) {
                 val returnedResult = intent?.getStringExtra(MLKitActivity.MLKIT_RESULT)
+                textLabelEmpty.visibility = GONE
                 returnedResult?.let { setupResultView(it) }
             }
         }

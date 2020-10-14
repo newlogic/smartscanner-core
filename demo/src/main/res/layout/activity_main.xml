@@ -6,6 +6,19 @@
     android:layout_height="match_parent"
     tools:context=".demo.MainActivity">
 
+
+    <TextView
+        android:id="@+id/textLabelEmpty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center|start"
+        android:text="Select code type to start scanning"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -46,7 +59,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingBottom="56dp">
+                    android:paddingBottom="64dp">
 
                     <TextView
                         android:id="@+id/textResultDetails"
@@ -151,47 +164,72 @@
                         android:visibility="gone"/>
                 </LinearLayout>
             </ScrollView>
-
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center|bottom"
                 android:layout_alignParentBottom="true"
-                android:layout_marginBottom="16dp"
-                android:orientation="horizontal">
+                android:layout_height="84dp">
 
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/button"
+                    android:layout_width="96dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:background="@color/newlogic_yellow"
+                    android:onClick="startScanningActivity"
+                    android:text="@string/mode_mrz"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/button2"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/first"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_margin="4dp"
-                    android:layout_marginStart="4dp"
-                    android:background="@color/yellow"
-                    android:onClick="startScanningActivity"
-                    android:text="@string/mode_mrz" />
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_percent="0.25" />
 
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/button2"
+                    android:layout_width="96dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:background="@color/newlogic_yellow"
+                    android:onClick="startQRCodeScanningActivity"
+                    android:text="@string/mode_qr"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/third"
+                    app:layout_constraintStart_toStartOf="@+id/first"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/second"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_margin="4dp"
-                    android:background="@color/yellow"
-                    android:onClick="startQRCodeScanningActivity"
-                    android:text="@string/mode_qr" />
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_percent="0.5" />
 
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/button3"
+                    android:layout_width="96dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:background="@color/newlogic_yellow"
+                    android:onClick="startBarcodeScanningActivity"
+                    android:text="@string/mode_barcode"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/button2"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/third"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_margin="4dp"
-                    android:layout_marginEnd="4dp"
-                    android:background="@color/yellow"
-                    android:onClick="startBarcodeScanningActivity"
-                    android:text="@string/mode_barcode" />
-            </LinearLayout>
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_percent="0.75" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </RelativeLayout>
     </LinearLayout>
 
