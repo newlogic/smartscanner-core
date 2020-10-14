@@ -4,6 +4,8 @@
     <color name="colorPrimaryDark">@color/newlogic_black</color>
     <color name="colorAccent">@color/newlogic_black</color>
 
-    <color name="newlogic_yellow">#ffc234</color>
     <color name="newlogic_black">#28282a</color>
+    <color name="newlogic_yellow">#ffc234</color>
+
+    <color name="yellow">#ffde2b</color>
 </resources>

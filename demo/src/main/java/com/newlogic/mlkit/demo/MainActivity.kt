@@ -52,6 +52,7 @@ class MainActivity : AppCompatActivity() {
             val path = resultObject["imagePath"].asString
             val myBitmap = BitmapFactory.decodeFile(path)
             imageView.setImageBitmap(myBitmap)
+            imageView.visibility = VISIBLE
             txtImgAction.visibility = VISIBLE
             txtImgAction.paintFlags = txtImgAction.paintFlags or Paint.UNDERLINE_TEXT_FLAG
             txtImgAction.setOnClickListener {
@@ -78,6 +79,7 @@ class MainActivity : AppCompatActivity() {
         }
         //Raw Data
         editTextTextMultiLine.setText(result)
+        editTextTextMultiLine.visibility = VISIBLE
         txtRawDataAction.visibility = VISIBLE
         txtRawDataAction.paintFlags = txtRawDataAction.paintFlags or Paint.UNDERLINE_TEXT_FLAG
         txtRawDataAction.setOnClickListener {
