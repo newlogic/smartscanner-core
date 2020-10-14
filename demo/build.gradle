@@ -25,9 +25,10 @@ android {
         android.applicationVariants.all { variant ->
             variant.outputs.all {
                 def date = new Date().format('MMddyyyy')
+                def time = new Date().format('HHmm')
                 def buildType = variant.buildType.name
                 def buildNumber = sprintf("%02d", variant.versionCode)
-                outputFileName = "mlkit-demo-${buildType}-${buildNumber}_${date}.apk"
+                outputFileName = "mlkitdemo-${buildType}-${buildNumber}_${date}_${time}.apk"
             }
         }
     }
