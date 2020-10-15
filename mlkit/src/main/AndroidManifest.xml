@@ -2,7 +2,9 @@
     package="com.newlogic.mlkitlib">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <application>
+    <application
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
         <activity
             android:name=".newlogic.MLKitActivity"
             android:screenOrientation="portrait"

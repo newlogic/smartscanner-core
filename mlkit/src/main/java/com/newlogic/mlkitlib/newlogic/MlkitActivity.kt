@@ -16,6 +16,7 @@ import android.util.Size
 import android.view.MotionEvent
 import android.view.View
 import android.view.View.*
+import android.view.Window
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -92,6 +93,7 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
         setContentView(R.layout.activity_mrz)
         context = applicationContext
         // assign layout ids
@@ -100,6 +102,11 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
         flashButton = findViewById(R.id.flash_button)
         closeButton = findViewById(R.id.close_button)
         rectangle = findViewById(R.id.rectimage)
+        // hide actionbar
+        supportActionBar?.hide()
+        supportActionBar?.setDisplayShowTitleEnabled(false)
+        actionBar?.hide()
+        actionBar?.setDisplayShowTitleEnabled(false)
         // Request camera permissions
         if (allPermissionsGranted()) {
             startCamera()
