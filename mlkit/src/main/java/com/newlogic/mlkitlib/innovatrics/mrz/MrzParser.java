@@ -369,12 +369,6 @@ public class MrzParser {
      * @return name, properly converted to MRZ format of SURNAME&lt;&lt;GIVENNAMES&lt;..., with the exact length of given length.
      */
     public static String nameToMrz(String surname, String givenNames, int length) {
-        if (isBlank(surname)) {
-            throw new IllegalArgumentException("Parameter surname: invalid value " + surname + ": blank");
-        }
-        if (isBlank(givenNames)) {
-            throw new IllegalArgumentException("Parameter givenNames: invalid value " + givenNames + ": blank");
-        }
         if (length <= 0) {
             throw new IllegalArgumentException("Parameter length: invalid value " + length + ": not positive");
         }
