@@ -91,7 +91,8 @@ class MainActivity : AppCompatActivity() {
 
     fun startScanningActivity (view: View) {
         val intent = Intent(this, MLKitActivity::class.java)
-        intent.putExtra(MLKitActivity.MLKIT_CONFIG, sampleConfig(Modes.MRZ.value))
+        intent.putExtra(MLKitActivity.MODE, Modes.MRZ.value)
+        intent.putExtra(MLKitActivity.CONFIG, sampleConfig())
         startActivityForResult(intent, OP_MLKIT)
     }
 
@@ -125,16 +126,15 @@ class MainActivity : AppCompatActivity() {
 
     private fun startBarcode (mode: String) {
         val intent = Intent(this, MLKitActivity::class.java)
-        intent.putExtra(MLKitActivity.MLKIT_CONFIG, sampleConfig(mode))
+        intent.putExtra(MLKitActivity.MODE, mode)
+        intent.putExtra(MLKitActivity.CONFIG, sampleConfig())
         startActivityForResult(intent, OP_MLKIT)
     }
 
-    private fun sampleConfig (mode: String) = Config(
+    private fun sampleConfig () = Config(
         font = String.empty(),
         language = String.empty(),
-        label = String.empty(),
-        mode = mode,
-        true
+        label = String.empty()
     )
 
     companion object {

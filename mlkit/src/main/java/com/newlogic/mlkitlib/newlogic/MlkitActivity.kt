@@ -34,12 +34,13 @@ import com.newlogic.mlkitlib.R
 import com.newlogic.mlkitlib.innovatrics.barcode.BarcodeResult
 import com.newlogic.mlkitlib.newlogic.config.Config
 import com.newlogic.mlkitlib.newlogic.config.Fonts
-import com.newlogic.mlkitlib.newlogic.config.Modes.BARCODE
-import com.newlogic.mlkitlib.newlogic.config.Modes.PDF_417
+import com.newlogic.mlkitlib.newlogic.config.Modes.*
 import com.newlogic.mlkitlib.newlogic.extension.cacheImageToLocal
+import com.newlogic.mlkitlib.newlogic.extension.empty
 import com.newlogic.mlkitlib.newlogic.extension.getConnectionType
 import com.newlogic.mlkitlib.newlogic.extension.toBitmap
 import com.newlogic.mlkitlib.newlogic.utils.AnalyzerType
+import com.newlogic.mlkitlib.newlogic.utils.CameraUtils.isLedFlashAvailable
 import com.newlogic.mlkitlib.newlogic.utils.MLKitAnalyzer
 import com.newlogic.mlkitlib.newlogic.utils.MRZCleaner
 import com.newlogic.mlkitlib.newlogic.utils.MRZResult
@@ -58,9 +59,16 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
     companion object {
         const val TAG = "MLKitActivity"
         const val MLKIT_RESULT = "MLKIT_RESULT"
-        const val MLKIT_CONFIG = "MLKIT_CONFIG"
+        const val CONFIG = "CONFIG"
+        const val MODE = "MODE"
         private const val REQUEST_CODE_PERMISSIONS = 10
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+
+        fun defaultConfig() = Config(
+            font = String.empty(),
+            language = String.empty(),
+            label = String.empty()
+        )
     }
 
     private var x = 0f
@@ -99,7 +107,8 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
         }
         // setup config for reader
-        setupConfiguration(intent.getParcelableExtra(MLKIT_CONFIG))
+        mode = intent.getStringExtra(MODE)
+        setupConfiguration(intent.getParcelableExtra(CONFIG) ?: defaultConfig())
         // assign click listeners
         closeButton?.setOnClickListener(this)
         flashButton?.setOnClickListener(this)
@@ -110,23 +119,20 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
         Log.d(TAG, "path: $extDirPath")
     }
 
-    private fun setupConfiguration(readerConfig: Config?) {
-        readerConfig?.let {
-            flashButton?.visibility = if (it.withFlash) VISIBLE else GONE
-            captureLabelText.text = it.label
-            if (it.font == Fonts.NOTO_SANS_ARABIC.value) captureLabelText.typeface = ResourcesCompat.getFont(this, R.font.notosansarabic_bold)
-            val layoutParams = modelLayoutView.layoutParams as ConstraintLayout.LayoutParams
-            mode = it.mode
-            when (mode) {
-                PDF_417.value -> {
-                    layoutParams.dimensionRatio = "9:21"
-                    modelLayoutView.layoutParams = layoutParams
-                }
-                BARCODE.value -> {
-                    layoutParams.marginStart = 48 // Approx. 20dp
-                    layoutParams.marginEnd = 48 // Approx. 20dp
-                    modelLayoutView.layoutParams = layoutParams
-                }
+    private fun setupConfiguration(config: Config) {
+        flashButton?.visibility = if (isLedFlashAvailable(this)) VISIBLE else GONE
+        captureLabelText.text = config.label
+        if (config.font == Fonts.NOTO_SANS_ARABIC.value) captureLabelText.typeface = ResourcesCompat.getFont(this, R.font.notosansarabic_bold)
+        val layoutParams = modelLayoutView.layoutParams as ConstraintLayout.LayoutParams
+        when (mode) {
+            PDF_417.value -> {
+                layoutParams.dimensionRatio = "9:21"
+                modelLayoutView.layoutParams = layoutParams
+            }
+            BARCODE.value, QR_CODE.value -> {
+                layoutParams.marginStart = 64 // Approx. 30dp
+                layoutParams.marginEnd = 64 // Approx. 30dp
+                modelLayoutView.layoutParams = layoutParams
             }
         }
     }
@@ -240,8 +246,8 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
                 else Bitmap.createBitmap(bf, 0, bf.height / 2, bf.width, bf.height / 2)
                 Log.d(TAG, "Bitmap: (${mediaImage.width}, ${mediaImage.height}) Cropped: (${cropped.width}, ${cropped.height}), Rotation: ${imageProxy.imageInfo.rotationDegrees}")
 
-                //barcode and pdf417
-                if (!barcodeBusy && ((mode == PDF_417.value) || (mode == BARCODE.value))) {
+                //barcode, qr and pdf417
+                if (!barcodeBusy && ((mode == PDF_417.value) || (mode == BARCODE.value)|| (mode == QR_CODE.value))) {
                     barcodeBusy = true
                     Log.d("$TAG/MLKit", "barcode: mode is $mode")
                     val start = System.currentTimeMillis()
@@ -252,6 +258,11 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
                         PDF_417.value -> {
                             options = BarcodeScannerOptions.Builder()
                                 .setBarcodeFormats(Barcode.FORMAT_PDF417)
+                                .build()
+                        }
+                        QR_CODE.value -> {
+                            options = BarcodeScannerOptions.Builder()
+                                .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
                                 .build()
                         }
                         BARCODE.value -> {
@@ -265,7 +276,6 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
                                     Barcode.FORMAT_EAN_13,
                                     Barcode.FORMAT_EAN_8,
                                     Barcode.FORMAT_ITF,
-                                    Barcode.FORMAT_QR_CODE,
                                     Barcode.FORMAT_UPC_A,
                                     Barcode.FORMAT_UPC_E,
                                     Barcode.FORMAT_AZTEC

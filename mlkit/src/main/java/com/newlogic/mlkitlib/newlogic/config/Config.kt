@@ -8,11 +8,9 @@ import kotlinx.android.parcel.Parcelize
 data class Config(
         val font: String,
         val language: String,
-        val label: String,
-        val mode: String,
-        val withFlash: Boolean
+        val label: String
 ) : Parcelable {
     companion object {
-        fun empty() = Config(String.empty(), String.empty(), String.empty(), String.empty(), false)
+        fun empty() = Config(String.empty(), String.empty(), String.empty())
     }
 }
