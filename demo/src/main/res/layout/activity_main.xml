@@ -28,7 +28,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/newlogic_yellow"
+            android:background="@color/idpass_orange"
             app:layout_scrollFlags="scroll|enterAlways">
 
             <FrameLayout
@@ -42,7 +42,7 @@
                     android:layout_gravity="center|start"
                     android:text="@string/app_name"
                     android:textStyle="bold"
-                    android:textColor="@color/newlogic_black"
+                    android:textColor="@color/white"
                     android:textSize="20sp" />
             </FrameLayout>
         </androidx.appcompat.widget.Toolbar>
@@ -173,7 +173,9 @@
                     android:layout_width="96dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:background="@color/newlogic_yellow"
+                    android:background="@color/idpass_orange"
+                    android:textColor="@color/white"
+                    android:textAllCaps="false"
                     android:onClick="startScanningActivity"
                     android:text="@string/mode_mrz"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -193,9 +195,11 @@
                     android:layout_width="96dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:background="@color/newlogic_yellow"
+                    android:background="@color/idpass_orange"
+                    android:textColor="@color/white"
                     android:onClick="startQRCodeScanningActivity"
                     android:text="@string/mode_qr"
+                    android:textAllCaps="false"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/third"
                     app:layout_constraintStart_toStartOf="@+id/first"
@@ -213,9 +217,11 @@
                     android:layout_width="96dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:background="@color/newlogic_yellow"
+                    android:background="@color/idpass_orange"
+                    android:textColor="@color/white"
                     android:onClick="startBarcodeScanningActivity"
                     android:text="@string/mode_barcode"
+                    android:textAllCaps="false"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/button2"

@@ -6,6 +6,7 @@
 
     <color name="newlogic_black">#28282a</color>
     <color name="newlogic_yellow">#ffc234</color>
+    <color name="idpass_orange">#ff6d37</color>
+    <color name="idpass_black">#666</color>
 
-    <color name="yellow">#ffde2b</color>
 </resources>
