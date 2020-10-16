@@ -10,7 +10,6 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.LinearLayout
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.JsonParser
@@ -64,7 +63,6 @@ class MainActivity : AppCompatActivity() {
                     txtImgAction.text = if (imageView.visibility == GONE) getString(R.string.action_show_hide) else getString(R.string.action_show)
                 }
             }
-
         }
         // Simple Data
         if (resultObject["givenNames"] != null) {
@@ -103,8 +101,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun startQRCodeScanningActivity (view: View) {
-        // TODO add QR implementation Modes.QR_CODE
-        Toast.makeText(this, "Not yet available!", Toast.LENGTH_LONG).show()
+        val intent = Intent(this, MLKitActivity::class.java)
+        intent.putExtra(MLKitActivity.MODE, Modes.QR_CODE.value)
+        intent.putExtra(MLKitActivity.CONFIG, sampleConfig())
+        startActivityForResult(intent, OP_MLKIT)
     }
 
     @SuppressLint("InflateParams")
@@ -112,11 +112,11 @@ class MainActivity : AppCompatActivity() {
         val bottomSheetDialog = BottomSheetDialog(this)
         val sheetViewBarcode = layoutInflater.inflate(R.layout.bottom_sheet_barcode, null)
         bottomSheetDialog.setContentView(sheetViewBarcode)
-
+        // bottom sheet ids
         val btnPdf417 = sheetViewBarcode.findViewById<LinearLayout>(R.id.btnPdf417)
         val btnBarcode = sheetViewBarcode.findViewById<LinearLayout>(R.id.btnBarcode)
         val btnCancel = sheetViewBarcode.findViewById<LinearLayout>(R.id.btnCancel)
-
+        // bottom sheet listeners
         btnPdf417.setOnClickListener {
             startBarcode(Modes.PDF_417.value)
             bottomSheetDialog.dismiss()
@@ -126,7 +126,7 @@ class MainActivity : AppCompatActivity() {
             bottomSheetDialog.dismiss()
         }
         btnCancel.setOnClickListener { bottomSheetDialog.dismiss() }
-
+        // show bottom sheet
         bottomSheetDialog.show()
     }
 
