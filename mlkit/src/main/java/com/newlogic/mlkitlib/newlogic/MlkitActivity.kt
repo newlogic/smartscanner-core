@@ -285,6 +285,7 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
                                     Barcode.FORMAT_ITF,
                                     Barcode.FORMAT_UPC_A,
                                     Barcode.FORMAT_UPC_E,
+                                    Barcode.FORMAT_QR_CODE,
                                     Barcode.FORMAT_AZTEC
                                 )
                                 .build()
