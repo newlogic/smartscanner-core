@@ -1,7 +1,7 @@
-package com.newlogic.mlkitlib.newlogic.utils
+package com.newlogic.mlkitlib.innovatrics.mrz
 
 data class MRZResult(
-        val imagePath: String?,
+        val image: String?,
         val code: String?,
         val code1: Short?,
         val code2: Short?,
@@ -14,5 +14,7 @@ data class MRZResult(
         val nationality: String?,
         val sex: String?,
         val surname: String?,
-        var mrz: String?
+        var mrz: String?,
+        val optional: String? = null,
+        val optional2: String? = null
 )

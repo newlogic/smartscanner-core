@@ -1,8 +1,9 @@
-package com.newlogic.mlkitlib.newlogic.utils
+package com.newlogic.mlkitlib.newlogic.platform
 
 import android.util.Log
 import com.newlogic.mlkitlib.innovatrics.mrz.MrzParser
 import com.newlogic.mlkitlib.innovatrics.mrz.MrzRecord
+import com.newlogic.mlkitlib.innovatrics.mrz.records.MrtdTd1
 import com.newlogic.mlkitlib.newlogic.MLKitActivity
 import java.net.URLEncoder
 
@@ -66,6 +67,25 @@ object MRZCleaner {
 
     fun parseAndClean(mrz: String): MrzRecord {
         val record = MrzParser.parse(mrz)
+
+        Log.d(MLKitActivity.TAG, "Previous Scan: $previousMRZString")
+        if (!record.validComposite || !record.validDateOfBirth || !record.validDocumentNumber || !record.validExpirationDate) {
+            if (mrz != previousMRZString) {
+                previousMRZString = mrz
+                throw IllegalArgumentException("Invalid check digits.")
+            }
+            Log.d(MLKitActivity.TAG, "Still accept scanning.")
+        }
+
+        record.givenNames = record.givenNames.replaceNumbertoChar()
+        record.surname = record.surname.replaceNumbertoChar()
+        record.issuingCountry = record.issuingCountry.replaceNumbertoChar()
+        record.nationality = record.nationality.replaceNumbertoChar()
+        return record
+    }
+
+    fun parseAndCleanMrtdTd1(mrz: String): MrtdTd1 {
+        val record = MrzParser.parseToMrtdTd1(mrz)
 
         Log.d(MLKitActivity.TAG, "Previous Scan: $previousMRZString")
         if (!record.validComposite || !record.validDateOfBirth || !record.validDocumentNumber || !record.validExpirationDate) {

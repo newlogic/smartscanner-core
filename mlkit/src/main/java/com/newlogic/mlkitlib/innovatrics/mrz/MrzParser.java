@@ -19,6 +19,7 @@
 package com.newlogic.mlkitlib.innovatrics.mrz;
 
 
+import com.newlogic.mlkitlib.innovatrics.mrz.records.MrtdTd1;
 import com.newlogic.mlkitlib.innovatrics.mrz.types.MrzDate;
 import com.newlogic.mlkitlib.innovatrics.mrz.types.MrzFormat;
 import com.newlogic.mlkitlib.innovatrics.mrz.types.MrzSex;
@@ -168,7 +169,7 @@ public class MrzParser {
         return invalidCheckdigit==null;
     }
 
-    private static Logger log = LoggerFactory.getLogger(MrzParser.class);
+    private static final Logger log = LoggerFactory.getLogger(MrzParser.class);
 
     /**
      * Parses MRZ date.
@@ -280,6 +281,17 @@ public class MrzParser {
      */
     public static MrzRecord parse(String mrz) {
         final MrzRecord result = MrzFormat.get(mrz).newRecord();
+        result.fromMrz(mrz);
+        return result;
+    }
+
+    /**
+     * Factory method, which parses the MRZ and returns appropriate record class.
+     * @param mrz MRZ to parse.
+     * @return MrtdTd1 record class.
+     */
+    public static MrtdTd1 parseToMrtdTd1(String mrz) {
+        final MrtdTd1 result = (MrtdTd1)MrzFormat.get(mrz).newRecord();
         result.fromMrz(mrz);
         return result;
     }

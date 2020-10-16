@@ -1,4 +1,4 @@
-package com.newlogic.mlkitlib.newlogic.utils
+package com.newlogic.mlkitlib.newlogic.platform
 
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy

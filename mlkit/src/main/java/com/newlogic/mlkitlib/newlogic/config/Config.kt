@@ -7,8 +7,8 @@ import kotlinx.android.parcel.Parcelize
 @Parcelize
 data class Config(
         val font: String,
-        val language: String,
-        val label: String
+        val label: String,
+        val imageResultType: String,
 ) : Parcelable {
     companion object {
         fun empty() = Config(String.empty(), String.empty(), String.empty())

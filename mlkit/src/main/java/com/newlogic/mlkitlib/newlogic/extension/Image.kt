@@ -2,11 +2,13 @@ package com.newlogic.mlkitlib.newlogic.extension
 
 import android.graphics.*
 import android.media.Image
+import android.util.Base64
 import android.util.Log
 import com.newlogic.mlkitlib.newlogic.MLKitActivity
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
+
 
 fun Image.toBitmap(rotation: Int = 0): Bitmap {
     val yBuffer = planes[0].buffer // Y
@@ -40,7 +42,10 @@ fun Image.toBitmap(rotation: Int = 0): Bitmap {
         rect.bottom =  this.height - rect.top
     }
 
-    Log.d(MLKitActivity.TAG, "Image ${this.width}x${this.height}, crop to: ${rect.left},${rect.top},${rect.right},${rect.bottom}")
+    Log.d(
+        MLKitActivity.TAG,
+        "Image ${this.width}x${this.height}, crop to: ${rect.left},${rect.top},${rect.right},${rect.bottom}"
+    )
 
     yuvImage.compressToJpeg(rect, 100, out) // Ugly but it works
     //yuvImage.compressToJpeg(Rect(270, 20, 370, 460), 100, out)
@@ -57,4 +62,28 @@ fun Bitmap.cacheImageToLocal(localPath: String, rotation: Int = 0, quality: Int 
     b.compress(Bitmap.CompressFormat.JPEG, quality, ostream)
     ostream.flush()
     ostream.close()
+}
+
+fun Bitmap.resizeBitmap( newWidth: Int, newHeight: Int): Bitmap? {
+    val width = this.width
+    val height = this.height
+    val scaleWidth = newWidth.toFloat() / width
+    val scaleHeight = newHeight.toFloat() / height
+    // CREATE A MATRIX FOR THE MANIPULATION
+    val matrix = Matrix()
+    // RESIZE THE BIT MAP
+    matrix.postScale(scaleWidth, scaleHeight)
+
+    // "RECREATE" THE NEW BITMAP
+    return Bitmap.createBitmap(this, 0, 0, width, height, matrix, false)
+}
+fun Bitmap.decodeBase64(input: String): Bitmap? {
+    val decodedBytes = Base64.decode(input, 0)
+    return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+}
+
+fun Bitmap.convertBase64String(): String? {
+    val outputStream = ByteArrayOutputStream()
+    this.compress(Bitmap.CompressFormat.JPEG, 50, outputStream)
+    return Base64.encodeToString(outputStream.toByteArray(), Base64.DEFAULT)
 }
