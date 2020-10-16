@@ -18,7 +18,9 @@ import com.newlogic.mlkit.R
 import com.newlogic.mlkit.demo.utils.AnimationUtils
 import com.newlogic.mlkitlib.newlogic.MLKitActivity
 import com.newlogic.mlkitlib.newlogic.config.Config
+import com.newlogic.mlkitlib.newlogic.config.ImageResultType.PATH
 import com.newlogic.mlkitlib.newlogic.config.Modes
+import com.newlogic.mlkitlib.newlogic.config.MrzFormat
 import com.newlogic.mlkitlib.newlogic.extension.empty
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
@@ -49,26 +51,29 @@ class MainActivity : AppCompatActivity() {
         // Result Details
         textResultDetails.visibility = VISIBLE
         // Image
-        if (resultObject["imagePath"] != null) {
-            val path = resultObject["imagePath"].asString
-            val myBitmap = BitmapFactory.decodeFile(path)
-            imageView.setImageBitmap(myBitmap)
-            imageView.visibility = VISIBLE
-            txtImgAction.visibility = VISIBLE
-            txtImgAction.paintFlags = txtImgAction.paintFlags or Paint.UNDERLINE_TEXT_FLAG
-            txtImgAction.setOnClickListener {
-                AnimationUtils.expandCollapse(imageView, originalHeight)
-                txtImgAction.text = if (imageView.visibility == GONE) getString(R.string.action_show_hide) else getString(R.string.action_show)
+        if (resultObject["image"] != null) {
+            if (imageType == PATH.value) {
+                val path = resultObject["image"].asString
+                val myBitmap = BitmapFactory.decodeFile(path)
+                imageView.setImageBitmap(myBitmap)
+                imageView.visibility = VISIBLE
+                txtImgAction.visibility = VISIBLE
+                txtImgAction.paintFlags = txtImgAction.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+                txtImgAction.setOnClickListener {
+                    AnimationUtils.expandCollapse(imageView, originalHeight)
+                    txtImgAction.text = if (imageView.visibility == GONE) getString(R.string.action_show_hide) else getString(R.string.action_show)
+                }
             }
+
         }
         // Simple Data
         if (resultObject["givenNames"] != null) {
             textName.visibility = VISIBLE
-            textName.text = getString(R.string.label_name, resultObject["givenNames"].asString.toLowerCase(Locale.ROOT).capitalize(Locale.ROOT))
+            textName.text = getString(R.string.label_name, resultObject["givenNames"].asString.toLowerCase(Locale.ROOT).capitalize())
         }
         if (resultObject["surname"] != null) {
             textSurName.visibility = VISIBLE
-            textSurName.text = getString(R.string.label_surname, resultObject["surname"].asString.toLowerCase(Locale.ROOT).capitalize(Locale.ROOT))
+            textSurName.text = getString(R.string.label_surname, resultObject["surname"].asString.toLowerCase(Locale.ROOT).capitalize())
         }
         if (resultObject["dateOfBirth"] != null) {
             textBirthday.visibility = VISIBLE
@@ -92,6 +97,7 @@ class MainActivity : AppCompatActivity() {
     fun startScanningActivity (view: View) {
         val intent = Intent(this, MLKitActivity::class.java)
         intent.putExtra(MLKitActivity.MODE, Modes.MRZ.value)
+        intent.putExtra(MLKitActivity.MRZ_FORMAT, MrzFormat.MRTD_TD1.value)
         intent.putExtra(MLKitActivity.CONFIG, sampleConfig())
         startActivityForResult(intent, OP_MLKIT)
     }
@@ -131,14 +137,15 @@ class MainActivity : AppCompatActivity() {
         startActivityForResult(intent, OP_MLKIT)
     }
 
-    private fun sampleConfig () = Config(
+    private fun sampleConfig() = Config(
         font = String.empty(),
-        language = String.empty(),
-        label = String.empty()
+        label = String.empty(),
+        imageResultType = imageType
     )
 
     companion object {
         private const val TAG = "Newlogic-MLkit"
         private const val OP_MLKIT = 1001
+        private val imageType = PATH.value
     }
 }
