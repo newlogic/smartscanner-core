@@ -16,6 +16,7 @@ import com.google.gson.JsonParser
 import com.newlogic.mlkit.R
 import com.newlogic.mlkit.demo.utils.AnimationUtils
 import com.newlogic.mlkitlib.newlogic.MLKitActivity
+import com.newlogic.mlkitlib.newlogic.config.BarcodeFormat
 import com.newlogic.mlkitlib.newlogic.config.Config
 import com.newlogic.mlkitlib.newlogic.config.ImageResultType.PATH
 import com.newlogic.mlkitlib.newlogic.config.Modes
@@ -93,16 +94,13 @@ class MainActivity : AppCompatActivity() {
     fun startScanningActivity (view: View) {
         val intent = Intent(this, MLKitActivity::class.java)
         intent.putExtra(MLKitActivity.MODE, Modes.MRZ.value)
-        intent.putExtra(MLKitActivity.MRZ_FORMAT, MrzFormat.MRTD_TD1.value)
+        intent.putExtra(MLKitActivity.MRZ_FORMAT, MrzFormat.MRP.value)
         intent.putExtra(MLKitActivity.CONFIG, sampleConfig())
         startActivityForResult(intent, OP_MLKIT)
     }
 
     fun startQRCodeScanningActivity (view: View) {
-        val intent = Intent(this, MLKitActivity::class.java)
-        intent.putExtra(MLKitActivity.MODE, Modes.QR_CODE.value)
-        intent.putExtra(MLKitActivity.CONFIG, sampleConfig())
-        startActivityForResult(intent, OP_MLKIT)
+        startBarcode(BarcodeFormat.QR_CODE.value)
     }
 
     @SuppressLint("InflateParams")
@@ -116,11 +114,11 @@ class MainActivity : AppCompatActivity() {
         val btnCancel = sheetViewBarcode.findViewById<LinearLayout>(R.id.btnCancel)
         // bottom sheet listeners
         btnPdf417.setOnClickListener {
-            startBarcode(Modes.PDF_417.value)
+            startBarcode(BarcodeFormat.PDF_417.value)
             bottomSheetDialog.dismiss()
         }
         btnBarcode.setOnClickListener {
-            startBarcode(Modes.BARCODE.value)
+            startBarcode(BarcodeFormat.COMMON.value)
             bottomSheetDialog.dismiss()
         }
         btnCancel.setOnClickListener { bottomSheetDialog.dismiss() }
@@ -128,14 +126,16 @@ class MainActivity : AppCompatActivity() {
         bottomSheetDialog.show()
     }
 
-    private fun startBarcode (mode: String) {
+    private fun startBarcode (barcodeOption: String) {
         val intent = Intent(this, MLKitActivity::class.java)
-        intent.putExtra(MLKitActivity.MODE, mode)
+        intent.putExtra(MLKitActivity.MODE, Modes.BARCODE.value)
+        intent.putExtra(MLKitActivity.BARCODE_OPTION, barcodeOption)
         intent.putExtra(MLKitActivity.CONFIG, sampleConfig())
         startActivityForResult(intent, OP_MLKIT)
     }
 
     private fun sampleConfig() = Config(
+        branding = true,
         background = String.empty(),
         font = String.empty(),
         label = String.empty(),
