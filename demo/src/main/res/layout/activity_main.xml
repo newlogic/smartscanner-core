@@ -13,7 +13,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center|start"
         android:text="@string/label_choose_codetype"
-        android:textSize="16sp"
+        android:fontFamily="@font/sourcesanspro_regular"
+        android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -41,9 +42,9 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center|start"
                     android:text="@string/app_name"
-                    android:textStyle="bold"
+                    android:fontFamily="@font/sourcesanspro_bold"
                     android:textColor="@color/white"
-                    android:textSize="20sp" />
+                    android:textSize="22sp" />
             </FrameLayout>
         </androidx.appcompat.widget.Toolbar>
 
@@ -68,7 +69,7 @@
                         android:layout_gravity="center|start"
                         android:layout_marginStart="16dp"
                         android:layout_marginTop="8dp"
-                        android:text="Result Details:"
+                        android:text="@string/label_result_details"
                         android:textColor="@color/newlogic_black"
                         android:textSize="18sp"
                         android:textStyle="bold"
@@ -178,6 +179,7 @@
                     android:textAllCaps="false"
                     android:onClick="startScanningActivity"
                     android:text="@string/mode_mrz"
+                    android:fontFamily="@font/sourcesanspro_regular"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/button2"
                     app:layout_constraintStart_toStartOf="parent"
@@ -198,6 +200,7 @@
                     android:background="@color/idpass_orange"
                     android:textColor="@color/white"
                     android:onClick="startQRCodeScanningActivity"
+                    android:fontFamily="@font/sourcesanspro_regular"
                     android:text="@string/mode_qr"
                     android:textAllCaps="false"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -220,6 +223,7 @@
                     android:background="@color/idpass_orange"
                     android:textColor="@color/white"
                     android:onClick="startBarcodeScanningActivity"
+                    android:fontFamily="@font/sourcesanspro_regular"
                     android:text="@string/mode_barcode"
                     android:textAllCaps="false"
                     app:layout_constraintBottom_toBottomOf="parent"
