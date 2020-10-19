@@ -138,6 +138,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun sampleConfig() = Config(
+        background = String.empty(),
         font = String.empty(),
         label = String.empty(),
         imageResultType = imageType

@@ -5,7 +5,7 @@
     android:id="@+id/coordinatorLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/transparent_dark_grey"
+    android:background="@color/transparent_grey"
     android:elevation="3dp"
     android:textAlignment="gravity"
     tools:context=".newlogic.MLKitActivity">

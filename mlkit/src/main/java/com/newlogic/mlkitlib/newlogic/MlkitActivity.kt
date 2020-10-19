@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.hardware.camera2.CameraManager
 import android.net.Uri
 import android.os.Bundle
@@ -68,6 +69,7 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
         const val MODE = "MODE"
 
         fun defaultConfig() = Config(
+            background = String.empty(),
             font = String.empty(),
             label = String.empty(),
             imageResultType = PATH.value
@@ -135,18 +137,40 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun setupConfiguration(config: Config) {
+        // flash
         flashButton?.visibility = if (isLedFlashAvailable(this)) VISIBLE else GONE
+        // capture text label
         captureLabelText.text = config.label
-        if (config.font == Fonts.NOTO_SANS_ARABIC.value) captureLabelText.typeface = ResourcesCompat.getFont(this, R.font.notosansarabic_bold)
+        // font to use
+        captureLabelText.typeface = if (config.font == Fonts.NOTO_SANS_ARABIC.value) ResourcesCompat.getFont(
+            this,
+            R.font.notosansarabic_bold)
+        else ResourcesCompat.getFont(this, R.font.sourcesanspro_bold)
+        // Background reader
+        try {
+            if (config.background.isNotEmpty()) {
+                val color = Color.parseColor(config.background)
+                coordinatorLayout.setBackgroundColor(color)
+            }
+        } catch (iae: IllegalArgumentException) {
+            // This color string is not valid
+            coordinatorLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.transparent_grey))
+        }
+        // reader modes
         val layoutParams = modelLayoutView.layoutParams as ConstraintLayout.LayoutParams
         when (mode) {
             PDF_417.value -> {
                 layoutParams.dimensionRatio = "9:21"
                 modelLayoutView.layoutParams = layoutParams
             }
-            BARCODE.value, QR_CODE.value -> {
-                layoutParams.marginStart = 64 // Approx. 30dp
-                layoutParams.marginEnd = 64 // Approx. 30dp
+            BARCODE.value -> {
+                layoutParams.marginStart = 72 // Approx. 30dp
+                layoutParams.marginEnd = 72 // Approx. 30dp
+                modelLayoutView.layoutParams = layoutParams
+            }
+            QR_CODE.value -> {
+                layoutParams.marginStart = 124 // Approx. 54dp
+                layoutParams.marginEnd = 124 // Approx. 54dp
                 modelLayoutView.layoutParams = layoutParams
             }
         }
@@ -417,7 +441,7 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
                                 } catch (e: Exception) { // MrzParseException, IllegalArgumentException
                                     Log.d("$TAG/MLKit", e.toString())
                                 }
-                                getAnalyzerStat (
+                                getAnalyzerStat(
                                     mlStartTime,
                                     System.currentTimeMillis()
                                 )
@@ -431,7 +455,7 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
                                     modelLayoutView.modelText.text = context.getString(R.string.model_text)
                                 }
                                 modelLayoutView.modelText.visibility = VISIBLE
-                                getAnalyzerStat (
+                                getAnalyzerStat(
                                     mlStartTime,
                                     System.currentTimeMillis()
                                 )
@@ -463,7 +487,7 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-    private fun getAnalyzerStat (startTime: Long, endTime: Long) {
+    private fun getAnalyzerStat(startTime: Long, endTime: Long) {
         runOnUiThread {
             val analyzerTime = endTime - startTime
             mlkitMS.text = "Frame processing time: $analyzerTime ms"
