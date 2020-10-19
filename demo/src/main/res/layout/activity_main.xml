@@ -42,7 +42,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center|start"
                     android:text="@string/app_name"
-                    android:fontFamily="@font/sourcesanspro_bold"
+                    android:fontFamily="@font/sourcesanspro_medium"
                     android:textColor="@color/white"
                     android:textSize="22sp" />
             </FrameLayout>
