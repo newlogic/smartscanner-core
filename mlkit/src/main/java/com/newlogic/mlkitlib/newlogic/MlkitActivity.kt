@@ -48,9 +48,6 @@ import com.newlogic.mlkitlib.newlogic.platform.MRZCleaner
 import com.newlogic.mlkitlib.newlogic.utils.CameraUtils.isLedFlashAvailable
 import kotlinx.android.synthetic.main.activity_mrz.*
 import kotlinx.android.synthetic.main.activity_mrz.view.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.net.URLEncoder
 import java.text.SimpleDateFormat
@@ -106,7 +103,7 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
         context = applicationContext
         // assign layout ids
         modelLayoutView = findViewById(R.id.viewLayout)
-        coordinatorLayoutView =  findViewById(R.id.coordinatorLayout)
+        coordinatorLayoutView = findViewById(R.id.coordinatorLayout)
         flashButton = findViewById(R.id.flash_button)
         closeButton = findViewById(R.id.close_button)
         rectangle = findViewById(R.id.rectimage)
@@ -142,10 +139,12 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
         // capture text label
         captureLabelText.text = config.label
         // font to use
-        captureLabelText.typeface = if (config.font == Fonts.NOTO_SANS_ARABIC.value) ResourcesCompat.getFont(
-            this,
-            R.font.notosansarabic_bold)
-        else ResourcesCompat.getFont(this, R.font.sourcesanspro_bold)
+        captureLabelText.typeface =
+            if (config.font == Fonts.NOTO_SANS_ARABIC.value) ResourcesCompat.getFont(
+                this,
+                R.font.notosansarabic_bold
+            )
+            else ResourcesCompat.getFont(this, R.font.sourcesanspro_bold)
         // Background reader
         try {
             if (config.background.isNotEmpty()) {
@@ -164,13 +163,13 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
                 modelLayoutView.layoutParams = layoutParams
             }
             BARCODE.value -> {
-                layoutParams.marginStart = 72 // Approx. 30dp
-                layoutParams.marginEnd = 72 // Approx. 30dp
+                layoutParams.marginStart = 64 // Approx. 30dp
+                layoutParams.marginEnd = 64 // Approx. 30dp
                 modelLayoutView.layoutParams = layoutParams
             }
             QR_CODE.value -> {
-                layoutParams.marginStart = 124 // Approx. 54dp
-                layoutParams.marginEnd = 124 // Approx. 54dp
+                layoutParams.marginStart = 72 // Approx. 54dp
+                layoutParams.marginEnd = 72 // Approx. 54dp
                 modelLayoutView.layoutParams = layoutParams
             }
         }
@@ -245,18 +244,24 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
             if (mediaImage != null) {
                 val rot = imageProxy.imageInfo.rotationDegrees
                 val bf = mediaImage.toBitmap(rot)
-                val cropped = if (rot == 90 || rot == 270) Bitmap.createBitmap(bf, bf.width / 2, 0, bf.width / 2, bf.height)
+                val cropped = if (rot == 90 || rot == 270) Bitmap.createBitmap(
+                    bf,
+                    bf.width / 2,
+                    0,
+                    bf.width / 2,
+                    bf.height
+                )
                 else Bitmap.createBitmap(bf, 0, bf.height / 2, bf.width, bf.height / 2)
                 Log.d(TAG, "Bitmap: (${mediaImage.width}, ${mediaImage.height}) Cropped: (${cropped.width}, ${cropped.height}), Rotation: ${imageProxy.imageInfo.rotationDegrees}")
 
                 //barcode, qr and pdf417
-                if (!barcodeBusy && ((mode == PDF_417.value) || (mode == BARCODE.value)|| (mode == QR_CODE.value))) {
+                if (!barcodeBusy && ((mode == PDF_417.value) || (mode == BARCODE.value) || (mode == QR_CODE.value))) {
                     barcodeBusy = true
                     Log.d("$TAG/MLKit", "barcode: mode is $mode")
                     val start = System.currentTimeMillis()
                     var options: BarcodeScannerOptions = BarcodeScannerOptions.Builder()
-                            .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS)
-                            .build()
+                        .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS)
+                        .build()
                     when (mode) {
                         PDF_417.value -> {
                             options = BarcodeScannerOptions.Builder()
@@ -292,49 +297,49 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
                     val scanner = BarcodeScanning.getClient(options)
                     Log.d("$TAG/MLKit", "barcode: process")
                     scanner.process(image)
-                            .addOnSuccessListener { barcodes ->
-                                val timeRequired = System.currentTimeMillis() - start
-                                val rawValue: String
-                                val cornersString: String
-                                Log.d("$TAG/MLKit", "barcode: success: $timeRequired ms")
-                                if (barcodes.isNotEmpty()) {
-                                    //                                val bounds = barcode.boundingBox
-                                    val corners = barcodes[0].cornerPoints
-                                    val builder = StringBuilder()
-                                    if (corners != null) {
-                                        for (corner in corners) {
-                                            builder.append("${corner.x},${corner.y} ")
-                                        }
+                        .addOnSuccessListener { barcodes ->
+                            val timeRequired = System.currentTimeMillis() - start
+                            val rawValue: String
+                            val cornersString: String
+                            Log.d("$TAG/MLKit", "barcode: success: $timeRequired ms")
+                            if (barcodes.isNotEmpty()) {
+                                //                                val bounds = barcode.boundingBox
+                                val corners = barcodes[0].cornerPoints
+                                val builder = StringBuilder()
+                                if (corners != null) {
+                                    for (corner in corners) {
+                                        builder.append("${corner.x},${corner.y} ")
                                     }
-                                    cornersString = builder.toString()
-                                    rawValue = barcodes[0].rawValue!!
-                                    //val valueType = barcode.valueType
-                                    val date = Calendar.getInstance().time
-                                    val formatter = SimpleDateFormat("yyyyMMddHHmmss", Locale.ROOT)
-                                    val currentDateTime = formatter.format(date)
-                                    val imageCachePathFile = "${context.cacheDir}/Scanner-$currentDateTime.jpg"
-                                    bf.cacheImageToLocal(
-                                        imageCachePathFile,
-                                        imageProxy.imageInfo.rotationDegrees
-                                    )
-                                    val gson = Gson()
-                                    val jsonString = gson.toJson(
-                                        BarcodeResult(
-                                            imageCachePathFile,
-                                            cornersString,
-                                            rawValue
-                                        )
-                                    )
-                                    getAnalyzerResult(AnalyzerType.BARCODE, jsonString)
-                                } else {
-                                    Log.d("$TAG/MLKit", "barcode: nothing detected")
                                 }
-                                barcodeBusy = false
+                                cornersString = builder.toString()
+                                rawValue = barcodes[0].rawValue!!
+                                //val valueType = barcode.valueType
+                                val date = Calendar.getInstance().time
+                                val formatter = SimpleDateFormat("yyyyMMddHHmmss", Locale.ROOT)
+                                val currentDateTime = formatter.format(date)
+                                val imageCachePathFile = "${context.cacheDir}/Scanner-$currentDateTime.jpg"
+                                bf.cacheImageToLocal(
+                                    imageCachePathFile,
+                                    imageProxy.imageInfo.rotationDegrees
+                                )
+                                val gson = Gson()
+                                val jsonString = gson.toJson(
+                                    BarcodeResult(
+                                        imageCachePathFile,
+                                        cornersString,
+                                        rawValue
+                                    )
+                                )
+                                getAnalyzerResult(AnalyzerType.BARCODE, jsonString)
+                            } else {
+                                Log.d("$TAG/MLKit", "barcode: nothing detected")
                             }
-                            .addOnFailureListener { e ->
-                                Log.d("$TAG/MLKit", "barcode: failure: ${e.message}")
-                                barcodeBusy = false
-                            }
+                            barcodeBusy = false
+                        }
+                        .addOnFailureListener { e ->
+                            Log.d("$TAG/MLKit", "barcode: failure: ${e.message}")
+                            barcodeBusy = false
+                        }
                 }
                 //MRZ
                 if (!mlkitBusy) {
@@ -347,120 +352,115 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
                     Log.d("$TAG/MLKit", "TextRecognition: process")
                     val start = System.currentTimeMillis()
                     recognizer.process(image)
-                            .addOnSuccessListener { visionText ->
-                                modelLayoutView.modelText.visibility = INVISIBLE
-                                val timeRequired = System.currentTimeMillis() - start
-
-                                Log.d("$TAG/MLKit", "TextRecognition: success: $timeRequired ms")
-                                var rawFullRead = ""
-                                val blocks = visionText.textBlocks
-                                for (i in blocks.indices) {
-                                    val lines = blocks[i].lines
-                                    for (j in lines.indices) {
-                                        if (lines[j].text.contains('<')) {
-                                            rawFullRead += lines[j].text + "\n"
-                                        }
+                        .addOnSuccessListener { visionText ->
+                            modelLayoutView.modelText.visibility = INVISIBLE
+                            val timeRequired = System.currentTimeMillis() - start
+                            Log.d("$TAG/MLKit", "TextRecognition: success: $timeRequired ms")
+                            var rawFullRead = ""
+                            val blocks = visionText.textBlocks
+                            for (i in blocks.indices) {
+                                val lines = blocks[i].lines
+                                for (j in lines.indices) {
+                                    if (lines[j].text.contains('<')) {
+                                        rawFullRead += lines[j].text + "\n"
                                     }
                                 }
-                                rectangle!!.isSelected = rawFullRead != ""
-                                try {
-                                    Log.d(
-                                        "$TAG/MLKit",
-                                        "Before cleaner: [${
-                                            URLEncoder.encode(rawFullRead, "UTF-8")
-                                                .replace("%3C", "<").replace("%0A", "↩")
-                                        }]"
-                                    )
-                                    val mrz = MRZCleaner.clean(rawFullRead)
-                                    Log.d(
-                                        "$TAG/MLKit",
-                                        "After cleaner = [${
-                                            URLEncoder.encode(mrz, "UTF-8")
-                                                .replace("%3C", "<").replace("%0A", "↩")
-                                        }]"
-                                    )
-                                    runBlocking {
-                                        val jsonString =  withContext(Dispatchers.IO) {
-                                            val date = Calendar.getInstance().time
-                                            val formatter = SimpleDateFormat("yyyyMMddHHmmss", Locale.ROOT)
-                                            val currentDateTime = formatter.format(date)
-                                            val imagePathFile = "${context.cacheDir}/Scanner-$currentDateTime.jpg"
-                                            bf.cacheImageToLocal(
-                                                imagePathFile,
-                                                imageProxy.imageInfo.rotationDegrees
-                                            )
-                                            val imageString = if (config?.imageResultType == PATH.value) imagePathFile else bf.convertBase64String()
-                                            val mrzResult: MRZResult = when (mrzFormat) {
-                                                MRTD_TD1.value -> {
-                                                    val record = MRZCleaner.parseAndCleanMrtdTd1(mrz)
-                                                    MRZResult(
-                                                        imageString,
-                                                        record.code.toString(),
-                                                        record.code1.toShort(),
-                                                        record.code2.toShort(),
-                                                        record.dateOfBirth?.toString()?.replace(Regex("[{}]"), ""),
-                                                        record.documentNumber.toString(),
-                                                        record.expirationDate?.toString()?.replace(Regex("[{}]"), ""),
-                                                        record.format.toString(),
-                                                        record.givenNames,
-                                                        record.issuingCountry,
-                                                        record.nationality,
-                                                        record.sex.toString(),
-                                                        record.surname,
-                                                        record.toMrz(),
-                                                        record.optional,
-                                                        record.optional2
-                                                    )
-                                                }
-                                                else -> {
-                                                    val record = MRZCleaner.parseAndClean(mrz)
-                                                    MRZResult(
-                                                        imageString,
-                                                        record.code.toString(),
-                                                        record.code1.toShort(),
-                                                        record.code2.toShort(),
-                                                        record.dateOfBirth?.toString()?.replace(Regex("[{}]"), ""),
-                                                        record.documentNumber.toString(),
-                                                        record.expirationDate?.toString()?.replace(Regex("[{}]"), ""),
-                                                        record.format.toString(),
-                                                        record.givenNames,
-                                                        record.issuingCountry,
-                                                        record.nationality,
-                                                        record.sex.toString(),
-                                                        record.surname,
-                                                        record.toMrz()
-                                                    )
-                                                }
-                                            }
-                                            // record to json
-                                            val gson = Gson()
-                                            gson.toJson(mrzResult)
-                                        }
-                                        getAnalyzerResult(AnalyzerType.MRZ, jsonString)
+                            }
+                            rectangle!!.isSelected = rawFullRead != ""
+                            try {
+                                Log.d(
+                                    "$TAG/MLKit",
+                                    "Before cleaner: [${
+                                        URLEncoder.encode(rawFullRead, "UTF-8")
+                                            .replace("%3C", "<").replace("%0A", "↩")
+                                    }]"
+                                )
+                                val mrz = MRZCleaner.clean(rawFullRead)
+                                Log.d(
+                                    "$TAG/MLKit",
+                                    "After cleaner = [${
+                                        URLEncoder.encode(mrz, "UTF-8")
+                                            .replace("%3C", "<").replace("%0A", "↩")
+                                    }]"
+                                )
+                                val date = Calendar.getInstance().time
+                                val formatter = SimpleDateFormat("yyyyMMddHHmmss", Locale.ROOT)
+                                val currentDateTime = formatter.format(date)
+                                val imagePathFile = "${context.cacheDir}/Scanner-$currentDateTime.jpg"
+                                bf.cacheImageToLocal(
+                                    imagePathFile,
+                                    imageProxy.imageInfo.rotationDegrees
+                                )
+                                val imageString = if (config?.imageResultType == PATH.value) imagePathFile else bf.convertBase64String()
+                                val mrzResult: MRZResult = when (mrzFormat) {
+                                    MRTD_TD1.value -> {
+                                        val record = MRZCleaner.parseAndCleanMrtdTd1(mrz)
+                                        MRZResult(
+                                            imageString,
+                                            record.code.toString(),
+                                            record.code1.toShort(),
+                                            record.code2.toShort(),
+                                            record.dateOfBirth?.toString()?.replace(Regex("[{}]"), ""),
+                                            record.documentNumber.toString(),
+                                            record.expirationDate?.toString()?.replace(Regex("[{}]"), ""),
+                                            record.format.toString(),
+                                            record.givenNames,
+                                            record.issuingCountry,
+                                            record.nationality,
+                                            record.sex.toString(),
+                                            record.surname,
+                                            record.toMrz(),
+                                            record.optional,
+                                            record.optional2
+                                        )
                                     }
-                                } catch (e: Exception) { // MrzParseException, IllegalArgumentException
-                                    Log.d("$TAG/MLKit", e.toString())
+                                    else -> {
+                                        val record = MRZCleaner.parseAndClean(mrz)
+                                        MRZResult(
+                                            imageString,
+                                            record.code.toString(),
+                                            record.code1.toShort(),
+                                            record.code2.toShort(),
+                                            record.dateOfBirth?.toString()?.replace(Regex("[{}]"), ""),
+                                            record.documentNumber.toString(),
+                                            record.expirationDate?.toString()?.replace(Regex("[{}]"), ""),
+                                            record.format.toString(),
+                                            record.givenNames,
+                                            record.issuingCountry,
+                                            record.nationality,
+                                            record.sex.toString(),
+                                            record.surname,
+                                            record.toMrz()
+                                        )
+                                    }
                                 }
-                                getAnalyzerStat(
-                                    mlStartTime,
-                                    System.currentTimeMillis()
-                                )
-                                mlkitBusy = false
+                                // record to json
+                                val gson = Gson()
+                                val jsonString = gson.toJson(mrzResult)
+                                getAnalyzerResult(AnalyzerType.MRZ, jsonString)
+                            } catch (e: Exception) { // MrzParseException, IllegalArgumentException
+                                Log.d("$TAG/MLKit", e.toString())
                             }
-                            .addOnFailureListener { e ->
-                                Log.d("$TAG/MLKit", "TextRecognition: failure: ${e.message}")
-                                if (getConnectionType() == 0) {
-                                    modelLayoutView.modelText.text = context.getString(R.string.connection_text)
-                                } else {
-                                    modelLayoutView.modelText.text = context.getString(R.string.model_text)
-                                }
-                                modelLayoutView.modelText.visibility = VISIBLE
-                                getAnalyzerStat(
-                                    mlStartTime,
-                                    System.currentTimeMillis()
-                                )
-                                mlkitBusy = false
+                            getAnalyzerStat(
+                                mlStartTime,
+                                System.currentTimeMillis()
+                            )
+                            mlkitBusy = false
+                        }
+                        .addOnFailureListener { e ->
+                            Log.d("$TAG/MLKit", "TextRecognition: failure: ${e.message}")
+                            if (getConnectionType() == 0) {
+                                modelLayoutView.modelText.text = context.getString(R.string.connection_text)
+                            } else {
+                                modelLayoutView.modelText.text = context.getString(R.string.model_text)
                             }
+                            modelLayoutView.modelText.visibility = VISIBLE
+                            getAnalyzerStat(
+                                mlStartTime,
+                                System.currentTimeMillis()
+                            )
+                            mlkitBusy = false
+                        }
                 }
             }
             imageProxy.close()
