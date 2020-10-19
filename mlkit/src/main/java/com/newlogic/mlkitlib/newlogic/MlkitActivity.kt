@@ -182,6 +182,8 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
                 }
             }
         }
+        // branding
+        brandingImage.visibility = if (config.branding) VISIBLE else GONE
     }
 
     override fun onRequestPermissionsResult(
