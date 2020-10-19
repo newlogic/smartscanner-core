@@ -37,6 +37,7 @@ import com.newlogic.mlkitlib.innovatrics.barcode.BarcodeResult
 import com.newlogic.mlkitlib.innovatrics.mrz.MRZResult
 import com.newlogic.mlkitlib.newlogic.config.Config
 import com.newlogic.mlkitlib.newlogic.config.Fonts
+import com.newlogic.mlkitlib.newlogic.config.ImageResultType.BASE_64
 import com.newlogic.mlkitlib.newlogic.config.ImageResultType.PATH
 import com.newlogic.mlkitlib.newlogic.config.Modes.*
 import com.newlogic.mlkitlib.newlogic.config.MrzFormat
@@ -60,10 +61,10 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
 
     companion object {
         val TAG = MLKitActivity::class.java.simpleName
-        const val MLKIT_RESULT = "MLKIT_RESULT"
-        const val MRZ_FORMAT = "MRZ_FORMAT"
-        const val CONFIG = "CONFIG"
-        const val MODE = "MODE"
+        const val MLKIT_RESULT = "mlkitResult"
+        const val MRZ_FORMAT = "mrzFormat"
+        const val CONFIG = "config"
+        const val MODE = "mode"
 
         fun defaultConfig() = Config(
             background = String.empty(),
@@ -391,7 +392,7 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
                                     imagePathFile,
                                     imageProxy.imageInfo.rotationDegrees
                                 )
-                                val imageString = if (config?.imageResultType == PATH.value) imagePathFile else bf.convertBase64String()
+                                val imageString = if (config?.imageResultType == BASE_64.value) bf.convertBase64String() else imagePathFile
                                 val mrzResult: MRZResult = when (mrzFormat) {
                                     MRTD_TD1.value -> {
                                         val record = MRZCleaner.parseAndCleanMrtdTd1(mrz)
