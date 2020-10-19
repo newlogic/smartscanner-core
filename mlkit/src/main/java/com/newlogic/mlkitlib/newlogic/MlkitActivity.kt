@@ -61,10 +61,10 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
 
     companion object {
         val TAG = MLKitActivity::class.java.simpleName
-        const val MLKIT_RESULT = "mlkitResult"
-        const val MRZ_FORMAT = "mrzFormat"
-        const val CONFIG = "config"
-        const val MODE = "mode"
+        const val MLKIT_RESULT = "MLKIT_RESULT"
+        const val MRZ_FORMAT = "MRZ_FORMAT"
+        const val CONFIG = "CONFIG"
+        const val MODE = "MODE"
 
         fun defaultConfig() = Config(
             background = String.empty(),
