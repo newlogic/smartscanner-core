@@ -27,7 +27,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
-import com.google.mlkit.vision.barcode.Barcode
+import com.google.mlkit.vision.barcode.Barcode.*
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
@@ -261,35 +261,35 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
                     Log.d("$TAG/MLKit", "barcode: mode is $mode")
                     val start = System.currentTimeMillis()
                     var options: BarcodeScannerOptions = BarcodeScannerOptions.Builder()
-                        .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS)
+                        .setBarcodeFormats(FORMAT_ALL_FORMATS)
                         .build()
                     when (mode) {
                         PDF_417.value -> {
                             options = BarcodeScannerOptions.Builder()
-                                .setBarcodeFormats(Barcode.FORMAT_PDF417)
+                                .setBarcodeFormats(FORMAT_PDF417)
                                 .build()
                         }
                         QR_CODE.value -> {
                             options = BarcodeScannerOptions.Builder()
-                                .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
+                                .setBarcodeFormats(FORMAT_QR_CODE)
                                 .build()
                         }
                         BARCODE.value -> {
                             options = BarcodeScannerOptions.Builder()
                                 .setBarcodeFormats(
-                                    Barcode.FORMAT_CODE_128,
-                                    Barcode.FORMAT_CODE_39,
-                                    Barcode.FORMAT_CODE_93,
-                                    Barcode.FORMAT_CODABAR,
-                                    Barcode.FORMAT_DATA_MATRIX,
-                                    Barcode.FORMAT_EAN_13,
-                                    Barcode.FORMAT_EAN_8,
-                                    Barcode.FORMAT_ITF,
-                                    Barcode.FORMAT_QR_CODE,
-                                    Barcode.FORMAT_UPC_A,
-                                    Barcode.FORMAT_UPC_E,
-                                    Barcode.FORMAT_QR_CODE,
-                                    Barcode.FORMAT_AZTEC
+                                    FORMAT_CODE_128,
+                                    FORMAT_CODE_39,
+                                    FORMAT_CODE_93,
+                                    FORMAT_CODABAR,
+                                    FORMAT_DATA_MATRIX,
+                                    FORMAT_EAN_13,
+                                    FORMAT_EAN_8,
+                                    FORMAT_ITF,
+                                    FORMAT_QR_CODE,
+                                    FORMAT_UPC_A,
+                                    FORMAT_UPC_E,
+                                    FORMAT_QR_CODE,
+                                    FORMAT_AZTEC
                                 )
                                 .build()
                         }
@@ -392,7 +392,7 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
                                     imagePathFile,
                                     imageProxy.imageInfo.rotationDegrees
                                 )
-                                val imageString = if (config?.imageResultType == BASE_64.value) bf.convertBase64String() else imagePathFile
+                                val imageString = if (config?.imageResultType == BASE_64.value) bf.encodeBase64(imageProxy.imageInfo.rotationDegrees) else imagePathFile
                                 val mrzResult: MRZResult = when (mrzFormat) {
                                     MRTD_TD1.value -> {
                                         val record = MRZCleaner.parseAndCleanMrtdTd1(mrz)

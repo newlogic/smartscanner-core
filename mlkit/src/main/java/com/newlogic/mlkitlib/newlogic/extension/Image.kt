@@ -77,13 +77,16 @@ fun Bitmap.resizeBitmap( newWidth: Int, newHeight: Int): Bitmap? {
     // "RECREATE" THE NEW BITMAP
     return Bitmap.createBitmap(this, 0, 0, width, height, matrix, false)
 }
-fun Bitmap.decodeBase64(input: String): Bitmap? {
-    val decodedBytes = Base64.decode(input, 0)
+
+fun String.decodeBase64(): Bitmap? {
+    val decodedBytes = Base64.decode(this, 0)
     return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
 }
 
-fun Bitmap.convertBase64String(): String? {
+fun Bitmap.encodeBase64(rotation: Int = 0): String? {
     val outputStream = ByteArrayOutputStream()
-    this.compress(Bitmap.CompressFormat.JPEG, 50, outputStream)
+    val matrix = Matrix().apply { postRotate(rotation.toFloat()) }
+    val b = Bitmap.createBitmap(this, 0, 0, this.width, this.height, matrix, true)
+    b.compress(Bitmap.CompressFormat.JPEG, 50, outputStream)
     return Base64.encodeToString(outputStream.toByteArray(), Base64.DEFAULT)
 }

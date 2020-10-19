@@ -20,6 +20,7 @@ import com.newlogic.mlkitlib.newlogic.config.Config
 import com.newlogic.mlkitlib.newlogic.config.ImageResultType.PATH
 import com.newlogic.mlkitlib.newlogic.config.Modes
 import com.newlogic.mlkitlib.newlogic.config.MrzFormat
+import com.newlogic.mlkitlib.newlogic.extension.decodeBase64
 import com.newlogic.mlkitlib.newlogic.extension.empty
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
@@ -51,17 +52,14 @@ class MainActivity : AppCompatActivity() {
         textResultDetails.visibility = VISIBLE
         // Image
         if (resultObject["image"] != null) {
-            if (imageType == PATH.value) {
-                val path = resultObject["image"].asString
-                val myBitmap = BitmapFactory.decodeFile(path)
-                imageView.setImageBitmap(myBitmap)
-                imageView.visibility = VISIBLE
-                txtImgAction.visibility = VISIBLE
-                txtImgAction.paintFlags = txtImgAction.paintFlags or Paint.UNDERLINE_TEXT_FLAG
-                txtImgAction.setOnClickListener {
-                    AnimationUtils.expandCollapse(imageView, originalHeight)
-                    txtImgAction.text = if (imageView.visibility == GONE) getString(R.string.action_show_hide) else getString(R.string.action_show)
-                }
+            val image = resultObject["image"].asString
+            imageView.setImageBitmap(if (imageType == PATH.value) BitmapFactory.decodeFile(image) else image.decodeBase64())
+            imageView.visibility = VISIBLE
+            txtImgAction.visibility = VISIBLE
+            txtImgAction.paintFlags = txtImgAction.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+            txtImgAction.setOnClickListener {
+                AnimationUtils.expandCollapse(imageView, originalHeight)
+                txtImgAction.text = if (imageView.visibility == GONE) getString(R.string.action_show_hide) else getString(R.string.action_show)
             }
         }
         // Simple Data
