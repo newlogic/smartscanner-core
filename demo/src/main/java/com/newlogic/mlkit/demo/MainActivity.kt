@@ -62,24 +62,27 @@ class MainActivity : AppCompatActivity() {
                 AnimationUtils.expandCollapse(imageView, originalHeight)
                 txtImgAction.text = if (imageView.visibility == GONE) getString(R.string.action_show_hide) else getString(R.string.action_show)
             }
+        } else {
+            imageView.visibility = GONE
+            txtImgAction.visibility = GONE
         }
         // Simple Data
         if (resultObject["givenNames"] != null) {
             textName.visibility = VISIBLE
             textName.text = getString(R.string.label_name, resultObject["givenNames"].asString.toLowerCase(Locale.ROOT).capitalize())
-        }
+        } else textName.visibility = GONE
         if (resultObject["surname"] != null) {
             textSurName.visibility = VISIBLE
             textSurName.text = getString(R.string.label_surname, resultObject["surname"].asString.toLowerCase(Locale.ROOT).capitalize())
-        }
+        } else textSurName.visibility = GONE
         if (resultObject["dateOfBirth"] != null) {
             textBirthday.visibility = VISIBLE
             textBirthday.text = getString(R.string.label_birthday, resultObject["dateOfBirth"].asString)
-        }
+        } else textBirthday.visibility = GONE
         if (resultObject["nationality"] != null) {
             textNationality.visibility = VISIBLE
             textNationality.text = getString(R.string.label_nationality, resultObject["nationality"].asString)
-        }
+        } else textNationality.visibility = GONE
         //Raw Data
         editTextTextMultiLine.setText(result)
         editTextTextMultiLine.visibility = VISIBLE
