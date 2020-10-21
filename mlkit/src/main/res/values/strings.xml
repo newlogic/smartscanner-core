@@ -11,5 +11,4 @@
     <string name="cd_close_button">Back</string>
     <string name="cd_flash_button">Toggle camera flash</string>
     <string name="mlkit">MLKit</string>
-    <string name="tesseract">Tesseract</string>
 </resources>

@@ -6,47 +6,6 @@ import java.io.*
 
 object FileUtils {
     private val TAG = FileUtils::class.java.simpleName
-    const val TAMWINI_PREFS = "TamwiniPrefs"
-    const val TAMWINI_PREFS_TESS_FILE_OPS_DONE = "TESS_FILE_OPS_DONE"
-
-    fun tesseractPathExists(context: Context): Boolean {
-        val f = createTesseractFile(context)
-        return f.isDirectory && f.exists()
-    }
-
-    fun getTesseractExtFilePathAsString(context: Context): String {
-        var path = context.getExternalFilesDir(null)!!.absolutePath
-        path = "$path/tessdata"
-        return path
-    }
-
-    fun createTesseractSubDir(context: Context): Boolean {
-        return if (!tesseractPathExists(context)) {
-            val f = createTesseractFile(context)
-            f.mkdir()
-        } else {
-            //directory exists
-            true
-        }
-    }
-
-    private fun createTesseractFile(context: Context): File {
-        val extDirPath = getTesseractExtFilePathAsString(context)
-        return File(extDirPath)
-    }
-
-    fun copyFilesToSdCard(context: Context) {
-        copyFileOrDir(
-            "tessdata",
-            context
-        ) // copy all files in assets folder in my project
-        val editor = context.getSharedPreferences(
-            TAMWINI_PREFS,
-            Context.MODE_PRIVATE
-        ).edit()
-        editor.putBoolean(TAMWINI_PREFS_TESS_FILE_OPS_DONE, true)
-        editor.apply()
-    }
 
     private fun copyFileOrDir(path: String, context: Context) {
         val assetManager = context.assets
