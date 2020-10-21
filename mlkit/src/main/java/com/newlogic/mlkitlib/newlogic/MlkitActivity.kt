@@ -18,12 +18,9 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.*
 import android.view.Window
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.PreviewView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -35,6 +32,7 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.newlogic.mlkitlib.R
+import com.newlogic.mlkitlib.databinding.ActivityMrzBinding
 import com.newlogic.mlkitlib.innovatrics.barcode.BarcodeResult
 import com.newlogic.mlkitlib.innovatrics.mrz.MRZResult
 import com.newlogic.mlkitlib.innovatrics.mrz.MRZResult.Companion.formatMrtdTd1MrzResult
@@ -93,18 +91,8 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
 
     private var flashButton: View? = null
     private var closeButton: View? = null
-    private var rectangle: View? = null
-    private var debugLayout: View? = null
-    private var brandingImage: ImageView? = null
-    private var captureLabelText: TextView? = null
-    private var modelText: TextView? = null
-    private var mlkitText: TextView? = null
-    private var mlkitMS: TextView? = null
-    private var mlkitTime: TextView? = null
 
-    private lateinit var modelLayoutView: View
-    private lateinit var coordinatorLayoutView: View
-    private lateinit var viewFinder: PreviewView
+    private lateinit var binding : ActivityMrzBinding
     private lateinit var outputDirectory: File
     private lateinit var cameraExecutor: ExecutorService
     private lateinit var context: Context
@@ -112,22 +100,14 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
-        setContentView(R.layout.activity_mrz)
+        binding = ActivityMrzBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
+        // get application context
         context = applicationContext
         // assign layout ids
-        coordinatorLayoutView = findViewById(R.id.coordinatorLayout)
-        modelLayoutView = findViewById(R.id.viewLayout)
-        viewFinder = findViewById(R.id.viewFinder)
         flashButton = findViewById(R.id.flash_button)
         closeButton = findViewById(R.id.close_button)
-        rectangle = findViewById(R.id.rectimage)
-        debugLayout = findViewById(R.id.debugLayout)
-        modelText = findViewById(R.id.modelText)
-        brandingImage = findViewById(R.id.brandingImage)
-        captureLabelText = findViewById(R.id.captureLabelText)
-        mlkitText = findViewById(R.id.mlkitText)
-        mlkitMS = findViewById(R.id.mlkitMS)
-        mlkitTime = findViewById(R.id.mlkitTime)
         // hide actionbar
         supportActionBar?.hide()
         supportActionBar?.setDisplayShowTitleEnabled(false)
@@ -162,9 +142,9 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
         // flash
         flashButton?.visibility = if (isLedFlashAvailable(this)) VISIBLE else GONE
         // capture text label
-        captureLabelText?.text = config.label
+        binding.captureLabelText.text = config.label
         // font to use
-        captureLabelText?.typeface =
+        binding.captureLabelText.typeface =
             if (config.font == Fonts.NOTO_SANS_ARABIC.value) ResourcesCompat.getFont(
                 this,
                 R.font.notosansarabic_bold
@@ -174,34 +154,34 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
         try {
             if (config.background.isNotEmpty()) {
                 val color = Color.parseColor(config.background)
-                coordinatorLayoutView.setBackgroundColor(color)
+                binding.coordinatorLayout.setBackgroundColor(color)
             }
         } catch (iae: IllegalArgumentException) {
             // This color string is not valid
-            coordinatorLayoutView.setBackgroundColor(ContextCompat.getColor(this, R.color.transparent_grey))
+            binding.coordinatorLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.transparent_grey))
         }
-        // reader modes
+        // barcode view layout
         if (mode == BARCODE.value) {
-            val layoutParams = modelLayoutView.layoutParams as ConstraintLayout.LayoutParams
+            val layoutParams = binding.viewLayout.layoutParams as ConstraintLayout.LayoutParams
             when (barcodeFormat) {
                 PDF_417.value -> {
                     layoutParams.dimensionRatio = "9:21"
-                    modelLayoutView.layoutParams = layoutParams
+                    binding.viewLayout.layoutParams = layoutParams
                 }
                 QR_CODE.value -> {
                     layoutParams.marginStart = 72 // Approx. 36dp
                     layoutParams.marginEnd = 72 // Approx. 36dp
-                    modelLayoutView.layoutParams = layoutParams
+                    binding.viewLayout.layoutParams = layoutParams
                 }
                 ALL.value, COMMON.value -> {
                     layoutParams.marginStart = 64 // Approx. 30dp
                     layoutParams.marginEnd = 64 // Approx. 30dp
-                    modelLayoutView.layoutParams = layoutParams
+                    binding.viewLayout.layoutParams = layoutParams
                 }
             }
         }
         // branding
-        brandingImage?.visibility = if (config.branding) VISIBLE else GONE
+        binding.brandingImage.visibility = if (config.branding) VISIBLE else GONE
     }
 
     override fun onRequestPermissionsResult(
@@ -212,7 +192,7 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
                 startCamera()
             } else {
                 val snackBar: Snackbar = Snackbar.make(
-                    coordinatorLayoutView,
+                    binding.coordinatorLayout,
                     R.string.required_perms_not_given, Snackbar.LENGTH_INDEFINITE
                 )
                 snackBar.setAction(R.string.settings) { openSettingsApp() }
@@ -252,8 +232,8 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
                 cameraProvider.unbindAll()
                 // Bind use cases to camera
                 camera = cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageAnalyzer)
-                preview?.setSurfaceProvider(viewFinder.createSurfaceProvider())
-                Log.d(TAG, "Measured size: ${viewFinder.width}x${viewFinder.height}")
+                preview?.setSurfaceProvider(binding.viewFinder.createSurfaceProvider())
+                Log.d(TAG, "Measured size: ${binding.viewFinder.width}x${binding.viewFinder.height}")
                 startScanTime = System.currentTimeMillis()
             } catch (exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
@@ -351,7 +331,7 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
                     val start = System.currentTimeMillis()
                     recognizer.process(image)
                         .addOnSuccessListener { visionText ->
-                            modelText?.visibility = INVISIBLE
+                            binding.modelText.visibility = INVISIBLE
                             val timeRequired = System.currentTimeMillis() - start
                             Log.d("$TAG/MLKit", "TextRecognition: success: $timeRequired ms")
                             var rawFullRead = ""
@@ -364,7 +344,7 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
                                     }
                                 }
                             }
-                            rectangle!!.isSelected = rawFullRead != ""
+                            binding.rectimage.isSelected = rawFullRead != ""
                             try {
                                 Log.d(
                                     "$TAG/MLKit",
@@ -410,11 +390,11 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
                         .addOnFailureListener { e ->
                             Log.d("$TAG/MLKit", "TextRecognition: failure: ${e.message}")
                             if (getConnectionType() == 0) {
-                                modelText?.text = context.getString(R.string.connection_text)
+                                binding.modelText.text = context.getString(R.string.connection_text)
                             } else {
-                                modelText?.text = context.getString(R.string.model_text)
+                                binding.modelText.text = context.getString(R.string.model_text)
                             }
-                            modelText?.visibility = VISIBLE
+                            binding.modelText.visibility = VISIBLE
                             getAnalyzerStat(
                                 mlStartTime,
                                 System.currentTimeMillis()
@@ -434,7 +414,7 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
                 AnalyzerType.MRZ -> {
                     Log.d(TAG, "Success from MLKit")
                     Log.d(TAG, "value: $result")
-                    mlkitText?.text = result
+                    binding.mlkitText.text = result
                 }
                 AnalyzerType.BARCODE -> {
                     Log.d(TAG, "Success from Barcode")
@@ -450,9 +430,9 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
     private fun getAnalyzerStat(startTime: Long, endTime: Long) {
         runOnUiThread {
             val analyzerTime = endTime - startTime
-            mlkitMS?.text = "Frame processing time: $analyzerTime ms"
+            binding.mlkitText.text = "Frame processing time: $analyzerTime ms"
             val scanTime = ((System.currentTimeMillis().toDouble() - startScanTime.toDouble()) / 1000)
-            mlkitTime?.text = "Total scan time: $scanTime s"
+            binding.mlkitText.text = "Total scan time: $scanTime s"
         }
     }
 
@@ -471,12 +451,14 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
         if (id == R.id.close_button) {
             onBackPressed()
         } else if (id == R.id.flash_button) {
-            if (flashButton!!.isSelected) {
-                flashButton!!.isSelected = false
-                camera?.cameraControl?.enableTorch(false)
-            } else {
-                flashButton!!.isSelected = true
-                camera?.cameraControl?.enableTorch(true)
+            flashButton?.let {
+                if (it.isSelected) {
+                    it.isSelected = false
+                    camera?.cameraControl?.enableTorch(false)
+                } else {
+                    it.isSelected = true
+                    camera?.cameraControl?.enableTorch(true)
+                }
             }
         }
     }
@@ -502,7 +484,7 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
             MotionEvent.ACTION_UP -> {
                 if (isAClick(x, event.x, y, event.y)) {
                     val factory: MeteringPointFactory = SurfaceOrientedMeteringPointFactory(
-                        viewFinder.width.toFloat(), viewFinder.height.toFloat()
+                        binding.viewFinder.width.toFloat(), binding.viewFinder.height.toFloat()
                     )
                     val autoFocusPoint = factory.createPoint(event.x, event.y)
                     try {
@@ -521,9 +503,9 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
                 } else {
                     val deltaY = event.y - y
                     if (deltaY < -minDistance) {
-                        debugLayout?.visibility = VISIBLE
+                        binding.debugLayout.visibility = VISIBLE
                     } else if (deltaY > minDistance) {
-                        debugLayout?.visibility = INVISIBLE
+                        binding.debugLayout.visibility = INVISIBLE
                     }
                 }
             }

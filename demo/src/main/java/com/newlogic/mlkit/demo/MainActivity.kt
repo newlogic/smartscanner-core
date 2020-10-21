@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.JsonParser
 import com.newlogic.mlkit.R
+import com.newlogic.mlkit.databinding.ActivityMainBinding
 import com.newlogic.mlkit.demo.utils.AnimationUtils
 import com.newlogic.mlkitlib.newlogic.MLKitActivity
 import com.newlogic.mlkitlib.newlogic.config.BarcodeFormat
@@ -23,15 +24,17 @@ import com.newlogic.mlkitlib.newlogic.config.Modes
 import com.newlogic.mlkitlib.newlogic.config.MrzFormat
 import com.newlogic.mlkitlib.newlogic.extension.decodeBase64
 import com.newlogic.mlkitlib.newlogic.extension.empty
-import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var binding : ActivityMainBinding
 
     override fun onCreate (savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
     }
 
     public override fun onActivityResult (requestCode: Int, resultCode: Int, intent: Intent?) {
@@ -40,7 +43,7 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "Plugin post ML Activity resultCode $resultCode")
             if (resultCode == RESULT_OK) {
                 val returnedResult = intent?.getStringExtra(MLKitActivity.MLKIT_RESULT)
-                textLabelEmpty.visibility = GONE
+                binding.textLabelEmpty.visibility = GONE
                 returnedResult?.let { setupResultView(it) }
             }
         }
@@ -50,47 +53,47 @@ class MainActivity : AppCompatActivity() {
         val resultObject = JsonParser.parseString(result).asJsonObject
         val originalHeight = 750 // Approx. 250dp for image and textView
         // Result Details
-        textResultDetails.visibility = VISIBLE
+        binding.textResultDetails.visibility = VISIBLE
         // Image
         if (resultObject["image"] != null) {
             val image = resultObject["image"].asString
-            imageView.setImageBitmap(if (imageType == PATH.value) BitmapFactory.decodeFile(image) else image.decodeBase64())
-            imageView.visibility = VISIBLE
-            txtImgAction.visibility = VISIBLE
-            txtImgAction.paintFlags = txtImgAction.paintFlags or Paint.UNDERLINE_TEXT_FLAG
-            txtImgAction.setOnClickListener {
-                AnimationUtils.expandCollapse(imageView, originalHeight)
-                txtImgAction.text = if (imageView.visibility == GONE) getString(R.string.action_show_hide) else getString(R.string.action_show)
+            binding.imageView.setImageBitmap(if (imageType == PATH.value) BitmapFactory.decodeFile(image) else image.decodeBase64())
+            binding.imageView.visibility = VISIBLE
+            binding.txtImgAction.visibility = VISIBLE
+            binding.txtImgAction.paintFlags = binding.txtImgAction.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+            binding.txtImgAction.setOnClickListener {
+                AnimationUtils.expandCollapse(binding.imageView, originalHeight)
+                binding.txtImgAction.text = if (binding.imageView.visibility == GONE) getString(R.string.action_show_hide) else getString(R.string.action_show)
             }
         } else {
-            imageView.visibility = GONE
-            txtImgAction.visibility = GONE
+            binding.imageView.visibility = GONE
+            binding.txtImgAction.visibility = GONE
         }
         // Simple Data
         if (resultObject["givenNames"] != null) {
-            textName.visibility = VISIBLE
-            textName.text = getString(R.string.label_name, resultObject["givenNames"].asString.toLowerCase(Locale.ROOT).capitalize())
-        } else textName.visibility = GONE
+            binding.textName.visibility = VISIBLE
+            binding.textName.text = getString(R.string.label_name, resultObject["givenNames"].asString.toLowerCase(Locale.ROOT).capitalize())
+        } else binding.textName.visibility = GONE
         if (resultObject["surname"] != null) {
-            textSurName.visibility = VISIBLE
-            textSurName.text = getString(R.string.label_surname, resultObject["surname"].asString.toLowerCase(Locale.ROOT).capitalize())
-        } else textSurName.visibility = GONE
+            binding.textSurName.visibility = VISIBLE
+            binding.textSurName.text = getString(R.string.label_surname, resultObject["surname"].asString.toLowerCase(Locale.ROOT).capitalize())
+        } else binding.textSurName.visibility = GONE
         if (resultObject["dateOfBirth"] != null) {
-            textBirthday.visibility = VISIBLE
-            textBirthday.text = getString(R.string.label_birthday, resultObject["dateOfBirth"].asString)
-        } else textBirthday.visibility = GONE
+            binding.textBirthday.visibility = VISIBLE
+            binding.textBirthday.text = getString(R.string.label_birthday, resultObject["dateOfBirth"].asString)
+        } else binding.textBirthday.visibility = GONE
         if (resultObject["nationality"] != null) {
-            textNationality.visibility = VISIBLE
-            textNationality.text = getString(R.string.label_nationality, resultObject["nationality"].asString)
-        } else textNationality.visibility = GONE
+            binding.textNationality.visibility = VISIBLE
+            binding.textNationality.text = getString(R.string.label_nationality, resultObject["nationality"].asString)
+        } else binding.textNationality.visibility = GONE
         //Raw Data
-        editTextTextMultiLine.setText(result)
-        editTextTextMultiLine.visibility = VISIBLE
-        txtRawDataAction.visibility = VISIBLE
-        txtRawDataAction.paintFlags = txtRawDataAction.paintFlags or Paint.UNDERLINE_TEXT_FLAG
-        txtRawDataAction.setOnClickListener {
-            AnimationUtils.expandCollapse(editTextTextMultiLine, originalHeight)
-            txtRawDataAction.text = if (editTextTextMultiLine.visibility == GONE) getString(R.string.action_show_hide) else getString(R.string.action_show)
+        binding.editTextTextMultiLine.setText(result)
+        binding.editTextTextMultiLine.visibility = VISIBLE
+        binding.txtRawDataAction.visibility = VISIBLE
+        binding.txtRawDataAction.paintFlags = binding.txtRawDataAction.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+        binding.txtRawDataAction.setOnClickListener {
+            AnimationUtils.expandCollapse(binding.editTextTextMultiLine, originalHeight)
+            binding.txtRawDataAction.text = if (binding.editTextTextMultiLine.visibility == GONE) getString(R.string.action_show_hide) else getString(R.string.action_show)
         }
     }
 
