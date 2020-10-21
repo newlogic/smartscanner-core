@@ -18,9 +18,12 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.*
 import android.view.Window
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -52,8 +55,6 @@ import com.newlogic.mlkitlib.newlogic.platform.AnalyzerType
 import com.newlogic.mlkitlib.newlogic.platform.MLKitAnalyzer
 import com.newlogic.mlkitlib.newlogic.platform.MRZCleaner
 import com.newlogic.mlkitlib.newlogic.utils.CameraUtils.isLedFlashAvailable
-import kotlinx.android.synthetic.main.activity_mrz.*
-import kotlinx.android.synthetic.main.activity_mrz.view.*
 import java.io.File
 import java.net.URLEncoder
 import java.text.SimpleDateFormat
@@ -62,7 +63,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlin.math.abs
 
-class MLKitActivity : AppCompatActivity(), View.OnClickListener {
+class MLKitActivity : AppCompatActivity(), OnClickListener {
 
     companion object {
         val TAG : String = MLKitActivity::class.java.simpleName
@@ -81,22 +82,31 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
 
     private var x = 0f
     private var y = 0f
+    private var config: Config? = null
     private var preview: Preview? = null
     private var imageAnalyzer: ImageAnalysis? = null
     private var camera: Camera? = null
-    private var flashButton: View? = null
-    private var closeButton: View? = null
     private var startScanTime: Long = 0
     private var mode: String? = null
     private var barcodeFormat: String? = null
     private var mrzFormat: String? = null
-    private var rectangle: View? = null
-    private var config: Config? = null
 
-    private lateinit var outputDirectory: File
-    private lateinit var cameraExecutor: ExecutorService
+    private var flashButton: View? = null
+    private var closeButton: View? = null
+    private var rectangle: View? = null
+    private var debugLayout: View? = null
+    private var brandingImage: ImageView? = null
+    private var captureLabelText: TextView? = null
+    private var modelText: TextView? = null
+    private var mlkitText: TextView? = null
+    private var mlkitMS: TextView? = null
+    private var mlkitTime: TextView? = null
+
     private lateinit var modelLayoutView: View
     private lateinit var coordinatorLayoutView: View
+    private lateinit var viewFinder: PreviewView
+    private lateinit var outputDirectory: File
+    private lateinit var cameraExecutor: ExecutorService
     private lateinit var context: Context
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -105,11 +115,19 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
         setContentView(R.layout.activity_mrz)
         context = applicationContext
         // assign layout ids
-        modelLayoutView = findViewById(R.id.viewLayout)
         coordinatorLayoutView = findViewById(R.id.coordinatorLayout)
+        modelLayoutView = findViewById(R.id.viewLayout)
+        viewFinder = findViewById(R.id.viewFinder)
         flashButton = findViewById(R.id.flash_button)
         closeButton = findViewById(R.id.close_button)
         rectangle = findViewById(R.id.rectimage)
+        debugLayout = findViewById(R.id.debugLayout)
+        modelText = findViewById(R.id.modelText)
+        brandingImage = findViewById(R.id.brandingImage)
+        captureLabelText = findViewById(R.id.captureLabelText)
+        mlkitText = findViewById(R.id.mlkitText)
+        mlkitMS = findViewById(R.id.mlkitMS)
+        mlkitTime = findViewById(R.id.mlkitTime)
         // hide actionbar
         supportActionBar?.hide()
         supportActionBar?.setDisplayShowTitleEnabled(false)
@@ -144,9 +162,9 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
         // flash
         flashButton?.visibility = if (isLedFlashAvailable(this)) VISIBLE else GONE
         // capture text label
-        captureLabelText.text = config.label
+        captureLabelText?.text = config.label
         // font to use
-        captureLabelText.typeface =
+        captureLabelText?.typeface =
             if (config.font == Fonts.NOTO_SANS_ARABIC.value) ResourcesCompat.getFont(
                 this,
                 R.font.notosansarabic_bold
@@ -156,11 +174,11 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
         try {
             if (config.background.isNotEmpty()) {
                 val color = Color.parseColor(config.background)
-                coordinatorLayout.setBackgroundColor(color)
+                coordinatorLayoutView.setBackgroundColor(color)
             }
         } catch (iae: IllegalArgumentException) {
             // This color string is not valid
-            coordinatorLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.transparent_grey))
+            coordinatorLayoutView.setBackgroundColor(ContextCompat.getColor(this, R.color.transparent_grey))
         }
         // reader modes
         if (mode == BARCODE.value) {
@@ -183,7 +201,7 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
             }
         }
         // branding
-        brandingImage.visibility = if (config.branding) VISIBLE else GONE
+        brandingImage?.visibility = if (config.branding) VISIBLE else GONE
     }
 
     override fun onRequestPermissionsResult(
@@ -333,7 +351,7 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
                     val start = System.currentTimeMillis()
                     recognizer.process(image)
                         .addOnSuccessListener { visionText ->
-                            modelLayoutView.modelText.visibility = INVISIBLE
+                            modelText?.visibility = INVISIBLE
                             val timeRequired = System.currentTimeMillis() - start
                             Log.d("$TAG/MLKit", "TextRecognition: success: $timeRequired ms")
                             var rawFullRead = ""
@@ -392,11 +410,11 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
                         .addOnFailureListener { e ->
                             Log.d("$TAG/MLKit", "TextRecognition: failure: ${e.message}")
                             if (getConnectionType() == 0) {
-                                modelLayoutView.modelText.text = context.getString(R.string.connection_text)
+                                modelText?.text = context.getString(R.string.connection_text)
                             } else {
-                                modelLayoutView.modelText.text = context.getString(R.string.model_text)
+                                modelText?.text = context.getString(R.string.model_text)
                             }
-                            modelLayoutView.modelText.visibility = VISIBLE
+                            modelText?.visibility = VISIBLE
                             getAnalyzerStat(
                                 mlStartTime,
                                 System.currentTimeMillis()
@@ -416,7 +434,7 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
                 AnalyzerType.MRZ -> {
                     Log.d(TAG, "Success from MLKit")
                     Log.d(TAG, "value: $result")
-                    mlkitText.text = result
+                    mlkitText?.text = result
                 }
                 AnalyzerType.BARCODE -> {
                     Log.d(TAG, "Success from Barcode")
@@ -432,9 +450,9 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
     private fun getAnalyzerStat(startTime: Long, endTime: Long) {
         runOnUiThread {
             val analyzerTime = endTime - startTime
-            mlkitMS.text = "Frame processing time: $analyzerTime ms"
+            mlkitMS?.text = "Frame processing time: $analyzerTime ms"
             val scanTime = ((System.currentTimeMillis().toDouble() - startScanTime.toDouble()) / 1000)
-            mlkitTime.text = "Total scan time: $scanTime s"
+            mlkitTime?.text = "Total scan time: $scanTime s"
         }
     }
 
@@ -503,9 +521,9 @@ class MLKitActivity : AppCompatActivity(), View.OnClickListener {
                 } else {
                     val deltaY = event.y - y
                     if (deltaY < -minDistance) {
-                        debugLayout.visibility = VISIBLE
+                        debugLayout?.visibility = VISIBLE
                     } else if (deltaY > minDistance) {
-                        debugLayout.visibility = INVISIBLE
+                        debugLayout?.visibility = INVISIBLE
                     }
                 }
             }
