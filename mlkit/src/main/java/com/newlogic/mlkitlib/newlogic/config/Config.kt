@@ -13,6 +13,6 @@ data class Config(
         val imageResultType: String,
 ) : Parcelable {
     companion object {
-        fun default() = Config(true, String.empty(),String.empty(), String.empty(), ImageResultType.PATH.value)
+        val default = Config(true, String.empty(),String.empty(), String.empty(), ImageResultType.PATH.value)
     }
 }

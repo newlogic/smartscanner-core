@@ -17,7 +17,6 @@ import com.newlogic.mlkit.R
 import com.newlogic.mlkit.databinding.ActivityMainBinding
 import com.newlogic.mlkit.demo.utils.AnimationUtils
 import com.newlogic.mlkitlib.newlogic.MLKitActivity
-import com.newlogic.mlkitlib.newlogic.config.BarcodeFormat
 import com.newlogic.mlkitlib.newlogic.config.Config
 import com.newlogic.mlkitlib.newlogic.config.ImageResultType.PATH
 import com.newlogic.mlkitlib.newlogic.config.Modes
@@ -100,13 +99,14 @@ class MainActivity : AppCompatActivity() {
     fun startScanningActivity (view: View) {
         val intent = Intent(this, MLKitActivity::class.java)
         intent.putExtra(MLKitActivity.MODE, Modes.MRZ.value)
-        intent.putExtra(MLKitActivity.MRZ_FORMAT, MrzFormat.MRP.value)
+        intent.putExtra(MLKitActivity.MRZ_FORMAT, MrzFormat.MRTD_TD1.value)
         intent.putExtra(MLKitActivity.CONFIG, sampleConfig())
         startActivityForResult(intent, OP_MLKIT)
     }
 
     fun startQRCodeScanningActivity (view: View) {
-        startBarcode(BarcodeFormat.QR_CODE.value)
+        val qrFormatOnly = arrayListOf("QR_CODE")
+        startBarcode(qrFormatOnly)
     }
 
     @SuppressLint("InflateParams")
@@ -120,22 +120,22 @@ class MainActivity : AppCompatActivity() {
         val btnCancel = sheetViewBarcode.findViewById<LinearLayout>(R.id.btnCancel)
         // bottom sheet listeners
         btnPdf417.setOnClickListener {
-            startBarcode(BarcodeFormat.PDF_417.value)
+            val pdf417FormatOnly = arrayListOf("PDF_417")
+            startBarcode(pdf417FormatOnly)
             bottomSheetDialog.dismiss()
         }
         btnBarcode.setOnClickListener {
-            startBarcode(BarcodeFormat.COMMON.value)
+            startBarcode(MLKitActivity.defaultBarcodeFormats())
             bottomSheetDialog.dismiss()
         }
         btnCancel.setOnClickListener { bottomSheetDialog.dismiss() }
-        // show bottom sheet
         bottomSheetDialog.show()
     }
 
-    private fun startBarcode (barcodeOption: String) {
+    private fun startBarcode (barcodeOptions : ArrayList<String>? = null) {
         val intent = Intent(this, MLKitActivity::class.java)
         intent.putExtra(MLKitActivity.MODE, Modes.BARCODE.value)
-        intent.putExtra(MLKitActivity.BARCODE_OPTION, barcodeOption)
+        intent.putStringArrayListExtra(MLKitActivity.BARCODE_OPTIONS, barcodeOptions)
         intent.putExtra(MLKitActivity.CONFIG, sampleConfig())
         startActivityForResult(intent, OP_MLKIT)
     }

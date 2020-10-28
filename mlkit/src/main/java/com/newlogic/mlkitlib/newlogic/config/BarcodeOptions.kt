@@ -1,39 +1,39 @@
 package com.newlogic.mlkitlib.newlogic.config
 
-import com.google.mlkit.vision.barcode.Barcode
-import com.google.mlkit.vision.barcode.BarcodeScannerOptions
+import com.google.mlkit.vision.barcode.Barcode.*
 
-object BarcodeOptions {
-    private val TAG = BarcodeOptions::class.java.simpleName
+enum class BarcodeOptions(val label: String, val value: Int) {
+    ALL("ALL", FORMAT_ALL_FORMATS),
+    AZTEC("AZTEC", FORMAT_AZTEC),
+    CODABAR("CODABAR", FORMAT_CODABAR),
+    CODE_39("CODE_39", FORMAT_CODE_39),
+    CODE_93("CODE_93", FORMAT_CODE_93),
+    CODE_128("CODE_128", FORMAT_CODE_128),
+    DATA_MATRIX("DATA_MATRIX", FORMAT_DATA_MATRIX),
+    EAN_8("EAN_8", FORMAT_EAN_8),
+    EAN_13("EAN_13", FORMAT_EAN_13),
+    ITF("ITF", FORMAT_ITF),
+    QR_CODE("QR_CODE", FORMAT_QR_CODE),
+    UPC_A("UPC_A", FORMAT_UPC_A),
+    UPC_E("UPC_E", FORMAT_UPC_E),
+    PDF_417("PDF_417", FORMAT_PDF417);
 
-    val ALL : BarcodeScannerOptions = BarcodeScannerOptions.Builder()
-        .setBarcodeFormats(
-            Barcode.FORMAT_ALL_FORMATS
-        ).build()
-
-    val COMMON : BarcodeScannerOptions = BarcodeScannerOptions.Builder()
-        .setBarcodeFormats(
-            Barcode.FORMAT_AZTEC,
-            Barcode.FORMAT_CODABAR,
-            Barcode.FORMAT_CODE_39,
-            Barcode.FORMAT_CODE_93,
-            Barcode.FORMAT_CODE_128,
-            Barcode.FORMAT_DATA_MATRIX,
-            Barcode.FORMAT_EAN_8,
-            Barcode.FORMAT_EAN_13,
-            Barcode.FORMAT_ITF,
-            Barcode.FORMAT_QR_CODE,
-            Barcode.FORMAT_UPC_A,
-            Barcode.FORMAT_UPC_E,
-        ).build()
-
-    val PDF_417 : BarcodeScannerOptions = BarcodeScannerOptions.Builder()
-        .setBarcodeFormats(
-            Barcode.FORMAT_PDF417
-        ).build()
-
-    val QR_CODE : BarcodeScannerOptions = BarcodeScannerOptions.Builder()
-        .setBarcodeFormats(
-            Barcode.FORMAT_QR_CODE
-        ).build()
+    companion object {
+        val default =
+            arrayListOf(
+                AZTEC.label,
+                CODABAR.label,
+                CODABAR.label,
+                CODE_39.label,
+                CODE_93.label,
+                CODE_128.label,
+                DATA_MATRIX.label,
+                EAN_8.label,
+                EAN_13.label,
+                ITF.label,
+                QR_CODE.label,
+                UPC_A.label,
+                UPC_E.label,
+            )
+    }
 }

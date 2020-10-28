@@ -27,6 +27,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
+import com.google.mlkit.vision.barcode.Barcode.FORMAT_CODE_39
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
@@ -37,7 +38,6 @@ import com.newlogic.mlkitlib.innovatrics.barcode.BarcodeResult
 import com.newlogic.mlkitlib.innovatrics.mrz.MRZResult
 import com.newlogic.mlkitlib.innovatrics.mrz.MRZResult.Companion.formatMrtdTd1MrzResult
 import com.newlogic.mlkitlib.innovatrics.mrz.MRZResult.Companion.formatMrzResult
-import com.newlogic.mlkitlib.newlogic.config.BarcodeFormat.*
 import com.newlogic.mlkitlib.newlogic.config.BarcodeOptions
 import com.newlogic.mlkitlib.newlogic.config.Config
 import com.newlogic.mlkitlib.newlogic.config.Fonts
@@ -69,9 +69,10 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
         const val CONFIG = "CONFIG"
         const val MODE = "MODE"
         const val MRZ_FORMAT = "MRZ_FORMAT"
-        const val BARCODE_OPTION = "BARCODE_OPTION"
+        const val BARCODE_OPTIONS = "BARCODE_OPTIONS"
 
-        fun defaultConfig() = Config.default()
+        fun defaultBarcodeFormats() =  BarcodeOptions.default
+        fun defaultConfig() = Config.default
     }
 
     private val REQUEST_CODE_PERMISSIONS = 10
@@ -86,7 +87,8 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
     private var camera: Camera? = null
     private var startScanTime: Long = 0
     private var mode: String? = null
-    private var barcodeFormat: String? = null
+    private var barcodeFormats: List<Int> = listOf()
+    private var barcodeOptions: List<String> = listOf()
     private var mrzFormat: String? = null
 
     private var flashButton: View? = null
@@ -124,7 +126,8 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
         // mrz format to use
         mrzFormat = intent.getStringExtra(MRZ_FORMAT) ?: MrzFormat.MRP.value
         // barcode format to use
-        barcodeFormat = intent.getStringExtra(BARCODE_OPTION) ?: COMMON.value
+        barcodeOptions = intent.getStringArrayListExtra(BARCODE_OPTIONS) ?: defaultBarcodeFormats()
+        barcodeFormats = barcodeOptions.map { BarcodeOptions.valueOf(it).value }
         // setup config for reader
         config = intent.getParcelableExtra(CONFIG)
         setupConfiguration(config ?: defaultConfig())
@@ -163,17 +166,17 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
         // barcode view layout
         if (mode == BARCODE.value) {
             val layoutParams = binding.viewLayout.layoutParams as ConstraintLayout.LayoutParams
-            when (barcodeFormat) {
-                PDF_417.value -> {
+            when {
+                isPdf417(barcodeOptions) -> {
                     layoutParams.dimensionRatio = "9:21"
                     binding.viewLayout.layoutParams = layoutParams
                 }
-                QR_CODE.value -> {
+                isQrCodeOnly(barcodeOptions)  -> {
                     layoutParams.marginStart = 72 // Approx. 36dp
                     layoutParams.marginEnd = 72 // Approx. 36dp
                     binding.viewLayout.layoutParams = layoutParams
                 }
-                ALL.value, COMMON.value -> {
+                else -> {
                     layoutParams.marginStart = 64 // Approx. 30dp
                     layoutParams.marginEnd = 64 // Approx. 30dp
                     binding.viewLayout.layoutParams = layoutParams
@@ -217,7 +220,7 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
             // Preview
             preview = Preview.Builder().build()
             var size = Size(480, 640)
-            if (mode == PDF_417.value) size = Size(1080, 1920)
+            if (isPdf417(barcodeOptions)) size = Size(1080, 1920)
             imageAnalyzer = ImageAnalysis.Builder()
                 .setTargetResolution(size)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
@@ -266,12 +269,11 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
                     barcodeBusy = true
                     Log.d("$TAG/MLKit", "barcode: mode is $mode")
                     val start = System.currentTimeMillis()
-                    val options: BarcodeScannerOptions = when (barcodeFormat) {
-                        PDF_417.value ->  BarcodeOptions.PDF_417
-                        QR_CODE.value -> BarcodeOptions.QR_CODE
-                        COMMON.value -> BarcodeOptions.COMMON
-                        else -> BarcodeOptions.ALL
+                    var barcodeFormat = FORMAT_CODE_39 // Most common barcode format
+                    barcodeFormats.forEach {
+                        barcodeFormat = it or barcodeFormat // bitwise different barcode format options
                     }
+                    val options = BarcodeScannerOptions.Builder().setBarcodeFormats(barcodeFormat).build()
                     val image = InputImage.fromBitmap(bf, imageProxy.imageInfo.rotationDegrees)
                     val scanner = BarcodeScanning.getClient(options)
                     Log.d("$TAG/MLKit", "barcode: process")
@@ -406,6 +408,9 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
             imageProxy.close()
         }
     }
+
+    private fun isPdf417(options : List<String>) = options.any { it == BarcodeOptions.PDF_417.label }
+    private fun isQrCodeOnly(options : List<String>) = options.size <= 1 && options.any { it == BarcodeOptions.QR_CODE.label }
 
     private fun getAnalyzerResult(analyzerType: AnalyzerType, result: String) {
         val data = Intent()
