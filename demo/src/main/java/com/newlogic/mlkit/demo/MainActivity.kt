@@ -125,7 +125,7 @@ class MainActivity : AppCompatActivity() {
             bottomSheetDialog.dismiss()
         }
         btnBarcode.setOnClickListener {
-            startBarcode(MLKitActivity.defaultBarcodeFormats())
+            startBarcode(MLKitActivity.defaultBarcodeOptions())
             bottomSheetDialog.dismiss()
         }
         btnCancel.setOnClickListener { bottomSheetDialog.dismiss() }

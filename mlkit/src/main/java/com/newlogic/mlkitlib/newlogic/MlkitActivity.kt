@@ -25,6 +25,8 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.google.mlkit.vision.barcode.Barcode.FORMAT_CODE_39
@@ -50,8 +52,8 @@ import com.newlogic.mlkitlib.newlogic.extension.encodeBase64
 import com.newlogic.mlkitlib.newlogic.extension.getConnectionType
 import com.newlogic.mlkitlib.newlogic.extension.toBitmap
 import com.newlogic.mlkitlib.newlogic.platform.AnalyzerType
-import com.newlogic.mlkitlib.newlogic.platform.MLKitAnalyzer
 import com.newlogic.mlkitlib.newlogic.platform.MRZCleaner
+import com.newlogic.mlkitlib.newlogic.platform.SmartScannerAnalyzer
 import com.newlogic.mlkitlib.newlogic.utils.CameraUtils.isLedFlashAvailable
 import java.io.File
 import java.net.URLEncoder
@@ -71,7 +73,7 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
         const val MRZ_FORMAT = "MRZ_FORMAT"
         const val BARCODE_OPTIONS = "BARCODE_OPTIONS"
 
-        fun defaultBarcodeFormats() =  BarcodeOptions.default
+        fun defaultBarcodeOptions() =  BarcodeOptions.default
         fun defaultConfig() = Config.default
     }
 
@@ -126,7 +128,7 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
         // mrz format to use
         mrzFormat = intent.getStringExtra(MRZ_FORMAT) ?: MrzFormat.MRP.value
         // barcode format to use
-        barcodeOptions = intent.getStringArrayListExtra(BARCODE_OPTIONS) ?: defaultBarcodeFormats()
+        barcodeOptions = intent.getStringArrayListExtra(BARCODE_OPTIONS) ?: defaultBarcodeOptions()
         barcodeFormats = barcodeOptions.map { BarcodeOptions.valueOf(it).value }
         // setup config for reader
         config = intent.getParcelableExtra(CONFIG)
@@ -244,12 +246,15 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
         }, ContextCompat.getMainExecutor(this))
     }
 
-    @SuppressLint("UnsafeExperimentalUsageError")
-    private fun getMrzAnalyzer(): MLKitAnalyzer {
-        var barcodeBusy = false
-        var mlkitBusy = false
+    private fun isPdf417(options : List<String>) = options.any { it == BarcodeOptions.PDF_417.label }
+    private fun isQrCodeOnly(options : List<String>) = options.size <= 1 && options.any { it == BarcodeOptions.QR_CODE.label }
 
-        return MLKitAnalyzer { imageProxy ->
+    @SuppressLint("UnsafeExperimentalUsageError")
+    private fun getMrzAnalyzer(): SmartScannerAnalyzer {
+        var barcodeBusy = false
+        var mrzBusy = false
+
+        return SmartScannerAnalyzer { imageProxy ->
             val mediaImage = imageProxy.image
             if (mediaImage != null) {
                 val rot = imageProxy.imageInfo.rotationDegrees
@@ -323,107 +328,134 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
                         }
                 }
                 //MRZ
-                if (!mlkitBusy) {
-                    mlkitBusy = true
-                    val mlStartTime = System.currentTimeMillis()
+                if (!mrzBusy) {
+                    mrzBusy = true
+                    val mrzStartTime = System.currentTimeMillis()
                     val image = InputImage.fromBitmap(cropped, imageProxy.imageInfo.rotationDegrees)
-                    // Pass image to an ML Kit Vision API
-                    val recognizer = TextRecognition.getClient()
-                    Log.d("$TAG/MLKit", "TextRecognition: process")
-                    val start = System.currentTimeMillis()
-                    recognizer.process(image)
-                        .addOnSuccessListener { visionText ->
-                            binding.modelText.visibility = INVISIBLE
-                            val timeRequired = System.currentTimeMillis() - start
-                            Log.d("$TAG/MLKit", "TextRecognition: success: $timeRequired ms")
-                            var rawFullRead = ""
-                            val blocks = visionText.textBlocks
-                            for (i in blocks.indices) {
-                                val lines = blocks[i].lines
-                                for (j in lines.indices) {
-                                    if (lines[j].text.contains('<')) {
-                                        rawFullRead += lines[j].text + "\n"
-                                    }
-                                }
-                            }
-                            binding.rectimage.isSelected = rawFullRead != ""
-                            try {
-                                Log.d(
-                                    "$TAG/MLKit",
-                                    "Before cleaner: [${
-                                        URLEncoder.encode(rawFullRead, "UTF-8")
-                                            .replace("%3C", "<").replace("%0A", "↩")
-                                    }]"
-                                )
-                                val mrz = MRZCleaner.clean(rawFullRead)
-                                Log.d(
-                                    "$TAG/MLKit",
-                                    "After cleaner = [${
-                                        URLEncoder.encode(mrz, "UTF-8")
-                                            .replace("%3C", "<").replace("%0A", "↩")
-                                    }]"
-                                )
-                                val date = Calendar.getInstance().time
-                                val formatter = SimpleDateFormat("yyyyMMddHHmmss", Locale.ROOT)
-                                val currentDateTime = formatter.format(date)
-                                val imagePathFile = "${context.cacheDir}/Scanner-$currentDateTime.jpg"
-                                bf.cacheImageToLocal(
-                                    imagePathFile,
-                                    imageProxy.imageInfo.rotationDegrees
-                                )
-                                val imageString = if (config?.imageResultType == BASE_64.value) bf.encodeBase64(imageProxy.imageInfo.rotationDegrees) else imagePathFile
-                                val mrzResult: MRZResult = when (mrzFormat) {
-                                    MRTD_TD1.value -> formatMrtdTd1MrzResult(MRZCleaner.parseAndCleanMrtdTd1(mrz), imageString)
-                                    else -> formatMrzResult(MRZCleaner.parseAndClean(mrz), imageString)
-                                }
-                                // record to json
-                                val gson = Gson()
-                                val jsonString = gson.toJson(mrzResult)
-                                getAnalyzerResult(AnalyzerType.MRZ, jsonString)
-                            } catch (e: Exception) { // MrzParseException, IllegalArgumentException
-                                Log.d("$TAG/MLKit", e.toString())
-                            }
-                            getAnalyzerStat(
-                                mlStartTime,
-                                System.currentTimeMillis()
-                            )
-                            mlkitBusy = false
-                        }
-                        .addOnFailureListener { e ->
-                            Log.d("$TAG/MLKit", "TextRecognition: failure: ${e.message}")
-                            if (getConnectionType() == 0) {
-                                binding.modelText.text = context.getString(R.string.connection_text)
-                            } else {
-                                binding.modelText.text = context.getString(R.string.model_text)
-                            }
-                            binding.modelText.visibility = VISIBLE
-                            getAnalyzerStat(
-                                mlStartTime,
-                                System.currentTimeMillis()
-                            )
-                            mlkitBusy = false
-                        }
+                    if (checkGooglePlayServices()) {
+                        useMLKit(image, bf, imageProxy, mrzStartTime)
+                    } else {
+                        // TODO add tesseract impl here
+                    }
+                    mrzBusy = false
                 }
             }
             imageProxy.close()
         }
     }
 
-    private fun isPdf417(options : List<String>) = options.any { it == BarcodeOptions.PDF_417.label }
-    private fun isQrCodeOnly(options : List<String>) = options.size <= 1 && options.any { it == BarcodeOptions.QR_CODE.label }
+    private fun useMLKit(
+        image: InputImage,
+        bf: Bitmap,
+        imageProxy: ImageProxy,
+        mlStartTime: Long
+    ) {
+        // Pass image to an ML Kit Vision API
+        val recognizer = TextRecognition.getClient()
+        Log.d("$TAG/MLKit", "TextRecognition: process")
+        val start = System.currentTimeMillis()
+        recognizer.process(image)
+            .addOnSuccessListener { visionText ->
+                binding.modelText.visibility = INVISIBLE
+                val timeRequired = System.currentTimeMillis() - start
+                Log.d("$TAG/MLKit", "TextRecognition: success: $timeRequired ms")
+                var rawFullRead = ""
+                val blocks = visionText.textBlocks
+                for (i in blocks.indices) {
+                    val lines = blocks[i].lines
+                    for (j in lines.indices) {
+                        if (lines[j].text.contains('<')) {
+                            rawFullRead += lines[j].text + "\n"
+                        }
+                    }
+                }
+                binding.rectimage.isSelected = rawFullRead != ""
+                try {
+                    Log.d(
+                        "$TAG/MLKit",
+                        "Before cleaner: [${
+                            URLEncoder.encode(rawFullRead, "UTF-8")
+                                .replace("%3C", "<").replace("%0A", "↩")
+                        }]"
+                    )
+                    val mrz = MRZCleaner.clean(rawFullRead)
+                    Log.d(
+                        "$TAG/MLKit",
+                        "After cleaner = [${
+                            URLEncoder.encode(mrz, "UTF-8")
+                                .replace("%3C", "<").replace("%0A", "↩")
+                        }]"
+                    )
+                    analyzeResult(AnalyzerType.MRZ, bf, imageProxy, mrz)
+                } catch (e: Exception) { // MrzParseException, IllegalArgumentException
+                    Log.d("$TAG/MLKit", e.toString())
+                }
+                getAnalyzerStat(
+                    mlStartTime,
+                    System.currentTimeMillis()
+                )
+            }
+            .addOnFailureListener { e ->
+                Log.d("$TAG/MLKit", "TextRecognition: failure: ${e.message}")
+                if (getConnectionType() == 0) {
+                    binding.modelText.text = context.getString(R.string.connection_text)
+                } else {
+                    binding.modelText.text = context.getString(R.string.model_text)
+                }
+                binding.modelText.visibility = VISIBLE
+                getAnalyzerStat(
+                    mlStartTime,
+                    System.currentTimeMillis()
+                )
+            }
+    }
+
+    private fun analyzeResult(
+        analyzerType: AnalyzerType,
+        imageBitmap: Bitmap,
+        imageProxy: ImageProxy,
+        mrz: String
+    ) {
+        val date = Calendar.getInstance().time
+        val formatter = SimpleDateFormat("yyyyMMddHHmmss", Locale.ROOT)
+        val currentDateTime = formatter.format(date)
+        val imagePathFile = "${context.cacheDir}/Scanner-$currentDateTime.jpg"
+        imageBitmap.cacheImageToLocal(
+            imagePathFile,
+            imageProxy.imageInfo.rotationDegrees
+        )
+        val imageString =
+            if (config?.imageResultType == BASE_64.value) imageBitmap.encodeBase64(imageProxy.imageInfo.rotationDegrees) else imagePathFile
+        val mrzResult: MRZResult = when (mrzFormat) {
+            MRTD_TD1.value -> formatMrtdTd1MrzResult(
+                MRZCleaner.parseAndCleanMrtdTd1(mrz),
+                imageString
+            )
+            else -> formatMrzResult(MRZCleaner.parseAndClean(mrz), imageString)
+        }
+        // record to json
+        val gson = Gson()
+        val jsonString = gson.toJson(mrzResult)
+        getAnalyzerResult(analyzerType, jsonString)
+    }
 
     private fun getAnalyzerResult(analyzerType: AnalyzerType, result: String) {
         val data = Intent()
         runOnUiThread {
             when (analyzerType) {
-                AnalyzerType.MRZ -> {
+                AnalyzerType.MRZ-> {
                     Log.d(TAG, "Success from MLKit")
                     Log.d(TAG, "value: $result")
                     binding.mlkitText.text = result
                 }
                 AnalyzerType.BARCODE -> {
-                    Log.d(TAG, "Success from Barcode")
+                    Log.d(TAG, "Success from BARCODE")
                     Log.d(TAG, "value: $result")
+                }
+                AnalyzerType.TESSERACT -> {
+                    Log.d(TAG, "Success from TESSERACT")
+                    Log.d(TAG, "value: $result")
+                    binding.mlkitText.text = result
                 }
             }
             data.putExtra(MLKIT_RESULT, result)
@@ -448,6 +480,17 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
     private fun getOutputDirectory(): File {
         val mediaDir = externalMediaDirs.firstOrNull()?.let { File(it, resources.getString(R.string.app_name)).apply { mkdirs() } }
         return if (mediaDir != null && mediaDir.exists()) mediaDir else filesDir
+    }
+
+    private fun checkGooglePlayServices(showErrorDialog : Boolean = false): Boolean {
+        val availability = GoogleApiAvailability.getInstance()
+        val resultCode = availability.isGooglePlayServicesAvailable(this)
+        if (resultCode != ConnectionResult.SUCCESS) {
+            val dialog = availability.getErrorDialog(this, resultCode, 0)
+            if (showErrorDialog) dialog.show()
+            return false
+        }
+        return true
     }
 
     override fun onClick(view: View) {
