@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.Matrix
 import android.hardware.camera2.CameraManager
 import android.net.Uri
 import android.os.Bundle
@@ -34,18 +35,16 @@ import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
+import com.googlecode.tesseract.android.TessBaseAPI
 import com.newlogic.mlkitlib.R
 import com.newlogic.mlkitlib.databinding.ActivityMrzBinding
 import com.newlogic.mlkitlib.innovatrics.barcode.BarcodeResult
 import com.newlogic.mlkitlib.innovatrics.mrz.MRZResult
 import com.newlogic.mlkitlib.innovatrics.mrz.MRZResult.Companion.formatMrtdTd1MrzResult
 import com.newlogic.mlkitlib.innovatrics.mrz.MRZResult.Companion.formatMrzResult
-import com.newlogic.mlkitlib.newlogic.config.BarcodeOptions
-import com.newlogic.mlkitlib.newlogic.config.Config
-import com.newlogic.mlkitlib.newlogic.config.Fonts
+import com.newlogic.mlkitlib.newlogic.config.*
 import com.newlogic.mlkitlib.newlogic.config.ImageResultType.BASE_64
 import com.newlogic.mlkitlib.newlogic.config.Modes.BARCODE
-import com.newlogic.mlkitlib.newlogic.config.MrzFormat
 import com.newlogic.mlkitlib.newlogic.config.MrzFormat.MRTD_TD1
 import com.newlogic.mlkitlib.newlogic.extension.cacheImageToLocal
 import com.newlogic.mlkitlib.newlogic.extension.encodeBase64
@@ -55,25 +54,27 @@ import com.newlogic.mlkitlib.newlogic.platform.AnalyzerType
 import com.newlogic.mlkitlib.newlogic.platform.MRZCleaner
 import com.newlogic.mlkitlib.newlogic.platform.SmartScannerAnalyzer
 import com.newlogic.mlkitlib.newlogic.utils.CameraUtils.isLedFlashAvailable
+import com.newlogic.mlkitlib.newlogic.utils.FileUtils.copyAssets
 import java.io.File
 import java.net.URLEncoder
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import kotlin.concurrent.thread
 import kotlin.math.abs
 
 class MLKitActivity : AppCompatActivity(), OnClickListener {
 
     companion object {
-        val TAG : String = MLKitActivity::class.java.simpleName
+        val TAG: String = MLKitActivity::class.java.simpleName
         const val MLKIT_RESULT = "MLKIT_RESULT"
         const val CONFIG = "CONFIG"
         const val MODE = "MODE"
         const val MRZ_FORMAT = "MRZ_FORMAT"
         const val BARCODE_OPTIONS = "BARCODE_OPTIONS"
 
-        fun defaultBarcodeOptions() =  BarcodeOptions.default
+        fun defaultBarcodeOptions() = BarcodeOptions.default
         fun defaultConfig() = Config.default
     }
 
@@ -92,14 +93,15 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
     private var barcodeFormats: List<Int> = listOf()
     private var barcodeOptions: List<String> = listOf()
     private var mrzFormat: String? = null
-
     private var flashButton: View? = null
     private var closeButton: View? = null
+    private var isMLKitUsable = true
 
     private lateinit var binding : ActivityMrzBinding
-    private lateinit var outputDirectory: File
     private lateinit var cameraExecutor: ExecutorService
     private lateinit var context: Context
+    private lateinit var outputDirectory: File
+    private lateinit var tessBaseAPI: TessBaseAPI
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -139,8 +141,17 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
         // directory output paths
         outputDirectory = getOutputDirectory()
         cameraExecutor = Executors.newSingleThreadExecutor()
-        val extDirPath: String = getExternalFilesDir(null)!!.absolutePath
-        Log.d(TAG, "path: $extDirPath")
+        isMLKitUsable = checkGooglePlayServices()
+        Log.d(TAG, "isMLKitUsable: $isMLKitUsable")
+        // Initialize Tesseract
+        if (mode == Modes.MRZ.value && !isMLKitUsable) {
+            val extDirPath: String = getExternalFilesDir(null)!!.absolutePath
+            Log.d(TAG, "path: $extDirPath")
+            copyAssets(this, "tessdata", extDirPath)
+            tessBaseAPI = TessBaseAPI()
+            tessBaseAPI.init(extDirPath, "ocrb_int", TessBaseAPI.OEM_DEFAULT)
+            tessBaseAPI.pageSegMode = TessBaseAPI.PageSegMode.PSM_SINGLE_BLOCK
+        }
     }
 
     private fun setupConfiguration(config: Config) {
@@ -236,9 +247,17 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
                 // Unbind use cases before rebinding
                 cameraProvider.unbindAll()
                 // Bind use cases to camera
-                camera = cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageAnalyzer)
+                camera = cameraProvider.bindToLifecycle(
+                    this,
+                    cameraSelector,
+                    preview,
+                    imageAnalyzer
+                )
                 preview?.setSurfaceProvider(binding.viewFinder.createSurfaceProvider())
-                Log.d(TAG, "Measured size: ${binding.viewFinder.width}x${binding.viewFinder.height}")
+                Log.d(
+                    TAG,
+                    "Measured size: ${binding.viewFinder.width}x${binding.viewFinder.height}"
+                )
                 startScanTime = System.currentTimeMillis()
             } catch (exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
@@ -246,8 +265,8 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
         }, ContextCompat.getMainExecutor(this))
     }
 
-    private fun isPdf417(options : List<String>) = options.any { it == BarcodeOptions.PDF_417.label }
-    private fun isQrCodeOnly(options : List<String>) = options.size <= 1 && options.any { it == BarcodeOptions.QR_CODE.label }
+    private fun isPdf417(options: List<String>) = options.any { it == BarcodeOptions.PDF_417.label }
+    private fun isQrCodeOnly(options: List<String>) = options.size <= 1 && options.any { it == BarcodeOptions.QR_CODE.label }
 
     @SuppressLint("UnsafeExperimentalUsageError")
     private fun getMrzAnalyzer(): SmartScannerAnalyzer {
@@ -328,122 +347,186 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
                         }
                 }
                 //MRZ
-                if (!mrzBusy) {
-                    mrzBusy = true
-                    val mrzStartTime = System.currentTimeMillis()
-                    val image = InputImage.fromBitmap(cropped, imageProxy.imageInfo.rotationDegrees)
-                    if (checkGooglePlayServices()) {
-                        useMLKit(image, bf, imageProxy, mrzStartTime)
+                if (!mrzBusy &&  (mode == Modes.MRZ.value)) {
+                    val mlStartTime = System.currentTimeMillis()
+                    if (isMLKitUsable) {
+                        mrzBusy = true
+                        val image = InputImage.fromBitmap(
+                            cropped,
+                            imageProxy.imageInfo.rotationDegrees
+                        )
+                        // Pass image to an ML Kit Vision API
+                        val recognizer = TextRecognition.getClient()
+                        Log.d("$TAG/MLKit", "TextRecognition: process")
+                        val start = System.currentTimeMillis()
+                        recognizer.process(image)
+                            .addOnSuccessListener { visionText ->
+                                binding.modelText.visibility = INVISIBLE
+                                val timeRequired = System.currentTimeMillis() - start
+                                Log.d("$TAG/MLKit", "TextRecognition: success: $timeRequired ms")
+                                var rawFullRead = ""
+                                val blocks = visionText.textBlocks
+                                for (i in blocks.indices) {
+                                    val lines = blocks[i].lines
+                                    for (j in lines.indices) {
+                                        if (lines[j].text.contains('<')) {
+                                            rawFullRead += lines[j].text + "\n"
+                                        }
+                                    }
+                                }
+                                binding.rectimage.isSelected = rawFullRead != ""
+                                try {
+                                    Log.d(
+                                        "$TAG/MLKit",
+                                        "Before cleaner: [${
+                                            URLEncoder.encode(rawFullRead, "UTF-8")
+                                                .replace("%3C", "<").replace("%0A", "↩")
+                                        }]"
+                                    )
+                                    val mrz = MRZCleaner.clean(rawFullRead)
+                                    Log.d(
+                                        "$TAG/MLKit",
+                                        "After cleaner = [${
+                                            URLEncoder.encode(mrz, "UTF-8")
+                                                .replace("%3C", "<").replace("%0A", "↩")
+                                        }]"
+                                    )
+                                    val date = Calendar.getInstance().time
+                                    val formatter = SimpleDateFormat("yyyyMMddHHmmss", Locale.ROOT)
+                                    val currentDateTime = formatter.format(date)
+                                    val imagePathFile = "${context.cacheDir}/Scanner-$currentDateTime.jpg"
+                                    bf.cacheImageToLocal(
+                                        imagePathFile,
+                                        imageProxy.imageInfo.rotationDegrees
+                                    )
+                                    val imageString = if (config?.imageResultType == BASE_64.value) bf.encodeBase64(
+                                            imageProxy.imageInfo.rotationDegrees
+                                        ) else imagePathFile
+                                    val mrzResult: MRZResult = when (mrzFormat) {
+                                        MRTD_TD1.value -> formatMrtdTd1MrzResult(
+                                            MRZCleaner.parseAndCleanMrtdTd1(
+                                                mrz
+                                            ), imageString
+                                        )
+                                        else -> formatMrzResult(
+                                            MRZCleaner.parseAndClean(mrz),
+                                            imageString
+                                        )
+                                    }
+                                    // record to json
+                                    val gson = Gson()
+                                    val jsonString = gson.toJson(mrzResult)
+                                    getAnalyzerResult(AnalyzerType.MRZ, jsonString)
+                                } catch (e: Exception) { // MrzParseException, IllegalArgumentException
+                                    Log.d("$TAG/MLKit", e.toString())
+                                }
+                                getAnalyzerStat(
+                                    mlStartTime,
+                                    System.currentTimeMillis()
+                                )
+                                mrzBusy = false
+                            }
+                            .addOnFailureListener { e ->
+                                Log.d("$TAG/MLKit", "TextRecognition: failure: ${e.message}")
+                                if (getConnectionType() == 0) {
+                                    binding.modelText.text = context.getString(R.string.connection_text)
+                                } else {
+                                    binding.modelText.text = context.getString(R.string.model_text)
+                                }
+                                binding.modelText.visibility = VISIBLE
+                                getAnalyzerStat(
+                                    mlStartTime,
+                                    System.currentTimeMillis()
+                                )
+                                mrzBusy = false
+                            }
                     } else {
-                        // TODO add tesseract impl here
+                        thread(start = true) {
+                            mrzBusy = true
+                            // Tesseract
+                            val matrix = Matrix()
+                            matrix.postRotate(imageProxy.imageInfo.rotationDegrees.toFloat())
+                            val rotatedBitmap = Bitmap.createBitmap(
+                                cropped,
+                                0,
+                                0,
+                                cropped.width,
+                                cropped.height,
+                                matrix,
+                                true
+                            )
+                            tessBaseAPI.setImage(rotatedBitmap)
+                            val tessResult = tessBaseAPI.utF8Text
+                            try {
+                                Log.d(
+                                    "$TAG/Tesseract",
+                                    "Before cleaner: [${
+                                        URLEncoder.encode(tessResult, "UTF-8")
+                                            .replace("%3C", "<").replace("%0A", "↩")
+                                    }]"
+                                )
+                                val mrz = MRZCleaner.clean(tessResult)
+                                Log.d(
+                                    "$TAG/Tesseract",
+                                    "After cleaner = [${
+                                        URLEncoder.encode(mrz, "UTF-8")
+                                            .replace("%3C", "<")
+                                            .replace("%0A", "↩")
+                                    }]"
+                                )
+                                val date = Calendar.getInstance().time
+                                val formatter = SimpleDateFormat("yyyyMMddHHmmss", Locale.ROOT)
+                                val currentDateTime = formatter.format(date)
+                                val imagePathFile = "${context.cacheDir}/Scanner-$currentDateTime.jpg"
+                                bf.cacheImageToLocal(
+                                    imagePathFile,
+                                    imageProxy.imageInfo.rotationDegrees
+                                )
+                                val imageString = if (config?.imageResultType == BASE_64.value) bf.encodeBase64(
+                                    imageProxy.imageInfo.rotationDegrees
+                                ) else imagePathFile
+                                val record = MRZCleaner.parseAndClean(mrz)
+                                val gson = Gson()
+                                val jsonString = gson.toJson(
+                                    MRZResult(
+                                        imageString,
+                                        record.code.toString(),
+                                        record.code1.toShort(),
+                                        record.code2.toShort(),
+                                        record.dateOfBirth.toString().replace(Regex("[{}]"), ""),
+                                        record.documentNumber.toString(),
+                                        record.expirationDate.toString().replace(Regex("[{}]"), ""),
+                                        record.format.toString(),
+                                        record.givenNames,
+                                        record.issuingCountry,
+                                        record.nationality,
+                                        record.sex.toString(),
+                                        record.surname,
+                                        record.toMrz()
+                                    )
+                                )
+                                getAnalyzerResult(AnalyzerType.MRZ, jsonString)
+                            } catch (e: Exception) { // MrzParseException, IllegalArgumentException
+                                Log.d("$TAG/Tesseract", e.toString())
+                            }
+                            getAnalyzerStat(
+                                mlStartTime,
+                                System.currentTimeMillis()
+                            )
+                            mrzBusy = false
+                        }
                     }
-                    mrzBusy = false
                 }
             }
             imageProxy.close()
         }
     }
 
-    private fun useMLKit(
-        image: InputImage,
-        bf: Bitmap,
-        imageProxy: ImageProxy,
-        mlStartTime: Long
-    ) {
-        // Pass image to an ML Kit Vision API
-        val recognizer = TextRecognition.getClient()
-        Log.d("$TAG/MLKit", "TextRecognition: process")
-        val start = System.currentTimeMillis()
-        recognizer.process(image)
-            .addOnSuccessListener { visionText ->
-                binding.modelText.visibility = INVISIBLE
-                val timeRequired = System.currentTimeMillis() - start
-                Log.d("$TAG/MLKit", "TextRecognition: success: $timeRequired ms")
-                var rawFullRead = ""
-                val blocks = visionText.textBlocks
-                for (i in blocks.indices) {
-                    val lines = blocks[i].lines
-                    for (j in lines.indices) {
-                        if (lines[j].text.contains('<')) {
-                            rawFullRead += lines[j].text + "\n"
-                        }
-                    }
-                }
-                binding.rectimage.isSelected = rawFullRead != ""
-                try {
-                    Log.d(
-                        "$TAG/MLKit",
-                        "Before cleaner: [${
-                            URLEncoder.encode(rawFullRead, "UTF-8")
-                                .replace("%3C", "<").replace("%0A", "↩")
-                        }]"
-                    )
-                    val mrz = MRZCleaner.clean(rawFullRead)
-                    Log.d(
-                        "$TAG/MLKit",
-                        "After cleaner = [${
-                            URLEncoder.encode(mrz, "UTF-8")
-                                .replace("%3C", "<").replace("%0A", "↩")
-                        }]"
-                    )
-                    analyzeResult(AnalyzerType.MRZ, bf, imageProxy, mrz)
-                } catch (e: Exception) { // MrzParseException, IllegalArgumentException
-                    Log.d("$TAG/MLKit", e.toString())
-                }
-                getAnalyzerStat(
-                    mlStartTime,
-                    System.currentTimeMillis()
-                )
-            }
-            .addOnFailureListener { e ->
-                Log.d("$TAG/MLKit", "TextRecognition: failure: ${e.message}")
-                if (getConnectionType() == 0) {
-                    binding.modelText.text = context.getString(R.string.connection_text)
-                } else {
-                    binding.modelText.text = context.getString(R.string.model_text)
-                }
-                binding.modelText.visibility = VISIBLE
-                getAnalyzerStat(
-                    mlStartTime,
-                    System.currentTimeMillis()
-                )
-            }
-    }
-
-    private fun analyzeResult(
-        analyzerType: AnalyzerType,
-        imageBitmap: Bitmap,
-        imageProxy: ImageProxy,
-        mrz: String
-    ) {
-        val date = Calendar.getInstance().time
-        val formatter = SimpleDateFormat("yyyyMMddHHmmss", Locale.ROOT)
-        val currentDateTime = formatter.format(date)
-        val imagePathFile = "${context.cacheDir}/Scanner-$currentDateTime.jpg"
-        imageBitmap.cacheImageToLocal(
-            imagePathFile,
-            imageProxy.imageInfo.rotationDegrees
-        )
-        val imageString =
-            if (config?.imageResultType == BASE_64.value) imageBitmap.encodeBase64(imageProxy.imageInfo.rotationDegrees) else imagePathFile
-        val mrzResult: MRZResult = when (mrzFormat) {
-            MRTD_TD1.value -> formatMrtdTd1MrzResult(
-                MRZCleaner.parseAndCleanMrtdTd1(mrz),
-                imageString
-            )
-            else -> formatMrzResult(MRZCleaner.parseAndClean(mrz), imageString)
-        }
-        // record to json
-        val gson = Gson()
-        val jsonString = gson.toJson(mrzResult)
-        getAnalyzerResult(analyzerType, jsonString)
-    }
-
     private fun getAnalyzerResult(analyzerType: AnalyzerType, result: String) {
         val data = Intent()
         runOnUiThread {
             when (analyzerType) {
-                AnalyzerType.MRZ-> {
+                AnalyzerType.MRZ -> {
                     Log.d(TAG, "Success from MLKit")
                     Log.d(TAG, "value: $result")
                     binding.mlkitText.text = result

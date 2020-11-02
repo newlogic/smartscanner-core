@@ -75,6 +75,9 @@ dependencies {
     // MRZ
     implementation 'org.slf4j:slf4j-android:1.7.30'
 
+    // Tesseract4Android
+    implementation 'cz.adaptech.android:tesseract4android:2.1.0'
+
     // Gson
     implementation 'com.google.code.gson:gson:2.8.6'
 }

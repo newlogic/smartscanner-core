@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Newlogic MlkitLibrary</string>
-    <string name="model_text">Downloading OCR models...</string>
+    <string name="model_text">Downloading OCR models…</string>
     <string name="connection_text">No connection to download OCR models</string>
 
     <string name="required_perms_not_given">Error: Permissions denied.</string>

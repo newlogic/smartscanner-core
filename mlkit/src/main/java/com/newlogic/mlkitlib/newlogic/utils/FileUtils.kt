@@ -1,57 +1,44 @@
 package com.newlogic.mlkitlib.newlogic.utils
 
 import android.content.Context
+import android.content.res.AssetManager
+import android.util.Log
 import java.io.*
 
 
 object FileUtils {
     private val TAG = FileUtils::class.java.simpleName
 
-    private fun copyFileOrDir(path: String, context: Context) {
-        val assetManager = context.assets
+    fun copyAssets(context: Context,path: String, outPath: String) {
+        val assetManager: AssetManager = context.assets
         val assets: Array<String>?
         try {
             assets = assetManager.list(path)
             if (assets!!.isEmpty()) {
-                copyFile(path, context)
+                copyFile(context, path, outPath)
             } else {
-                val fullPath = context.getExternalFilesDir(null).toString() + "/" + path
+                val fullPath = "$outPath/$path"
                 val dir = File(fullPath)
-                if (!dir.exists()
-                    && !path.startsWith("fallback-locales") && !path.startsWith("stored-locales")
-                    && !path.startsWith("images") && !path.startsWith("public")
-                    && !path.startsWith("sounds") && !path.startsWith("webkit")
+                if (!dir.exists()) if (!dir.mkdir()) Log.e(
+                    TAG,
+                    "No create external directory: $dir"
                 )
-
-                for (i in assets.indices) {
-                    val p = if (path == "") "" else "$path/"
-                    if (!path.startsWith("fallback-locales") && !path.startsWith(
-                            "stored" +
-                                    "-locales"
-                        ) &&
-                        !path.startsWith("images") && !path.startsWith("public") &&
-                        !path.startsWith("sounds") && !path.startsWith("webkit")
-                    ) copyFileOrDir(p + assets[i], context)
+                for (asset in assets) {
+                    copyAssets(context,"$path/$asset", outPath)
                 }
             }
         } catch (ex: IOException) {
-            ex.printStackTrace()
+            Log.e(TAG, "I/O Exception", ex)
         }
     }
 
-    private fun copyFile(filename: String, context: Context) {
-        val assetManager = context.assets
-        val `in`: InputStream?
-        val out: OutputStream?
-        val newFileName: String?
+    private fun copyFile(context: Context, filename: String, outPath: String) {
+        val assetManager: AssetManager = context.assets
+        val `in`: InputStream
+        val out: OutputStream
         try {
             `in` = assetManager.open(filename)
-            newFileName =
-                if (filename.endsWith(".jpg")) // extension was added to avoid compression on APK file
-                    context.getExternalFilesDir(null).toString() + "/" + filename.substring(
-                        0,
-                        filename.length - 4
-                    ) else context.getExternalFilesDir(null).toString() + "/" + filename
+            val newFileName = "$outPath/$filename"
             out = FileOutputStream(newFileName)
             val buffer = ByteArray(1024)
             var read: Int
@@ -66,4 +53,3 @@ object FileUtils {
         }
     }
 }
-
