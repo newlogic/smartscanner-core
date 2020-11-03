@@ -90,3 +90,10 @@ fun Bitmap.encodeBase64(rotation: Int = 0): String? {
     b.compress(Bitmap.CompressFormat.JPEG, 50, outputStream)
     return Base64.encodeToString(outputStream.toByteArray(), Base64.DEFAULT)
 }
+
+fun Bitmap.rotate(rotation: Int = 0): Bitmap {
+    val matrix = Matrix().apply { postRotate(rotation.toFloat()) }
+    return Bitmap.createBitmap(this, 0, 0, this.width, this.height, matrix, true)
+}
+
+fun String.toBitmap() : Bitmap =  BitmapFactory.decodeFile(this)

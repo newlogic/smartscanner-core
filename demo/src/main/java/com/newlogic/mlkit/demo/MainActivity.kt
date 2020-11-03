@@ -144,8 +144,9 @@ class MainActivity : AppCompatActivity() {
         branding = true,
         background = String.empty(),
         font = String.empty(),
+        imageResultType = imageType,
         label = String.empty(),
-        imageResultType = imageType
+        isManualCapture = true
     )
 
     companion object {

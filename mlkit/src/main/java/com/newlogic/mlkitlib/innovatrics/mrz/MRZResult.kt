@@ -1,6 +1,8 @@
 package com.newlogic.mlkitlib.innovatrics.mrz
 
 import com.newlogic.mlkitlib.innovatrics.mrz.records.MrtdTd1
+import com.newlogic.mlkitlib.newlogic.extension.empty
+import com.newlogic.mlkitlib.newlogic.extension.noValue
 
 data class MRZResult(
         val image: String?,
@@ -58,6 +60,25 @@ data class MRZResult(
                     record.toMrz(),
                     record.optional,
                     record.optional2
+            )
+        }
+
+        fun getImageOnly(image: String?) : MRZResult {
+            return MRZResult(
+                    image,
+                    String.empty(),
+                    Int.noValue().toShort(),
+                    Int.noValue().toShort(),
+                    String.empty(),
+                    String.empty(),
+                    String.empty(),
+                    String.empty(),
+                    String.empty(),
+                    String.empty(),
+                    String.empty(),
+                    String.empty(),
+                    String.empty(),
+                    String.empty()
             )
         }
     }

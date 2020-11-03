@@ -10,7 +10,7 @@
     android:textAlignment="gravity"
     tools:context=".newlogic.MLKitActivity">
 
-    <ImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/brandingImage"
         android:layout_width="64dp"
         android:layout_height="32dp"
@@ -20,6 +20,17 @@
         android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/manualCapture"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:src="@drawable/circle_photo_camera"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/viewLayout"

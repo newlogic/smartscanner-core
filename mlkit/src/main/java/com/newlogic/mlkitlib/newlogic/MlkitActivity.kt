@@ -16,6 +16,7 @@ import android.provider.Settings
 import android.util.Log
 import android.util.Size
 import android.view.MotionEvent
+import android.view.Surface
 import android.view.View
 import android.view.View.*
 import android.view.Window
@@ -79,7 +80,10 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
     }
 
     private val REQUEST_CODE_PERMISSIONS = 10
-    private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    private val REQUIRED_PERMISSIONS = arrayOf(
+        Manifest.permission.CAMERA,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE
+    )
     private val clickThreshold = 5
 
     private var x = 0f
@@ -87,6 +91,7 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
     private var config: Config? = null
     private var preview: Preview? = null
     private var imageAnalyzer: ImageAnalysis? = null
+    private var imageCapture: ImageCapture? = null
     private var camera: Camera? = null
     private var startScanTime: Long = 0
     private var mode: String? = null
@@ -198,6 +203,8 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
         }
         // branding
         binding.brandingImage.visibility = if (config.branding) VISIBLE else GONE
+        // manual capture
+        binding.manualCapture.visibility = if (config.isManualCapture) VISIBLE else GONE
     }
 
     override fun onRequestPermissionsResult(
@@ -241,6 +248,33 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
                 .also {
                     it.setAnalyzer(cameraExecutor, getMrzAnalyzer())
                 }
+            // Create configuration object for the image capture use case
+            imageCapture = ImageCapture.Builder()
+                .setTargetResolution(size)
+                .setTargetRotation(Surface.ROTATION_0)
+                .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                .build()
+            binding.manualCapture.setOnClickListener {
+                val imageFile = File(getImagePath())
+                val outputFileOptions = ImageCapture.OutputFileOptions.Builder(imageFile).build()
+                imageCapture?.takePicture(outputFileOptions, ContextCompat.getMainExecutor(
+                    baseContext), object : ImageCapture.OnImageSavedCallback {
+                    override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                        val data = Intent()
+                        val gson = Gson()
+                        val bf = imageFile.path.toBitmap()
+                        bf.cacheImageToLocal(imageFile.path,90)
+                        val imageString = if (config?.imageResultType == BASE_64.value) bf.encodeBase64() else imageFile.path
+                        val result = gson.toJson(MRZResult.getImageOnly(imageString))
+                        data.putExtra(MLKIT_RESULT, result)
+                        setResult(Activity.RESULT_OK, data)
+                        finish()
+                    }
+                    override fun onError(exception: ImageCaptureException) {
+                        exception.printStackTrace()
+                    }
+                })
+            }
             // Select back camera
             val cameraSelector = CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build()
             try {
@@ -251,7 +285,8 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
                     this,
                     cameraSelector,
                     preview,
-                    imageAnalyzer
+                    imageAnalyzer,
+                    imageCapture
                 )
                 preview?.setSurfaceProvider(binding.viewFinder.createSurfaceProvider())
                 Log.d(
@@ -319,10 +354,7 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
                                 cornersString = builder.toString()
                                 rawValue = barcodes[0].rawValue!!
                                 //val valueType = barcode.valueType
-                                val date = Calendar.getInstance().time
-                                val formatter = SimpleDateFormat("yyyyMMddHHmmss", Locale.ROOT)
-                                val currentDateTime = formatter.format(date)
-                                val imageCachePathFile = "${context.cacheDir}/Scanner-$currentDateTime.jpg"
+                                val imageCachePathFile = getImagePath()
                                 bf.cacheImageToLocal(
                                     imageCachePathFile,
                                     imageProxy.imageInfo.rotationDegrees
@@ -391,17 +423,14 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
                                                 .replace("%3C", "<").replace("%0A", "↩")
                                         }]"
                                     )
-                                    val date = Calendar.getInstance().time
-                                    val formatter = SimpleDateFormat("yyyyMMddHHmmss", Locale.ROOT)
-                                    val currentDateTime = formatter.format(date)
-                                    val imagePathFile = "${context.cacheDir}/Scanner-$currentDateTime.jpg"
+                                    val imagePathFile = getImagePath()
                                     bf.cacheImageToLocal(
                                         imagePathFile,
                                         imageProxy.imageInfo.rotationDegrees
                                     )
                                     val imageString = if (config?.imageResultType == BASE_64.value) bf.encodeBase64(
-                                            imageProxy.imageInfo.rotationDegrees
-                                        ) else imagePathFile
+                                        imageProxy.imageInfo.rotationDegrees
+                                    ) else imagePathFile
                                     val mrzResult: MRZResult = when (mrzFormat) {
                                         MRTD_TD1.value -> formatMrtdTd1MrzResult(
                                             MRZCleaner.parseAndCleanMrtdTd1(
@@ -474,10 +503,7 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
                                             .replace("%0A", "↩")
                                     }]"
                                 )
-                                val date = Calendar.getInstance().time
-                                val formatter = SimpleDateFormat("yyyyMMddHHmmss", Locale.ROOT)
-                                val currentDateTime = formatter.format(date)
-                                val imagePathFile = "${context.cacheDir}/Scanner-$currentDateTime.jpg"
+                                val imagePathFile = getImagePath()
                                 bf.cacheImageToLocal(
                                     imagePathFile,
                                     imageProxy.imageInfo.rotationDegrees
@@ -522,6 +548,13 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
         }
     }
 
+    private fun getImagePath(): String {
+        val date = Calendar.getInstance().time
+        val formatter = SimpleDateFormat("yyyyMMddHHmmss", Locale.ROOT)
+        val currentDateTime = formatter.format(date)
+        return "${context.cacheDir}/Scanner-$currentDateTime.jpg"
+    }
+
     private fun getAnalyzerResult(analyzerType: AnalyzerType, result: String) {
         val data = Intent()
         runOnUiThread {
@@ -561,11 +594,14 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
     }
 
     private fun getOutputDirectory(): File {
-        val mediaDir = externalMediaDirs.firstOrNull()?.let { File(it, resources.getString(R.string.app_name)).apply { mkdirs() } }
+        val mediaDir = externalMediaDirs.firstOrNull()?.let { File(
+            it,
+            resources.getString(R.string.app_name)
+        ).apply { mkdirs() } }
         return if (mediaDir != null && mediaDir.exists()) mediaDir else filesDir
     }
 
-    private fun checkGooglePlayServices(showErrorDialog : Boolean = false): Boolean {
+    private fun checkGooglePlayServices(showErrorDialog: Boolean = false): Boolean {
         val availability = GoogleApiAvailability.getInstance()
         val resultCode = availability.isGooglePlayServicesAvailable(this)
         if (resultCode != ConnectionResult.SUCCESS) {

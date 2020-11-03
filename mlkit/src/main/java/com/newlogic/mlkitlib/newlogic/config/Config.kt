@@ -9,10 +9,11 @@ data class Config(
         val branding: Boolean,
         val background: String,
         val font: String,
-        val label: String,
         val imageResultType: String,
+        val label: String,
+        val isManualCapture: Boolean,
 ) : Parcelable {
     companion object {
-        val default = Config(true, String.empty(),String.empty(), String.empty(), ImageResultType.PATH.value)
+        val default = Config(false, String.empty(),String.empty(), String.empty(), ImageResultType.PATH.value, false)
     }
 }
