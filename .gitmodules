@@ -1,3 +1,6 @@
 [submodule "capacitor-plugin"]
 	path = capacitor-plugin
 	url = git@github.com:newlogic/idpass-smart-scanner-capacitor.git
+[submodule "cordova-plugin"]
+	path = cordova-plugin
+	url = git@github.com:newlogic/idpass-smart-scanner-cordova.git
