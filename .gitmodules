@@ -1,0 +1,3 @@
+[submodule "capacitor-plugin"]
+	path = capacitor-plugin
+	url = git@github.com:newlogic/idpass-smart-scanner-capacitor.git
