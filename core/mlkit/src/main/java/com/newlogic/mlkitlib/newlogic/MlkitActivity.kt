@@ -173,10 +173,15 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
             else ResourcesCompat.getFont(this, R.font.sourcesanspro_bold)
         // Background reader
         try {
-            if (config.background.isNotEmpty()) {
-                val color = Color.parseColor(config.background)
-                binding.coordinatorLayout.setBackgroundColor(color)
+            config.background?.let {
+                if (it.isNotEmpty()) {
+                    val color = Color.parseColor(config.background)
+                    binding.coordinatorLayout.setBackgroundColor(color)
+                }
+            } ?: run {
+                binding.coordinatorLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.transparent_grey))
             }
+
         } catch (iae: IllegalArgumentException) {
             // This color string is not valid
             binding.coordinatorLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.transparent_grey))
@@ -202,9 +207,9 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
             }
         }
         // branding
-        binding.brandingImage.visibility = if (config.branding) VISIBLE else GONE
+        binding.brandingImage.visibility = config.branding?.let { if (it) VISIBLE else GONE } ?: run { GONE }
         // manual capture
-        binding.manualCapture.visibility = if (config.isManualCapture) VISIBLE else GONE
+        binding.manualCapture.visibility = config.isManualCapture?.let { if (it) VISIBLE else GONE } ?: run { GONE }
     }
 
     override fun onRequestPermissionsResult(
