@@ -21,7 +21,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="PDF417"
-            android:textColor="@color/newlogic_black"
+            android:fontFamily="@font/sourcesanspro_medium"
+            android:textColor="@color/idpass_black"
             android:textSize="14sp" />
     </LinearLayout>
 
@@ -44,8 +45,9 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/sourcesanspro_medium"
             android:text="BARCODE"
-            android:textColor="@color/newlogic_black"
+            android:textColor="@color/idpass_black"
             android:textSize="14sp" />
     </LinearLayout>
 
@@ -68,8 +70,9 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/sourcesanspro_regular"
             android:text="CANCEL"
-            android:textColor="@color/newlogic_black"
+            android:textColor="@color/idpass_black"
             android:textSize="14sp" />
     </LinearLayout>
 

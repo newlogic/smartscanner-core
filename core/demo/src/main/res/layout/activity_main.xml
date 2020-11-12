@@ -4,242 +4,66 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
+    android:gravity="center|center_vertical"
+    android:orientation="vertical"
     tools:context=".demo.MainActivity">
 
-
-    <TextView
-        android:id="@+id/textLabelEmpty"
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/logo"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center|start"
-        android:text="@string/label_choose_codetype"
-        android:fontFamily="@font/sourcesanspro_regular"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_height="48dp"
+        android:paddingStart="48dp"
+        android:paddingEnd="48dp"
+        android:src="@drawable/ic_id_pass_logo"
+        android:layout_marginTop="64dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"/>
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/toolbarTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Smart Scanner"
+        android:textColor="@color/newlogic_black"
+        android:fontFamily="@font/sourcesanspro_medium"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/logo" />
+
+    <include
+        android:id="@+id/itemMrz"
+        layout="@layout/item_mrz"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="48dp"
+        android:layout_marginEnd="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbarTitle" />
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/idpass_orange"
-            app:layout_scrollFlags="scroll|enterAlways">
+    <include
+        android:id="@+id/itemQr"
+        layout="@layout/item_qr"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/itemMrz" />
 
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/toolbarTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center|start"
-                    android:text="@string/app_name"
-                    android:fontFamily="@font/sourcesanspro_medium"
-                    android:textColor="@color/white"
-                    android:textSize="22sp" />
-            </FrameLayout>
-        </androidx.appcompat.widget.Toolbar>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <ScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:paddingBottom="64dp">
-
-                    <TextView
-                        android:id="@+id/textResultDetails"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center|start"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/label_result_details"
-                        android:textColor="@color/newlogic_black"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:visibility="invisible" />
-
-                    <TextView
-                        android:id="@+id/textName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center|start"
-                        android:layout_marginStart="16dp"
-                        android:text="@string/label_name"
-                        android:textColor="@color/newlogic_black"
-                        android:textSize="16sp"
-                        android:visibility="gone" />
-
-                    <TextView
-                        android:id="@+id/textSurName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center|start"
-                        android:layout_marginStart="16dp"
-                        android:text="@string/label_surname"
-                        android:textColor="@color/newlogic_black"
-                        android:textSize="16sp"
-                        android:visibility="gone" />
-
-                    <TextView
-                        android:id="@+id/textBirthday"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center|start"
-                        android:layout_marginStart="16dp"
-                        android:text="@string/label_birthday"
-                        android:textColor="@color/newlogic_black"
-                        android:textSize="16sp"
-                        android:visibility="gone" />
-
-                    <TextView
-                        android:id="@+id/textNationality"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center|start"
-                        android:layout_marginStart="16dp"
-                        android:text="@string/label_nationality"
-                        android:textColor="@color/newlogic_black"
-                        android:textSize="16sp"
-                        android:visibility="gone" />
-
-                    <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/txtImgAction"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="24dp"
-                        android:layout_gravity="end"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/action_show_hide"
-                        android:textColor="@color/newlogic_black"
-                        android:textSize="12sp"
-                        android:visibility="invisible" />
-
-                    <ImageView
-                        android:id="@+id/imageView"
-                        android:layout_width="match_parent"
-                        android:layout_height="250dp"
-                        android:scaleType="fitXY"
-                        android:visibility="gone"
-                        tools:srcCompat="@tools:sample/avatars" />
-
-                    <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/txtRawDataAction"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="24dp"
-                        android:layout_gravity="end"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/action_show_hide"
-                        android:textColor="@color/newlogic_black"
-                        android:textSize="12sp"
-                        android:visibility="invisible" />
-
-                    <EditText
-                        android:id="@+id/editTextTextMultiLine"
-                        android:layout_width="match_parent"
-                        android:layout_height="250dp"
-                        android:ems="10"
-                        android:focusable="false"
-                        android:fontFamily="monospace"
-                        android:gravity="start|top"
-                        android:inputType="textMultiLine"
-                        android:textSize="12sp"
-                        android:visibility="gone"/>
-                </LinearLayout>
-            </ScrollView>
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_alignParentBottom="true"
-                android:layout_height="84dp">
-
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/button"
-                    android:layout_width="96dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:background="@color/idpass_orange"
-                    android:textColor="@color/white"
-                    android:textAllCaps="false"
-                    android:onClick="startScanningActivity"
-                    android:text="@string/mode_mrz"
-                    android:fontFamily="@font/sourcesanspro_regular"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/button2"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <androidx.constraintlayout.widget.Guideline
-                    android:id="@+id/first"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    app:layout_constraintGuide_percent="0.25" />
-
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/button2"
-                    android:layout_width="96dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:background="@color/idpass_orange"
-                    android:textColor="@color/white"
-                    android:onClick="startQRCodeScanningActivity"
-                    android:fontFamily="@font/sourcesanspro_regular"
-                    android:text="@string/mode_qr"
-                    android:textAllCaps="false"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/third"
-                    app:layout_constraintStart_toStartOf="@+id/first"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <androidx.constraintlayout.widget.Guideline
-                    android:id="@+id/second"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    app:layout_constraintGuide_percent="0.5" />
-
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/button3"
-                    android:layout_width="96dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:background="@color/idpass_orange"
-                    android:textColor="@color/white"
-                    android:onClick="startBarcodeScanningActivity"
-                    android:fontFamily="@font/sourcesanspro_regular"
-                    android:text="@string/mode_barcode"
-                    android:textAllCaps="false"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/button2"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <androidx.constraintlayout.widget.Guideline
-                    android:id="@+id/third"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    app:layout_constraintGuide_percent="0.75" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </RelativeLayout>
-    </LinearLayout>
+    <include
+        android:id="@+id/itemBarcode"
+        layout="@layout/item_barcode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/itemQr" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
