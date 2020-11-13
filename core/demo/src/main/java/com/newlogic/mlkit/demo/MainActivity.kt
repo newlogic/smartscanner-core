@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        binding.itemMrz.item.setOnClickListener { startIntentCallOut() }
+        binding.itemMrz.item.setOnClickListener { startMrzScan() }
         binding.itemQr.item.setOnClickListener { startQrScan() }
         binding.itemBarcode.item.setOnClickListener { startBarcodeScan() }
     }
@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity() {
         try {
             val intent = Intent("com.newlogic.mlkitlib.SCAN")
             intent.putExtra(MLKitActivity.MODE, Modes.MRZ.value)
-            intent.putExtra(MLKitActivity.MRZ_FORMAT, MrzFormat.MRTD_TD1.value)
+            intent.putExtra(MLKitActivity.MRZ_FORMAT, MrzFormat.MRP.value)
             intent.putExtra(MLKitActivity.CONFIG, sampleConfig())
             startActivityForResult(intent, OP_MLKIT)
         } catch (ex: ActivityNotFoundException) {
@@ -82,7 +82,6 @@ class MainActivity : AppCompatActivity() {
     private fun startMrzScan() {
         val intent = Intent(this, MLKitActivity::class.java)
         intent.putExtra(MLKitActivity.MODE, Modes.MRZ.value)
-        intent.putExtra(MLKitActivity.MRZ_FORMAT, MrzFormat.MRTD_TD1.value)
         intent.putExtra(MLKitActivity.CONFIG, sampleConfig())
         startActivityForResult(intent, OP_MLKIT)
     }

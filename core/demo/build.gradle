@@ -26,6 +26,13 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        debug {
+            ndk {
+                abiFilters "x86", "armeabi-v7a"
+            }
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
         android.applicationVariants.all { variant ->
             variant.outputs.all {
                 def date = new Date().format('MMddyyyy')
