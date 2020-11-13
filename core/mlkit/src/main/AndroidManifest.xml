@@ -11,7 +11,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".newlogic.MLKitActivity"
+            android:name=".newlogic.SmartScannerActivity"
             android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden">
             <intent-filter>

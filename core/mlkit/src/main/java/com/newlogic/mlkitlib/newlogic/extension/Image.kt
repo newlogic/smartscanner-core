@@ -4,7 +4,7 @@ import android.graphics.*
 import android.media.Image
 import android.util.Base64
 import android.util.Log
-import com.newlogic.mlkitlib.newlogic.MLKitActivity
+import com.newlogic.mlkitlib.newlogic.SmartScannerActivity
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -43,7 +43,7 @@ fun Image.toBitmap(rotation: Int = 0): Bitmap {
     }
 
     Log.d(
-        MLKitActivity.TAG,
+        SmartScannerActivity.TAG,
         "Image ${this.width}x${this.height}, crop to: ${rect.left},${rect.top},${rect.right},${rect.bottom}"
     )
 

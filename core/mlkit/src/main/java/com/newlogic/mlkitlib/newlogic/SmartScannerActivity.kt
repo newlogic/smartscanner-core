@@ -21,6 +21,7 @@ import android.view.View
 import android.view.View.*
 import android.view.Window
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
@@ -68,10 +69,10 @@ import java.util.concurrent.Executors
 import kotlin.concurrent.thread
 import kotlin.math.abs
 
-class MLKitActivity : AppCompatActivity(), OnClickListener {
+class SmartScannerActivity : AppCompatActivity(), OnClickListener {
 
     companion object {
-        val TAG: String = MLKitActivity::class.java.simpleName
+        val TAG: String = SmartScannerActivity::class.java.simpleName
         const val MLKIT_RESULT = "mlkit_result"
         const val SCANNER_OPTIONS = "scanner_options"
     }
@@ -109,6 +110,7 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
     private var mlkitText: TextView? = null
     private var mlkitMS: TextView? = null
     private var mlkitTime: TextView? = null
+    private var loading: ProgressBar? = null
 
     private lateinit var modelLayoutView: View
     private lateinit var coordinatorLayoutView: View
@@ -122,7 +124,7 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
-        setContentView(R.layout.activity_mrz)
+        setContentView(R.layout.activity_smart_scanner)
         // get application context
         context = applicationContext
         // assign layout ids
@@ -140,6 +142,8 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
         mlkitText = findViewById(R.id.mlkitText)
         mlkitMS = findViewById(R.id.mlkitMS)
         mlkitTime = findViewById(R.id.mlkitTime)
+        loading = findViewById(R.id.loading)
+
         // hide actionbar
         supportActionBar?.hide()
         supportActionBar?.setDisplayShowTitleEnabled(false)
@@ -216,13 +220,15 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
                     modelLayoutView.layoutParams = layoutParams
                 }
                 isQrCodeOnly(barcodeOptions)  -> {
-                    layoutParams.marginStart = 72 // Approx. 36dp
-                    layoutParams.marginEnd = 72 // Approx. 36dp
+                    layoutParams.dimensionRatio = "4:6"
+                    layoutParams.marginStart = 84 // Approx. 36dp
+                    layoutParams.marginEnd = 84 // Approx. 36dp
                     modelLayoutView.layoutParams = layoutParams
                 }
                 else -> {
-                    layoutParams.marginStart = 64 // Approx. 30dp
-                    layoutParams.marginEnd = 64 // Approx. 30dp
+                    layoutParams.dimensionRatio = "4:4"
+                    layoutParams.marginStart = 36 // Approx. 20dp
+                    layoutParams.marginEnd = 36 // Approx. 20dp
                     modelLayoutView.layoutParams = layoutParams
                 }
             }
@@ -433,6 +439,7 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
                                     }
                                 }
                                 rectangle!!.isSelected = rawFullRead != ""
+                                if(rawFullRead != "") loading?.visibility = VISIBLE else GONE
                                 try {
                                     Log.d(
                                         "$TAG/MLKit",

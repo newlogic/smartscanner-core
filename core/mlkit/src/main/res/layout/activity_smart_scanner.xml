@@ -8,18 +8,7 @@
     android:background="@color/transparent_grey"
     android:elevation="3dp"
     android:textAlignment="gravity"
-    tools:context=".newlogic.MLKitActivity">
-
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/brandingImage"
-        android:layout_width="64dp"
-        android:layout_height="32dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="4dp"
-        android:src="@drawable/ic_id_pass_logo"
-        android:textColor="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+    tools:context=".newlogic.SmartScannerActivity">
 
     <androidx.appcompat.widget.AppCompatImageButton
         android:id="@+id/manualCapture"
@@ -81,6 +70,33 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/top" />
+
+        <ProgressBar
+            android:id="@+id/loading"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="14dp"
+            android:indeterminate="true"
+            android:layout_marginHorizontal="18dp"
+            android:layout_marginVertical="2dp"
+            android:layout_weight="1"
+            android:adjustViewBounds="false"
+            android:visibility="invisible"
+            android:indeterminateTint="@color/idpass_orange"
+            app:layout_constraintBottom_toTopOf="@+id/bottom"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/brandingImage"
+            android:layout_width="64dp"
+            android:layout_height="32dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="4dp"
+            android:src="@drawable/ic_id_pass_logo"
+            android:textColor="@color/white"
+            app:layout_constraintTop_toBottomOf="@+id/rectimage"
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <TextView
             android:id="@+id/captureLabelText"

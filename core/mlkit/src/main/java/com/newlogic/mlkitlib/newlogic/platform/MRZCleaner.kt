@@ -4,7 +4,7 @@ import android.util.Log
 import com.newlogic.mlkitlib.innovatrics.mrz.MrzParser
 import com.newlogic.mlkitlib.innovatrics.mrz.MrzRecord
 import com.newlogic.mlkitlib.innovatrics.mrz.records.MrtdTd1
-import com.newlogic.mlkitlib.newlogic.MLKitActivity
+import com.newlogic.mlkitlib.newlogic.SmartScannerActivity
 import java.net.URLEncoder
 
 object MRZCleaner {
@@ -49,7 +49,7 @@ object MRZCleaner {
                 else -> throw IllegalArgumentException("Invalid MRZ string. Wrong number of lines.")
             }
         } else {
-            Log.d(MLKitActivity.TAG, "Error = [${URLEncoder.encode(result, "UTF-8").replace("%3C", "<").replace("%0A", "↩")}]")
+            Log.d(SmartScannerActivity.TAG, "Error = [${URLEncoder.encode(result, "UTF-8").replace("%3C", "<").replace("%0A", "↩")}]")
             throw IllegalArgumentException("Invalid MRZ string. No '<' or 'P', 'I', 'A', 'C', 'V' detected.")
         }
 
@@ -68,13 +68,13 @@ object MRZCleaner {
     fun parseAndClean(mrz: String): MrzRecord {
         val record = MrzParser.parse(mrz)
 
-        Log.d(MLKitActivity.TAG, "Previous Scan: $previousMRZString")
+        Log.d(SmartScannerActivity.TAG, "Previous Scan: $previousMRZString")
         if (!record.validComposite || !record.validDateOfBirth || !record.validDocumentNumber || !record.validExpirationDate) {
             if (mrz != previousMRZString) {
                 previousMRZString = mrz
                 throw IllegalArgumentException("Invalid check digits.")
             }
-            Log.d(MLKitActivity.TAG, "Still accept scanning.")
+            Log.d(SmartScannerActivity.TAG, "Still accept scanning.")
         }
 
         record.givenNames = record.givenNames.replaceNumbertoChar()
@@ -87,13 +87,13 @@ object MRZCleaner {
     fun parseAndCleanMrtdTd1(mrz: String): MrtdTd1 {
         val record = MrzParser.parseToMrtdTd1(mrz)
 
-        Log.d(MLKitActivity.TAG, "Previous Scan: $previousMRZString")
+        Log.d(SmartScannerActivity.TAG, "Previous Scan: $previousMRZString")
         if (!record.validComposite || !record.validDateOfBirth || !record.validDocumentNumber || !record.validExpirationDate) {
             if (mrz != previousMRZString) {
                 previousMRZString = mrz
                 throw IllegalArgumentException("Invalid check digits.")
             }
-            Log.d(MLKitActivity.TAG, "Still accept scanning.")
+            Log.d(SmartScannerActivity.TAG, "Still accept scanning.")
         }
 
         record.givenNames = record.givenNames.replaceNumbertoChar()

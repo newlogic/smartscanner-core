@@ -11,7 +11,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.newlogic.mlkit.R
 import com.newlogic.mlkit.databinding.ActivityMainBinding
 import com.newlogic.mlkit.demo.ResultActivity.Companion.SCAN_RESULT
-import com.newlogic.mlkitlib.newlogic.MLKitActivity
+import com.newlogic.mlkitlib.newlogic.SmartScannerActivity
 import com.newlogic.mlkitlib.newlogic.config.BarcodeOptions
 import com.newlogic.mlkitlib.newlogic.config.Config
 import com.newlogic.mlkitlib.newlogic.config.ImageResultType.PATH
@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == OP_MLKIT) {
             Log.d(TAG, "Plugin post ML Activity resultCode $resultCode")
             if (resultCode == RESULT_OK) {
-                val result = intent?.getStringExtra(MLKitActivity.MLKIT_RESULT)
+                val result = intent?.getStringExtra(SmartScannerActivity.MLKIT_RESULT)
                 val resultIntent = Intent(this, ResultActivity::class.java)
                 resultIntent.putExtra(SCAN_RESULT, result)
                 startActivity(resultIntent)
@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity() {
     private fun startIntentCallOut() {
         try {
             val intent = Intent("com.newlogic.mlkitlib.SCAN")
-            intent.putExtra(MLKitActivity.SCANNER_OPTIONS, ScannerOptions.defaultForMRZ)
+            intent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.defaultForMRZ)
             startActivityForResult(intent, OP_MLKIT)
         } catch (ex: ActivityNotFoundException) {
             ex.printStackTrace()
@@ -78,8 +78,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startMrzScan() {
-        val intent = Intent(this, MLKitActivity::class.java)
-        intent.putExtra(MLKitActivity.SCANNER_OPTIONS, ScannerOptions.sampleMrz(sampleConfig()))
+        val intent = Intent(this, SmartScannerActivity::class.java)
+        intent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleMrz(sampleConfig()))
         startActivityForResult(intent, OP_MLKIT)
     }
 
@@ -112,8 +112,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startBarcode(barcodeOptions: ArrayList<String>? = null) {
-        val intent = Intent(this, MLKitActivity::class.java)
-        intent.putExtra(MLKitActivity.SCANNER_OPTIONS, ScannerOptions.sampleBarcode(sampleConfig(), barcodeOptions))
+        val intent = Intent(this, SmartScannerActivity::class.java)
+        intent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleBarcode(sampleConfig(), barcodeOptions))
         startActivityForResult(intent, OP_MLKIT)
     }
 }
