@@ -55,6 +55,7 @@ import com.newlogic.mlkitlib.newlogic.extension.getConnectionType
 import com.newlogic.mlkitlib.newlogic.extension.toBitmap
 import com.newlogic.mlkitlib.newlogic.platform.AnalyzerType
 import com.newlogic.mlkitlib.newlogic.platform.MRZCleaner
+import com.newlogic.mlkitlib.newlogic.platform.ScannerOptions
 import com.newlogic.mlkitlib.newlogic.platform.SmartScannerAnalyzer
 import com.newlogic.mlkitlib.newlogic.utils.CameraUtils.isLedFlashAvailable
 import com.newlogic.mlkitlib.newlogic.utils.FileUtils.copyAssets
@@ -71,14 +72,8 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
 
     companion object {
         val TAG: String = MLKitActivity::class.java.simpleName
-        const val MLKIT_RESULT = "MLKIT_RESULT"
-        const val CONFIG = "CONFIG"
-        const val MODE = "MODE"
-        const val MRZ_FORMAT = "MRZ_FORMAT"
-        const val BARCODE_OPTIONS = "BARCODE_OPTIONS"
-
-        fun defaultBarcodeOptions() = BarcodeOptions.default
-        fun defaultConfig() = Config.default
+        const val MLKIT_RESULT = "mlkit_result"
+        const val SCANNER_OPTIONS = "scanner_options"
     }
 
     private val REQUEST_CODE_PERMISSIONS = 10
@@ -96,6 +91,7 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
     private var imageCapture: ImageCapture? = null
     private var camera: Camera? = null
     private var startScanTime: Long = 0
+    private var scannerOptions: ScannerOptions? = null
     private var mode: String? = null
     private var barcodeFormats: List<Int> = listOf()
     private var barcodeOptions: List<String> = listOf()
@@ -155,16 +151,16 @@ class MLKitActivity : AppCompatActivity(), OnClickListener {
         } else {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
         }
-        // mode to use
-        mode = intent.getStringExtra(MODE)
-        // mrz format to use
-        mrzFormat = intent.getStringExtra(MRZ_FORMAT) ?: MrzFormat.MRP.value
-        // barcode format to use
-        barcodeOptions = intent.getStringArrayListExtra(BARCODE_OPTIONS) ?: defaultBarcodeOptions()
+        // Scanner options
+        scannerOptions = intent.getParcelableExtra(SCANNER_OPTIONS)
+        mode = scannerOptions?.mode
+        mrzFormat = scannerOptions?.mrzFormat ?: MrzFormat.MRP.value
+        barcodeOptions = scannerOptions?.barcodeOptions ?: BarcodeOptions.default
         barcodeFormats = barcodeOptions.map { BarcodeOptions.valueOf(it).value }
         // setup config for reader
-        config = intent.getParcelableExtra(CONFIG)
-        setupConfiguration(config ?: defaultConfig())
+        config = scannerOptions?.config
+        setupConfiguration(config ?: Config.default)
+
         // assign click listeners
         closeButton?.setOnClickListener(this)
         flashButton?.setOnClickListener(this)

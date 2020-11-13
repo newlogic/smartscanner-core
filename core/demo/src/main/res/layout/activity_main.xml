@@ -25,7 +25,7 @@
         android:id="@+id/toolbarTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Smart Scanner"
+        android:text="@string/label_smart_scanner"
         android:textColor="@color/newlogic_black"
         android:fontFamily="@font/sourcesanspro_medium"
         android:textSize="18sp"

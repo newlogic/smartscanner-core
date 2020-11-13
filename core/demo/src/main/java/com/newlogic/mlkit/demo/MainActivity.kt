@@ -12,11 +12,11 @@ import com.newlogic.mlkit.R
 import com.newlogic.mlkit.databinding.ActivityMainBinding
 import com.newlogic.mlkit.demo.ResultActivity.Companion.SCAN_RESULT
 import com.newlogic.mlkitlib.newlogic.MLKitActivity
+import com.newlogic.mlkitlib.newlogic.config.BarcodeOptions
 import com.newlogic.mlkitlib.newlogic.config.Config
 import com.newlogic.mlkitlib.newlogic.config.ImageResultType.PATH
-import com.newlogic.mlkitlib.newlogic.config.Modes
-import com.newlogic.mlkitlib.newlogic.config.MrzFormat
 import com.newlogic.mlkitlib.newlogic.extension.empty
+import com.newlogic.mlkitlib.newlogic.platform.ScannerOptions
 import java.util.*
 
 
@@ -69,9 +69,7 @@ class MainActivity : AppCompatActivity() {
     private fun startIntentCallOut() {
         try {
             val intent = Intent("com.newlogic.mlkitlib.SCAN")
-            intent.putExtra(MLKitActivity.MODE, Modes.MRZ.value)
-            intent.putExtra(MLKitActivity.MRZ_FORMAT, MrzFormat.MRP.value)
-            intent.putExtra(MLKitActivity.CONFIG, sampleConfig())
+            intent.putExtra(MLKitActivity.SCANNER_OPTIONS, ScannerOptions.defaultForMRZ)
             startActivityForResult(intent, OP_MLKIT)
         } catch (ex: ActivityNotFoundException) {
             ex.printStackTrace()
@@ -81,8 +79,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun startMrzScan() {
         val intent = Intent(this, MLKitActivity::class.java)
-        intent.putExtra(MLKitActivity.MODE, Modes.MRZ.value)
-        intent.putExtra(MLKitActivity.CONFIG, sampleConfig())
+        intent.putExtra(MLKitActivity.SCANNER_OPTIONS, ScannerOptions.sampleMrz(sampleConfig()))
         startActivityForResult(intent, OP_MLKIT)
     }
 
@@ -107,7 +104,7 @@ class MainActivity : AppCompatActivity() {
             bottomSheetDialog.dismiss()
         }
         btnBarcode.setOnClickListener {
-            startBarcode(MLKitActivity.defaultBarcodeOptions())
+            startBarcode(BarcodeOptions.default)
             bottomSheetDialog.dismiss()
         }
         btnCancel.setOnClickListener { bottomSheetDialog.dismiss() }
@@ -116,9 +113,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun startBarcode(barcodeOptions: ArrayList<String>? = null) {
         val intent = Intent(this, MLKitActivity::class.java)
-        intent.putExtra(MLKitActivity.MODE, Modes.BARCODE.value)
-        intent.putStringArrayListExtra(MLKitActivity.BARCODE_OPTIONS, barcodeOptions)
-        intent.putExtra(MLKitActivity.CONFIG, sampleConfig())
+        intent.putExtra(MLKitActivity.SCANNER_OPTIONS, ScannerOptions.sampleBarcode(sampleConfig(), barcodeOptions))
         startActivityForResult(intent, OP_MLKIT)
     }
 }

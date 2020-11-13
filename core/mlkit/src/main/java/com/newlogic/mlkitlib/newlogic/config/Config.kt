@@ -14,6 +14,6 @@ data class Config(
         val branding: Boolean? = false,
 ) : Parcelable {
     companion object {
-        val default = Config( String.empty(),String.empty(), String.empty(), ImageResultType.PATH.value, isManualCapture = false, branding = false)
+        val default = Config( String.empty(),String.empty(), String.empty(), ImageResultType.PATH.value, isManualCapture = true, branding = true)
     }
 }
