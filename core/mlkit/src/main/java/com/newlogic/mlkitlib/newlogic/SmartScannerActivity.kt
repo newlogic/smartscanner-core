@@ -217,28 +217,30 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
         // barcode view layout
         if (mode == BARCODE.value) {
             val layoutParams = modelLayoutView.layoutParams as ConstraintLayout.LayoutParams
+            var message = BARCODE.value
             when {
                 isPdf417(barcodeOptions) -> {
                     layoutParams.dimensionRatio = "9:21"
                     modelLayoutView.layoutParams = layoutParams
-                    showToolTip("Pdf 417")
+                    message = "Pdf 417"
                 }
                 isQrCodeOnly(barcodeOptions)  -> {
                     layoutParams.dimensionRatio = "4:6"
                     layoutParams.marginStart = 84 // Approx. 36dp
                     layoutParams.marginEnd = 84 // Approx. 36dp
                     modelLayoutView.layoutParams = layoutParams
-                    showToolTip("qr code")
+                    message = "qr code"
                 }
                 else -> {
                     layoutParams.dimensionRatio = "4:4"
                     layoutParams.marginStart = 36 // Approx. 20dp
                     layoutParams.marginEnd = 36 // Approx. 20dp
                     modelLayoutView.layoutParams = layoutParams
-                    showToolTip(BARCODE.value)
                 }
             }
-        } else showToolTip(MRZ.value)
+            Toast.makeText(context,getString(R.string.label_tooltip_camera, message), Toast.LENGTH_LONG).show()
+        }
+
         // branding
         brandingImage?.visibility = config.branding?.let { if (it) VISIBLE else GONE } ?: run { GONE }
         // manual capture
@@ -447,7 +449,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                                     }
                                 }
                                 rectangle!!.isSelected = rawFullRead != ""
-                                if(rawFullRead != "") loading?.visibility = VISIBLE else GONE
+                                if(rawFullRead != "") loading?.visibility = VISIBLE else INVISIBLE
                                 try {
                                     Log.d(
                                         "$TAG/MLKit",
@@ -629,8 +631,6 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
             mlkitText?.text = "Total scan time: $scanTime s"
         }
     }
-
-    private fun showToolTip(message : String) = Toast.makeText(this,getString(R.string.label_tooltip_camera, message), Toast.LENGTH_LONG).show()
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
