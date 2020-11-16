@@ -23,6 +23,7 @@ import android.view.Window
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -46,9 +47,13 @@ import com.newlogic.mlkitlib.innovatrics.barcode.BarcodeResult
 import com.newlogic.mlkitlib.innovatrics.mrz.MRZResult
 import com.newlogic.mlkitlib.innovatrics.mrz.MRZResult.Companion.formatMrtdTd1MrzResult
 import com.newlogic.mlkitlib.innovatrics.mrz.MRZResult.Companion.formatMrzResult
-import com.newlogic.mlkitlib.newlogic.config.*
+import com.newlogic.mlkitlib.newlogic.config.BarcodeOptions
+import com.newlogic.mlkitlib.newlogic.config.Config
+import com.newlogic.mlkitlib.newlogic.config.Fonts
 import com.newlogic.mlkitlib.newlogic.config.ImageResultType.BASE_64
 import com.newlogic.mlkitlib.newlogic.config.Modes.BARCODE
+import com.newlogic.mlkitlib.newlogic.config.Modes.MRZ
+import com.newlogic.mlkitlib.newlogic.config.MrzFormat
 import com.newlogic.mlkitlib.newlogic.config.MrzFormat.MRTD_TD1
 import com.newlogic.mlkitlib.newlogic.extension.cacheImageToLocal
 import com.newlogic.mlkitlib.newlogic.extension.encodeBase64
@@ -149,12 +154,6 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
         supportActionBar?.setDisplayShowTitleEnabled(false)
         actionBar?.hide()
         actionBar?.setDisplayShowTitleEnabled(false)
-        // Request camera permissions
-        if (allPermissionsGranted()) {
-            startCamera()
-        } else {
-            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
-        }
         // Scanner options
         scannerOptions = intent.getParcelableExtra(SCANNER_OPTIONS)
         mode = scannerOptions?.mode
@@ -163,8 +162,12 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
         barcodeFormats = barcodeOptions.map { BarcodeOptions.valueOf(it).value }
         // setup config for reader
         config = scannerOptions?.config
-        setupConfiguration(config ?: Config.default)
-
+        // Request camera permissions
+        if (allPermissionsGranted()) {
+            startCamera(config ?: Config.default)
+        } else {
+            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
+        }
         // assign click listeners
         closeButton?.setOnClickListener(this)
         flashButton?.setOnClickListener(this)
@@ -174,7 +177,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
         isMLKitUsable = checkGooglePlayServices()
         Log.d(TAG, "isMLKitUsable: $isMLKitUsable")
         // Initialize Tesseract
-        if (mode == Modes.MRZ.value && !isMLKitUsable) {
+        if (mode == MRZ.value && !isMLKitUsable) {
             val extDirPath: String = getExternalFilesDir(null)!!.absolutePath
             Log.d(TAG, "path: $extDirPath")
             copyAssets(this, "tessdata", extDirPath)
@@ -218,21 +221,24 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                 isPdf417(barcodeOptions) -> {
                     layoutParams.dimensionRatio = "9:21"
                     modelLayoutView.layoutParams = layoutParams
+                    showToolTip("Pdf 417")
                 }
                 isQrCodeOnly(barcodeOptions)  -> {
                     layoutParams.dimensionRatio = "4:6"
                     layoutParams.marginStart = 84 // Approx. 36dp
                     layoutParams.marginEnd = 84 // Approx. 36dp
                     modelLayoutView.layoutParams = layoutParams
+                    showToolTip("qr code")
                 }
                 else -> {
                     layoutParams.dimensionRatio = "4:4"
                     layoutParams.marginStart = 36 // Approx. 20dp
                     layoutParams.marginEnd = 36 // Approx. 20dp
                     modelLayoutView.layoutParams = layoutParams
+                    showToolTip(BARCODE.value)
                 }
             }
-        }
+        } else showToolTip(MRZ.value)
         // branding
         brandingImage?.visibility = config.branding?.let { if (it) VISIBLE else GONE } ?: run { GONE }
         // manual capture
@@ -244,7 +250,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
     ) {
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
             if (allPermissionsGranted()) {
-                startCamera()
+                startCamera(config ?: Config.default)
             } else {
                 val snackBar: Snackbar = Snackbar.make(
                     coordinatorLayoutView,
@@ -263,7 +269,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
         startActivity(intent)
     }
 
-    private fun startCamera() {
+    private fun startCamera(config : Config) {
         this.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         cameraProviderFuture.addListener( {
@@ -296,7 +302,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                         val gson = Gson()
                         val bf = imageFile.path.toBitmap()
                         bf.cacheImageToLocal(imageFile.path,90)
-                        val imageString = if (config?.imageResultType == BASE_64.value) bf.encodeBase64() else imageFile.path
+                        val imageString = if (config.imageResultType == BASE_64.value) bf.encodeBase64() else imageFile.path
                         val result = gson.toJson(MRZResult.getImageOnly(imageString))
                         data.putExtra(MLKIT_RESULT, result)
                         setResult(Activity.RESULT_OK, data)
@@ -330,6 +336,8 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                 Log.e(TAG, "Use case binding failed", exc)
             }
         }, ContextCompat.getMainExecutor(this))
+
+        setupConfiguration(config)
     }
 
     private fun isPdf417(options: List<String>) = options.any { it == BarcodeOptions.PDF_417.label }
@@ -411,7 +419,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                         }
                 }
                 //MRZ
-                if (!mrzBusy &&  (mode == Modes.MRZ.value)) {
+                if (!mrzBusy &&  (mode == MRZ.value)) {
                     val mlStartTime = System.currentTimeMillis()
                     if (isMLKitUsable) {
                         mrzBusy = true
@@ -621,6 +629,8 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
             mlkitText?.text = "Total scan time: $scanTime s"
         }
     }
+
+    private fun showToolTip(message : String) = Toast.makeText(this,getString(R.string.label_tooltip_camera, message), Toast.LENGTH_LONG).show()
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED

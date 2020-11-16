@@ -11,4 +11,5 @@
     <string name="cd_close_button">Back</string>
     <string name="cd_flash_button">Toggle camera flash</string>
     <string name="mlkit">MLKit</string>
+    <string name="label_tooltip_camera">Point your camera to a %1$s</string>
 </resources>
