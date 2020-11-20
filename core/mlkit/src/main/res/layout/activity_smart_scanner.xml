@@ -109,22 +109,25 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/rectimage" />
 
-        <TextView
-            android:id="@+id/modelText"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="#C3555555"
-            android:gravity="center_horizontal|center_vertical"
-            android:text="@string/model_text"
-            android:textColor="#FFFFFF"
-            android:textSize="18sp"
-            android:visibility="invisible"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <TextView
+        android:id="@+id/modelText"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/transparent_grey"
+        android:elevation="2dp"
+        android:gravity="center_horizontal|center_vertical"
+        android:text="@string/model_text"
+        android:fontFamily="@font/sourcesanspro_medium"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
         android:id="@+id/debugLayout"

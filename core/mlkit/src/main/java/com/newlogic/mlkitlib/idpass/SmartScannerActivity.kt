@@ -51,10 +51,7 @@ import com.newlogic.mlkitlib.idpass.config.Modes.BARCODE
 import com.newlogic.mlkitlib.idpass.config.Modes.MRZ
 import com.newlogic.mlkitlib.idpass.config.MrzFormat
 import com.newlogic.mlkitlib.idpass.config.MrzFormat.MRTD_TD1
-import com.newlogic.mlkitlib.idpass.extension.cacheImageToLocal
-import com.newlogic.mlkitlib.idpass.extension.encodeBase64
-import com.newlogic.mlkitlib.idpass.extension.getConnectionType
-import com.newlogic.mlkitlib.idpass.extension.toBitmap
+import com.newlogic.mlkitlib.idpass.extension.*
 import com.newlogic.mlkitlib.idpass.platform.AnalyzerType
 import com.newlogic.mlkitlib.idpass.platform.MRZCleaner
 import com.newlogic.mlkitlib.idpass.platform.ScannerOptions
@@ -161,7 +158,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
         barcodeOptions = scannerOptions?.barcodeOptions ?: BarcodeOptions.default
         barcodeFormats = barcodeOptions.map { BarcodeOptions.valueOf(it).value }
         // setup config for reader
-        config = scannerOptions?.config
+        config = scannerOptions?.config  ?: Config.default
         // Request camera permissions
         if (allPermissionsGranted()) {
             startCamera(config ?: Config.default)
@@ -191,7 +188,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
         // flash
         flashButton?.visibility = if (isLedFlashAvailable(this)) VISIBLE else GONE
         // capture text label
-        captureLabelText?.text = config.label
+        captureLabelText?.text = config.label ?: String.empty()
         // font to use
         captureLabelText?.typeface =
             if (config.font == Fonts.NOTO_SANS_ARABIC.value) ResourcesCompat.getFont(
@@ -242,7 +239,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
         }
 
         // branding
-        brandingImage?.visibility = config.branding?.let { if (it) VISIBLE else GONE } ?: run { GONE }
+        brandingImage?.visibility = config.branding?.let { if (it) VISIBLE else GONE } ?: run { VISIBLE }
         // manual capture
         manualCapture?.visibility = config.isManualCapture?.let { if (it) VISIBLE else GONE } ?: run { GONE }
     }

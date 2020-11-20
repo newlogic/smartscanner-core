@@ -20,7 +20,7 @@ data class Config(
             imageResultType = ImageResultType.PATH.value,
             label = String.empty(),
             isManualCapture = false,
-            branding = false
+            branding = true
         )
     }
 }
