@@ -12,12 +12,9 @@ import com.newlogic.mlkit.R
 import com.newlogic.mlkit.databinding.ActivityMainBinding
 import com.newlogic.mlkit.demo.ResultActivity.Companion.SCAN_RESULT
 import com.newlogic.mlkitlib.idpass.SmartScannerActivity
-import com.newlogic.mlkitlib.idpass.config.BarcodeOptions
-import com.newlogic.mlkitlib.idpass.config.Config
+import com.newlogic.mlkitlib.idpass.config.*
 import com.newlogic.mlkitlib.idpass.config.ImageResultType.PATH
 import com.newlogic.mlkitlib.idpass.extension.empty
-import com.newlogic.mlkitlib.idpass.platform.ScannerOptions
-import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -85,7 +82,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun startQrScan() {
         val qrFormatOnly = arrayListOf("QR_CODE")
-        startBarcode(qrFormatOnly)
+        startBarcode(BarcodeOptions(qrFormatOnly))
     }
 
     @SuppressLint("InflateParams")
@@ -99,19 +96,18 @@ class MainActivity : AppCompatActivity() {
         val btnCancel = sheetViewBarcode.findViewById<LinearLayout>(R.id.btnCancel)
         // bottom sheet listeners
         btnPdf417.setOnClickListener {
-            val pdf417FormatOnly = arrayListOf("PDF_417")
-            startBarcode(pdf417FormatOnly)
+            startBarcode(BarcodeOptions(arrayListOf("PDF_417"), ScannerSize.LARGE.value))
             bottomSheetDialog.dismiss()
         }
         btnBarcode.setOnClickListener {
-            startBarcode(BarcodeOptions.default)
+            startBarcode(BarcodeOptions(BarcodeFormat.default, ScannerSize.SMALL.value))
             bottomSheetDialog.dismiss()
         }
         btnCancel.setOnClickListener { bottomSheetDialog.dismiss() }
         bottomSheetDialog.show()
     }
 
-    private fun startBarcode(barcodeOptions: ArrayList<String>? = null) {
+    private fun startBarcode(barcodeOptions: BarcodeOptions? = null) {
         val intent = Intent(this, SmartScannerActivity::class.java)
         intent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleBarcode(sampleConfig(), barcodeOptions))
         startActivityForResult(intent, OP_MLKIT)

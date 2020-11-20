@@ -23,7 +23,6 @@ import android.view.Window
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -43,18 +42,14 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.googlecode.tesseract.android.TessBaseAPI
 import com.newlogic.mlkitlib.R
-import com.newlogic.mlkitlib.idpass.config.BarcodeOptions
-import com.newlogic.mlkitlib.idpass.config.Config
-import com.newlogic.mlkitlib.idpass.config.Fonts
+import com.newlogic.mlkitlib.idpass.config.*
 import com.newlogic.mlkitlib.idpass.config.ImageResultType.BASE_64
 import com.newlogic.mlkitlib.idpass.config.Modes.BARCODE
 import com.newlogic.mlkitlib.idpass.config.Modes.MRZ
-import com.newlogic.mlkitlib.idpass.config.MrzFormat
 import com.newlogic.mlkitlib.idpass.config.MrzFormat.MRTD_TD1
 import com.newlogic.mlkitlib.idpass.extension.*
 import com.newlogic.mlkitlib.idpass.platform.AnalyzerType
 import com.newlogic.mlkitlib.idpass.platform.MRZCleaner
-import com.newlogic.mlkitlib.idpass.platform.ScannerOptions
 import com.newlogic.mlkitlib.idpass.platform.SmartScannerAnalyzer
 import com.newlogic.mlkitlib.idpass.utils.CameraUtils.isLedFlashAvailable
 import com.newlogic.mlkitlib.idpass.utils.FileUtils.copyAssets
@@ -96,8 +91,9 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
     private var startScanTime: Long = 0
     private var scannerOptions: ScannerOptions? = null
     private var mode: String? = null
+    private var barcodeOptions: BarcodeOptions = BarcodeOptions.default
     private var barcodeFormats: List<Int> = listOf()
-    private var barcodeOptions: List<String> = listOf()
+    private var barcodeStrings: List<String> = listOf()
     private var mrzFormat: String? = null
     private var isMLKitUsable = true
 
@@ -156,7 +152,8 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
         mode = scannerOptions?.mode
         mrzFormat = scannerOptions?.mrzFormat ?: MrzFormat.MRP.value
         barcodeOptions = scannerOptions?.barcodeOptions ?: BarcodeOptions.default
-        barcodeFormats = barcodeOptions.map { BarcodeOptions.valueOf(it).value }
+        barcodeStrings = barcodeOptions.barcodeFormats ?: BarcodeFormat.default
+        barcodeFormats = barcodeStrings.map { BarcodeFormat.valueOf(it).value }
         // setup config for reader
         config = scannerOptions?.config  ?: Config.default
         // Request camera permissions
@@ -214,28 +211,20 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
         // barcode view layout
         if (mode == BARCODE.value) {
             val layoutParams = modelLayoutView.layoutParams as ConstraintLayout.LayoutParams
-            var message = BARCODE.value
-            when {
-                isPdf417(barcodeOptions) -> {
-                    layoutParams.dimensionRatio = "9:21"
+            when (barcodeOptions.barcodeScannerSize) {
+                ScannerSize.LARGE.value-> {
+                    layoutParams.dimensionRatio = "4:7"
                     modelLayoutView.layoutParams = layoutParams
-                    message = "Pdf 417"
                 }
-                isQrCodeOnly(barcodeOptions)  -> {
-                    layoutParams.dimensionRatio = "4:6"
-                    layoutParams.marginStart = 84 // Approx. 36dp
-                    layoutParams.marginEnd = 84 // Approx. 36dp
+                ScannerSize.SMALL.value  -> {
+                    layoutParams.dimensionRatio = "4:4"
                     modelLayoutView.layoutParams = layoutParams
-                    message = "qr code"
                 }
                 else -> {
-                    layoutParams.dimensionRatio = "4:4"
-                    layoutParams.marginStart = 36 // Approx. 20dp
-                    layoutParams.marginEnd = 36 // Approx. 20dp
+                    layoutParams.dimensionRatio = "4:5"
                     modelLayoutView.layoutParams = layoutParams
                 }
             }
-            Toast.makeText(context,getString(R.string.label_tooltip_camera, message), Toast.LENGTH_LONG).show()
         }
 
         // branding
@@ -277,7 +266,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
             // Preview
             preview = Preview.Builder().build()
             var size = Size(480, 640)
-            if (isPdf417(barcodeOptions)) size = Size(1080, 1920)
+            if (isPdf417(barcodeStrings)) size = Size(1080, 1920)
             imageAnalyzer = ImageAnalysis.Builder()
                 .setTargetResolution(size)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
@@ -339,8 +328,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
         setupConfiguration(config)
     }
 
-    private fun isPdf417(options: List<String>) = options.any { it == BarcodeOptions.PDF_417.label }
-    private fun isQrCodeOnly(options: List<String>) = options.size <= 1 && options.any { it == BarcodeOptions.QR_CODE.label }
+    private fun isPdf417(options: List<String>) = options.any { it == BarcodeFormat.PDF_417.label }
 
     @SuppressLint("UnsafeExperimentalUsageError")
     private fun getMrzAnalyzer(): SmartScannerAnalyzer {
