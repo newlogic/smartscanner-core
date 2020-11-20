@@ -35,12 +35,12 @@ Main structure items:
 ```
 mode: 'mrz' 
 ```
-**mrzFormat** - when mode is set to `mrz`, mrzFormat is able to be accessed and set by either `MRP` (Default) or `MRTD_TD1`
+**mrzFormat** - when mode is set to `mrz`, mrzFormat is able to be accessed and set by either `MRP` (Default) or `MRTD_TD1`.
 Note that format `MRTD_TD1` is used in retrieving optional data from scanned MRZ
 ```
 mrzFormat: 'MRP'
 ```
-**barcodeOptions** - when mode is set to `barcode`, barcodeOptions is able to be accessed and set by the supported formats listed below
+**barcodeOptions** - when mode is set to `barcode`, barcodeOptions is able to be accessed and set by the supported formats listed below.
 Note that multiple formats can be supported 
 - `ALL` // Support all formats
 - `AZTEC`

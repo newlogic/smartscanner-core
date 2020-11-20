@@ -37,6 +37,7 @@ class ResultActivity : AppCompatActivity() {
         supportActionBar?.setDisplayShowTitleEnabled(false)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
+        supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_close)
 
         intent.getStringExtra(SCAN_RESULT)?.let { setupResultView(it, imageType) }
     }

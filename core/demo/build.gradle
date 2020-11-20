@@ -39,7 +39,7 @@ android {
                 def time = new Date().format('HHmm')
                 def buildType = variant.buildType.name
                 def buildNumber = sprintf("%02d", variant.versionCode)
-                outputFileName = "mlkitdemo-${buildType}-${buildNumber}_${date}_${time}.apk"
+                outputFileName = "idpass-smartscanner-${buildType}-${buildNumber}_${date}_${time}.apk"
             }
         }
     }
