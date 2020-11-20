@@ -1,9 +1,8 @@
 # idpass-smart-scanner-core
-The repository for the core Library to be used with the Base MLKit project of the ID Pass smart scanner 
+The repository for the core Library to be used with the Base project of the ID Pass smart scanner 
 
 ## Setting Up
 ---------------
-
 ```bash
 # 1. Clone this repository.
 git clone https://github.com/newlogic/idpass-smart-scanner-core.git
@@ -15,7 +14,6 @@ cd idpass-smart-scanner-core
 git submodule update --init --recursive
 
 ```
-
 Note: Please do not forget to initialize submodules to be able to access plugin repos.
 
 ## Structure
@@ -31,34 +29,19 @@ Main structure items:
 - **cordova** - submodule repo of cordova plugin
 - **capacitor** - submodule repo of capacitor plugin
 
-
-## Core
----------------
-The ID Pass Smart scanner is able to scan barcodes or MRZ
-which are accessed by assigning a mode in the scanner options
-
-
 ## Scanner Options
 ---------------
-**mode**
-- `barcode`
-- `mrz`
-
-**mrz**
-when mode assigned is mrz via `mode: 'mrz'`
-
-**mrzFormat**
-List of supported formats
-- `MRP` - default format
-- `MRTD_TD1` - format used to be able to get `optional` data from MRZ
-
-`mrzFormat: 'MRTD_TD1'`
-
-**barcode**
-when mode assigned is barcode via `mode: 'barcode'`
-
-**barcodeOptions**
-List of supported formats
+**mode** - the scanner is able to scan Barcodes or MRZ and is accessed by setting to either `barcode` or `mrz`
+```
+mode: 'mrz' 
+```
+**mrzFormat** - when mode is set to `mrz`, mrzFormat is able to be accessed and set by either `MRP` (Default) or `MRTD_TD1`
+Note that format `MRTD_TD1` is used in retrieving optional data from scanned MRZ
+```
+mrzFormat: 'MRP'
+```
+**barcodeOptions** - when mode is set to `barcode`, barcodeOptions is able to be accessed and set by the supported formats listed below
+Note that multiple formats can be supported 
 - `ALL` // Support all formats
 - `AZTEC`
 - `CODABAR`
@@ -72,30 +55,36 @@ List of supported formats
 - `UPC_A`
 - `UPC_E`
 - `PDF_417`
-
-`barcodeOptions: [ 'EAN_13','EAN_8','AZTEC'] `
+```
+barcodeOptions: [ 'EAN_13','EAN_8','AZTEC'] 
+```
 
 Config
 ---------------
-Scanner Configuration UI
-
 **background** - accepts hex color values, default is gray when empty or not set
-Sample: `background: '#89837c'`
-
+```
+background: '#89837c'`
+```
 **branding** - displays ID Pass branding, set to either `true` or `false`
-Sample: `branding: true`
-
+```
+branding: true`
+```
 **font** - currently supports 2 fonts only, NOTO_SANS_ARABIC (Arabic) and SOURCE_SANS_PRO (ID Pass font), default is SOURCE_SANS_PRO when empty or not set
-Sample: `font: 'NOTO_SANS_ARABIC'`
-
+```
+font: 'NOTO_SANS_ARABIC'`
+```
 **imageResultType** - currently supports 2 image result types: `base_64` or `path` (path of image string)
-Sample: `imageResultType: 'path'`
-
+```
+imageResultType: 'path'`
+```
 **isManualCapture** - enables manual capture mrz/barcode via capture button when not detected, set to either `true` or `false`
-Sample: `isManualCapture: true`
-
+```
+isManualCapture: true`
+```
 **label** - will show a label text below the scanner, default is empty
-Sample: `label: this.$t('Align your card with the box')`
+```
+label: this.$t('Align your card with the box')
+```
 
 
 ## Plugin call (Capacitor/Cordova)
