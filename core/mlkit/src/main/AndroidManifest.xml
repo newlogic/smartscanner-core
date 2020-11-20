@@ -11,11 +11,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".newlogic.SmartScannerActivity"
+            android:name=".idpass.SmartScannerActivity"
             android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden">
             <intent-filter>
-                <action android:name="com.newlogic.mlkitlib.SCAN" />
+                <action android:name="com.newlogic.idpass.SCAN" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

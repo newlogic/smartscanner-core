@@ -1,8 +1,8 @@
 package com.newlogic.mlkitlib.innovatrics.mrz
 
+import com.newlogic.mlkitlib.idpass.extension.empty
+import com.newlogic.mlkitlib.idpass.extension.noValue
 import com.newlogic.mlkitlib.innovatrics.mrz.records.MrtdTd1
-import com.newlogic.mlkitlib.newlogic.extension.empty
-import com.newlogic.mlkitlib.newlogic.extension.noValue
 
 data class MRZResult(
         val image: String?,

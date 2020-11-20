@@ -1,4 +1,4 @@
-package com.newlogic.mlkitlib.newlogic.platform
+package com.newlogic.mlkitlib.idpass.platform
 
 enum class AnalyzerType {
     MRZ,

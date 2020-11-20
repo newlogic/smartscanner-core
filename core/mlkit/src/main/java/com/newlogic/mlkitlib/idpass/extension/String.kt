@@ -1,4 +1,4 @@
-package com.newlogic.mlkitlib.newlogic.extension
+package com.newlogic.mlkitlib.idpass.extension
 
 import java.text.SimpleDateFormat
 import java.util.*

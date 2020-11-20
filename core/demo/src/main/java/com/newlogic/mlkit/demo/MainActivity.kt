@@ -11,12 +11,12 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.newlogic.mlkit.R
 import com.newlogic.mlkit.databinding.ActivityMainBinding
 import com.newlogic.mlkit.demo.ResultActivity.Companion.SCAN_RESULT
-import com.newlogic.mlkitlib.newlogic.SmartScannerActivity
-import com.newlogic.mlkitlib.newlogic.config.BarcodeOptions
-import com.newlogic.mlkitlib.newlogic.config.Config
-import com.newlogic.mlkitlib.newlogic.config.ImageResultType.PATH
-import com.newlogic.mlkitlib.newlogic.extension.empty
-import com.newlogic.mlkitlib.newlogic.platform.ScannerOptions
+import com.newlogic.mlkitlib.idpass.SmartScannerActivity
+import com.newlogic.mlkitlib.idpass.config.BarcodeOptions
+import com.newlogic.mlkitlib.idpass.config.Config
+import com.newlogic.mlkitlib.idpass.config.ImageResultType.PATH
+import com.newlogic.mlkitlib.idpass.extension.empty
+import com.newlogic.mlkitlib.idpass.platform.ScannerOptions
 import java.util.*
 
 

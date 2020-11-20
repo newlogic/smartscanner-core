@@ -1,10 +1,10 @@
-package com.newlogic.mlkitlib.newlogic.extension
+package com.newlogic.mlkitlib.idpass.extension
 
 import android.graphics.*
 import android.media.Image
 import android.util.Base64
 import android.util.Log
-import com.newlogic.mlkitlib.newlogic.SmartScannerActivity
+import com.newlogic.mlkitlib.idpass.SmartScannerActivity
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream

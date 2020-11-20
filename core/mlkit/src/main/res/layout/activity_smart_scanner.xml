@@ -8,7 +8,7 @@
     android:background="@color/transparent_grey"
     android:elevation="3dp"
     android:textAlignment="gravity"
-    tools:context=".newlogic.SmartScannerActivity">
+    tools:context=".idpass.SmartScannerActivity">
 
     <androidx.appcompat.widget.AppCompatImageButton
         android:id="@+id/manualCapture"

@@ -1,10 +1,10 @@
-package com.newlogic.mlkitlib.newlogic.platform
+package com.newlogic.mlkitlib.idpass.platform
 
 import android.util.Log
+import com.newlogic.mlkitlib.idpass.SmartScannerActivity
 import com.newlogic.mlkitlib.innovatrics.mrz.MrzParser
 import com.newlogic.mlkitlib.innovatrics.mrz.MrzRecord
 import com.newlogic.mlkitlib.innovatrics.mrz.records.MrtdTd1
-import com.newlogic.mlkitlib.newlogic.SmartScannerActivity
 import java.net.URLEncoder
 
 object MRZCleaner {

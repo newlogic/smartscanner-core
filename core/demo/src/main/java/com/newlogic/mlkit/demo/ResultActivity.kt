@@ -12,8 +12,8 @@ import com.newlogic.mlkit.R
 import com.newlogic.mlkit.databinding.ActivityResultBinding
 import com.newlogic.mlkit.demo.MainActivity.Companion.imageType
 import com.newlogic.mlkit.demo.utils.AnimationUtils
-import com.newlogic.mlkitlib.newlogic.config.ImageResultType.PATH
-import com.newlogic.mlkitlib.newlogic.extension.decodeBase64
+import com.newlogic.mlkitlib.idpass.config.ImageResultType.PATH
+import com.newlogic.mlkitlib.idpass.extension.decodeBase64
 import java.util.*
 
 

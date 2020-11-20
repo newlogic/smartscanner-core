@@ -1,4 +1,4 @@
-package com.newlogic.mlkitlib.newlogic.config
+package com.newlogic.mlkitlib.idpass.config
 
 import com.google.mlkit.vision.barcode.Barcode.*
 

@@ -1,4 +1,4 @@
-package com.newlogic.mlkitlib.newlogic.utils
+package com.newlogic.mlkitlib.idpass.utils
 
 import android.content.Context
 import android.content.res.AssetManager
