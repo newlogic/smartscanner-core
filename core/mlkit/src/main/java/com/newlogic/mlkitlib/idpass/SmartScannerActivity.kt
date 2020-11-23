@@ -141,7 +141,6 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
         mlkitMS = findViewById(R.id.mlkitMS)
         mlkitTime = findViewById(R.id.mlkitTime)
         loading = findViewById(R.id.loading)
-
         // hide actionbar
         supportActionBar?.hide()
         supportActionBar?.setDisplayShowTitleEnabled(false)
@@ -203,7 +202,6 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
             } ?: run {
                 coordinatorLayoutView.setBackgroundColor(ContextCompat.getColor(this, R.color.transparent_grey))
             }
-
         } catch (iae: IllegalArgumentException) {
             // This color string is not valid
             coordinatorLayoutView.setBackgroundColor(ContextCompat.getColor(this, R.color.transparent_grey))
@@ -212,11 +210,17 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
         if (mode == BARCODE.value) {
             val layoutParams = modelLayoutView.layoutParams as ConstraintLayout.LayoutParams
             when (barcodeOptions.barcodeScannerSize) {
-                ScannerSize.LARGE.value-> {
+                ScannerSize.CUSTOM_QR.value -> {
+                    layoutParams.dimensionRatio = "4:6"
+                    layoutParams.marginStart = 96 // Approx. 48dp
+                    layoutParams.marginEnd = 96 // Approx. 48dp
+                    modelLayoutView.layoutParams = layoutParams
+                }
+                ScannerSize.LARGE.value -> {
                     layoutParams.dimensionRatio = "4:7"
                     modelLayoutView.layoutParams = layoutParams
                 }
-                ScannerSize.SMALL.value  -> {
+                ScannerSize.SMALL.value -> {
                     layoutParams.dimensionRatio = "4:4"
                     modelLayoutView.layoutParams = layoutParams
                 }
@@ -226,7 +230,6 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                 }
             }
         }
-
         // branding
         brandingImage?.visibility = config.branding?.let { if (it) VISIBLE else GONE } ?: run { VISIBLE }
         // manual capture
@@ -434,7 +437,6 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                                     }
                                 }
                                 rectangle!!.isSelected = rawFullRead != ""
-                                if(rawFullRead != "") loading?.visibility = VISIBLE else INVISIBLE
                                 try {
                                     Log.d(
                                         "$TAG/MLKit",

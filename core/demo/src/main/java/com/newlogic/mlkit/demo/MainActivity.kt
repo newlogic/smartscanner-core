@@ -80,11 +80,6 @@ class MainActivity : AppCompatActivity() {
         startActivityForResult(intent, OP_MLKIT)
     }
 
-    private fun startQrScan() {
-        val qrFormatOnly = arrayListOf("QR_CODE")
-        startBarcode(BarcodeOptions(qrFormatOnly))
-    }
-
     @SuppressLint("InflateParams")
     private fun startBarcodeScan()  {
         val bottomSheetDialog = BottomSheetDialog(this)
@@ -107,6 +102,7 @@ class MainActivity : AppCompatActivity() {
         bottomSheetDialog.show()
     }
 
+    private fun startQrScan() = startBarcode(BarcodeOptions(arrayListOf("QR_CODE"), ScannerSize.CUSTOM_QR.value))
     private fun startBarcode(barcodeOptions: BarcodeOptions? = null) {
         val intent = Intent(this, SmartScannerActivity::class.java)
         intent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleBarcode(sampleConfig(), barcodeOptions))
