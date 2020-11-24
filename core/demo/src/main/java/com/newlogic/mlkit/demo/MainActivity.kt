@@ -1,19 +1,18 @@
 package com.newlogic.mlkit.demo
 
-import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.newlogic.mlkit.R
 import com.newlogic.mlkit.databinding.ActivityMainBinding
 import com.newlogic.mlkit.demo.ResultActivity.Companion.SCAN_RESULT
 import com.newlogic.mlkitlib.idpass.SmartScannerActivity
-import com.newlogic.mlkitlib.idpass.config.*
+import com.newlogic.mlkitlib.idpass.config.BarcodeFormat
+import com.newlogic.mlkitlib.idpass.config.BarcodeOptions
+import com.newlogic.mlkitlib.idpass.config.Config
 import com.newlogic.mlkitlib.idpass.config.ImageResultType.PATH
+import com.newlogic.mlkitlib.idpass.config.ScannerOptions
 import com.newlogic.mlkitlib.idpass.extension.empty
 
 
@@ -25,7 +24,7 @@ class MainActivity : AppCompatActivity() {
         val imageType = PATH.value
 
         private fun sampleConfig() = Config(
-                branding = true,
+                branding = false,
                 background = String.empty(),
                 font = String.empty(),
                 imageResultType = imageType,
@@ -47,7 +46,7 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
         binding.itemMrz.item.setOnClickListener { startMrzScan() }
         binding.itemQr.item.setOnClickListener { startQrScan() }
-        binding.itemBarcode.item.setOnClickListener { startBarcodeScan() }
+        binding.itemBarcode.item.setOnClickListener { startBarcode(BarcodeOptions(BarcodeFormat.default))}
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
@@ -80,29 +79,7 @@ class MainActivity : AppCompatActivity() {
         startActivityForResult(intent, OP_MLKIT)
     }
 
-    @SuppressLint("InflateParams")
-    private fun startBarcodeScan()  {
-        val bottomSheetDialog = BottomSheetDialog(this)
-        val sheetViewBarcode = layoutInflater.inflate(R.layout.bottom_sheet_barcode, null)
-        bottomSheetDialog.setContentView(sheetViewBarcode)
-        // bottom sheet ids
-        val btnPdf417 = sheetViewBarcode.findViewById<LinearLayout>(R.id.btnPdf417)
-        val btnBarcode = sheetViewBarcode.findViewById<LinearLayout>(R.id.btnBarcode)
-        val btnCancel = sheetViewBarcode.findViewById<LinearLayout>(R.id.btnCancel)
-        // bottom sheet listeners
-        btnPdf417.setOnClickListener {
-            startBarcode(BarcodeOptions(arrayListOf("PDF_417"), ScannerSize.LARGE.value))
-            bottomSheetDialog.dismiss()
-        }
-        btnBarcode.setOnClickListener {
-            startBarcode(BarcodeOptions(BarcodeFormat.default, ScannerSize.SMALL.value))
-            bottomSheetDialog.dismiss()
-        }
-        btnCancel.setOnClickListener { bottomSheetDialog.dismiss() }
-        bottomSheetDialog.show()
-    }
-
-    private fun startQrScan() = startBarcode(BarcodeOptions(arrayListOf("QR_CODE"), ScannerSize.CUSTOM_QR.value))
+    private fun startQrScan() = startBarcode(BarcodeOptions(arrayListOf("QR_CODE")))
     private fun startBarcode(barcodeOptions: BarcodeOptions? = null) {
         val intent = Intent(this, SmartScannerActivity::class.java)
         intent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleBarcode(sampleConfig(), barcodeOptions))

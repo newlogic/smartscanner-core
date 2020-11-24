@@ -13,10 +13,10 @@ enum class BarcodeFormat(val label: String, val value: Int) {
     EAN_8("EAN_8", FORMAT_EAN_8),
     EAN_13("EAN_13", FORMAT_EAN_13),
     ITF("ITF", FORMAT_ITF),
+    PDF_417("PDF_417", FORMAT_PDF417),
     QR_CODE("QR_CODE", FORMAT_QR_CODE),
     UPC_A("UPC_A", FORMAT_UPC_A),
-    UPC_E("UPC_E", FORMAT_UPC_E),
-    PDF_417("PDF_417", FORMAT_PDF417);
+    UPC_E("UPC_E", FORMAT_UPC_E);
 
     companion object {
         val default =
@@ -31,6 +31,7 @@ enum class BarcodeFormat(val label: String, val value: Int) {
                 EAN_8.label,
                 EAN_13.label,
                 ITF.label,
+                PDF_417.label,
                 QR_CODE.label,
                 UPC_A.label,
                 UPC_E.label,
