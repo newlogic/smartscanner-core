@@ -59,7 +59,9 @@ Note that multiple formats can be supported
 
 Note: default is `ALL`
 ```
-barcodeOptions: [ 'EAN_13','EAN_8','AZTEC'] 
+barcodeOptions: { 
+    [ 'EAN_13','EAN_8','AZTEC'] 
+}
 ```
 
 Config
@@ -124,8 +126,9 @@ BARCODE:
 const result = await MLKitPlugin.executeMLKit({
         action: 'START_MLKIT',
         mode: 'barcode',
-        barcodeOptions: [ 'EAN_13',
-         'EAN_8','AZTEC'] // string list of barcode formats
+        barcodeOptions: { 
+            [ 'EAN_13','EAN_8','AZTEC'] 
+        }
         config: {
           background: '#ffc234', // default transparent gray if empty, will accept hex color values only
           font: 'NOTO_SANS_ARABIC',
