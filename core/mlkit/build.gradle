@@ -81,4 +81,8 @@ dependencies {
 
     // Gson
     implementation 'com.google.code.gson:gson:2.8.6'
+
+    //ID Pass lite
+    implementation project(':idpass-lite')
+    implementation 'com.google.protobuf:protobuf-java:3.12.2'
 }

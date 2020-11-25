@@ -4,4 +4,5 @@ enum class AnalyzerType {
     MRZ,
     BARCODE,
     TESSERACT,
+    IDPASS_LITE,
 }
