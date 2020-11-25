@@ -14,8 +14,8 @@
                         <option name="values">
                           <map>
                             <entry key="assetSourceType" value="FILE" />
-                            <entry key="outputName" value="ic_scan_qr" />
-                            <entry key="sourceFile" value="$USER_HOME$/Desktop/qr, code, scan, barcode.svg" />
+                            <entry key="outputName" value="ic_scan_idpass_lite" />
+                            <entry key="sourceFile" value="$USER_HOME$/Desktop/scan, qr, code, scanning.svg" />
                           </map>
                         </option>
                       </PersistentState>

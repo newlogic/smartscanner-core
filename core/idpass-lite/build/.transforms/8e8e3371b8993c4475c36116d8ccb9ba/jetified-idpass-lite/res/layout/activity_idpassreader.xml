@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+
+    <TextView
+        android:id="@+id/hex"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="16dp"
+        android:typeface="monospace"
+        android:textSize="12sp"
+        android:text="JOHN DOE The Quick Brown Fox Jump Over the Back of Lazy dog. The Quick Brown Fox Jump Over the Back of Lazy Dog."
+        tools:text="54 65 73 74 20 51 52 20  Test QR\n43 6F 64 65              Code"
+        tools:ignore="MissingConstraints" />
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        >
+
+        <EditText
+            android:id="@+id/cardpincode"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:inputType="numberPassword"
+            android:maxLength="4"
+            android:hint="pin code"
+            />
+
+        <Button
+            android:id="@+id/pincodeauth"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="Authenticate"
+            tools:ignore="MissingConstraints" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/back2camera"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="Back"
+        tools:ignore="MissingConstraints" />
+
+</LinearLayout>

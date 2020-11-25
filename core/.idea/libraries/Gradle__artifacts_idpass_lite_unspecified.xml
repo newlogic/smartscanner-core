@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Gradle: artifacts:idpass-lite:unspecified">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/idpass-lite/build/.transforms/8e8e3371b8993c4475c36116d8ccb9ba/jetified-idpass-lite/jars/classes.jar!/" />
+      <root url="file://$PROJECT_DIR$/idpass-lite/build/.transforms/8e8e3371b8993c4475c36116d8ccb9ba/jetified-idpass-lite/res" />
+      <root url="file://$PROJECT_DIR$/idpass-lite/build/.transforms/8e8e3371b8993c4475c36116d8ccb9ba/jetified-idpass-lite/AndroidManifest.xml" />
+      <root url="jar://$PROJECT_DIR$/idpass-lite/build/.transforms/8e8e3371b8993c4475c36116d8ccb9ba/jetified-idpass-lite/jars/libs/idpasslite.proto.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
