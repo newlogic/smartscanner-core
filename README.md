@@ -30,7 +30,8 @@ Main structure items:
 
 ## Scanner Options
 ---------------
-**mode** - the scanner is able to scan Barcodes or MRZ and is accessed by setting to either `barcode` or `mrz`
+**mode** 
+- the scanner is able to scan Barcodes or MRZ and is accessed by setting to either `barcode` or `mrz`
 ```
 mode: 'mrz' 
 ```
@@ -41,9 +42,13 @@ mode: 'mrz'
 ```
 mrzFormat: 'MRTD_TD1'
 ```
-**barcodeOptions** - when mode is set to `barcode`, barcodeOptions is able to be accessed and set by the supported formats listed below.
-Note that multiple formats can be supported 
-- `ALL` // Support all formats
+**barcodeOptions** 
+- When mode is set to `barcode`, barcodeOptions is able to be accessed and set by a list of barcode formats.
+- Multiple barcode formats can be supported, see complete list below. 
+- Default is `ALL`
+
+Supported Formats:
+- `ALL` (Support all formats)
 - `AZTEC`
 - `CODABAR`
 - `CODE_39`
@@ -57,11 +62,22 @@ Note that multiple formats can be supported
 - `UPC_E`
 - `PDF_417`
 
-Note: default is `ALL`
 ```
-barcodeOptions: { 
-    barcodeFormats: [ 'EAN_13','EAN_8','AZTEC'] 
-}
+  barcodeOptions: { 
+    barcodeFormats: [ `AZTEC`, 
+                      `CODABAR`, 
+		      `CODE_39`, 
+		      `CODE_93`, 
+		      `CODE_128`, 
+		      `DATA_MATRIX`,
+		      'EAN_8',
+		      'EAN_13',
+		      `QR_CODE`,
+		      `UPC_A`,
+		      `UPC_E`,
+		      `PDF_417`
+		  ] 
+	       }
 ```
 
 Config
@@ -88,7 +104,7 @@ font: 'NOTO_SANS_ARABIC'
 - currently supports 2 image result types: `base_64` or `path` (path of image string)
 - default is `path`
 ```
-imageResultType: 'path'
+imageResultType: 'base_64'
 ```
 **isManualCapture** - enables manual capture mrz/barcode via capture button when not detected, set to either `true` or `false`
 - default is `false`
@@ -120,16 +136,31 @@ const result = await MLKitPlugin.executeScanner({
 ```
 BARCODE:
 ```
-const result = await MLKitPlugin.executeMLKit({
+const result = await MLKitPlugin.executeScanner({
         action: 'START_MLKIT',
-        mode: 'barcode',
-        barcodeOptions: { 
-            barcodeFormats: [ 'EAN_13','EAN_8','AZTEC'] 
-        }
-        config: {
-          background: '#ffc234', // default transparent gray if empty, will accept hex color values only
-          label: 'sample label'
-        }
+	options: {
+          mode: 'barcode',
+          barcodeOptions: { 
+               barcodeFormats: [ 
+	              `AZTEC`, 
+                      `CODABAR`, 
+		      `CODE_39`, 
+		      `CODE_93`, 
+		      `CODE_128`, 
+		      `DATA_MATRIX`,
+		      'EAN_8',
+		      'EAN_13',
+		      `QR_CODE`,
+		      `UPC_A`,
+		      `UPC_E`,
+		      `PDF_417`
+		 ] 
+	  },
+          config: {
+            background: '#ffc234', // default transparent gray if empty, will accept hex color values only
+            label: 'sample label'
+          }
+	}
       });
 ```
 
