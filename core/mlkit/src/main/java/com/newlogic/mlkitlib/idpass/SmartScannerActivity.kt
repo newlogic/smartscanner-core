@@ -71,6 +71,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
     companion object {
         val TAG: String = SmartScannerActivity::class.java.simpleName
         const val MLKIT_RESULT = "mlkit_result"
+        const val MLKIT_RESULT_BYTES = "mlkit_result_bytes"
         const val SCANNER_OPTIONS = "scanner_options"
     }
 
@@ -370,6 +371,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                             val timeRequired = System.currentTimeMillis() - start
                             val rawValue: String
                             val cornersString: String
+                            val rawBytes: ByteArray
                             Log.d("$TAG/MLKit", "barcode: success: $timeRequired ms")
                             if (barcodes.isNotEmpty()) {
                                 //                                val bounds = barcode.boundingBox
@@ -382,7 +384,6 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                                 }
                                 cornersString = builder.toString()
                                 rawValue = barcodes[0].rawValue!!
-                                //val valueType = barcode.valueType
                                 val imageCachePathFile = getImagePath()
                                 bf.cacheImageToLocal(
                                     imageCachePathFile,
@@ -396,7 +397,13 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                                         rawValue
                                     )
                                 )
-                                getAnalyzerResult(AnalyzerType.BARCODE, jsonString)
+                                rectangle!!.isSelected = rawValue != ""
+                                if (barcodeOptions.idPassLiteSupport == true) {
+                                    rawBytes = barcodes[0].rawBytes!!
+                                    getAnalyzerResult(AnalyzerType.IDPASS_LITE, null, rawBytes)
+                                } else {
+                                    getAnalyzerResult(AnalyzerType.BARCODE, jsonString)
+                                }
                             } else {
                                 Log.d("$TAG/MLKit", "barcode: nothing detected")
                             }
@@ -584,7 +591,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
         return "${context.cacheDir}/Scanner-$currentDateTime.jpg"
     }
 
-    private fun getAnalyzerResult(analyzerType: AnalyzerType, result: String) {
+    private fun getAnalyzerResult(analyzerType: AnalyzerType, result: String?, rawBytes: ByteArray? = null) {
         val data = Intent()
         runOnUiThread {
             when (analyzerType) {
@@ -593,16 +600,20 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                     Log.d(TAG, "value: $result")
                     mlkitText?.text = result
                 }
-                AnalyzerType.BARCODE -> {
-                    Log.d(TAG, "Success from BARCODE")
-                    Log.d(TAG, "value: $result")
-                }
                 AnalyzerType.TESSERACT -> {
                     Log.d(TAG, "Success from TESSERACT")
                     Log.d(TAG, "value: $result")
                     mlkitText?.text = result
                 }
+                AnalyzerType.BARCODE -> {
+                    Log.d(TAG, "Success from BARCODE")
+                    Log.d(TAG, "value: $result")
+                }
+                AnalyzerType.IDPASS_LITE -> {
+                    Log.d(TAG, "Success from IDPASS_LITE")
+                }
             }
+            data.putExtra(MLKIT_RESULT_BYTES, rawBytes)
             data.putExtra(MLKIT_RESULT, result)
             setResult(Activity.RESULT_OK, data)
             finish()
