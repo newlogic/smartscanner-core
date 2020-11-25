@@ -14,7 +14,7 @@
         android:id="@+id/appCompatImageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_scan_qr"
+        android:src="@drawable/ic_scan_idpass_lite"
         android:layout_marginStart="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -24,7 +24,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/sourcesanspro_medium"
-        android:text="@string/mode_qr"
+        android:text= "@string/mode_idpass_lite"
         android:textColor="@color/newlogic_black"
         android:textSize="16sp"
         android:layout_marginTop="8dp"

@@ -26,7 +26,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="9dp"
-        android:fontFamily="@font/sourcesanspro_medium"
+        android:fontFamily="@font/sourcesanspro_bold"
         android:text="@string/label_smart_scanner"
         android:textColor="@color/newlogic_black"
         android:textSize="14sp"
@@ -60,6 +60,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="24dp"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/itemMrz" />
 
@@ -74,17 +75,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/itemQr" />
 
-    <TextView
-        android:id="@+id/labelText"
-        android:layout_width="wrap_content"
+    <include
+        android:id="@+id/itemIdpassLite"
+        layout="@layout/item_idpass_lite"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/sourcesanspro_medium"
-        android:text="@string/label_choose_codetype"
-        android:textColor="@color/newlogic_black"
-        android:layout_marginTop="36dp"
-        android:textSize="16sp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="24dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/itemBarcode" />
 
     <TextView
@@ -93,8 +92,8 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:fontFamily="@font/sourcesanspro_regular"
-        android:text="Developed by NewLogic, 2020"
-        android:textSize="12sp"
+        android:text="Developed by NewLogic."
+        android:textSize="13sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

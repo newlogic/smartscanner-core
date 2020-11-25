@@ -20,6 +20,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".demo.ResultActivity"/>
+        <activity android:name=".demo.IDPassResultActivity"/>
         <meta-data
             android:name="com.google.mlkit.vision.DEPENDENCIES"
             android:value="ocr" />

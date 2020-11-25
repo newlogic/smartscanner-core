@@ -8,6 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.newlogic.mlkit.databinding.ActivityMainBinding
 import com.newlogic.mlkit.demo.ResultActivity.Companion.SCAN_RESULT
 import com.newlogic.mlkitlib.idpass.SmartScannerActivity
+import com.newlogic.mlkitlib.idpass.SmartScannerActivity.Companion.MLKIT_RESULT
+import com.newlogic.mlkitlib.idpass.SmartScannerActivity.Companion.MLKIT_RESULT_BYTES
 import com.newlogic.mlkitlib.idpass.config.BarcodeFormat
 import com.newlogic.mlkitlib.idpass.config.BarcodeOptions
 import com.newlogic.mlkitlib.idpass.config.Config
@@ -23,13 +25,13 @@ class MainActivity : AppCompatActivity() {
         private const val OP_MLKIT = 1001
         val imageType = PATH.value
 
-        private fun sampleConfig() = Config(
+        private fun sampleConfig(isManualCapture : Boolean) = Config(
                 branding = false,
                 background = String.empty(),
                 font = String.empty(),
                 imageResultType = imageType,
                 label = String.empty(),
-                isManualCapture = true
+                isManualCapture = isManualCapture
         )
     }
 
@@ -45,8 +47,9 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         binding.itemMrz.item.setOnClickListener { startMrzScan() }
-        binding.itemQr.item.setOnClickListener { startQrScan() }
+        binding.itemQr.item.setOnClickListener { startBarcode(BarcodeOptions(arrayListOf("QR_CODE"))) }
         binding.itemBarcode.item.setOnClickListener { startBarcode(BarcodeOptions(BarcodeFormat.default))}
+        binding.itemIdpassLite.item.setOnClickListener { startBarcode(BarcodeOptions(arrayListOf("QR_CODE"), idPassLiteSupport = true)) }
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
@@ -54,10 +57,18 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == OP_MLKIT) {
             Log.d(TAG, "Plugin post ML Activity resultCode $resultCode")
             if (resultCode == RESULT_OK) {
-                val result = intent?.getStringExtra(SmartScannerActivity.MLKIT_RESULT)
-                val resultIntent = Intent(this, ResultActivity::class.java)
-                resultIntent.putExtra(SCAN_RESULT, result)
-                startActivity(resultIntent)
+                val result = intent?.getStringExtra(MLKIT_RESULT)
+                if (result != null) {
+                    val resultIntent = Intent(this, ResultActivity::class.java)
+                    resultIntent.putExtra(SCAN_RESULT, result)
+                    startActivity(resultIntent)
+                } else {
+                    val resultBytes = intent?.getByteArrayExtra(MLKIT_RESULT_BYTES)
+                    val myIntent = Intent(this, IDPassResultActivity::class.java)
+                    myIntent.putExtra(IDPassResultActivity.RESULT, resultBytes)
+                    startActivity(myIntent)
+                }
+
             }
         }
     }
@@ -75,14 +86,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun startMrzScan() {
         val intent = Intent(this, SmartScannerActivity::class.java)
-        intent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleMrz(sampleConfig()))
+        intent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleMrz(sampleConfig(true)))
         startActivityForResult(intent, OP_MLKIT)
     }
 
-    private fun startQrScan() = startBarcode(BarcodeOptions(arrayListOf("QR_CODE")))
     private fun startBarcode(barcodeOptions: BarcodeOptions? = null) {
         val intent = Intent(this, SmartScannerActivity::class.java)
-        intent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleBarcode(sampleConfig(), barcodeOptions))
+        intent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleBarcode(sampleConfig(false), barcodeOptions))
         startActivityForResult(intent, OP_MLKIT)
     }
 }
