@@ -93,7 +93,7 @@ imageResultType: 'path'
 **isManualCapture** - enables manual capture mrz/barcode via capture button when not detected, set to either `true` or `false`
 - default is `false`
 ```
-isManualCapture: false
+isManualCapture: true
 ```
 **label** - will show a label text below the scanner, default is empty
 - default is empty string
@@ -112,9 +112,6 @@ const result = await MLKitPlugin.executeScanner({
             mrzFormat: 'MRTD_TD1',
             config: {
               background: '#89837c',
-              font: 'NOTO_SANS_ARABIC',
-              label: this.$t('Align your card with the box'),
-              imageResultType: 'base_64',
               branding: false,
               isManualCapture: true
             }
@@ -131,9 +128,7 @@ const result = await MLKitPlugin.executeMLKit({
         }
         config: {
           background: '#ffc234', // default transparent gray if empty, will accept hex color values only
-          font: 'NOTO_SANS_ARABIC',
-          label: 'التقط الصورة',
-          imageResultType: 'base_64' // default path if empty or not set to base64
+          label: 'sample label'
         }
       });
 ```
