@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/mlkitlibrary.iml" filepath="$PROJECT_DIR$/.idea/modules/mlkitlibrary.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/demo/mlkitlibrary.demo.iml" filepath="$PROJECT_DIR$/.idea/modules/demo/mlkitlibrary.demo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/idpass-lite/mlkitlibrary.idpass-lite.iml" filepath="$PROJECT_DIR$/.idea/modules/idpass-lite/mlkitlibrary.idpass-lite.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/mlkit/mlkitlibrary.mlkit.iml" filepath="$PROJECT_DIR$/.idea/modules/mlkit/mlkitlibrary.mlkit.iml" />
     </modules>
   </component>
