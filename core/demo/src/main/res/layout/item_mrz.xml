@@ -23,7 +23,7 @@
         android:id="@+id/txtMrz"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/sourcesanspro_bold"
+        android:fontFamily="@font/sourcesanspro_medium"
         android:text="@string/mode_mrz"
         android:textColor="@color/newlogic_black"
         android:textSize="16sp"

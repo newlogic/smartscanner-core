@@ -7,9 +7,10 @@
     <string name="action_show_hide">SHOW/HIDE</string>
 
     <!--Modes-->
+    <string name="mode_barcode">Barcode</string>
+    <string name="mode_idpass_lite">ID PASS Lite</string>
     <string name="mode_mrz">MRZ Code</string>
     <string name="mode_qr">QR Code</string>
-    <string name="mode_barcode">Barcode</string>
 
     <!--Labels-->
     <string name="label_smart_scanner">Smart Scanner</string>

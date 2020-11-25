@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "com.newlogic.mlkit.demo"
-        minSdkVersion 23
+        minSdkVersion 24
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
@@ -64,4 +64,8 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
 
     implementation project(path: ':mlkit')
+
+    //ID Pass lite
+    implementation project(':idpass-lite')
+    implementation 'com.google.protobuf:protobuf-java:3.12.2'
 }
