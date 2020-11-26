@@ -63,22 +63,22 @@ Supported Formats:
 - `PDF_417`
 
 ```
-  barcodeOptions: { 
-    barcodeFormats: [ 
-                      'AZTEC', 
-                      'CODABAR', 
-		      'CODE_39', 
-		      'CODE_93', 
-		      'CODE_128', 
-		      'DATA_MATRIX',
-		      'EAN_8',
-		      'EAN_13',
-		      'QR_CODE',
-		      'UPC_A',
-		      'UPC_E',
-		      'PDF_417'
-		  ] 
-	       }
+    barcodeOptions: { 
+        barcodeFormats: [ 
+            'AZTEC', 
+            'CODABAR', 
+		    'CODE_39', 
+		    'CODE_93', 
+		    'CODE_128', 
+		    'DATA_MATRIX',
+		    'EAN_8',
+		    'EAN_13',
+		    'QR_CODE',
+		    'UPC_A',
+		    'UPC_E',
+		    'PDF_417'
+		] 
+	}
 ```
 
 Config
@@ -123,8 +123,8 @@ label: 'sample label string'
 MRZ:
 ```
 const result = await MLKitPlugin.executeScanner({
-          action: 'START_SCANNER',
-          options: {
+        action: 'START_SCANNER',
+        options: {
             mode: 'mrz',
             mrzFormat: 'MRTD_TD1',
             config: {
@@ -132,37 +132,37 @@ const result = await MLKitPlugin.executeScanner({
               branding: false,
               isManualCapture: true
             }
-          }
-      });
+        }
+    });
 ```
 BARCODE:
 ```
 const result = await MLKitPlugin.executeScanner({
         action: 'START_MLKIT',
-	options: {
-          mode: 'barcode',
-          barcodeOptions: { 
-               barcodeFormats: [ 
-	              'AZTEC', 
-                      'CODABAR', 
-		      'CODE_39', 
-		      'CODE_93', 
-		      'CODE_128', 
-		      'DATA_MATRIX',
-		      'EAN_8',
-		      'EAN_13',
-		      'QR_CODE',
-		      'UPC_A',
-		      'UPC_E',
-		      'PDF_417'
-		 ] 
-	  },
-          config: {
-            background: '#ffc234', 
-            label: 'sample label'
-          }
-	}
-      });
+	    options: {
+            mode: 'barcode',
+            barcodeOptions: { 
+                barcodeFormats: [ 
+	                'AZTEC', 
+                    'CODABAR', 
+	                'CODE_39', 
+                    'CODE_93', 
+		            'CODE_128', 
+		            'DATA_MATRIX',
+		            'EAN_8',
+	                'EAN_13',
+	                'QR_CODE',
+		            'UPC_A',
+		            'UPC_E',
+		            'PDF_417'
+		        ] 
+	        },
+            config: {
+                background: '#ffc234', 
+                label: 'sample label'
+            }
+	    }
+    });
 ```
 
 ## Intent App Call Out
