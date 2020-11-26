@@ -1,5 +1,5 @@
 # idpass-smart-scanner-core
-The repository for the core Library to be used with the Base project of the ID Pass smart scanner 
+The repository for the core Library to be used with the Base project of the ID PASS smart scanner 
 
 ## Setting Up
 ---------------
@@ -36,7 +36,7 @@ Main structure items:
 mode: 'mrz' 
 ```
 **mrzFormat** 
-- when mode is set to `mrz`, mrzFormat is able to be accessed and set by either `MRP` (Default) or `MRTD_TD1`. 
+- when mode is set to `mrz`, mrzFormat is able to be accessed and set by either `MRP` or `MRTD_TD1`. 
 - format `MRTD_TD1` is used in retrieving optional data from scanned MRZ
 - default is `MRP`
 ```
@@ -64,18 +64,19 @@ Supported Formats:
 
 ```
   barcodeOptions: { 
-    barcodeFormats: [ `AZTEC`, 
-                      `CODABAR`, 
-		      `CODE_39`, 
-		      `CODE_93`, 
-		      `CODE_128`, 
-		      `DATA_MATRIX`,
+    barcodeFormats: [ 
+                      'AZTEC', 
+                      'CODABAR', 
+		      'CODE_39', 
+		      'CODE_93', 
+		      'CODE_128', 
+		      'DATA_MATRIX',
 		      'EAN_8',
 		      'EAN_13',
-		      `QR_CODE`,
-		      `UPC_A`,
-		      `UPC_E`,
-		      `PDF_417`
+		      'QR_CODE',
+		      'UPC_A',
+		      'UPC_E',
+		      'PDF_417'
 		  ] 
 	       }
 ```
@@ -89,13 +90,13 @@ Config
 background: '#89837c'
 ```
 **branding** 
-- displays ID Pass branding, set to either `true` or `false`
+- displays ID PASS branding, set to either `true` or `false`
 - default is `true`
 ```
-branding: false`
+branding: false
 ```
 **font** 
-- currently supports 2 fonts only, NOTO_SANS_ARABIC (Arabic) and SOURCE_SANS_PRO (ID Pass font), default is SOURCE_SANS_PRO when empty or not set
+- currently supports 2 fonts only, `NOTO_SANS_ARABIC` (Arabic) and `SOURCE_SANS_PRO` (ID PASS font)
 - default is `SOURCE_SANS_PRO`
 ```
 font: 'NOTO_SANS_ARABIC'
@@ -111,7 +112,7 @@ imageResultType: 'base_64'
 ```
 isManualCapture: true
 ```
-**label** - will show a label text below the scanner, default is empty
+**label** - will show a label text below the scanner
 - default is empty string
 ```
 label: 'sample label string'
@@ -142,22 +143,22 @@ const result = await MLKitPlugin.executeScanner({
           mode: 'barcode',
           barcodeOptions: { 
                barcodeFormats: [ 
-	              `AZTEC`, 
-                      `CODABAR`, 
-		      `CODE_39`, 
-		      `CODE_93`, 
-		      `CODE_128`, 
-		      `DATA_MATRIX`,
+	              'AZTEC', 
+                      'CODABAR', 
+		      'CODE_39', 
+		      'CODE_93', 
+		      'CODE_128', 
+		      'DATA_MATRIX',
 		      'EAN_8',
 		      'EAN_13',
-		      `QR_CODE`,
-		      `UPC_A`,
-		      `UPC_E`,
-		      `PDF_417`
+		      'QR_CODE',
+		      'UPC_A',
+		      'UPC_E',
+		      'PDF_417'
 		 ] 
 	  },
           config: {
-            background: '#ffc234', // default transparent gray if empty, will accept hex color values only
+            background: '#ffc234', 
             label: 'sample label'
           }
 	}
