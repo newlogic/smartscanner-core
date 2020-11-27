@@ -186,12 +186,11 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
         // capture text label
         captureLabelText?.text = config.label ?: String.empty()
         // font to use
-        captureLabelText?.typeface =
-            if (config.font == Fonts.NOTO_SANS_ARABIC.value) ResourcesCompat.getFont(
-                this,
-                R.font.notosansarabic_bold
-            )
-            else ResourcesCompat.getFont(this, R.font.sourcesanspro_bold)
+        captureLabelText?.typeface = when (config.font) {
+            Fonts.NOTO_SANS_ARABIC.value -> ResourcesCompat.getFont(this, R.font.notosansarabic_bold)
+            Fonts.ROBOTO.value -> ResourcesCompat.getFont(this, R.font.roboto_regular)
+            else -> ResourcesCompat.getFont(this, R.font.sourcesanspro_medium)
+        }
         // Background reader
         try {
             config.background?.let {
