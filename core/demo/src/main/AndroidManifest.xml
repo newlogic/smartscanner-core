@@ -13,14 +13,14 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".demo.MainActivity">
+        <activity android:name="com.newlogic.idpass.demo.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".demo.ResultActivity"/>
-        <activity android:name=".demo.IDPassResultActivity"/>
+        <activity android:name="com.newlogic.idpass.demo.ResultActivity"/>
+        <activity android:name="com.newlogic.idpass.demo.IDPassResultActivity"/>
         <meta-data
             android:name="com.google.mlkit.vision.DEPENDENCIES"
             android:value="ocr" />
