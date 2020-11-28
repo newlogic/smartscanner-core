@@ -7,7 +7,7 @@
     android:background="@color/white"
     android:gravity="center|center_vertical"
     android:orientation="vertical"
-    tools:context=".demo.MainActivity">
+    tools:context="com.newlogic.idpass.demo.MainActivity">
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/logo"
