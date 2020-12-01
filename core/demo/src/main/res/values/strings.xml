@@ -13,12 +13,16 @@
     <string name="mode_qr">QR Code</string>
 
     <!--Labels-->
+    <string name="label_authenticate">Authenticate</string>
+    <string name="label_birthday">Birthday: %1$s</string>
+    <string name="label_choose_codetype">Select code type to start scanning.</string>
+    <string name="label_enter_pin">Enter pin code</string>
+    <string name="label_hex">JOHN DOE The Quick Brown Fox Jump Over the Back of Lazy dog. The Quick Brown Fox Jump Over the Back of Lazy Dog.</string>
+    <string name="label_name">Name: %1$s</string>
+    <string name="label_nationality">Nationality: %1$s</string>
+    <string name="label_newlogic">Developed by NewLogic</string>
+    <string name="label_result_details">Scan Results</string>
     <string name="label_smart_scanner">Smart Scanner</string>
     <string name="label_surname">Surname: %1$s</string>
-    <string name="label_name">Name: %1$s</string>
-    <string name="label_birthday">Birthday: %1$s</string>
-    <string name="label_nationality">Nationality: %1$s</string>
-    <string name="label_choose_codetype">Select code type to start scanning.</string>
-    <string name="label_result_details">Scan Results</string>
 
 </resources>

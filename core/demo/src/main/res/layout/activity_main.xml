@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
     android:gravity="center|center_vertical"
     android:orientation="vertical"
     tools:context="com.newlogic.idpass.demo.MainActivity">
@@ -92,7 +91,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:fontFamily="@font/sourcesanspro_regular"
-        android:text="Developed by NewLogic."
+        android:text="@string/label_newlogic"
         android:textSize="13sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

@@ -90,3 +90,6 @@ lint/tmp/
 /app/signing
 /.idea/.name
 /app/staging/release/output-metadata.json
+
+# OSX files
+.DS_Store

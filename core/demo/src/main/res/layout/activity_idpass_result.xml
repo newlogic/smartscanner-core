@@ -49,7 +49,7 @@
             android:layout_marginRight="16dp"
             android:layout_marginBottom="16dp"
             android:fontFamily="@font/sourcesanspro_regular"
-            android:text="JOHN DOE The Quick Brown Fox Jump Over the Back of Lazy dog. The Quick Brown Fox Jump Over the Back of Lazy Dog."
+            android:text="@string/label_hex"
             android:textColor="@color/newlogic_black"
             android:textSize="14sp"
             tools:ignore="MissingConstraints"
@@ -57,11 +57,11 @@
     </LinearLayout>
 
     <androidx.appcompat.widget.AppCompatEditText
-        android:id="@+id/cardpincode"
+        android:id="@+id/cardPinCode"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fontFamily="@font/sourcesanspro_regular"
-        android:hint="Enter pin code"
+        android:hint="@string/label_enter_pin"
         android:gravity="center"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
@@ -73,7 +73,7 @@
         app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
 
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/pincodeauth"
+        android:id="@+id/pinCodeAuth"
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:fontFamily="@font/sourcesanspro_medium"
@@ -81,9 +81,9 @@
         android:layout_marginTop="8dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:text="Authenticate"
+        android:text="@string/label_authenticate"
         android:textColor="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardpincode" />
+        app:layout_constraintTop_toBottomOf="@+id/cardPinCode" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -75,7 +75,7 @@ public class MrzParser {
             str = str.substring(0, str.length() - 1);
         }
         final String[] names = str.split("<<");
-        String surname = "";
+        String surname;
         String givenNames = "";
         surname = parseString(new MrzRange(range.column, range.column + names[0].length(), range.row));
         if(names.length==1){
