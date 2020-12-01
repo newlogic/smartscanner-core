@@ -62,11 +62,11 @@ class ResultActivity : AppCompatActivity() {
         // Simple Data
         if (resultObject["givenNames"] != null) {
             binding.textName.visibility = VISIBLE
-            binding.textName.text = getString(R.string.label_name, resultObject["givenNames"].asString.toLowerCase(Locale.ROOT).capitalize())
+            binding.textName.text = getString(R.string.label_name, resultObject["givenNames"].asString.toLowerCase(Locale.ROOT).capitalize(Locale.ROOT))
         } else binding.textName.visibility = GONE
         if (resultObject["surname"] != null) {
             binding.textSurName.visibility = VISIBLE
-            binding.textSurName.text = getString(R.string.label_surname, resultObject["surname"].asString.toLowerCase(Locale.ROOT).capitalize())
+            binding.textSurName.text = getString(R.string.label_surname, resultObject["surname"].asString.toLowerCase(Locale.ROOT).capitalize(Locale.ROOT))
         } else binding.textSurName.visibility = GONE
         if (resultObject["dateOfBirth"] != null) {
             binding.textBirthday.visibility = VISIBLE

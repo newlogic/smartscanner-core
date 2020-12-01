@@ -8,6 +8,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.newlogic.lib.idpass.extension.hideKeyboard
+import com.newlogic.lib.idpass.utils.FileUtils
 import com.newlogic.mlkit.R
 import kotlinx.android.synthetic.main.activity_idpass_result.*
 import org.idpass.lite.Card
@@ -16,114 +17,106 @@ import org.idpass.lite.exceptions.CardVerificationException
 import org.idpass.lite.exceptions.InvalidCardException
 import org.idpass.lite.exceptions.InvalidKeyException
 import java.text.SimpleDateFormat
+import java.util.*
 
 class IDPassResultActivity : AppCompatActivity() {
 
     companion object {
-        private var m_reader = IDPassReader(null)
         const val RESULT = "idpass_result"
     }
 
-    var m_pincode: String = ""
-    var m_qrbytes:ByteArray? = null
+    private var pinCode: String = ""
+    private var qrBytes:ByteArray? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_idpass_result)
         overridePendingTransition(R.anim.slide_in_up, android.R.anim.fade_out)
-
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
         supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_close)
-
-        val pincodeauth: Button = findViewById(R.id.pincodeauth)
-        pincodeauth.setOnClickListener {
-            val cardpincode = findViewById<EditText>(R.id.cardpincode)
-            m_pincode = cardpincode.text.toString()
-            m_qrbytes?.let {
-                val qrstr = readCard(it)
+        val extDirPath: String = getExternalFilesDir(null)!!.absolutePath
+        FileUtils.copyAssets(this, "idpass", extDirPath)
+        val idPassReader = IDPassReader("$extDirPath/idpass/demokeys.p12")
+        val pinCodeBtn: Button = findViewById(R.id.pinCodeAuth)
+        pinCodeBtn.setOnClickListener {
+            val cardpincode = findViewById<EditText>(R.id.cardPinCode)
+            pinCode = cardpincode.text.toString()
+            qrBytes?.let {
+                val qrstr = readCard(idPassReader, it)
                 val tv =  (findViewById<TextView>(R.id.hex))
                 tv.text = "\n\n" + qrstr + "\n"
             }
-            hideKeyboard(pincodeauth)
+            hideKeyboard(pinCodeBtn)
         }
-
         val intent = intent
         val qrbytes = intent.getByteArrayExtra(RESULT)
-        val qrstr = qrbytes?.let { readCard(it) }
-
+        val qrstr = qrbytes?.let { readCard(idPassReader, it) }
         val tv =  (findViewById<TextView>(R.id.hex))
         tv.text = "\n\n" + qrstr + "\n"
-
     }
 
-    fun readCard(qrbytes: ByteArray, charsPerLine: Int = 33): String {
+    private fun readCard(idPassReader: IDPassReader, qrbytes: ByteArray, charsPerLine: Int = 33): String {
         if (charsPerLine < 4 || qrbytes.isEmpty()) {
             return ""
         }
-
         val dump = StringBuilder()
         var authStatus = "NO"
         var certStatus = ""
         var card: Card?
-
         try {
             try {
-                card = m_reader.open(qrbytes)
-                certStatus = if (card.hasCertificate()) "Verified" else "No certificate"
+                card = idPassReader.open(qrbytes)
+                certStatus = if (card.verifyCertificate()) "Verified" else "No certificate"
             } catch (ice: InvalidCardException) {
-                card = m_reader.open(qrbytes, true)
-                certStatus = if (card.hasCertificate()) "Not Verified" else "No certificate"
+                card = idPassReader.open(qrbytes, true)
+                certStatus = if (card.verifyCertificate()) "Not Verified" else "No certificate"
             }
-
             if (card != null) {
-                if (m_pincode.isNotEmpty()) {
+                if (pinCode.isNotEmpty()) {
                     try {
-                        card.authenticateWithPIN(m_pincode)
+                        card.authenticateWithPIN(pinCode)
                         authStatus = "YES"
                         Toast.makeText(applicationContext, "Authentication Success", Toast.LENGTH_SHORT).show()
                     } catch (ve: CardVerificationException) {
                         Toast.makeText(applicationContext, "Authentication Fail", Toast.LENGTH_SHORT).show()
                     }
                 }
-
-                val sdf = SimpleDateFormat("yyyy/MM/dd")
+                val sdf = SimpleDateFormat("yyyy/MM/dd", Locale.ROOT)
+                val fullName = card.getfullName()
+                val givenName = card.givenName
                 val surname = card.surname
-                val givenname = card.givenName
                 val dob = card.dateOfBirth
                 val pob = card.placeOfBirth
-
-                dump.append("Surname: $surname\n")
-                dump.append("Given Name: $givenname\n")
-
+                if (fullName != null) {
+                    dump.append("Full Name: $fullName\n")
+                }
+                if (givenName != null) {
+                    dump.append("Given Name: $givenName\n")
+                }
+                if (surname != null) {
+                    dump.append("Surname: $surname\n")
+                }
                 if (dob != null) {
                     dump.append("Date of Birth: ${sdf.format(dob)}\n")
                 }
-
                 if (pob.isNotEmpty()) {
                     dump.append("Place of Birth: $pob\n")
                 }
-
                 dump.append("\n-------------------------\n\n")
-
                 for ((key, value) in card.cardExtras) {
                     dump.append("$key: $value\n")
                 }
-
                 dump.append("\n-------------------------\n\n")
                 dump.append("Authenticated: $authStatus\n")
                 dump.append("Certificate  : $certStatus\n")
-
-                m_qrbytes = qrbytes.clone()
-
+                qrBytes = qrbytes.clone()
                 return dump.toString()
-
             } else {
                 return "Error: Invalid IDPASS CARD"
             }
-
         } catch (ike: InvalidKeyException) {
             return "Error: Reader keyset is not authorized"
         } catch (e: Exception) {

@@ -9,11 +9,8 @@ import com.newlogic.idpass.demo.ResultActivity.Companion.SCAN_RESULT
 import com.newlogic.lib.idpass.SmartScannerActivity
 import com.newlogic.lib.idpass.SmartScannerActivity.Companion.SCANNER_RESULT
 import com.newlogic.lib.idpass.SmartScannerActivity.Companion.SCANNER_RESULT_BYTES
-import com.newlogic.lib.idpass.config.BarcodeFormat
-import com.newlogic.lib.idpass.config.BarcodeOptions
-import com.newlogic.lib.idpass.config.Config
+import com.newlogic.lib.idpass.config.*
 import com.newlogic.lib.idpass.config.ImageResultType.PATH
-import com.newlogic.lib.idpass.config.ScannerOptions
 import com.newlogic.lib.idpass.extension.empty
 import com.newlogic.mlkit.databinding.ActivityMainBinding
 
@@ -55,7 +52,7 @@ class MainActivity : AppCompatActivity() {
     public override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
         super.onActivityResult(requestCode, resultCode, intent)
         if (requestCode == OP_SCANNER) {
-            Log.d(TAG, "Plugin post ML Activity resultCode $resultCode")
+            Log.d(TAG, "Plugin post SmartScanner Activity resultCode $resultCode")
             if (resultCode == RESULT_OK) {
                 val result = intent?.getStringExtra(SCANNER_RESULT)
                 if (result != null) {
@@ -73,10 +70,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun startIntentCallOut() {
+    private fun startIntentCallOut(scannerType : String) {
+        // scannerType: can either be 'barcode', 'idpass-lite', mrz'
         try {
             val intent = Intent("com.newlogic.idpass.SCAN")
-            intent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.defaultForMRZ)
+            intent.putExtra(SmartScannerActivity.SCANNER, scannerType)
             startActivityForResult(intent, OP_SCANNER)
         } catch (ex: ActivityNotFoundException) {
             ex.printStackTrace()
@@ -86,13 +84,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun startMrzScan() {
         val intent = Intent(this, SmartScannerActivity::class.java)
-        intent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleMrz(sampleConfig(true)))
+        intent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleMrz(config = sampleConfig(true), mrzFormat = MrzFormat.MRTD_TD1.value))
         startActivityForResult(intent, OP_SCANNER)
     }
 
     private fun startBarcode(barcodeOptions: BarcodeOptions? = null) {
         val intent = Intent(this, SmartScannerActivity::class.java)
-        intent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleBarcode(sampleConfig(false), barcodeOptions))
+        intent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleBarcode(config = sampleConfig(false), barcodeOptions = barcodeOptions))
         startActivityForResult(intent, OP_SCANNER)
     }
 }
