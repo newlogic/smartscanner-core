@@ -1,5 +1,5 @@
 # idpass-smart-scanner-core
-The repository for the core Library to be used with the Base project of the ID Pass smart scanner 
+The repository for the core Library to be used with the Base project of the ID PASS smart scanner
 
 ## Setting Up
 ---------------
@@ -30,20 +30,25 @@ Main structure items:
 
 ## Scanner Options
 ---------------
-**mode** - the scanner is able to scan Barcodes or MRZ and is accessed by setting to either `barcode` or `mrz`
+**mode**
+- the scanner is able to scan Barcodes or MRZ and is accessed by setting to either `barcode` or `mrz`
 ```
-mode: 'mrz' 
+mode: 'mrz'
 ```
-**mrzFormat** 
-- when mode is set to `mrz`, mrzFormat is able to be accessed and set by either `MRP` (Default) or `MRTD_TD1`. 
+**mrzFormat**
+- when mode is set to `mrz`, mrzFormat is able to be accessed and set by either `MRP` or `MRTD_TD1`.
 - format `MRTD_TD1` is used in retrieving optional data from scanned MRZ
 - default is `MRP`
 ```
 mrzFormat: 'MRTD_TD1'
 ```
-**barcodeOptions** - when mode is set to `barcode`, barcodeOptions is able to be accessed and set by the supported formats listed below.
-Note that multiple formats can be supported 
-- `ALL` // Support all formats
+**barcodeOptions**
+- When mode is set to `barcode`, barcodeOptions is able to be accessed and set by a list of barcode formats.
+- Multiple barcode formats can be supported, see complete list below.
+- Default is `ALL`
+
+Supported Formats:
+- `ALL` (Support all formats)
 - `AZTEC`
 - `CODABAR`
 - `CODE_39`
@@ -57,11 +62,23 @@ Note that multiple formats can be supported
 - `UPC_E`
 - `PDF_417`
 
-Note: default is `ALL`
 ```
-barcodeOptions: { 
-    barcodeFormats: [ 'EAN_13','EAN_8','AZTEC'] 
-}
+    barcodeOptions: {
+        barcodeFormats: [
+            'AZTEC',
+            'CODABAR',
+            'CODE_39',
+            'CODE_93',
+            'CODE_128',
+            'DATA_MATRIX',
+            'EAN_8',
+            'EAN_13',
+            'QR_CODE',
+            'UPC_A',
+            'UPC_E',
+            'PDF_417'
+        ]
+    }
 ```
 
 Config
@@ -72,14 +89,14 @@ Config
 ```
 background: '#89837c'
 ```
-**branding** 
-- displays ID Pass branding, set to either `true` or `false`
+**branding**
+- displays ID PASS branding, set to either `true` or `false`
 - default is `true`
 ```
-branding: false`
+branding: false
 ```
-**font** 
-- currently supports 2 fonts only, NOTO_SANS_ARABIC (Arabic) and SOURCE_SANS_PRO (ID Pass font), default is SOURCE_SANS_PRO when empty or not set
+**font**
+- currently supports 2 fonts only, `NOTO_SANS_ARABIC` (Arabic) and `SOURCE_SANS_PRO` (ID PASS font)
 - default is `SOURCE_SANS_PRO`
 ```
 font: 'NOTO_SANS_ARABIC'
@@ -88,14 +105,14 @@ font: 'NOTO_SANS_ARABIC'
 - currently supports 2 image result types: `base_64` or `path` (path of image string)
 - default is `path`
 ```
-imageResultType: 'path'
+imageResultType: 'base_64'
 ```
 **isManualCapture** - enables manual capture mrz/barcode via capture button when not detected, set to either `true` or `false`
 - default is `false`
 ```
 isManualCapture: true
 ```
-**label** - will show a label text below the scanner, default is empty
+**label** - will show a label text below the scanner
 - default is empty string
 ```
 label: 'sample label string'
@@ -105,9 +122,9 @@ label: 'sample label string'
 ---------------
 MRZ:
 ```
-const result = await MLKitPlugin.executeScanner({
-          action: 'START_SCANNER',
-          options: {
+const result = await SmartScannerPlugin.executeScanner({
+        action: 'START_SCANNER',
+        options: {
             mode: 'mrz',
             mrzFormat: 'MRTD_TD1',
             config: {
@@ -115,56 +132,53 @@ const result = await MLKitPlugin.executeScanner({
               branding: false,
               isManualCapture: true
             }
-          }
-      });
+        }
+    });
 ```
 BARCODE:
 ```
-const result = await MLKitPlugin.executeMLKit({
-        action: 'START_MLKIT',
-        mode: 'barcode',
-        barcodeOptions: { 
-            barcodeFormats: [ 'EAN_13','EAN_8','AZTEC'] 
-        }
-        config: {
-          background: '#ffc234', // default transparent gray if empty, will accept hex color values only
-          label: 'sample label'
-        }
-      });
+const result = await SmartScannerPlugin.executeScanner({
+        action: 'START_SCANNER',
+        options: {
+            mode: 'barcode',
+            barcodeOptions: {
+                barcodeFormats: [
+                'AZTEC',
+                'CODABAR',
+                'CODE_39',
+                'CODE_93',
+                'CODE_128',
+                'DATA_MATRIX',
+                'EAN_8',
+                'EAN_13',
+                'QR_CODE',
+                'UPC_A',
+                'UPC_E',
+                'PDF_417'
+                ]
+            },
+            config: {
+                background: '#ffc234',
+                label: 'sample label'
+            }
+       }
+    });
 ```
 
 ## Intent App Call Out
 ---------------
 Smart Scanner is also able to be called from another app by calling this code block directly
 
-- Call it via intent `"com.newlogic.mlkitlib.SCAN"`
-- Add scanner options json object
+- Call it via intent `"com.newlogic.idpass.SCAN"`
+- Add an intent extra string depending on the scanner type you would like to use which can be either `"barcode"`, `"idpass-lite"`, `"mrz"`
 
-Call via MRZ:
 ```
-    val config = Config(background ="",font= "", label="", imageResultType = "path", isManualCapture = true, branding = true)
-    val scannerOptions = ScannerOptions(mode = "mrz" config = config, mrzFormat = mrzFormat)
     private fun startIntentCallOut() {
         try {
             val intent = Intent("com.newlogic.idpass.SCAN")
-            intent.putExtra("scanner_options", scannerOptions)
-            startActivityForResult(intent, OP_MLKIT)
-        } catch (ex: ActivityNotFoundException) {
-            ex.printStackTrace()
-            Log.e(TAG, "smart scanner is not installed!")
-        }
-    }
-```
-
-Call via barcode:
-```
-    val config = Config(background ="",font= "", label="", imageResultType = "path", isManualCapture = true, branding = true)
-    val scannerOptions = ScannerOptions(mode = "barcode" config = config, barcodeOptions = listOf("QR_CODE"))
-    private fun startIntentCallOut() {
-        try {
-            val intent = Intent("com.newlogic.mlkitlib.SCAN")
-            intent.putExtra("scanner_options", scannerOptions)
-            startActivityForResult(intent, OP_MLKIT)
+            // scannerType: can either be "barcode", "idpass-lite", "mrz"
+            intent.putExtra("scanner", "mrz")
+            startActivityForResult(intent, OP_SCANNER)
         } catch (ex: ActivityNotFoundException) {
             ex.printStackTrace()
             Log.e(TAG, "smart scanner is not installed!")
@@ -174,7 +188,7 @@ Call via barcode:
 
 ## Scan Results
 ---------------
-**MRZ** 
+**MRZ**
 ```
 {
 	"code": "TypeI",
@@ -185,7 +199,7 @@ Call via barcode:
 	"expirationDate": "8/9/29",
 	"format": "MRTD_TD1",
 	"givenNames": " SALI",
-	"image": "/data/user/0/com.newlogic.mlkit.demo/cache/Scanner-20201123103638.jpg",
+	"image": "/data/user/0/com.newlogic.idpass.demo/cache/Scanner-20201123103638.jpg",
 	"issuingCountry": "IRQ",
 	"mrz": "IDIRQAB12345671180000000002\u003c\u003c\u003c\n7909308M2909082IRQ\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c7\n\u003c\u003cSALI\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\n",
 	"nationality": "IRQ",
@@ -193,11 +207,11 @@ Call via barcode:
 	"surname": ""
 }
 ```
-**Barcode** 
+**Barcode**
 ```
 {
 	"corners": "65,-46 314,-14 306,171 65,141 ",
-	"imagePath": "/data/user/0/com.newlogic.mlkit.demo/cache/Scanner-20201123103911.jpg",
+	"imagePath": "/data/user/0/com.newlogic.idpass.demo/cache/Scanner-20201123103911.jpg",
 	"value": "036000291452"
 }
 ```
