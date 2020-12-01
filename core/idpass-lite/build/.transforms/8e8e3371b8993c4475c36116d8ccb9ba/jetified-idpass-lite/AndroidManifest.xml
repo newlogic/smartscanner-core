@@ -8,8 +8,4 @@
         android:minSdkVersion="9"
         android:targetSdkVersion="29" />
 
-    <application>
-        <activity android:name="org.idpass.lite.IDPassReaderActivity" />
-    </application>
-
 </manifest>
