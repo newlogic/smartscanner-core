@@ -1,4 +1,4 @@
-/**
+/*
  * Java parser for the MRZ records, as specified by the ICAO organization.
  * Copyright (C) 2011 Innovatrics s.r.o.
  * 

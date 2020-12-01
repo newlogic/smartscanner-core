@@ -1,4 +1,4 @@
-/**
+/*
  * Java parser for the MRZ records, as specified by the ICAO organization.
  * Copyright (C) 2011 Innovatrics s.r.o.
  * 
@@ -132,7 +132,7 @@ public enum MrzFormat {
      * @param mrz the MRZ string.
      * @return the format, never null.
      */
-    public static final MrzFormat get(String mrz) {
+    public static MrzFormat get(String mrz) {
         final String[] rows = mrz.split("\n");
         final int cols = rows[0].length();
         for (int i = 1; i < rows.length; i++) {

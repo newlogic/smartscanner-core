@@ -116,6 +116,7 @@
                     android:layout_marginEnd="24dp"
                     android:scaleType="fitXY"
                     android:visibility="gone"
+                    android:contentDescription="@string/label_content_description"
                     tools:srcCompat="@tools:sample/avatars" />
 
                 <androidx.appcompat.widget.AppCompatButton
@@ -144,7 +145,8 @@
                     android:gravity="start"
                     android:inputType="textMultiLine"
                     android:textSize="14sp"
-                    android:visibility="gone" />
+                    android:visibility="gone"
+                    tools:ignore="Autofill,LabelFor" />
             </LinearLayout>
         </ScrollView>
     </LinearLayout>
