@@ -65,7 +65,7 @@
         android:gravity="center"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:inputType="numberPassword"
+        android:inputType="textPassword"
         android:maxLength="4"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
