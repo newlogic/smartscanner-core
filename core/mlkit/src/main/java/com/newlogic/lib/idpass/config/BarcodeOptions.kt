@@ -15,5 +15,10 @@ data class BarcodeOptions(
             barcodeFormats = BarcodeFormat.default,
             idPassLiteSupport = false
         )
+        val defaultIdPassLite = BarcodeOptions(
+            barcodeScannerSize = ScannerSize.MEDIUM.value,
+            barcodeFormats = BarcodeFormat.default,
+            idPassLiteSupport = true
+        )
     }
 }

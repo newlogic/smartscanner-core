@@ -47,6 +47,7 @@ import com.newlogic.lib.idpass.config.ImageResultType.BASE_64
 import com.newlogic.lib.idpass.config.Modes.BARCODE
 import com.newlogic.lib.idpass.config.Modes.MRZ
 import com.newlogic.lib.idpass.config.MrzFormat.MRTD_TD1
+import com.newlogic.lib.idpass.exceptions.SmartScannerException
 import com.newlogic.lib.idpass.extension.*
 import com.newlogic.lib.idpass.platform.AnalyzerType
 import com.newlogic.lib.idpass.platform.MRZCleaner
@@ -70,9 +71,10 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
 
     companion object {
         val TAG: String = SmartScannerActivity::class.java.simpleName
+        const val SCANNER = "scanner"
+        const val SCANNER_OPTIONS = "scanner_options"
         const val SCANNER_RESULT = "scanner_result"
         const val SCANNER_RESULT_BYTES = "scanner_result_bytes"
-        const val SCANNER_OPTIONS = "scanner_options"
     }
 
     private val REQUEST_CODE_PERMISSIONS = 10
@@ -147,8 +149,23 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
         supportActionBar?.setDisplayShowTitleEnabled(false)
         actionBar?.hide()
         actionBar?.setDisplayShowTitleEnabled(false)
-        // Scanner options
-        scannerOptions = intent.getParcelableExtra(SCANNER_OPTIONS)
+        // Scanner type or options
+        val type : ScannerType? = intent.getParcelableExtra(SCANNER)
+        type?.let {
+            // Check for options on specific scanner type call out
+            scannerOptions = when (it.value) {
+                ScannerType.BARCODE.value -> ScannerType.barcodeOptions
+                ScannerType.IDPASS_LITE.value -> ScannerType.idPassLiteOptions
+                else -> ScannerType.mrzOptions
+            }
+        } ?: run {
+            try {
+                // Use scanner options directly if no scanner type is called
+                scannerOptions = intent.getParcelableExtra(SCANNER_OPTIONS)
+            } catch (ex: Exception) {
+                throw SmartScannerException("Please set scanner type or options to be able to use ID PASS Smart Scanner.")
+            }
+        }
         mode = scannerOptions?.mode
         mrzFormat = scannerOptions?.mrzFormat ?: MrzFormat.MRP.value
         barcodeOptions = scannerOptions?.barcodeOptions ?: BarcodeOptions.default
@@ -260,10 +277,10 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
         startActivity(intent)
     }
 
-    private fun startCamera(config : Config) {
+    private fun startCamera(config: Config) {
         this.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
-        cameraProviderFuture.addListener( {
+        cameraProviderFuture.addListener({
             // Used to bind the lifecycle of cameras to the lifecycle owner
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
             // Preview
@@ -292,7 +309,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                         val data = Intent()
                         val gson = Gson()
                         val bf = imageFile.path.toBitmap()
-                        bf.cacheImageToLocal(imageFile.path,90)
+                        bf.cacheImageToLocal(imageFile.path, 90)
                         val imageString = if (config.imageResultType == BASE_64.value) bf.encodeBase64() else imageFile.path
                         val result = gson.toJson(MRZResult.getImageOnly(imageString))
                         data.putExtra(SCANNER_RESULT, result)
@@ -623,9 +640,9 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
     private fun getAnalyzerStat(startTime: Long, endTime: Long) {
         runOnUiThread {
             val analyzerTime = endTime - startTime
-            mlkitText?.text = "Frame processing time: $analyzerTime ms"
+            "Frame processing time: $analyzerTime ms".also { mlkitText?.text = it }
             val scanTime = ((System.currentTimeMillis().toDouble() - startScanTime.toDouble()) / 1000)
-            mlkitText?.text = "Total scan time: $scanTime s"
+            "Total scan time: $scanTime s".also { mlkitText?.text = it }
         }
     }
 
