@@ -150,20 +150,29 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
         actionBar?.hide()
         actionBar?.setDisplayShowTitleEnabled(false)
         // Scanner type or options
-        val type : ScannerType? = intent.getParcelableExtra(SCANNER)
+        val type : String? = intent.getStringExtra(SCANNER)
         type?.let {
             // Check for options on specific scanner type call out
-            scannerOptions = when (it.value) {
-                ScannerType.BARCODE.value -> ScannerType.barcodeOptions
-                ScannerType.IDPASS_LITE.value -> ScannerType.idPassLiteOptions
-                else -> ScannerType.mrzOptions
+            Log.d(TAG, "scannerType: $it")
+            if (it.isNotEmpty()) {
+                scannerOptions = when (it) {
+                    ScannerType.BARCODE.value -> ScannerType.barcodeOptions
+                    ScannerType.IDPASS_LITE.value -> ScannerType.idPassLiteOptions
+                    ScannerType.MRZ.value -> ScannerType.mrzOptions
+                    else -> throw SmartScannerException("Error: Wrong scanner type. Please set to either \"barcode\", \"idpass-lite\", \"mrz\" ")
+                }
+            } else {
+                throw SmartScannerException("Scanner type cannot be null or empty.")
             }
+
         } ?: run {
-            try {
-                // Use scanner options directly if no scanner type is called
-                scannerOptions = intent.getParcelableExtra(SCANNER_OPTIONS)
-            } catch (ex: Exception) {
-                throw SmartScannerException("Please set scanner type or options to be able to use ID PASS Smart Scanner.")
+            // Use scanner options directly if no scanner type is called
+            val options : ScannerOptions? = intent.getParcelableExtra(SCANNER_OPTIONS)
+            options?.let {
+                Log.d(TAG, "scannerOptions: $it")
+                scannerOptions = options
+            } ?: run {
+                throw SmartScannerException("Please set proper scanner options to be able to use ID PASS Smart Scanner.")
             }
         }
         mode = scannerOptions?.mode
@@ -285,8 +294,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
             // Preview
             preview = Preview.Builder().build()
-            var size = Size(480, 640)
-            if (isPdf417(barcodeStrings)) size = Size(1080, 1920)
+            val size = Size(480, 640)
             imageAnalyzer = ImageAnalysis.Builder()
                 .setTargetResolution(size)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
@@ -628,9 +636,9 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                 }
                 AnalyzerType.IDPASS_LITE -> {
                     Log.d(TAG, "Success from IDPASS_LITE")
+                    data.putExtra(SCANNER_RESULT_BYTES, rawBytes)
                 }
             }
-            data.putExtra(SCANNER_RESULT_BYTES, rawBytes)
             data.putExtra(SCANNER_RESULT, result)
             setResult(Activity.RESULT_OK, data)
             finish()
