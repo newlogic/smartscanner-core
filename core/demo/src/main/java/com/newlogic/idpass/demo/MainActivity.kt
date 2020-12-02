@@ -10,8 +10,6 @@ import com.newlogic.lib.idpass.SmartScannerActivity
 import com.newlogic.lib.idpass.SmartScannerActivity.Companion.SCANNER_RESULT
 import com.newlogic.lib.idpass.SmartScannerActivity.Companion.SCANNER_RESULT_BYTES
 import com.newlogic.lib.idpass.config.*
-import com.newlogic.lib.idpass.config.ImageResultType.PATH
-import com.newlogic.lib.idpass.extension.empty
 import com.newlogic.mlkit.databinding.ActivityMainBinding
 
 
@@ -20,14 +18,9 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "Newlogic-MainActivity"
         private const val OP_SCANNER = 1001
-        val imageType = PATH.value
 
         private fun sampleConfig(isManualCapture : Boolean) = Config(
                 branding = true,
-                background = String.empty(),
-                font = String.empty(),
-                imageResultType = imageType,
-                label = String.empty(),
                 isManualCapture = isManualCapture
         )
     }
@@ -44,7 +37,6 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         binding.itemMrz.item.setOnClickListener { startMrzScan() }
-        binding.itemQr.item.setOnClickListener { startBarcode(BarcodeOptions(arrayListOf("QR_CODE"))) }
         binding.itemBarcode.item.setOnClickListener { startBarcode(BarcodeOptions(BarcodeFormat.default))}
         binding.itemIdpassLite.item.setOnClickListener { startBarcode(BarcodeOptions(arrayListOf("QR_CODE"), idPassLiteSupport = true)) }
     }
@@ -71,9 +63,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startIntentCallOut(scannerType : String) {
-        // scannerType: can either be 'barcode', 'idpass-lite', mrz'
         try {
             val intent = Intent("com.newlogic.idpass.SCAN")
+            // scannerType: can either be "barcode", "idpass-lite", "mrz"
             intent.putExtra(SmartScannerActivity.SCANNER, scannerType)
             startActivityForResult(intent, OP_SCANNER)
         } catch (ex: ActivityNotFoundException) {
