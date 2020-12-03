@@ -18,8 +18,9 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "Newlogic-MainActivity"
         private const val OP_SCANNER = 1001
+        val imageType = ImageResultType.PATH.value
 
-        private fun sampleConfig(isManualCapture : Boolean) = Config(
+        private fun sampleConfig(isManualCapture : Boolean) = Config (
                 branding = true,
                 isManualCapture = isManualCapture
         )
