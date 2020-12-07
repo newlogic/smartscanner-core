@@ -3,6 +3,7 @@ package com.newlogic.lib.innovatrics.mrz
 import com.newlogic.lib.idpass.extension.empty
 import com.newlogic.lib.idpass.extension.noValue
 import com.newlogic.lib.innovatrics.mrz.records.MrtdTd1
+import com.newlogic.lib.innovatrics.mrz.records.MrvA
 
 data class MRZResult(
         val image: String?,
@@ -42,7 +43,7 @@ data class MRZResult(
             )
         }
 
-        fun formatMrtdTd1MrzResult(record: MrtdTd1, image: String?) : MRZResult {
+        fun formatMrtdTd1Result(record: MrtdTd1, image: String?) : MRZResult {
             return MRZResult(
                     image,
                     record.code.toString(),
@@ -60,6 +61,25 @@ data class MRZResult(
                     record.toMrz(),
                     record.optional,
                     record.optional2
+            )
+        }
+
+        fun formatMrpResult(record: MrvA, image: String?) : MRZResult {
+            return MRZResult(
+                    image,
+                    record.code.toString(),
+                    record.code1.toShort(),
+                    record.code2.toShort(),
+                    record.dateOfBirth?.toString()?.replace(Regex("[{}]"), ""),
+                    record.documentNumber.toString(),
+                    record.expirationDate?.toString()?.replace(Regex("[{}]"), ""),
+                    record.format.toString(),
+                    record.givenNames,
+                    record.issuingCountry,
+                    record.nationality,
+                    record.sex.toString(),
+                    record.surname,
+                    record.toMrz()
             )
         }
 

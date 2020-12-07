@@ -19,6 +19,8 @@
 package com.newlogic.lib.innovatrics.mrz.types;
 
 
+import android.util.Log;
+
 import com.newlogic.lib.innovatrics.mrz.MrzParseException;
 import com.newlogic.lib.innovatrics.mrz.MrzRange;
 import com.newlogic.lib.innovatrics.mrz.MrzRecord;
@@ -30,6 +32,8 @@ import com.newlogic.lib.innovatrics.mrz.records.MrvB;
 import com.newlogic.lib.innovatrics.mrz.records.countries.French_ID;
 import com.newlogic.lib.innovatrics.mrz.records.countries.Senegal_ID;
 import com.newlogic.lib.innovatrics.mrz.records.countries.Slovak_ID_2_34;
+
+import java.util.Arrays;
 
 /**
  * Lists all supported MRZ formats. Note that the order of the enum constants are important, see for example {@link  #FRENCH_ID}.
@@ -81,7 +85,7 @@ public enum MrzFormat {
             }
             return mrzRows[0].startsWith("V");
         } 
-    },    
+    },
     /**
      * MRTD td2 format: A two line long, 36 characters per line format.
      */
@@ -99,7 +103,7 @@ public enum MrzFormat {
             }
             return mrzRows[0].startsWith("V");
         }
-    }, 
+    },
     /**
      * MRP Passport format: A two line long, 44 characters per line format.
      */
@@ -133,13 +137,24 @@ public enum MrzFormat {
      * @return the format, never null.
      */
     public static MrzFormat get(String mrz) {
-        final String[] rows = mrz.split("\n");
+        final int dummyRow = 44;
+        String[] rows = mrz.split("\n");
         final int cols = rows[0].length();
+        Log.d("SmartScanner", "mrz: " + mrz);
+        Log.d("SmartScanner", "rows: " + Arrays.toString(rows));
+        StringBuilder mrzBuilder = new StringBuilder(mrz);
         for (int i = 1; i < rows.length; i++) {
             if (rows[i].length() != cols) {
-                throw new MrzParseException("Different row lengths: 0: " + cols + " and " + i + ": " + rows[i].length(), mrz, new MrzRange(0, 0, 0), null);
+                //throw new MrzParseException("Different row lengths: 0: " + cols + " and " + i + ": " + rows[i].length(), mrz, new MrzRange(0, 0, 0), null);
+                if (rows[i].length() != dummyRow) {
+                    mrzBuilder.append("<");
+                }
             }
         }
+        mrz = mrzBuilder.toString();
+        rows = mrz.split("\n");
+        Log.d("SmartScanner", "mrz append: " + mrz);
+        Log.d("SmartScanner", "rows append: " + Arrays.toString(rows));
         for (final MrzFormat f : values()) {
             if (f.isFormatOf(rows)) {
                 return f;

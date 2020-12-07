@@ -7,6 +7,9 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.newlogic.idpass.demo.utils.DateUtils.formatDate
+import com.newlogic.idpass.demo.utils.DateUtils.isValidDate
+import com.newlogic.lib.idpass.extension.empty
 import com.newlogic.lib.idpass.extension.hideKeyboard
 import com.newlogic.lib.idpass.utils.FileUtils
 import com.newlogic.mlkit.R
@@ -16,8 +19,6 @@ import org.idpass.lite.IDPassReader
 import org.idpass.lite.exceptions.CardVerificationException
 import org.idpass.lite.exceptions.InvalidCardException
 import org.idpass.lite.exceptions.InvalidKeyException
-import java.text.SimpleDateFormat
-import java.util.*
 
 class IDPassResultActivity : AppCompatActivity() {
 
@@ -84,7 +85,6 @@ class IDPassResultActivity : AppCompatActivity() {
                         Toast.makeText(applicationContext, "Authentication Fail", Toast.LENGTH_SHORT).show()
                     }
                 }
-                val sdf = SimpleDateFormat("yyyy/MM/dd", Locale.ROOT)
                 val fullName = card.getfullName()
                 val givenName = card.givenName
                 val surname = card.surname
@@ -100,7 +100,8 @@ class IDPassResultActivity : AppCompatActivity() {
                     dump.append("Surname: $surname\n")
                 }
                 if (dob != null) {
-                    dump.append("Date of Birth: ${sdf.format(dob)}\n")
+                    val birthday = if (isValidDate(formatDate(dob))) formatDate(dob) else String.empty()
+                    dump.append("Date of Birth: ${birthday}\n")
                 }
                 if (pob.isNotEmpty()) {
                     dump.append("Place of Birth: $pob\n")
