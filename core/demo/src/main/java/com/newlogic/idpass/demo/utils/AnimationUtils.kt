@@ -1,4 +1,4 @@
-package com.newlogic.idpass.demo
+package com.newlogic.idpass.demo.utils
 
 import android.view.View
 import android.view.View.VISIBLE

@@ -46,6 +46,7 @@ import com.newlogic.lib.idpass.config.*
 import com.newlogic.lib.idpass.config.ImageResultType.BASE_64
 import com.newlogic.lib.idpass.config.Modes.BARCODE
 import com.newlogic.lib.idpass.config.Modes.MRZ
+import com.newlogic.lib.idpass.config.MrzFormat.MRP
 import com.newlogic.lib.idpass.config.MrzFormat.MRTD_TD1
 import com.newlogic.lib.idpass.exceptions.SmartScannerException
 import com.newlogic.lib.idpass.extension.*
@@ -56,7 +57,7 @@ import com.newlogic.lib.idpass.utils.CameraUtils.isLedFlashAvailable
 import com.newlogic.lib.idpass.utils.FileUtils.copyAssets
 import com.newlogic.lib.innovatrics.barcode.BarcodeResult
 import com.newlogic.lib.innovatrics.mrz.MRZResult
-import com.newlogic.lib.innovatrics.mrz.MRZResult.Companion.formatMrtdTd1MrzResult
+import com.newlogic.lib.innovatrics.mrz.MRZResult.Companion.formatMrtdTd1Result
 import com.newlogic.lib.innovatrics.mrz.MRZResult.Companion.formatMrzResult
 import java.io.File
 import java.net.URLEncoder
@@ -164,7 +165,6 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
             } else {
                 throw SmartScannerException("Scanner type cannot be null or empty.")
             }
-
         } ?: run {
             // Use scanner options directly if no scanner type is called
             val options : ScannerOptions? = intent.getParcelableExtra(SCANNER_OPTIONS)
@@ -176,7 +176,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
             }
         }
         mode = scannerOptions?.mode
-        mrzFormat = scannerOptions?.mrzFormat ?: MrzFormat.MRP.value
+        mrzFormat = scannerOptions?.mrzFormat ?: MRP.value
         barcodeOptions = scannerOptions?.barcodeOptions ?: BarcodeOptions.default
         barcodeStrings = barcodeOptions.barcodeFormats ?: BarcodeFormat.default
         barcodeFormats = barcodeStrings.map { BarcodeFormat.valueOf(it).value }
@@ -306,7 +306,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
             imageCapture = ImageCapture.Builder()
                 .setTargetResolution(size)
                 .setTargetRotation(Surface.ROTATION_0)
-                .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
                 .build()
             manualCapture?.setOnClickListener {
                 val imageFile = File(getImagePath())
@@ -315,11 +315,10 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                     baseContext), object : ImageCapture.OnImageSavedCallback {
                     override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                         val data = Intent()
-                        val gson = Gson()
                         val bf = imageFile.path.toBitmap()
                         bf.cacheImageToLocal(imageFile.path, 90)
                         val imageString = if (config.imageResultType == BASE_64.value) bf.encodeBase64() else imageFile.path
-                        val result = gson.toJson(MRZResult.getImageOnly(imageString))
+                        val result = Gson().toJson(MRZResult.getImageOnly(imageString))
                         data.putExtra(SCANNER_RESULT, result)
                         setResult(Activity.RESULT_OK, data)
                         finish()
@@ -352,11 +351,8 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                 Log.e(TAG, "Use case binding failed", exc)
             }
         }, ContextCompat.getMainExecutor(this))
-
         setupConfiguration(config)
     }
-
-    private fun isPdf417(options: List<String>) = options.any { it == BarcodeFormat.PDF_417.label }
 
     @SuppressLint("UnsafeExperimentalUsageError")
     private fun getMrzAnalyzer(): SmartScannerAnalyzer {
@@ -399,7 +395,6 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                             val rawBytes: ByteArray
                             Log.d("$TAG/SmartScanner", "barcode: success: $timeRequired ms")
                             if (barcodes.isNotEmpty()) {
-                                //                                val bounds = barcode.boundingBox
                                 val corners = barcodes[0].cornerPoints
                                 val builder = StringBuilder()
                                 if (corners != null) {
@@ -493,15 +488,8 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                                         imageProxy.imageInfo.rotationDegrees
                                     ) else imagePathFile
                                     val mrzResult: MRZResult = when (mrzFormat) {
-                                        MRTD_TD1.value -> formatMrtdTd1MrzResult(
-                                            MRZCleaner.parseAndCleanMrtdTd1(
-                                                mrz
-                                            ), imageString
-                                        )
-                                        else -> formatMrzResult(
-                                            MRZCleaner.parseAndClean(mrz),
-                                            imageString
-                                        )
+                                        MRTD_TD1.value -> formatMrtdTd1Result(MRZCleaner.parseAndCleanMrtdTd1(mrz), imageString)
+                                        else -> formatMrzResult(MRZCleaner.parseAndClean(mrz), imageString)
                                     }
                                     // record to json
                                     val gson = Gson()
