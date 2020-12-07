@@ -9,6 +9,7 @@ import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.JsonParser
 import com.newlogic.idpass.demo.MainActivity.Companion.imageType
+import com.newlogic.idpass.demo.utils.AnimationUtils
 import com.newlogic.lib.idpass.config.ImageResultType.PATH
 import com.newlogic.lib.idpass.extension.decodeBase64
 import com.newlogic.mlkit.R

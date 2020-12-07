@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ID PASS Smart Scanner </string>
+    <string name="app_name">SmartScanner</string>
 
     <!--Action items-->
     <string name="action_hide">HIDE</string>
