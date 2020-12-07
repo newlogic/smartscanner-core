@@ -58,7 +58,6 @@ class MainActivity : AppCompatActivity() {
                     myIntent.putExtra(IDPassResultActivity.RESULT, resultBytes)
                     startActivity(myIntent)
                 }
-
             }
         }
     }
@@ -77,7 +76,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun startMrzScan() {
         val intent = Intent(this, SmartScannerActivity::class.java)
-        intent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleMrz(config = sampleConfig(true), mrzFormat = MrzFormat.MRTD_TD1.value))
+        intent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleMrz(config = sampleConfig(true)))
         startActivityForResult(intent, OP_SCANNER)
     }
 
