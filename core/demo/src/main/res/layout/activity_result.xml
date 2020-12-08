@@ -4,12 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.newlogic.idpass.demo.MainActivity">
+    tools:context="com.newlogic.idpass.demo.ResultActivity">
 
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
@@ -26,6 +30,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_marginEnd="32dp"
                     android:fontFamily="@font/sourcesanspro_medium"
                     android:text="@string/label_result_details"
@@ -35,120 +40,75 @@
             </FrameLayout>
         </androidx.appcompat.widget.Toolbar>
 
-        <ScrollView
+        <TextView
+            android:id="@+id/textResult"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:fontFamily="@font/sourcesanspro_regular"
+            android:text="@string/label_hex"
+            android:textColor="@color/newlogic_black"
+            android:textSize="16sp"
+            tools:ignore="MissingConstraints"
+            tools:text="54 65 73 74 20 51 52 20  Test QR\n43 6F 64 65              Code" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingBottom="48dp">
+        <TextView
+            android:id="@+id/imageLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:gravity="start"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:visibility="gone"
+            android:fontFamily="@font/sourcesanspro_regular"
+            android:text="@string/label_result_image"
+            android:textColor="@color/newlogic_black"
+            android:textSize="16sp"/>
 
-                <TextView
-                    android:id="@+id/textName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center|start"
-                    android:layout_marginStart="24dp"
-                    android:fontFamily="@font/sourcesanspro_medium"
-                    android:text="@string/label_name"
-                    android:textColor="@color/newlogic_black"
-                    android:textSize="16sp"
-                    android:visibility="gone" />
+        <ImageView
+            android:id="@+id/imageResult"
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="8dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/label_content_description"
+            android:scaleType="fitCenter"
+            android:visibility="gone"
+            tools:srcCompat="@tools:sample/avatars" />
 
-                <TextView
-                    android:id="@+id/textSurName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center|start"
-                    android:layout_marginStart="24dp"
-                    android:fontFamily="@font/sourcesanspro_medium"
-                    android:text="@string/label_surname"
-                    android:textColor="@color/newlogic_black"
-                    android:textSize="16sp"
-                    android:visibility="gone" />
+        <TextView
+            android:id="@+id/textRawLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_marginTop="14dp"
+            android:layout_marginStart="16dp"
+            android:fontFamily="@font/sourcesanspro_regular"
+            android:text="@string/label_result_raw"
+            android:visibility="gone"
+            android:textColor="@color/newlogic_black"
+            android:textSize="15sp"/>
 
-                <TextView
-                    android:id="@+id/textBirthday"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center|start"
-                    android:layout_marginStart="24dp"
-                    android:fontFamily="@font/sourcesanspro_medium"
-                    android:text="@string/label_birthday"
-                    android:textColor="@color/newlogic_black"
-                    android:textSize="16sp"
-                    android:visibility="gone" />
-
-                <TextView
-                    android:id="@+id/textNationality"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center|start"
-                    android:layout_marginStart="24dp"
-                    android:fontFamily="@font/sourcesanspro_medium"
-                    android:text="@string/label_nationality"
-                    android:textColor="@color/newlogic_black"
-                    android:textSize="16sp"
-                    android:visibility="gone" />
-
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/txtImgAction"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="24dp"
-                    android:layout_gravity="end"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginEnd="16dp"
-                    android:fontFamily="@font/sourcesanspro_medium"
-                    android:text="@string/action_show_hide"
-                    android:textColor="@color/newlogic_black"
-                    android:textSize="14sp"
-                    android:visibility="invisible" />
-
-                <ImageView
-                    android:id="@+id/imageView"
-                    android:layout_width="match_parent"
-                    android:layout_height="250dp"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginEnd="24dp"
-                    android:scaleType="fitCenter"
-                    android:adjustViewBounds="true"
-                    android:visibility="gone"
-                    android:contentDescription="@string/label_content_description"
-                    tools:srcCompat="@tools:sample/avatars" />
-
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/txtRawDataAction"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="24dp"
-                    android:layout_gravity="end"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginEnd="16dp"
-                    android:fontFamily="@font/sourcesanspro_medium"
-                    android:text="@string/action_show_hide"
-                    android:textColor="@color/newlogic_black"
-                    android:textSize="14sp"
-                    android:visibility="invisible" />
-
-                <EditText
-                    android:id="@+id/editTextTextMultiLine"
-                    android:layout_width="match_parent"
-                    android:layout_height="250dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:ems="10"
-                    android:focusable="false"
-                    android:fontFamily="@font/sourcesanspro_regular"
-                    android:gravity="start"
-                    android:inputType="textMultiLine"
-                    android:textSize="14sp"
-                    android:visibility="gone"
-                    tools:ignore="Autofill,LabelFor" />
-            </LinearLayout>
-        </ScrollView>
+        <EditText
+            android:id="@+id/editTextRaw"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:focusable="false"
+            android:editable="false"
+            android:ems="10"
+            android:textIsSelectable="true"
+            android:visibility="gone"
+            android:fontFamily="@font/sourcesanspro_regular"
+            android:gravity="start"
+            android:inputType="textMultiLine"
+            android:textSize="13sp"
+            tools:ignore="Autofill,LabelFor" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -48,7 +48,7 @@ class IDPassResultActivity : AppCompatActivity() {
             qrBytes?.let {
                 val qrstr = readCard(idPassReader, it)
                 val tv =  (findViewById<TextView>(R.id.hex))
-                tv.text = "\n\n" + qrstr + "\n"
+                tv.text = "\n" + qrstr + "\n"
             }
             hideKeyboard(pinCodeBtn)
         }
@@ -56,7 +56,7 @@ class IDPassResultActivity : AppCompatActivity() {
         val qrbytes = intent.getByteArrayExtra(RESULT)
         val qrstr = qrbytes?.let { readCard(idPassReader, it) }
         val tv =  (findViewById<TextView>(R.id.hex))
-        tv.text = "\n\n" + qrstr + "\n"
+        tv.text = "\n" + qrstr + "\n"
     }
 
     private fun readCard(idPassReader: IDPassReader, qrbytes: ByteArray, charsPerLine: Int = 33): String {
