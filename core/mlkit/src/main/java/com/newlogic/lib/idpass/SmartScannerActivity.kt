@@ -417,7 +417,6 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                                         rawValue
                                     )
                                 )
-                                rectangle!!.isSelected = rawValue != ""
                                 if (barcodeOptions.idPassLiteSupport == true) {
                                     rawBytes = barcodes[0].rawBytes!!
                                     getAnalyzerResult(AnalyzerType.IDPASS_LITE, null, rawBytes)
@@ -462,7 +461,6 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                                         }
                                     }
                                 }
-                                rectangle!!.isSelected = rawFullRead != ""
                                 try {
                                     Log.d(
                                         "$TAG/SmartScanner",
