@@ -19,8 +19,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="PDF417"
             android:fontFamily="@font/sourcesanspro_medium"
+            android:text="PDF417"
             android:textColor="@color/idpass_black"
             android:textSize="14sp" />
     </LinearLayout>
