@@ -7,6 +7,7 @@ import android.view.MenuItem
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
 import com.google.gson.JsonParser
 import com.newlogic.idpass.demo.MainActivity.Companion.imageType
 import com.newlogic.lib.idpass.config.ImageResultType.PATH
@@ -70,8 +71,11 @@ class ResultActivity : AppCompatActivity() {
         // Image Data Result
         val image = resultObject["image"]
         if (image != null) {
-            val imageString = image.asString
-            binding.imageResult.setImageBitmap(if (imageType == PATH.value) BitmapFactory.decodeFile(imageString) else imageString.decodeBase64())
+            val imageBitmap = if (imageType == PATH.value) BitmapFactory.decodeFile(image.asString) else image.asString.decodeBase64()
+            Glide
+                .with(this)
+                .load(imageBitmap)
+                .into(binding.imageResult)
             binding.imageLabel.paintFlags = binding.imageLabel.paintFlags or Paint.UNDERLINE_TEXT_FLAG
             binding.imageLabel.visibility = VISIBLE
             binding.imageResult.visibility = VISIBLE
