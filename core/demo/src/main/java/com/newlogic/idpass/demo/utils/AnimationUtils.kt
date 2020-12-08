@@ -10,12 +10,11 @@ import androidx.core.view.animation.PathInterpolatorCompat
 object AnimationUtils {
 
     /**
-     * This is the method for expanding/collapsing view \
+     * This is the method for expanding/collapsing view
      * @param view the view to perform expand or collapse
      */
     fun expandCollapse(view: View, originalHeight : Int) {
         val expand = view.visibility == View.GONE
-
         //Create a path for animation
         val easeInOutQuart: Interpolator =
             PathInterpolatorCompat.create(
@@ -24,7 +23,6 @@ object AnimationUtils {
                 0.175f,
                 1f
             )
-
         //Measure the view
         view.measure(
             View.MeasureSpec.makeMeasureSpec(
@@ -63,7 +61,6 @@ object AnimationUtils {
                     }
                 }
             }
-
             override fun willChangeBounds(): Boolean {
                 return true
             }

@@ -18,7 +18,6 @@ import com.newlogic.mlkit.databinding.ActivityResultBinding
 class ResultActivity : AppCompatActivity() {
 
     companion object {
-        private const val TAG = "Newlogic-ResultActivity"
         const val SCAN_RESULT = "SCAN_RESULT"
     }
 

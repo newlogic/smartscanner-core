@@ -24,19 +24,18 @@
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
-
                 <TextView
                     android:id="@+id/toolbarTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_marginEnd="32dp"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:fontFamily="@font/sourcesanspro_medium"
                     android:text="@string/label_result_details"
                     android:textColor="@color/idpass_orange"
                     android:textSize="22sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    style="@style/Widget.MaterialComponents.Button.TextButton" />
             </FrameLayout>
         </androidx.appcompat.widget.Toolbar>
 
@@ -61,11 +60,11 @@
         android:id="@+id/cardPinCode"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/sourcesanspro_regular"
-        android:hint="@string/label_enter_pin"
-        android:gravity="center"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
+        android:fontFamily="@font/sourcesanspro_regular"
+        android:gravity="center"
+        android:hint="@string/label_enter_pin"
         android:inputType="textPassword"
         android:maxLength="12"
         android:textSize="14sp"
@@ -77,11 +76,11 @@
         android:id="@+id/pinCodeAuth"
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:fontFamily="@font/sourcesanspro_medium"
-        android:background="@color/idpass_orange"
-        android:layout_marginTop="8dp"
         android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
+        android:background="@color/idpass_orange"
+        android:fontFamily="@font/sourcesanspro_medium"
         android:text="@string/label_authenticate"
         android:textColor="@color/white"
         app:layout_constraintEnd_toEndOf="parent"

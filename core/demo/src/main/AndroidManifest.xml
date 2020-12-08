@@ -3,6 +3,7 @@
     package="com.newlogic.mlkit">
 
     <uses-feature android:name="android.hardware.camera.any" />
+
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" tools:ignore="ScopedStorage" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -20,8 +21,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.newlogic.idpass.demo.ResultActivity"/>
-        <activity android:name="com.newlogic.idpass.demo.IDPassResultActivity"/>
+        <activity android:name="com.newlogic.idpass.demo.ResultActivity" />
+        <activity android:name="com.newlogic.idpass.demo.IDPassResultActivity" />
         <meta-data
             android:name="com.google.mlkit.vision.DEPENDENCIES"
             android:value="ocr" />

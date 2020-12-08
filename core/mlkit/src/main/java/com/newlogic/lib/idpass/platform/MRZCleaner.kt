@@ -102,5 +102,4 @@ object MRZCleaner {
         record.nationality = record.nationality.replaceNumbertoChar()
         return record
     }
-
 }
