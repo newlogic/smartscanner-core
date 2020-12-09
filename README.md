@@ -16,18 +16,6 @@ git submodule update --init --recursive
 ```
 Note: Please do not forget to initialize submodules to be able to access plugin repos.
 
-## Structure
----------------
-Main structure items:
-
-    ├─ core
-    ├─ cordova
-    ├─ capacitor
-
-- **core** - contains the core library and demo android app for testing purposes
-- **cordova** - submodule repo of cordova plugin
-- **capacitor** - submodule repo of capacitor plugin
-
 ## Scanner Options
 ---------------
 **mode**
