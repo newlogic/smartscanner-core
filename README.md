@@ -10,11 +10,7 @@ git clone https://github.com/newlogic/idpass-smart-scanner-core.git
 # 2. Enter your newly-cloned folder.
 cd idpass-smart-scanner-core
 
-# 3. Init submodules - used in working (capacitor/cordova/etc) plugins
-git submodule update --init --recursive
-
 ```
-Note: Please do not forget to initialize submodules to be able to access plugin repos.
 
 ## Scanner Options
 ---------------
