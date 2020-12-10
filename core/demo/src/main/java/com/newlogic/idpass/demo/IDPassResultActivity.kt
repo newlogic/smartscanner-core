@@ -87,6 +87,11 @@ class IDPassResultActivity : AppCompatActivity() {
                 val surname = card.surname
                 val dob = card.dateOfBirth
                 val pob = card.placeOfBirth
+                // TODO Display new fields in proper format
+                val gender = card.gender
+                val postalAdder = card.postalAddress
+                val UIN = card.uin
+
                 if (fullName != null) {
                     dump.append("Full Name: $fullName\n")
                 }
