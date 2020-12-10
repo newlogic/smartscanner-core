@@ -7,23 +7,38 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.protobuf.ByteString
 import com.newlogic.idpass.demo.utils.DateUtils.formatDate
 import com.newlogic.idpass.demo.utils.DateUtils.isValidDate
 import com.newlogic.lib.idpass.extension.empty
 import com.newlogic.lib.idpass.extension.hideKeyboard
-import com.newlogic.lib.idpass.utils.FileUtils
 import com.newlogic.mlkit.R
 import kotlinx.android.synthetic.main.activity_idpass_result.*
+import org.api.proto.KeySet
+import org.api.proto.byteArray
 import org.idpass.lite.Card
+import org.idpass.lite.IDPassHelper
 import org.idpass.lite.IDPassReader
 import org.idpass.lite.exceptions.CardVerificationException
 import org.idpass.lite.exceptions.InvalidCardException
 import org.idpass.lite.exceptions.InvalidKeyException
+import java.util.*
 
 class IDPassResultActivity : AppCompatActivity() {
 
     companion object {
         const val RESULT = "idpass_result"
+        var encryptionKey = IDPassHelper.generateEncryptionKey()
+        var signatureKey = IDPassHelper.generateSecretSignatureKey()
+        var publicVerificationKey: ByteArray = Arrays.copyOfRange(signatureKey, 32, 64)
+        var keySet = KeySet.newBuilder()
+                .setEncryptionKey(ByteString.copyFrom(encryptionKey))
+                .setSignatureKey(ByteString.copyFrom(signatureKey))
+                .addVerificationKeys(byteArray.newBuilder()
+                        .setTyp(byteArray.Typ.ED25519PUBKEY)
+                        .setVal(ByteString.copyFrom(publicVerificationKey)).build())
+                .build()
+        private var idPassReader = IDPassReader(keySet)
     }
 
     private var pinCode: String = ""
@@ -38,9 +53,6 @@ class IDPassResultActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
         supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_close)
-        val extDirPath: String = getExternalFilesDir(null)!!.absolutePath
-        FileUtils.copyAssets(this, "idpass", extDirPath)
-        val idPassReader = IDPassReader("$extDirPath/idpass/demokeys.p12")
         val pinCodeBtn: Button = findViewById(R.id.pinCodeAuth)
         pinCodeBtn.setOnClickListener {
             val cardpincode = findViewById<EditText>(R.id.cardPinCode)
