@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">@color/idpass_orange</color>
+    <color name="colorPrimaryDark">@color/idpass_black</color>
+    <color name="colorAccent">@color/newlogic_black</color>
+
+    <color name="idpass_black">#231f20</color>
+    <color name="idpass_orange">#ff6d37</color>
+    <color name="newlogic_black">#28282a</color>
+    <color name="newlogic_yellow">#ffc234</color>
+</resources>
