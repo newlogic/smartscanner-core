@@ -1,4 +1,4 @@
 include ':idpass-lite'
-include ':mlkit'
-include ':demo'
-rootProject.name = "mlkitlibrary"
+include ':app'
+include ':core-lib'
+rootProject.name = "idpass-smart-scanner"

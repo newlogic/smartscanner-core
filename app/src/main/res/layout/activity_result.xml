@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="org.idpass.smartscanner.ResultActivity">
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:layout_scrollFlags="scroll|enterAlways">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/toolbarTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginEnd="32dp"
+                    android:fontFamily="@font/sourcesanspro_medium"
+                    android:text="@string/label_result_details"
+                    android:textColor="@color/idpass_orange"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    style="@style/Widget.MaterialComponents.Button.TextButton" />
+            </FrameLayout>
+        </androidx.appcompat.widget.Toolbar>
+
+        <TextView
+            android:id="@+id/textResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:fontFamily="@font/sourcesanspro_regular"
+            android:text="@string/label_hex"
+            android:textColor="@color/newlogic_black"
+            android:textSize="16sp"
+            tools:ignore="MissingConstraints"
+            tools:text="54 65 73 74 20 51 52 20  Test QR\n43 6F 64 65              Code" />
+
+        <TextView
+            android:id="@+id/imageLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:fontFamily="@font/sourcesanspro_regular"
+            android:gravity="start"
+            android:text="@string/label_result_image"
+            android:textColor="@color/newlogic_black"
+            android:textSize="16sp"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/imageResult"
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/label_content_description"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            tools:srcCompat="@tools:sample/avatars" />
+
+        <TextView
+            android:id="@+id/textRawLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="14dp"
+            android:fontFamily="@font/sourcesanspro_regular"
+            android:text="@string/label_result_raw"
+            android:textColor="@color/newlogic_black"
+            android:textSize="15sp"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/editTextRaw"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:editable="false"
+            android:ems="10"
+            android:focusable="false"
+            android:fontFamily="@font/sourcesanspro_regular"
+            android:gravity="start"
+            android:inputType="textMultiLine"
+            android:textIsSelectable="true"
+            android:textSize="13sp"
+            android:visibility="gone"
+            tools:ignore="Autofill,LabelFor" />
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
