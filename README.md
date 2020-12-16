@@ -4,10 +4,10 @@ The repository for the core Library to be used as the core project of the ID PAS
 ## Setting Up
 ---------------
 ```bash
-1. Clone this repository.
+# 1. Clone this repository.
 git clone https://github.com/newlogic/idpass-smart-scanner-core.git
 
-2. Enter your newly-cloned folder.
+# 2. Enter your newly-cloned folder.
 cd idpass-smart-scanner-core
 
 ```
@@ -153,7 +153,7 @@ const result = await SmartScannerPlugin.executeScanner({
 ---------------
 Smart Scanner is also able to be called from another app by calling this code block directly
 
-- Call it via intent `"org.idpass.smartscanner.SCAN`
+- Call it via intent `"org.idpass.smartscanner.SCAN"`
 - Add an intent extra string depending on the scanner type you would like to use which can be either `"barcode"`, `"idpass-lite"`, `"mrz"`
 
 ```
@@ -183,7 +183,7 @@ Smart Scanner is also able to be called from another app by calling this code bl
 	"expirationDate": "8/9/29",
 	"format": "MRTD_TD1",
 	"givenNames": " SALI",
-	"image": "/data/user/0/corg.idpass.smartscanner/cache/Scanner-20201123103638.jpg",
+	"image": "/data/user/0/org.idpass.smartscanner/cache/Scanner-20201123103638.jpg",
 	"issuingCountry": "IRQ",
 	"mrz": "IDIRQAB12345671180000000002\u003c\u003c\u003c\n7909308M2909082IRQ\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c7\n\u003c\u003cSALI\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\u003c\n",
 	"nationality": "IRQ",
