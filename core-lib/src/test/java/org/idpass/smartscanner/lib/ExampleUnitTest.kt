@@ -1,4 +1,4 @@
-package org.idpass.smartscannerlib
+package org.idpass.smartscanner.lib
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
