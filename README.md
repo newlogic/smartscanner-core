@@ -1,5 +1,5 @@
 # idpass-smart-scanner-core
-The repository for the core Library to be used with the Base project of the ID PASS smart scanner
+The repository for the core Library to be used as the core project of the ID PASS smart scanner
 
 ## Setting Up
 ---------------
@@ -195,7 +195,7 @@ Smart Scanner is also able to be called from another app by calling this code bl
 ```
 {
 	"corners": "65,-46 314,-14 306,171 65,141 ",
-	"imagePath": "/data/user/0/org.idpass.smartscanner./cache/Scanner-20201123103911.jpg",
+	"imagePath": "/data/user/0/org.idpass.smartscanner/cache/Scanner-20201123103911.jpg",
 	"value": "036000291452"
 }
 ```
