@@ -5,12 +5,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import org.idpass.smartscanner.ResultActivity.Companion.SCAN_RESULT
 import org.idpass.smartscanner.databinding.ActivityMainBinding
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT_BYTES
 import org.idpass.smartscanner.lib.config.*
+import org.idpass.smartscanner.result.IDPassResultActivity
+import org.idpass.smartscanner.result.ResultActivity
+import org.idpass.smartscanner.result.ResultActivity.Companion.SCAN_RESULT
 
 
 class MainActivity : AppCompatActivity() {
