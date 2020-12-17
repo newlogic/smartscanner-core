@@ -20,8 +20,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="ResultActivity" />
-        <activity android:name="IDPassResultActivity" />
+        <activity android:name=".result.ResultActivity" />
+        <activity android:name=".result.IDPassResultActivity" />
         <meta-data
             android:name="com.google.mlkit.vision.DEPENDENCIES"
             android:value="ocr" />
