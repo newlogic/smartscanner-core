@@ -110,7 +110,7 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
                     dump.append("Full Name: $fullName\n")
                 }
                 if (givenName != null) {
-                    dump.append("Given Name: $givenName\n")
+                    dump.append("Given Names: $givenName\n")
                 }
                 if (surname != null) {
                     dump.append("Surname: $surname\n")
@@ -124,11 +124,13 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
                 }
                 dump.append("\n-------------------------\n\n")
                 for ((key, value) in card.cardExtras) {
-                    dump.append("$key: $value\n")
+                    // typo workaround for extras value
+                    val newKey = key.replace(" Of", " of")
+                    dump.append("$newKey: $value\n")
                 }
                 dump.append("\n-------------------------\n\n")
                 dump.append("Authenticated: $authStatus\n")
-                dump.append("Certificate  : $certStatus\n")
+                dump.append("Certificate: $certStatus\n")
                 qrBytes = qrbytes.clone()
                 return dump.toString()
             } else {
