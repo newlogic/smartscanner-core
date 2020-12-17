@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="org.idpass.smartscanner.IDPassResultActivity">
+    tools:context="org.idpass.smartscanner.result.IDPassResultActivity">
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -29,13 +29,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_marginEnd="32dp"
+                    android:layout_marginEnd="16dp"
                     android:fontFamily="@font/sourcesanspro_medium"
+                    android:textAllCaps="true"
                     android:text="@string/label_result_details"
                     android:textColor="@color/idpass_orange"
                     android:textSize="22sp"
-                    android:textStyle="bold"
-                    style="@style/Widget.MaterialComponents.Button.TextButton" />
+                    android:textStyle="bold"/>
             </FrameLayout>
         </androidx.appcompat.widget.Toolbar>
 
