@@ -99,6 +99,7 @@ class ResultActivity : AppCompatActivity() {
         val surname = resultObject["surname"]
         val dateOfBirth = resultObject["dateOfBirth"]
         val nationality = resultObject["nationality"]
+        val documentNumber = resultObject["documentNumber"]
         if (givenNames != null) {
             if (givenNames.asString.isNotEmpty()) dump.append("Given Name: ${givenNames.asString}\n")
         }
@@ -110,6 +111,9 @@ class ResultActivity : AppCompatActivity() {
         }
         if (nationality != null) {
             if (nationality.asString.isNotEmpty()) dump.append("Nationality: ${nationality.asString}\n")
+        }
+        if (documentNumber != null) {
+            if (documentNumber.asString.isNotEmpty()) dump.append("Document Number: ${documentNumber.asString}\n")
         }
         if (dump.isNotEmpty()) dump.append("-------------------------")
         return dump
