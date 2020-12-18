@@ -1,30 +1,45 @@
+<!--
+
+    Copyright 2019 Newlogic Impact Lab Pte. Ltd.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        https://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-    <path android:pathData="M31,63.928c0,0 6.4,-11 12.1,-13.1c7.2,-2.6 26,-1.4 26,-1.4l38.1,38.1L107,108.928l-32,-1L31,63.928z">
-        <aapt:attr name="android:fillColor">
-            <gradient
-                android:endX="85.84757"
-                android:endY="92.4963"
-                android:startX="42.9492"
-                android:startY="49.59793"
-                android:type="linear">
-                <item
-                    android:color="#44000000"
-                    android:offset="0.0" />
-                <item
-                    android:color="#00000000"
-                    android:offset="1.0" />
-            </gradient>
-        </aapt:attr>
-    </path>
-    <path
-        android:fillColor="#FFFFFF"
-        android:fillType="nonZero"
-        android:pathData="M65.3,45.828l3.8,-6.6c0.2,-0.4 0.1,-0.9 -0.3,-1.1c-0.4,-0.2 -0.9,-0.1 -1.1,0.3l-3.9,6.7c-6.3,-2.8 -13.4,-2.8 -19.7,0l-3.9,-6.7c-0.2,-0.4 -0.7,-0.5 -1.1,-0.3C38.8,38.328 38.7,38.828 38.9,39.228l3.8,6.6C36.2,49.428 31.7,56.028 31,63.928h46C76.3,56.028 71.8,49.428 65.3,45.828zM43.4,57.328c-0.8,0 -1.5,-0.5 -1.8,-1.2c-0.3,-0.7 -0.1,-1.5 0.4,-2.1c0.5,-0.5 1.4,-0.7 2.1,-0.4c0.7,0.3 1.2,1 1.2,1.8C45.3,56.528 44.5,57.328 43.4,57.328L43.4,57.328zM64.6,57.328c-0.8,0 -1.5,-0.5 -1.8,-1.2s-0.1,-1.5 0.4,-2.1c0.5,-0.5 1.4,-0.7 2.1,-0.4c0.7,0.3 1.2,1 1.2,1.8C66.5,56.528 65.6,57.328 64.6,57.328L64.6,57.328z"
-        android:strokeWidth="1"
-        android:strokeColor="#00000000" />
+    android:viewportWidth="448.44635"
+    android:viewportHeight="448.44635">
+    <group android:translateX="91.9315"
+        android:translateY="91.9315">
+        <path
+            android:pathData="M58.454,52.236L23.175,52.236v32.567h35.278z"
+            android:strokeWidth="1.55569482"
+            android:fillColor="#ff6d37"
+            android:strokeColor="#00000000"
+            android:fillType="nonZero"
+            android:fillAlpha="1"/>
+        <path
+            android:pathData="M23.175,102.441L23.175,114.864 23.175,212.347L58.454,212.347L58.454,114.864 58.454,102.441Z"
+            android:fillColor="#ff6d37"
+            android:strokeColor="#00000000"
+            android:fillType="nonZero"
+            android:fillAlpha="1"/>
+        <path
+            android:pathData="m233.832,95.429c-5.053,-10.25 -11.873,-18.578 -20.467,-24.989 -8.594,-6.406 -18.656,-11.042 -30.19,-13.906 -11.535,-2.862 -23.71,-4.298 -36.523,-4.298l-52.919,-0l0,109.908l35.278,-0L129.012,84.801l20.806,-0c7.385,-0 14.434,0.943 21.145,2.827 6.707,1.887 12.551,4.715 17.526,8.482 4.975,3.769 8.931,8.558 11.872,14.359 2.94,5.807 4.41,12.631 4.41,20.467 0,9.046 -1.47,16.702 -4.41,22.954 -2.94,6.259 -6.976,11.307 -12.099,15.151 -5.128,3.846 -11.195,6.599 -18.205,8.255 -7.01,1.661 -14.586,2.489 -22.727,2.489l-10.602,-0 -1.49,-0 -6.226,-0 -35.278,-0l0,5.347 0,27.217l57.666,-0c11.909,-0 23.293,-1.73 34.149,-5.199 10.856,-3.468 20.426,-8.556 28.721,-15.266 8.289,-6.708 14.888,-15 19.787,-24.876 4.899,-9.874 7.351,-21.294 7.351,-34.263C241.408,118.124 238.881,105.683 233.832,95.429"
+            android:fillColor="#ff6d37"
+            android:strokeColor="#00000000"
+            android:fillType="nonZero"
+            android:fillAlpha="1"/>
+    </group>
 </vector>
