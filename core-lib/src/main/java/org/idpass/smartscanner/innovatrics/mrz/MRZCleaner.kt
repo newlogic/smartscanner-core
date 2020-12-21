@@ -1,8 +1,6 @@
-package org.idpass.smartscanner.lib.platform
+package org.idpass.smartscanner.innovatrics.mrz
 
 import android.util.Log
-import org.idpass.smartscanner.innovatrics.mrz.MrzParser
-import org.idpass.smartscanner.innovatrics.mrz.MrzRecord
 import org.idpass.smartscanner.innovatrics.mrz.records.MrtdTd1
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import java.net.URLEncoder
