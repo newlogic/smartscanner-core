@@ -42,6 +42,7 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.googlecode.tesseract.android.TessBaseAPI
 import org.idpass.smartscanner.innovatrics.barcode.BarcodeResult
+import org.idpass.smartscanner.innovatrics.mrz.MRZCleaner
 import org.idpass.smartscanner.innovatrics.mrz.MRZResult
 import org.idpass.smartscanner.innovatrics.mrz.MRZResult.Companion.formatMrtdTd1Result
 import org.idpass.smartscanner.innovatrics.mrz.MRZResult.Companion.formatMrzResult
@@ -49,7 +50,6 @@ import org.idpass.smartscanner.lib.config.*
 import org.idpass.smartscanner.lib.exceptions.SmartScannerException
 import org.idpass.smartscanner.lib.extension.*
 import org.idpass.smartscanner.lib.platform.AnalyzerType
-import org.idpass.smartscanner.lib.platform.MRZCleaner
 import org.idpass.smartscanner.lib.platform.SmartScannerAnalyzer
 import org.idpass.smartscanner.lib.utils.CameraUtils.isLedFlashAvailable
 import org.idpass.smartscanner.lib.utils.FileUtils.copyAssets
@@ -66,7 +66,6 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
 
     companion object {
         val TAG: String = SmartScannerActivity::class.java.simpleName
-        const val SCANNER = "scanner"
         const val SCANNER_OPTIONS = "scanner_options"
         const val SCANNER_RESULT = "scanner_result"
         const val SCANNER_RESULT_BYTES = "scanner_result_bytes"
@@ -145,7 +144,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
         actionBar?.hide()
         actionBar?.setDisplayShowTitleEnabled(false)
         // Scanner type or options
-        val type : String? = intent.getStringExtra(SCANNER)
+        val type : String? = intent.getStringExtra(ScannerConstants.SCANNER)
         type?.let {
             // Check for options on specific scanner type call out
             Log.d(TAG, "scannerType: $it")
@@ -386,7 +385,6 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                             val timeRequired = System.currentTimeMillis() - start
                             val rawValue: String
                             val cornersString: String
-                            val rawBytes: ByteArray
                             Log.d("$TAG/SmartScanner", "barcode: success: $timeRequired ms")
                             if (barcodes.isNotEmpty()) {
                                 val corners = barcodes[0].cornerPoints
@@ -404,18 +402,20 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                                     imageProxy.imageInfo.rotationDegrees
                                 )
                                 val gson = Gson()
-                                val jsonString = gson.toJson(
-                                    BarcodeResult(
-                                        imageCachePathFile,
-                                        cornersString,
-                                        rawValue
-                                    )
-                                )
-                                if (barcodeOptions.idPassLiteSupport == true) {
-                                    rawBytes = barcodes[0].rawBytes!!
-                                    getAnalyzerResult(AnalyzerType.IDPASS_LITE, null, rawBytes)
+                                val barcodeResult = BarcodeResult(imageCachePathFile, cornersString, rawValue)
+                                val jsonString = gson.toJson(barcodeResult)
+                                if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_INTENT) {
+                                    if (barcodeOptions.idPassLiteSupport == true) {
+                                        sendBundleResult(AnalyzerType.IDPASS_LITE, barcodeRaw = barcodes[0].rawBytes!!)
+                                    } else {
+                                        sendBundleResult(AnalyzerType.BARCODE, barcodeResult = barcodeResult)
+                                    }
                                 } else {
-                                    getAnalyzerResult(AnalyzerType.BARCODE, jsonString)
+                                    if (barcodeOptions.idPassLiteSupport == true) {
+                                        sendAnalyzerResult(AnalyzerType.IDPASS_LITE, null, barcodes[0].rawBytes!!)
+                                    } else {
+                                        sendAnalyzerResult(AnalyzerType.BARCODE, jsonString)
+                                    }
                                 }
                             } else {
                                 Log.d("$TAG/SmartScanner", "barcode: nothing detected")
@@ -483,10 +483,14 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                                         MrzFormat.MRTD_TD1.value -> formatMrtdTd1Result(MRZCleaner.parseAndCleanMrtdTd1(mrz), imageString)
                                         else -> formatMrzResult(MRZCleaner.parseAndClean(mrz), imageString)
                                     }
-                                    // record to json
-                                    val gson = Gson()
-                                    val jsonString = gson.toJson(mrzResult)
-                                    getAnalyzerResult(AnalyzerType.MRZ, jsonString)
+                                    // Send Result
+                                    if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_INTENT) {
+                                        sendBundleResult(AnalyzerType.MLKIT, mrzResult = mrzResult)
+                                    } else {
+                                        val gson = Gson()
+                                        val jsonString = gson.toJson(mrzResult)
+                                        sendAnalyzerResult(AnalyzerType.MLKIT, jsonString)
+                                    }
                                 } catch (e: Exception) { // MrzParseException, IllegalArgumentException
                                     Log.d("$TAG/SmartScanner", e.toString())
                                 }
@@ -553,9 +557,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                                     imageProxy.imageInfo.rotationDegrees
                                 ) else imagePathFile
                                 val record = MRZCleaner.parseAndClean(mrz)
-                                val gson = Gson()
-                                val jsonString = gson.toJson(
-                                    MRZResult(
+                                val mrzResult = MRZResult(
                                         imageString,
                                         record.code.toString(),
                                         record.code1.toShort(),
@@ -570,9 +572,15 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                                         record.sex.toString(),
                                         record.surname,
                                         record.toMrz()
-                                    )
                                 )
-                                getAnalyzerResult(AnalyzerType.MRZ, jsonString)
+                                // Send Result
+                                if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_INTENT) {
+                                    sendBundleResult(AnalyzerType.TESSERACT, mrzResult = mrzResult)
+                                } else {
+                                    val gson = Gson()
+                                    val jsonString = gson.toJson(mrzResult)
+                                    sendAnalyzerResult(AnalyzerType.TESSERACT, jsonString)
+                                }
                             } catch (e: Exception) { // MrzParseException, IllegalArgumentException
                                 Log.d("$TAG/Tesseract", e.toString())
                             }
@@ -596,11 +604,11 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
         return "${context.cacheDir}/Scanner-$currentDateTime.jpg"
     }
 
-    private fun getAnalyzerResult(analyzerType: AnalyzerType, result: String? = null, rawBytes: ByteArray? = null) {
+    private fun sendAnalyzerResult(analyzerType: AnalyzerType, result: String? = null, rawBytes: ByteArray? = null) {
         val data = Intent()
         runOnUiThread {
             when (analyzerType) {
-                AnalyzerType.MRZ -> {
+                AnalyzerType.MLKIT -> {
                     Log.d(TAG, "Success from MLKit")
                     Log.d(TAG, "value: $result")
                     mlkitText?.text = result
@@ -624,6 +632,44 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
             setResult(Activity.RESULT_OK, data)
             finish()
         }
+    }
+
+    private fun sendBundleResult(analyzerType: AnalyzerType, barcodeResult: BarcodeResult? = null, mrzResult : MRZResult? = null, barcodeRaw: ByteArray? = null) {
+        val bundle = Bundle()
+        when (analyzerType) {
+            AnalyzerType.MLKIT, AnalyzerType.TESSERACT -> {
+                Log.d(TAG, "Success from MRZ")
+                mrzResult?.let { result ->
+                    bundle.putString(ScannerConstants.MRZ_IMAGE, result.image)
+                    bundle.putString(ScannerConstants.MRZ_CODE, result.code)
+                    bundle.putShort(ScannerConstants.MRZ_CODE_1, result.code1 ?: -1)
+                    bundle.putShort(ScannerConstants.MRZ_CODE_2, result.code2 ?: -1)
+                    bundle.putString(ScannerConstants.MRZ_DATE_BIRTH, result.dateOfBirth)
+                    bundle.putString(ScannerConstants.MRZ_DOC_NUM, result.documentNumber)
+                    bundle.putString(ScannerConstants.MRZ_EXP_DATE, result.expirationDate)
+                    bundle.putString(ScannerConstants.MRZ_FORMAT, result.format)
+                    bundle.putString(ScannerConstants.MRZ_GIVEN_NAMES, result.givenNames)
+                    bundle.putString(ScannerConstants.MRZ_SURNAME, result.surname)
+                    bundle.putString(ScannerConstants.MRZ_ISSUE_COUNTRY, result.issuingCountry)
+                    bundle.putString(ScannerConstants.MRZ_NATIONALITY, result.issuingCountry)
+                    bundle.putString(ScannerConstants.MRZ_SEX, result.sex)
+                }
+            }
+            AnalyzerType.BARCODE -> {
+                Log.d(TAG, "Success from BARCODE")
+                bundle.putString(ScannerConstants.BARCODE_IMAGE, barcodeResult?.imagePath)
+                bundle.putString(ScannerConstants.BARCODE_CORNERS, barcodeResult?.corners)
+                bundle.putString(ScannerConstants.BARCODE_VALUE, barcodeResult?.value)
+            }
+            AnalyzerType.IDPASS_LITE -> {
+                Log.d(TAG, "Success from IDPASS_LITE")
+                bundle.putByteArray(ScannerConstants.BARCODE_RAW, barcodeRaw)
+            }
+        }
+        val data = Intent()
+        data.putExtra(ScannerConstants.RESULT, bundle)
+        setResult(Activity.RESULT_OK, data)
+        finish()
     }
 
     private fun getAnalyzerStat(startTime: Long, endTime: Long) {

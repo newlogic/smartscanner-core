@@ -6,13 +6,13 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import org.idpass.smartscanner.databinding.ActivityMainBinding
+import org.idpass.smartscanner.lib.ScannerIntent
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT_BYTES
 import org.idpass.smartscanner.lib.config.*
 import org.idpass.smartscanner.result.IDPassResultActivity
 import org.idpass.smartscanner.result.ResultActivity
-import org.idpass.smartscanner.result.ResultActivity.Companion.SCAN_MODE
 import org.idpass.smartscanner.result.ResultActivity.Companion.SCAN_RESULT
 
 
@@ -30,7 +30,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private lateinit var binding : ActivityMainBinding
-    private var mode = Modes.MRZ
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,32 +45,6 @@ class MainActivity : AppCompatActivity() {
         binding.itemIdpassLite.item.setOnClickListener { startBarcode(BarcodeOptions(arrayListOf("QR_CODE"), idPassLiteSupport = true)) }
     }
 
-    private fun startIntentCallOut(scannerType : String) {
-        try {
-            val intent = Intent("org.idpass.smartscanner.SCAN")
-            // scannerType: can either be "barcode", "idpass-lite", "mrz"
-            intent.putExtra(SmartScannerActivity.SCANNER, scannerType)
-            startActivityForResult(intent, OP_SCANNER)
-        } catch (ex: ActivityNotFoundException) {
-            ex.printStackTrace()
-            Log.e(TAG, "smart scanner is not installed!")
-        }
-    }
-
-    private fun startMrzScan() {
-        mode = Modes.MRZ
-        val intent = Intent(this, SmartScannerActivity::class.java)
-        intent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleMrz(config = sampleConfig(true)))
-        startActivityForResult(intent, OP_SCANNER)
-    }
-
-    private fun startBarcode(barcodeOptions: BarcodeOptions? = null) {
-        mode = Modes.BARCODE
-        val intent = Intent(this,SmartScannerActivity::class.java)
-        intent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleBarcode(config = sampleConfig(false), barcodeOptions = barcodeOptions))
-        startActivityForResult(intent, OP_SCANNER)
-    }
-
     public override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
         super.onActivityResult(requestCode, resultCode, intent)
         if (requestCode == OP_SCANNER) {
@@ -81,7 +54,6 @@ class MainActivity : AppCompatActivity() {
                 if (result != null) {
                     val resultIntent = Intent(this, ResultActivity::class.java)
                     resultIntent.putExtra(SCAN_RESULT, result)
-                    resultIntent.putExtra(SCAN_MODE, mode.value)
                     startActivity(resultIntent)
                 } else {
                     val resultBytes = intent?.getByteArrayExtra(SCANNER_RESULT_BYTES)
@@ -91,5 +63,31 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun startIntentCallOut() {
+        try {
+            // Note: Scanner via intent can either be for barcode, idpass-lite, mrz
+            // barcode -> val intent = ScannerIntent.intentBarcode()
+            // idpass-lite -> val intent = ScannerIntent.intentIDPassLite()
+            // mrz -> val intent = ScannerIntent.intentMrz()
+            val intent = ScannerIntent.intentMrz()
+            startActivityForResult(intent, OP_SCANNER)
+        } catch (ex: ActivityNotFoundException) {
+            ex.printStackTrace()
+            Log.e(TAG, "smart scanner is not installed!")
+        }
+    }
+
+    private fun startMrzScan() {
+        val intent = Intent(this, SmartScannerActivity::class.java)
+        intent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleMrz(config = sampleConfig(true)))
+        startActivityForResult(intent, OP_SCANNER)
+    }
+
+    private fun startBarcode(barcodeOptions: BarcodeOptions? = null) {
+        val intent = Intent(this,SmartScannerActivity::class.java)
+        intent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleBarcode(config = sampleConfig(false), barcodeOptions = barcodeOptions))
+        startActivityForResult(intent, OP_SCANNER)
     }
 }
