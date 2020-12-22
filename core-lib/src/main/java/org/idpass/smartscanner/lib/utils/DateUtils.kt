@@ -15,7 +15,7 @@
  *
  *
  */
-package org.idpass.smartscanner.utils
+package org.idpass.smartscanner.lib.utils
 
 import java.text.ParseException
 import java.text.SimpleDateFormat
