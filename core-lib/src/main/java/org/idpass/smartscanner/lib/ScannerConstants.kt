@@ -31,26 +31,33 @@ object ScannerConstants {
     const val IDPASS_LITE = "idpass-lite"
     const val MRZ = "mrz"
 
-    // BARCODE or ID PASS Lite
-    const val BARCODE_IMAGE = "IMAGE"
-    const val BARCODE_CORNERS = "CORNERS"
-    const val BARCODE_VALUE = "RAW_VALUE"
-    const val BARCODE_RAW = "RAW_BYTES"
+    // BARCODE
+    const val BARCODE_IMAGE = "BARCODE_IMAGE"
+    const val BARCODE_CORNERS = "BARCODE_CORNERS"
+    const val BARCODE_VALUE = "BARCODE_VALUE"
+
+    //ID PASS LITE
+    const val IDPASS_LITE_FULL_NAME = "IDPASS_FULL_NAME"
+    const val IDPASS_LITE_GIVEN_NAME = "IDPASS_GIVEN_NAME"
+    const val IDPASS_LITE_SURNAME = "IDPASS_SURNAME"
+    const val IDPASS_LITE_DATE_OF_BIRTH = "IDPASS_DATE_OF_BIRTH"
+    const val IDPASS_LITE_PLACE_OF_BIRTH = "IDPASS_DATE_OF_BIRTH"
+    const val IDPASS_LITE_UIN = "IDPASS_UIN"
 
     // MRZ
-    const val MRZ_IMAGE = "IMAGE"
-    const val MRZ_CODE = "CODE"
-    const val MRZ_CODE_1 = "CODE_1"
-    const val MRZ_CODE_2 = "CODE_2"
-    const val MRZ_DATE_BIRTH = "DATE_OF_BIRTH"
-    const val MRZ_DOC_NUM = "DOCUMENT_NUMBER"
-    const val MRZ_EXP_DATE = "EXPIRY_DATE"
-    const val MRZ_FORMAT = "FORMAT"
-    const val MRZ_GIVEN_NAMES = "GIVEN_NAMES"
-    const val MRZ_ISSUE_COUNTRY = "ISSUE_COUNTRY"
-    const val MRZ_NATIONALITY = "NATIONALITY"
-    const val MRZ_SEX = "SEX"
-    const val MRZ_SURNAME = "SURNAME"
+    const val MRZ_IMAGE = "MRZ_IMAGE"
+    const val MRZ_CODE = "MRZ_CODE"
+    const val MRZ_CODE_1 = "MRZ_CODE_1"
+    const val MRZ_CODE_2 = "MRZ_CODE_2"
+    const val MRZ_DATE_OF_BIRTH = "MRZ_DATE_OF_BIRTH"
+    const val MRZ_DOCUMENT_NUMBER = "MRZ_DOCUMENT_NUMBER"
+    const val MRZ_EXPIRY_DATE = "MRZ_EXPIRY_DATE"
+    const val MRZ_FORMAT = "MRZ_FORMAT"
+    const val MRZ_GIVEN_NAMES = "MRZ_GIVEN_NAMES"
+    const val MRZ_SURNAME = "MRZ_SURNAME"
+    const val MRZ_ISSUING_COUNTRY = "MRZ_ISSUING_COUNTRY"
+    const val MRZ_NATIONALITY = "MRZ_NATIONALITY"
+    const val MRZ_SEX = "MRZ_SEX"
 
     // Intent
     const val IDPASS_SMARTSCANNER_INTENT = "org.idpass.smartscanner.SCAN"
