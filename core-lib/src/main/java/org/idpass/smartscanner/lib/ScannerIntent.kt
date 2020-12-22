@@ -18,6 +18,8 @@
 package org.idpass.smartscanner.lib
 
 import android.content.Intent
+import org.idpass.smartscanner.lib.ScannerConstants.IDPASS_SMARTSCANNER_INTENT
+import org.idpass.smartscanner.lib.ScannerConstants.IDPASS_SMARTSCANNER_ODK_INTENT
 
 /*
 * TODO Remove when idpass-smarscanner-api is available in maven
@@ -26,24 +28,26 @@ class ScannerIntent {
 
     companion object {
         @JvmStatic
-        fun intentMrz(): Intent {
-            val intent = Intent(ScannerConstants.IDPASS_SMARTSCANNER_INTENT)
+        fun intentMrz(useODK : Boolean = false): Intent {
+            val intent = Intent(getAction(useODK))
             intent.putExtra(ScannerConstants.SCANNER, ScannerConstants.MRZ)
             return intent
         }
 
         @JvmStatic
-        fun intentBarcode(): Intent {
-            val intent = Intent(ScannerConstants.IDPASS_SMARTSCANNER_INTENT)
+        fun intentBarcode(useODK : Boolean = false): Intent {
+            val intent = Intent(getAction(useODK))
             intent.putExtra(ScannerConstants.SCANNER, ScannerConstants.BARCODE)
             return intent
         }
 
         @JvmStatic
-        fun intentIDPassLite(): Intent {
-            val intent = Intent(ScannerConstants.IDPASS_SMARTSCANNER_INTENT)
+        fun intentIDPassLite(useODK : Boolean = false): Intent {
+            val intent = Intent(getAction(useODK))
             intent.putExtra(ScannerConstants.SCANNER, ScannerConstants.IDPASS_LITE)
             return intent
         }
+
+        private fun getAction(useODK : Boolean) = if (useODK) IDPASS_SMARTSCANNER_ODK_INTENT else  IDPASS_SMARTSCANNER_INTENT
     }
 }

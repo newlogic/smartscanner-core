@@ -17,6 +17,7 @@
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="org.idpass.smartscanner.SCAN" />
+                <action android:name="org.idpass.smartscanner.odk.SCAN" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

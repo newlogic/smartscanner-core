@@ -59,6 +59,10 @@ object ScannerConstants {
     const val MRZ_NATIONALITY = "MRZ_NATIONALITY"
     const val MRZ_SEX = "MRZ_SEX"
 
+    // ODK
+    const val ODK_INTENT_DATA = "odk_intent_data"
+
     // Intent
     const val IDPASS_SMARTSCANNER_INTENT = "org.idpass.smartscanner.SCAN"
+    const val IDPASS_SMARTSCANNER_ODK_INTENT = "org.idpass.smartscanner.odk.SCAN"
 }
