@@ -38,8 +38,8 @@ import org.idpass.smartscanner.R
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.extension.empty
 import org.idpass.smartscanner.lib.extension.hideKeyboard
-import org.idpass.smartscanner.utils.DateUtils.formatDate
-import org.idpass.smartscanner.utils.DateUtils.isValidDate
+import org.idpass.smartscanner.lib.utils.DateUtils.formatDate
+import org.idpass.smartscanner.lib.utils.DateUtils.isValidDate
 
 class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
 
@@ -157,7 +157,7 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
             return "Error: Reader keyset is not authorized"
         } catch (e: Exception) {
             Log.d(SmartScannerActivity.Companion.TAG, "ID PASS exception: ${e.localizedMessage}")
-            return "ERROR: NOT AN IDPASS CARD"
+            return "Error: SmartScanner cannot read IDPASS CARD"
         }
     }
 
