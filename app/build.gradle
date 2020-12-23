@@ -67,4 +67,6 @@ dependencies {
     //ID PASS lite
     implementation project(path: ':idpass-lite')
     implementation 'com.google.protobuf:protobuf-java:3.14.0'
+    // SmartScanner API Intent Call Out
+    implementation project(path: ':smartscanner-android-api')
 }

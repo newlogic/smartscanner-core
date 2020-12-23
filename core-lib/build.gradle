@@ -56,15 +56,12 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'com.google.android.material:material:1.2.1'
-
     testImplementation 'junit:junit:4.13'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
-
     // ML Kit dependencies
     implementation 'com.google.android.gms:play-services-mlkit-text-recognition:16.1.1'
     implementation 'com.google.mlkit:barcode-scanning:16.0.3'
-
     // CameraX
     def camerax_version = "1.0.0-beta06"
     implementation "androidx.camera:camera-core:$camerax_version"
@@ -74,20 +71,17 @@ dependencies {
     implementation "androidx.camera:camera-lifecycle:$camerax_version"
     // CameraX View class
     implementation "androidx.camera:camera-view:1.0.0-alpha12"
-
     // MRZ
     implementation 'org.slf4j:slf4j-android:1.7.30'
-
     // Tesseract4Android
     implementation 'cz.adaptech.android:tesseract4android:2.1.0'
-
     // Gson
     implementation 'com.google.code.gson:gson:2.8.6'
-
     // ID PASS lite
     implementation project(path: ':idpass-lite')
     implementation 'com.google.protobuf:protobuf-java:3.14.0'
-
     // SmartScanner MRZ Parser
     implementation project(path: ':smartscanner-mrz-parser')
+    // SmartScanner API Intent Call Out
+    implementation project(path: ':smartscanner-android-api')
 }

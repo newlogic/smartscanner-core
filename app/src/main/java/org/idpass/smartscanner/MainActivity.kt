@@ -22,9 +22,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import org.idpass.smartscanner.api.ScannerConstants
+import org.idpass.smartscanner.api.ScannerIntent
 import org.idpass.smartscanner.databinding.ActivityMainBinding
-import org.idpass.smartscanner.lib.ScannerConstants
-import org.idpass.smartscanner.lib.ScannerIntent
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT_BYTES

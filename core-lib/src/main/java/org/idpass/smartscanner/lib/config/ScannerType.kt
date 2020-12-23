@@ -17,7 +17,7 @@
  */
 package org.idpass.smartscanner.lib.config
 
-import org.idpass.smartscanner.lib.ScannerConstants
+import org.idpass.smartscanner.api.ScannerConstants
 
 enum class ScannerType (val value : String) {
     BARCODE(ScannerConstants.BARCODE),
