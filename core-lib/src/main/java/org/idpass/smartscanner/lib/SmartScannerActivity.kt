@@ -62,6 +62,7 @@ import org.idpass.lite.Card
 import org.idpass.lite.IDPassReader
 import org.idpass.lite.exceptions.InvalidCardException
 import org.idpass.lite.exceptions.InvalidKeyException
+import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.config.*
 import org.idpass.smartscanner.lib.exceptions.SmartScannerException
 import org.idpass.smartscanner.lib.extension.*
@@ -669,32 +670,30 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                 mrzResult?.let { result ->
                     if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_INTENT) {
                         bundle.putString(ScannerConstants.ODK_INTENT_DATA, result.documentNumber)
-                    } else {
-                        bundle.putString(ScannerConstants.MRZ_IMAGE, result.image)
-                        bundle.putString(ScannerConstants.MRZ_CODE, result.code)
-                        bundle.putShort(ScannerConstants.MRZ_CODE_1, result.code1 ?: -1)
-                        bundle.putShort(ScannerConstants.MRZ_CODE_2, result.code2 ?: -1)
-                        bundle.putString(ScannerConstants.MRZ_DATE_OF_BIRTH, result.dateOfBirth)
-                        bundle.putString(ScannerConstants.MRZ_DOCUMENT_NUMBER, result.documentNumber)
-                        bundle.putString(ScannerConstants.MRZ_EXPIRY_DATE, result.expirationDate)
-                        bundle.putString(ScannerConstants.MRZ_FORMAT, result.format)
-                        bundle.putString(ScannerConstants.MRZ_GIVEN_NAMES, result.givenNames)
-                        bundle.putString(ScannerConstants.MRZ_SURNAME, result.surname)
-                        bundle.putString(ScannerConstants.MRZ_ISSUING_COUNTRY, result.issuingCountry)
-                        bundle.putString(ScannerConstants.MRZ_NATIONALITY, result.nationality)
-                        bundle.putString(ScannerConstants.MRZ_SEX, result.sex)
                     }
+                    bundle.putString(ScannerConstants.MRZ_IMAGE, result.image)
+                    bundle.putString(ScannerConstants.MRZ_CODE, result.code)
+                    bundle.putShort(ScannerConstants.MRZ_CODE_1, result.code1 ?: -1)
+                    bundle.putShort(ScannerConstants.MRZ_CODE_2, result.code2 ?: -1)
+                    bundle.putString(ScannerConstants.MRZ_DATE_OF_BIRTH, result.dateOfBirth)
+                    bundle.putString(ScannerConstants.MRZ_DOCUMENT_NUMBER, result.documentNumber)
+                    bundle.putString(ScannerConstants.MRZ_EXPIRY_DATE, result.expirationDate)
+                    bundle.putString(ScannerConstants.MRZ_FORMAT, result.format)
+                    bundle.putString(ScannerConstants.MRZ_GIVEN_NAMES, result.givenNames)
+                    bundle.putString(ScannerConstants.MRZ_SURNAME, result.surname)
+                    bundle.putString(ScannerConstants.MRZ_ISSUING_COUNTRY, result.issuingCountry)
+                    bundle.putString(ScannerConstants.MRZ_NATIONALITY, result.nationality)
+                    bundle.putString(ScannerConstants.MRZ_SEX, result.sex)
                 }
             }
             AnalyzerType.BARCODE -> {
                 Log.d(TAG, "Success from BARCODE")
                 if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_INTENT) {
                     bundle.putString(ScannerConstants.ODK_INTENT_DATA, barcodeResult?.value)
-                } else {
-                    bundle.putString(ScannerConstants.BARCODE_IMAGE, barcodeResult?.imagePath)
-                    bundle.putString(ScannerConstants.BARCODE_CORNERS, barcodeResult?.corners)
-                    bundle.putString(ScannerConstants.BARCODE_VALUE, barcodeResult?.value)
                 }
+                bundle.putString(ScannerConstants.BARCODE_IMAGE, barcodeResult?.imagePath)
+                bundle.putString(ScannerConstants.BARCODE_CORNERS, barcodeResult?.corners)
+                bundle.putString(ScannerConstants.BARCODE_VALUE, barcodeResult?.value)
             }
             AnalyzerType.IDPASS_LITE -> {
                 Log.d(TAG, "Success from IDPASS_LITE")
@@ -713,31 +712,30 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                         val surname = card.surname
                         val dateOfBirth = card.dateOfBirth
                         val placeOfBirth = card.placeOfBirth
-                        val UIN = card.uin
+                        val uin = card.uin
                         if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_INTENT) {
-                            if (UIN != null) {
-                                bundle.putString(ScannerConstants.ODK_INTENT_DATA, UIN)
+                            if (uin != null) {
+                                bundle.putString(ScannerConstants.ODK_INTENT_DATA, uin)
                             }
-                        } else {
-                            if (fullName != null) {
-                                bundle.putString(ScannerConstants.IDPASS_LITE_FULL_NAME, fullName)
-                            }
-                            if (givenName != null) {
-                                bundle.putString(ScannerConstants.IDPASS_LITE_GIVEN_NAME, givenName)
-                            }
-                            if (surname != null) {
-                                bundle.putString(ScannerConstants.IDPASS_LITE_SURNAME, surname)
-                            }
-                            if (dateOfBirth != null) {
-                                val birthday = if (isValidDate(formatDate(dateOfBirth))) formatDate(dateOfBirth) else ""
-                                bundle.putString(ScannerConstants.IDPASS_LITE_DATE_OF_BIRTH, birthday)
-                            }
-                            if (placeOfBirth.isNotEmpty()) {
-                                bundle.putString(ScannerConstants.IDPASS_LITE_PLACE_OF_BIRTH, placeOfBirth)
-                            }
-                            if (UIN != null) {
-                                bundle.putString(ScannerConstants.IDPASS_LITE_UIN, UIN)
-                            }
+                        }
+                        if (fullName != null) {
+                            bundle.putString(ScannerConstants.IDPASS_LITE_FULL_NAME, fullName)
+                        }
+                        if (givenName != null) {
+                            bundle.putString(ScannerConstants.IDPASS_LITE_GIVEN_NAME, givenName)
+                        }
+                        if (surname != null) {
+                            bundle.putString(ScannerConstants.IDPASS_LITE_SURNAME, surname)
+                        }
+                        if (dateOfBirth != null) {
+                            val birthday = if (isValidDate(formatDate(dateOfBirth))) formatDate(dateOfBirth) else ""
+                            bundle.putString(ScannerConstants.IDPASS_LITE_DATE_OF_BIRTH, birthday)
+                        }
+                        if (placeOfBirth.isNotEmpty()) {
+                            bundle.putString(ScannerConstants.IDPASS_LITE_PLACE_OF_BIRTH, placeOfBirth)
+                        }
+                        if (uin != null) {
+                            bundle.putString(ScannerConstants.IDPASS_LITE_UIN, uin)
                         }
                         bundle.putByteArray(ScannerConstants.IDPASS_LITE_RAW, idPassLiteRaw)
                     }
