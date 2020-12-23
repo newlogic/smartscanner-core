@@ -17,10 +17,10 @@
  */
 package org.idpass.smartscanner.lib.platform
 
-import org.idpass.smartscanner.innovatrics.mrz.MrzRecord
-import org.idpass.smartscanner.innovatrics.mrz.records.MrtdTd1
 import org.idpass.smartscanner.lib.extension.empty
 import org.idpass.smartscanner.lib.extension.noValue
+import org.idpass.smartscanner.mrz.parser.innovatrics.MrzRecord
+import org.idpass.smartscanner.mrz.parser.innovatrics.records.MrtdTd1
 
 
 data class MRZResult(

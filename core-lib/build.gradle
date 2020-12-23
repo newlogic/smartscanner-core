@@ -84,7 +84,10 @@ dependencies {
     // Gson
     implementation 'com.google.code.gson:gson:2.8.6'
 
-    //ID PASS lite
+    // ID PASS lite
     implementation project(path: ':idpass-lite')
     implementation 'com.google.protobuf:protobuf-java:3.14.0'
+
+    // SmartScanner MRZ Parser
+    implementation project(path: ':smartscanner-mrz-parser')
 }

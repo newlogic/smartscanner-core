@@ -18,10 +18,10 @@
 package org.idpass.smartscanner.lib.platform
 
 import android.util.Log
-import org.idpass.smartscanner.innovatrics.mrz.MrzParser
-import org.idpass.smartscanner.innovatrics.mrz.MrzRecord
-import org.idpass.smartscanner.innovatrics.mrz.records.MrtdTd1
 import org.idpass.smartscanner.lib.SmartScannerActivity
+import org.idpass.smartscanner.mrz.parser.innovatrics.MrzParser
+import org.idpass.smartscanner.mrz.parser.innovatrics.MrzRecord
+import org.idpass.smartscanner.mrz.parser.innovatrics.records.MrtdTd1
 import java.net.URLEncoder
 
 object MRZCleaner {
