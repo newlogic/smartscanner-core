@@ -187,16 +187,13 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                 throw SmartScannerException("Please set proper scanner options to be able to use ID PASS Smart Scanner.")
             }
         }
+        // setup modes & config for reader
         mode = scannerOptions?.mode
-        mrzFormat = scannerOptions?.mrzFormat ?: MrzFormat.MRP.value
-        barcodeOptions = scannerOptions?.barcodeOptions ?: BarcodeOptions.default
-        barcodeStrings = barcodeOptions.barcodeFormats ?: BarcodeFormat.default
-        barcodeFormats = barcodeStrings.map { BarcodeFormat.valueOf(it).value }
-        // setup config for reader
-        config = scannerOptions?.config  ?: Config.default
+        config = scannerOptions?.config
         // Request camera permissions
         if (allPermissionsGranted()) {
             startCamera(config ?: Config.default)
+            setupConfiguration(config ?: Config.default)
         } else {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
         }
@@ -220,6 +217,36 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
     }
 
     private fun setupConfiguration(config: Config) {
+        if (mode == Modes.MRZ.value) {
+            mrzFormat = scannerOptions?.mrzFormat ?: intent.getStringExtra(ScannerConstants.MRZ_FORMAT_EXTRA)
+        }
+        // barcode view layout
+        if (mode == Modes.BARCODE.value) {
+            barcodeOptions = scannerOptions?.barcodeOptions ?: BarcodeOptions.default
+            barcodeStrings = barcodeOptions.barcodeFormats ?: BarcodeFormat.default
+            barcodeFormats = barcodeStrings.map { BarcodeFormat.valueOf(it).value }
+            val layoutParams = modelLayoutView.layoutParams as ConstraintLayout.LayoutParams
+            when (barcodeOptions.barcodeScannerSize) {
+                ScannerSize.CUSTOM_QR.value -> {
+                    layoutParams.dimensionRatio = "4:6"
+                    layoutParams.marginStart = 96 // Approx. 48dp
+                    layoutParams.marginEnd = 96 // Approx. 48dp
+                    modelLayoutView.layoutParams = layoutParams
+                }
+                ScannerSize.LARGE.value -> {
+                    layoutParams.dimensionRatio = "4:7"
+                    modelLayoutView.layoutParams = layoutParams
+                }
+                ScannerSize.SMALL.value -> {
+                    layoutParams.dimensionRatio = "4:4"
+                    modelLayoutView.layoutParams = layoutParams
+                }
+                else -> {
+                    layoutParams.dimensionRatio = "4:5"
+                    modelLayoutView.layoutParams = layoutParams
+                }
+            }
+        }
         // flash
         flashButton?.visibility = if (isLedFlashAvailable(this)) VISIBLE else GONE
         // capture text label
@@ -244,34 +271,14 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
             // This color string is not valid
             coordinatorLayoutView.setBackgroundColor(ContextCompat.getColor(this, R.color.transparent_grey))
         }
-        // barcode view layout
-        if (mode == Modes.BARCODE.value) {
-            val layoutParams = modelLayoutView.layoutParams as ConstraintLayout.LayoutParams
-            when (barcodeOptions.barcodeScannerSize) {
-                ScannerSize.CUSTOM_QR.value -> {
-                    layoutParams.dimensionRatio = "4:6"
-                    layoutParams.marginStart = 96 // Approx. 48dp
-                    layoutParams.marginEnd = 96 // Approx. 48dp
-                    modelLayoutView.layoutParams = layoutParams
-                }
-                ScannerSize.LARGE.value -> {
-                    layoutParams.dimensionRatio = "4:7"
-                    modelLayoutView.layoutParams = layoutParams
-                }
-                ScannerSize.SMALL.value -> {
-                    layoutParams.dimensionRatio = "4:4"
-                    modelLayoutView.layoutParams = layoutParams
-                }
-                else -> {
-                    layoutParams.dimensionRatio = "4:5"
-                    modelLayoutView.layoutParams = layoutParams
-                }
-            }
-        }
         // branding
         brandingImage?.visibility = config.branding?.let { if (it) VISIBLE else GONE } ?: run { VISIBLE }
         // manual capture
-        manualCapture?.visibility = config.isManualCapture?.let { if (it) VISIBLE else GONE } ?: run { GONE }
+        manualCapture?.visibility = config.isManualCapture?.let {
+            if (it) VISIBLE else GONE
+        } ?: run {
+            if (intent.getBooleanExtra(ScannerConstants.MRZ_MANUAL_CAPTURE_EXTRA, false)) VISIBLE else GONE
+        }
     }
 
     override fun onRequestPermissionsResult(
@@ -280,6 +287,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
             if (allPermissionsGranted()) {
                 startCamera(config ?: Config.default)
+                setupConfiguration(config ?: Config.default)
             } else {
                 val snackBar: Snackbar = Snackbar.make(
                     coordinatorLayoutView,
@@ -329,7 +337,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                         val data = Intent()
                         val bf = imageFile.path.toBitmap()
                         bf.cacheImageToLocal(imageFile.path, 90)
-                        val imageString = if (config.imageResultType == ImageResultType.BASE_64.value) bf.encodeBase64() else imageFile.path
+                        val imageString = if (config.imageResultType == ImageResultType.BASE_64.value) bf.encodeBase64(90) else imageFile.path
                         val result = Gson().toJson(MRZResult.getImageOnly(imageString))
                         data.putExtra(SCANNER_RESULT, result)
                         setResult(Activity.RESULT_OK, data)
@@ -363,7 +371,6 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                 Log.e(TAG, "Use case binding failed", exc)
             }
         }, ContextCompat.getMainExecutor(this))
-        setupConfiguration(config)
     }
 
     @SuppressLint("UnsafeExperimentalUsageError")
@@ -425,7 +432,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                                 val jsonString = gson.toJson(barcodeResult)
                                 if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_INTENT) {
                                     if (barcodeOptions.idPassLiteSupport == true) {
-                                        sendBundleResult(AnalyzerType.IDPASS_LITE, barcodeRaw = barcodes[0].rawBytes!!)
+                                        sendBundleResult(AnalyzerType.IDPASS_LITE, idPassLiteRaw = barcodes[0].rawBytes!!)
                                     } else {
                                         sendBundleResult(AnalyzerType.BARCODE, barcodeResult = barcodeResult)
                                     }
@@ -653,8 +660,9 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
         }
     }
 
-    private fun sendBundleResult(analyzerType: AnalyzerType, barcodeResult: BarcodeResult? = null, mrzResult : MRZResult? = null, barcodeRaw: ByteArray? = null) {
+    private fun sendBundleResult(analyzerType: AnalyzerType, barcodeResult: BarcodeResult? = null, mrzResult : MRZResult? = null, idPassLiteRaw: ByteArray? = null) {
         val bundle = Bundle()
+        bundle.putString(ScannerConstants.MODE, mode)
         when (analyzerType) {
             AnalyzerType.MLKIT, AnalyzerType.TESSERACT -> {
                 Log.d(TAG, "Success from MRZ")
@@ -694,9 +702,9 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                 var card: Card?
                 try {
                     try {
-                        card = idPassReader.open(barcodeRaw)
+                        card = idPassReader.open(idPassLiteRaw)
                     } catch (ice: InvalidCardException) {
-                        card = idPassReader.open(barcodeRaw, true)
+                        card = idPassReader.open(idPassLiteRaw, true)
                         ice.printStackTrace()
                     }
                     if (card != null) {
@@ -721,7 +729,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                                 bundle.putString(ScannerConstants.IDPASS_LITE_SURNAME, surname)
                             }
                             if (dateOfBirth != null) {
-                                val birthday = if (isValidDate(formatDate(dateOfBirth))) formatDate(dateOfBirth) else null
+                                val birthday = if (isValidDate(formatDate(dateOfBirth))) formatDate(dateOfBirth) else ""
                                 bundle.putString(ScannerConstants.IDPASS_LITE_DATE_OF_BIRTH, birthday)
                             }
                             if (placeOfBirth.isNotEmpty()) {
@@ -731,6 +739,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                                 bundle.putString(ScannerConstants.IDPASS_LITE_UIN, UIN)
                             }
                         }
+                        bundle.putByteArray(ScannerConstants.IDPASS_LITE_RAW, idPassLiteRaw)
                     }
                 } catch (ike: InvalidKeyException) {
                     ike.printStackTrace()

@@ -24,6 +24,7 @@ object ScannerConstants {
 
     // Scanner
     const val SCANNER = "SCANNER"
+    const val MODE = "MODE"
     const val RESULT = "RESULT"
 
     // Types
@@ -37,12 +38,13 @@ object ScannerConstants {
     const val BARCODE_VALUE = "BARCODE_VALUE"
 
     //ID PASS LITE
-    const val IDPASS_LITE_FULL_NAME = "IDPASS_FULL_NAME"
-    const val IDPASS_LITE_GIVEN_NAME = "IDPASS_GIVEN_NAME"
-    const val IDPASS_LITE_SURNAME = "IDPASS_SURNAME"
-    const val IDPASS_LITE_DATE_OF_BIRTH = "IDPASS_DATE_OF_BIRTH"
-    const val IDPASS_LITE_PLACE_OF_BIRTH = "IDPASS_DATE_OF_BIRTH"
-    const val IDPASS_LITE_UIN = "IDPASS_UIN"
+    const val IDPASS_LITE_FULL_NAME = "IDPASS_LITE_FULL_NAME"
+    const val IDPASS_LITE_GIVEN_NAME = "IDPASS_LITE_GIVEN_NAME"
+    const val IDPASS_LITE_SURNAME = "IDPASS_LITE_SURNAME"
+    const val IDPASS_LITE_DATE_OF_BIRTH = "IDPASS_LITE_DATE_OF_BIRTH"
+    const val IDPASS_LITE_PLACE_OF_BIRTH = "IDPASS_LITE_PLACE_OF_BIRTH"
+    const val IDPASS_LITE_UIN = "IDPASS_LITE_UIN"
+    const val IDPASS_LITE_RAW = "IDPASS_LITE_RAW"
 
     // MRZ
     const val MRZ_IMAGE = "MRZ_IMAGE"
@@ -58,6 +60,12 @@ object ScannerConstants {
     const val MRZ_ISSUING_COUNTRY = "MRZ_ISSUING_COUNTRY"
     const val MRZ_NATIONALITY = "MRZ_NATIONALITY"
     const val MRZ_SEX = "MRZ_SEX"
+    // MRZ Manual Capture
+    const val MRZ_MANUAL_CAPTURE_EXTRA = "MRZ_MANUAL_CAPTURE_EXTRA"
+    // MRZ Format
+    const val MRZ_FORMAT_EXTRA = "MRZ_FORMAT_EXTRA"
+    const val MRZ_FORMAT_MRTD_TD1= "MRTD_TD1"
+    const val MRZ_FORMAT_MRP = "MRP"
 
     // ODK
     const val ODK_INTENT_DATA = "odk_intent_data"

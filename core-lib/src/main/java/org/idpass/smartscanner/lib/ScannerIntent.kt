@@ -28,13 +28,6 @@ class ScannerIntent {
 
     companion object {
         @JvmStatic
-        fun intentMrz(useODK : Boolean = false): Intent {
-            val intent = Intent(getAction(useODK))
-            intent.putExtra(ScannerConstants.SCANNER, ScannerConstants.MRZ)
-            return intent
-        }
-
-        @JvmStatic
         fun intentBarcode(useODK : Boolean = false): Intent {
             val intent = Intent(getAction(useODK))
             intent.putExtra(ScannerConstants.SCANNER, ScannerConstants.BARCODE)
@@ -45,6 +38,17 @@ class ScannerIntent {
         fun intentIDPassLite(useODK : Boolean = false): Intent {
             val intent = Intent(getAction(useODK))
             intent.putExtra(ScannerConstants.SCANNER, ScannerConstants.IDPASS_LITE)
+            return intent
+        }
+
+        @JvmStatic
+        fun intentMrz(useODK : Boolean = false,
+                      isManualCapture : Boolean = false,
+                      mrzFormat : String? = null): Intent {
+            val intent = Intent(getAction(useODK))
+            intent.putExtra(ScannerConstants.SCANNER, ScannerConstants.MRZ)
+            intent.putExtra(ScannerConstants.MRZ_MANUAL_CAPTURE_EXTRA, isManualCapture)
+            intent.putExtra(ScannerConstants.MRZ_FORMAT_EXTRA, mrzFormat)
             return intent
         }
 
