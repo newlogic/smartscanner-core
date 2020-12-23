@@ -671,7 +671,8 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                     if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_INTENT) {
                         bundle.putString(ScannerConstants.ODK_INTENT_DATA, result.documentNumber)
                     }
-                    bundle.putString(ScannerConstants.MRZ_IMAGE, result.image)
+                    // TODO implement proper image passing
+                    //  bundle.putString(ScannerConstants.MRZ_IMAGE, result.image)
                     bundle.putString(ScannerConstants.MRZ_CODE, result.code)
                     bundle.putShort(ScannerConstants.MRZ_CODE_1, result.code1 ?: -1)
                     bundle.putShort(ScannerConstants.MRZ_CODE_2, result.code2 ?: -1)

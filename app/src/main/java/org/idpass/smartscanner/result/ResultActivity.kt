@@ -30,8 +30,8 @@ import com.bumptech.glide.Glide
 import com.google.gson.JsonParser
 import org.idpass.smartscanner.MainActivity.Companion.imageType
 import org.idpass.smartscanner.R
+import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.databinding.ActivityResultBinding
-import org.idpass.smartscanner.lib.ScannerConstants
 import org.idpass.smartscanner.lib.config.ImageResultType
 import org.idpass.smartscanner.lib.extension.decodeBase64
 
@@ -90,9 +90,10 @@ class ResultActivity : AppCompatActivity() {
                 showResultImage(image.asString, imageType)
             }
         } ?: run {
-            if (bundle != null) {
-                showResultImage(bundle.getString(ScannerConstants.MRZ_IMAGE) ?: "", imageType)
-            }
+            // TODO implement proper image passing
+            //  if (bundle != null) {
+            //  showResultImage(bundle.getString(ScannerConstants.MRZ_IMAGE) ?: "", imageType)
+            //  }
         }
 
         // Raw Data Result

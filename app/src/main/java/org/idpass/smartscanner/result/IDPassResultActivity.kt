@@ -35,7 +35,7 @@ import org.idpass.lite.exceptions.CardVerificationException
 import org.idpass.lite.exceptions.InvalidCardException
 import org.idpass.lite.exceptions.InvalidKeyException
 import org.idpass.smartscanner.R
-import org.idpass.smartscanner.lib.ScannerConstants
+import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.extension.empty
 import org.idpass.smartscanner.lib.extension.hideKeyboard
@@ -128,7 +128,7 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
                 // TODO Display new fields in proper format
                 // val gender = card.gender
                 // val postalAdder = card.postalAddress
-                // val UIN = card.uin
+                // val uin = card.uin
 
                 if (fullName != null) {
                     dump.append("Full Name: $fullName\n")
