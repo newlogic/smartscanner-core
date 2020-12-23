@@ -33,6 +33,7 @@ data class ScannerOptions(
         // Default
         val defaultForBarcode = ScannerOptions(mode = BARCODE.value, config = Config.default)
         val defaultForMRZ = ScannerOptions(mode = MRZ.value, config = Config.default)
+        val defaultForMRZ64 = ScannerOptions(mode = MRZ.value, config = Config.default64)
         val defaultForIdPassLite = ScannerOptions(mode = BARCODE.value, barcodeOptions = BarcodeOptions.defaultIdPassLite, config = Config.default)
         // Sample
         fun sampleMrz(config: Config? = null, mrzFormat: String? = null) = ScannerOptions(mode = MRZ.value, config = config, mrzFormat = mrzFormat)

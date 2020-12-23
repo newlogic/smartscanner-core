@@ -39,5 +39,10 @@ data class Config(
             isManualCapture = false,
             branding = true
         )
+
+        val default64 = Config(
+            imageResultType = ImageResultType.BASE_64.value,
+            branding = true
+        )
     }
 }
