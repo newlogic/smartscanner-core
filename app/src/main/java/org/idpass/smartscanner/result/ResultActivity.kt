@@ -31,16 +31,15 @@ import com.google.gson.JsonParser
 import org.idpass.smartscanner.MainActivity.Companion.imageType
 import org.idpass.smartscanner.R
 import org.idpass.smartscanner.databinding.ActivityResultBinding
+import org.idpass.smartscanner.lib.ScannerConstants
 import org.idpass.smartscanner.lib.config.ImageResultType
 import org.idpass.smartscanner.lib.extension.decodeBase64
-import java.util.*
 
 
 class ResultActivity : AppCompatActivity() {
 
     companion object {
-        const val SCAN_RESULT = "SCAN_RESULT"
-        const val SCAN_MODE = "SCAN_MODE"
+        const val RESULT = "SCAN_RESULT"
     }
 
     private lateinit var binding : ActivityResultBinding
@@ -57,39 +56,47 @@ class ResultActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
         supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_close)
-        intent.getStringExtra(SCAN_RESULT)?.let {
-            setupResult(it, imageType)
-            resultString = getShareResult(it, intent.getStringExtra(SCAN_MODE))
-        } ?: run {
-            binding.textResult.text = getString(R.string.label_result_none)
+        if (intent.getStringExtra(RESULT) != null) {
+            val scanResult = intent.getStringExtra(RESULT)
+            setupResult(result = scanResult, imageType = imageType)
+            resultString = getShareResult(result = scanResult)
+        } else {
+            intent.getBundleExtra(RESULT)?.let {
+                setupResult(bundle = it, imageType = imageType)
+                resultString = getShareResult(bundle = it)
+            } ?: run {
+                binding.textResult.text = getString(R.string.label_result_none)
+            }
         }
     }
 
-    private fun setupResult(result: String, imageType: String) {
+    private fun setupResult(result: String? = null, bundle: Bundle? = null, imageType: String) {
+        val dump: StringBuilder
+        if (bundle != null) {
+            dump = getResult(bundle = bundle)
+        } else {
+            dump = getResult(result = result)
+        }
         // Text Data Result
-        val dump = getResult(result)
         if (dump.isNotEmpty()) {
             binding.textResult.text = dump.toString()
         } else {
             binding.textResult.visibility = GONE
         }
-        // Image Data Result
-        val image = JsonParser.parseString(result).asJsonObject["image"]
-        if (image != null) {
-            val imageBitmap = if (imageType == ImageResultType.PATH.value) BitmapFactory.decodeFile(image.asString) else image.asString.decodeBase64()
-            Glide
-                .with(this)
-                .load(imageBitmap)
-                .into(binding.imageResult)
-            binding.imageLabel.paintFlags = binding.imageLabel.paintFlags or Paint.UNDERLINE_TEXT_FLAG
-            binding.imageLabel.visibility = VISIBLE
-            binding.imageResult.visibility = VISIBLE
-        } else {
-            binding.imageLabel.visibility = GONE
-            binding.imageResult.visibility = GONE
+        // Image & Raw Data Result
+        result?.let {
+            val image = JsonParser.parseString(it).asJsonObject["image"]
+            if (image != null) {
+                showResultImage(image.asString, imageType)
+            }
+        } ?: run {
+            if (bundle != null) {
+                showResultImage(bundle.getString(ScannerConstants.MRZ_IMAGE) ?: "", imageType)
+            }
         }
+
         // Raw Data Result
-        if (result.isNotEmpty()) {
+        if (result?.isNotEmpty() != null) {
             binding.editTextRaw.setText(result)
             binding.textRawLabel.paintFlags = binding.textRawLabel.paintFlags or Paint.UNDERLINE_TEXT_FLAG
             binding.textRawLabel.visibility = VISIBLE
@@ -100,37 +107,73 @@ class ResultActivity : AppCompatActivity() {
         }
     }
 
-    private fun getShareResult(result: String, mode: String?) : String {
-        val dump = getResult(result)
+    private fun showResultImage(image: String, imageType: String) {
+        if (image.isNotEmpty()) {
+            val imageBitmap = if (imageType == ImageResultType.PATH.value) BitmapFactory.decodeFile(image) else image.decodeBase64()
+            Glide
+                .with(this)
+                .load(imageBitmap)
+                .into(binding.imageResult)
+            binding.imageLabel.paintFlags =
+                binding.imageLabel.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+            binding.imageLabel.visibility = VISIBLE
+            binding.imageResult.visibility = VISIBLE
+        } else {
+            binding.imageLabel.visibility = GONE
+            binding.imageResult.visibility = GONE
+        }
+    }
+
+
+    private fun getShareResult(result: String? = null, bundle: Bundle? = null) : String {
+        val dump: StringBuilder
+        if (bundle != null) {
+            dump = getResult(bundle = bundle)
+        } else {
+            dump = getResult(result = result)
+        }
         if (dump.isEmpty()) {
             dump.append(result)
         }
-        dump.insert(0, "Scan Result via ID PASS SmartScanner:\n\n${mode?.toUpperCase(Locale.getDefault())}\n-------------------------\n")
+        dump.insert(0, "Scan Result via ID PASS SmartScanner:\n\n-------------------------\n")
         return dump.toString()
     }
 
-    private fun getResult(result: String): StringBuilder {
+    private fun getResult(result: String? = null, bundle: Bundle? = null): StringBuilder {
         val dump = StringBuilder()
-        val resultObject = JsonParser.parseString(result).asJsonObject
-        val givenNames = resultObject["givenNames"]
-        val surname = resultObject["surname"]
-        val dateOfBirth = resultObject["dateOfBirth"]
-        val nationality = resultObject["nationality"]
-        val documentNumber = resultObject["documentNumber"]
+        var givenNames: String? = null
+        var surname: String? = null
+        var dateOfBirth: String? = null
+        var nationality: String? = null
+        var documentNumber: String? = null
+        if (bundle != null) {
+            givenNames = bundle.getString(ScannerConstants.MRZ_GIVEN_NAMES)
+            surname = bundle.getString(ScannerConstants.MRZ_SURNAME)
+            dateOfBirth = bundle.getString(ScannerConstants.MRZ_DATE_OF_BIRTH)
+            nationality = bundle.getString(ScannerConstants.MRZ_NATIONALITY)
+            documentNumber = bundle.getString(ScannerConstants.MRZ_NATIONALITY)
+        } else {
+            val resultObject = JsonParser.parseString(result).asJsonObject
+            givenNames = if (resultObject["givenNames"] != null) resultObject["givenNames"].asString else ""
+            surname = if (resultObject["surname"]!= null) resultObject["surname"].asString else ""
+            dateOfBirth = if (resultObject["dateOfBirth"]!= null) resultObject["dateOfBirth"].asString else ""
+            nationality =  if (resultObject["nationality"]!= null) resultObject["nationality"].asString else ""
+            documentNumber = if (resultObject["documentNumber"]!= null) resultObject["documentNumber"].asString else ""
+        }
         if (givenNames != null) {
-            if (givenNames.asString.isNotEmpty()) dump.append("Given Name: ${givenNames.asString}\n")
+            if (givenNames.isNotEmpty()) dump.append("Given Name: ${givenNames}\n")
         }
         if (surname != null) {
-            if (surname.asString.isNotEmpty()) dump.append("Surname: ${surname.asString}\n")
+            if (surname.isNotEmpty()) dump.append("Surname: ${surname}\n")
         }
         if (dateOfBirth != null) {
-            if (dateOfBirth.asString.isNotEmpty()) dump.append("Birthday: ${dateOfBirth.asString}\n")
+            if (dateOfBirth.isNotEmpty()) dump.append("Birthday: ${dateOfBirth}\n")
         }
         if (nationality != null) {
-            if (nationality.asString.isNotEmpty()) dump.append("Nationality: ${nationality.asString}\n")
+            if (nationality.isNotEmpty()) dump.append("Nationality: ${nationality}\n")
         }
         if (documentNumber != null) {
-            if (documentNumber.asString.isNotEmpty()) dump.append("Document Number: ${documentNumber.asString}\n")
+            if (documentNumber.isNotEmpty()) dump.append("Document Number: ${documentNumber}\n")
         }
         if (dump.isNotEmpty()) dump.append("-------------------------")
         return dump

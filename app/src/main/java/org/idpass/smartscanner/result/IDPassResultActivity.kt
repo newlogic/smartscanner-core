@@ -35,6 +35,7 @@ import org.idpass.lite.exceptions.CardVerificationException
 import org.idpass.lite.exceptions.InvalidCardException
 import org.idpass.lite.exceptions.InvalidKeyException
 import org.idpass.smartscanner.R
+import org.idpass.smartscanner.lib.ScannerConstants
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.extension.empty
 import org.idpass.smartscanner.lib.extension.hideKeyboard
@@ -44,7 +45,7 @@ import org.idpass.smartscanner.lib.utils.DateUtils.isValidDate
 class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
 
     companion object {
-        const val RESULT = "idpass_result"
+        const val RESULT = "IDPASS_RESULT"
         private var idPassReader = IDPassReader()
     }
 
@@ -67,10 +68,16 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
         supportActionBar?.setHomeButtonEnabled(true)
         supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_close)
         // Display ID PASS Lite Result
-        displayResult(intent.getByteArrayExtra(RESULT))
+        intent.getByteArrayExtra(RESULT)?.let {
+            displayResult(it)
+        } ?: run {
+            intent.getBundleExtra(ResultActivity.RESULT)?.let {
+                displayResult(it.getByteArray(ScannerConstants.IDPASS_LITE_RAW))
+            }
+        }
     }
 
-    private fun displayResult(qrbytes: ByteArray?) {
+    private fun displayResult(qrbytes: ByteArray? = null) {
         val tv =  (findViewById<TextView>(R.id.hex))
         val qrstr = qrbytes?.let { readCard(idPassReader, it) }
         tv.text = "\n" + qrstr + "\n"
