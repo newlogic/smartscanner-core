@@ -689,6 +689,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                     bundle.putString(ScannerConstants.MRZ_ISSUING_COUNTRY, result.issuingCountry)
                     bundle.putString(ScannerConstants.MRZ_NATIONALITY, result.nationality)
                     bundle.putString(ScannerConstants.MRZ_SEX, result.sex)
+                    bundle.putString(ScannerConstants.MRZ_RAW, result.mrz)
                 }
             }
             AnalyzerType.BARCODE -> {
