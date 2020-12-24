@@ -28,13 +28,12 @@ data class BarcodeOptions(
 ) : Parcelable {
     companion object {
         val default = BarcodeOptions(
-            barcodeScannerSize = ScannerSize.MEDIUM.value,
             barcodeFormats = BarcodeFormat.default,
             idPassLiteSupport = false
         )
         val defaultIdPassLite = BarcodeOptions(
-            barcodeScannerSize = ScannerSize.MEDIUM.value,
-            barcodeFormats = BarcodeFormat.default,
+            barcodeScannerSize = ScannerSize.LARGE.value,
+            barcodeFormats = arrayListOf(BarcodeFormat.QR_CODE.label),
             idPassLiteSupport = true
         )
     }

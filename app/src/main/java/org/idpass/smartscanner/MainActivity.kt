@@ -59,8 +59,8 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         binding.itemMrz.item.setOnClickListener { startMrzScan() }
-        binding.itemBarcode.item.setOnClickListener { startBarcode(BarcodeOptions(BarcodeFormat.default))}
-        binding.itemIdpassLite.item.setOnClickListener { startBarcode(BarcodeOptions(arrayListOf("QR_CODE"), idPassLiteSupport = true)) }
+        binding.itemBarcode.item.setOnClickListener { startBarcode(BarcodeOptions.default)}
+        binding.itemIdpassLite.item.setOnClickListener { startBarcode(BarcodeOptions.defaultIdPassLite) }
     }
 
     private fun startIntentCallOut() {

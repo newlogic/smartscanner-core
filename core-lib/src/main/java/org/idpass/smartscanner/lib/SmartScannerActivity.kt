@@ -239,7 +239,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                     modelLayoutView.layoutParams = layoutParams
                 }
                 else -> {
-                    layoutParams.dimensionRatio = "4:5"
+                    layoutParams.dimensionRatio = "3:4"
                     modelLayoutView.layoutParams = layoutParams
                 }
             }
