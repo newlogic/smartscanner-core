@@ -134,6 +134,10 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
                 if (givenName != null) {
                     dump.append("Given Names: $givenName\n")
                 }
+//                if (card.gender != 0) {
+//                    dump.append("Gender: ${card.gender.toString()}\n")
+//                }
+
                 if (surname != null) {
                     dump.append("Surname: $surname\n")
                 }
@@ -145,10 +149,10 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
                     dump.append("Place of Birth: $pob\n")
                 }
                 if (uin != null) {
-                    dump.append("UIN: $uin")
+                    dump.append("UIN: $uin\n")
                 }
                 if (address != null) {
-                    dump.append("Address:")
+                    dump.append("Address:\n")
                     val postalCode = address.postalCode
                     val administrativeArea = address.administrativeArea
                     val languageCode = address.languageCode
@@ -158,14 +162,14 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
                     val sublocality = address.sublocality
                     val organization = address.organization
 
-                    dump.append("    Language Code: $languageCode")
-                    dump.append("    Postal Code: $postalCode")
-                    dump.append("    Administrative Area: $administrativeArea")
-                    dump.append("    Address Lines: $addressLines")
-                    dump.append("    Sorting Code: $sortingCode")
-                    dump.append("    Locality: $locality")
-                    dump.append("    Sublocality: $sublocality")
-                    dump.append("    Organization: $organization")
+                    dump.append("    Language Code: $languageCode\n")
+                    dump.append("    Postal Code: $postalCode\n")
+                    dump.append("    Administrative Area: $administrativeArea\n")
+                    dump.append("    Address Lines: $addressLines\n")
+                    dump.append("    Sorting Code: $sortingCode\n")
+                    dump.append("    Locality: $locality\n")
+                    dump.append("    Sublocality: $sublocality\n")
+                    dump.append("    Organization: $organization\n")
                 }
                 dump.append("\n-------------------------\n\n")
                 for ((key, value) in card.cardExtras) {

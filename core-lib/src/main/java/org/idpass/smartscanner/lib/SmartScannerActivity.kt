@@ -736,9 +736,9 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                         if (surname != null) {
                             bundle.putString(ScannerConstants.IDPASS_LITE_SURNAME, surname)
                         }
-                        if (card.gender != 0) {
-                            bundle.putString(ScannerConstants.IDPASS_LITE_GENDER, card.gender.toString())
-                        }
+//                        if (card.gender != 0) {
+//                            bundle.putString(ScannerConstants.IDPASS_LITE_GENDER, card.gender.toString())
+//                        }
                         if (dateOfBirth != null) {
                             val birthday = if (isValidDate(formatDate(dateOfBirth))) formatDate(dateOfBirth) else ""
                             bundle.putString(ScannerConstants.IDPASS_LITE_DATE_OF_BIRTH, birthday)
