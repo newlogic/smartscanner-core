@@ -99,7 +99,7 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
         }
         val dump = StringBuilder()
         var authStatus = "NO"
-        var certStatus = ""
+        var certStatus: String
         var card: Card?
         try {
             try {
