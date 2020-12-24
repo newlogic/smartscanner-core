@@ -148,15 +148,16 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
                     dump.append("UIN: $uin")
                 }
                 if (address != null) {
+                    dump.append("Address:")
                     val postalCode = address.postalCode
                     val administrativeArea = address.administrativeArea
                     val languageCode = address.languageCode
                     val addressLines = address.addressLinesList.joinToString(",")
 
-                    dump.append("Language Code: $languageCode")
-                    dump.append("Postal Code: $postalCode")
-                    dump.append("Administrative Area: $administrativeArea")
-                    dump.append("Address: $addressLines")
+                    dump.append("    Language Code: $languageCode")
+                    dump.append("    Postal Code: $postalCode")
+                    dump.append("    Administrative Area: $administrativeArea")
+                    dump.append("    Address: $addressLines")
                 }
                 dump.append("\n-------------------------\n\n")
                 for ((key, value) in card.cardExtras) {
