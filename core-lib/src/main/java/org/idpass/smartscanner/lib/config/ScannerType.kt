@@ -27,6 +27,6 @@ enum class ScannerType (val value : String) {
     companion object {
         val barcodeOptions = ScannerOptions.defaultForBarcode
         val idPassLiteOptions = ScannerOptions.defaultForIdPassLite
-        val mrzOptions = ScannerOptions.defaultForMRZ64
+        val mrzOptions = ScannerOptions.defaultForMRZ
     }
 }
