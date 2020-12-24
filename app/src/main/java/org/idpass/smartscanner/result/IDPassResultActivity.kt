@@ -71,7 +71,7 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
         intent.getByteArrayExtra(RESULT)?.let {
             displayResult(it)
         } ?: run {
-            intent.getBundleExtra(ResultActivity.RESULT)?.let {
+            intent.getBundleExtra(RESULT)?.let {
                 displayResult(it.getByteArray(ScannerConstants.IDPASS_LITE_RAW))
             }
         }
@@ -98,7 +98,7 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
             return ""
         }
         val dump = StringBuilder()
-        var authStatus = "NO"
+        var authStatus = ""
         var certStatus: String
         var card: Card?
         try {
@@ -117,6 +117,7 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
                         authStatus = "YES"
                         Toast.makeText(applicationContext, "Authentication Success", Toast.LENGTH_SHORT).show()
                     } catch (ve: CardVerificationException) {
+                        authStatus = "NO"
                         Toast.makeText(applicationContext, "Authentication Fail", Toast.LENGTH_SHORT).show()
                     }
                 }
@@ -145,10 +146,10 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
                     dump.append("Place of Birth: $pob\n")
                 }
                 if (uin != null) {
-                    dump.append("UIN: $uin")
+                    dump.append("UIN: $uin\n")
                 }
                 if (address != null) {
-                    dump.append("Address:")
+                    dump.append("Address:\n")
                     val postalCode = address.postalCode
                     val administrativeArea = address.administrativeArea
                     val languageCode = address.languageCode
@@ -158,14 +159,14 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
                     val sublocality = address.sublocality
                     val organization = address.organization
 
-                    dump.append("    Language Code: $languageCode")
-                    dump.append("    Postal Code: $postalCode")
-                    dump.append("    Administrative Area: $administrativeArea")
-                    dump.append("    Address Lines: $addressLines")
-                    dump.append("    Sorting Code: $sortingCode")
-                    dump.append("    Locality: $locality")
-                    dump.append("    Sublocality: $sublocality")
-                    dump.append("    Organization: $organization")
+                    dump.append("    Language Code: $languageCode\n")
+                    dump.append("    Postal Code: $postalCode\n")
+                    dump.append("    Administrative Area: $administrativeArea\n")
+                    dump.append("    Address Lines: \n$addressLines\n")
+                    dump.append("    Sorting Code: $sortingCode\n")
+                    dump.append("    Locality: $locality\n")
+                    dump.append("    Sublocality: $sublocality\n")
+                    dump.append("    Organization: $organization\n")
                 }
                 dump.append("\n-------------------------\n\n")
                 for ((key, value) in card.cardExtras) {

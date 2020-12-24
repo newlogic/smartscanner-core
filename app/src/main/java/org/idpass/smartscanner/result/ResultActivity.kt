@@ -89,14 +89,16 @@ class ResultActivity : AppCompatActivity() {
             if (image != null) {
                 showResultImage(image.asString, imageType)
             }
+            showRawResult(it)
         } ?: run {
             // TODO implement proper image passing
             //  if (bundle != null) {
             //  showResultImage(bundle.getString(ScannerConstants.MRZ_IMAGE) ?: "", imageType)
             //  }
         }
+    }
 
-        // Raw Data Result
+    private fun showRawResult(result : String?) {
         if (result?.isNotEmpty() != null) {
             binding.editTextRaw.setText(result)
             binding.textRawLabel.paintFlags = binding.textRawLabel.paintFlags or Paint.UNDERLINE_TEXT_FLAG

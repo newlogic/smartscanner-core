@@ -60,6 +60,7 @@ import com.google.mlkit.vision.text.TextRecognition
 import com.googlecode.tesseract.android.TessBaseAPI
 import org.idpass.lite.Card
 import org.idpass.lite.IDPassReader
+import org.idpass.lite.exceptions.CardVerificationException
 import org.idpass.lite.exceptions.InvalidCardException
 import org.idpass.lite.exceptions.InvalidKeyException
 import org.idpass.smartscanner.api.ScannerConstants
@@ -126,6 +127,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
     private var mlkitMS: TextView? = null
     private var mlkitTime: TextView? = null
     private var loading: ProgressBar? = null
+    private var pinCode: String = ""
 
     private lateinit var modelLayoutView: View
     private lateinit var coordinatorLayoutView: View
@@ -173,6 +175,9 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                 ScannerConstants.IDPASS_SMARTSCANNER_MRZ_INTENT,
                 ScannerConstants.IDPASS_SMARTSCANNER_ODK_MRZ_INTENT -> ScannerType.mrzOptions
                 else -> throw SmartScannerException("Error: Wrong intent action. Please see ScannerConstants.kt for proper intent action strings.")
+            }
+            if (intent.hasExtra(ScannerConstants.IDPASS_LITE_PIN_CODE)) {
+                pinCode = intent.getStringExtra(ScannerConstants.IDPASS_LITE_PIN_CODE) ?: ""
             }
         } else {
             // Use scanner options directly if no scanner type is called
@@ -664,13 +669,13 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
 
     private fun sendBundleResult(analyzerType: AnalyzerType, barcodeResult: BarcodeResult? = null, mrzResult : MRZResult? = null, idPassLiteRaw: ByteArray? = null) {
         val bundle = Bundle()
-        bundle.putString(ScannerConstants.MODE, mode)
         val prefix = if (intent.hasExtra(ScannerConstants.IDPASS_ODK_PREFIX_EXTRA)) {
             intent.getStringExtra(ScannerConstants.IDPASS_ODK_PREFIX_EXTRA)
         } else { "" }
         when (analyzerType) {
             AnalyzerType.MLKIT, AnalyzerType.TESSERACT -> {
                 Log.d(TAG, "Success from MRZ")
+                bundle.putString(ScannerConstants.MODE, ScannerConstants.MRZ)
                 mrzResult?.let { result ->
                     if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_MRZ_INTENT) {
                         bundle.putString(ScannerConstants.IDPASS_ODK_INTENT_DATA, result.documentNumber)
@@ -694,6 +699,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
             }
             AnalyzerType.BARCODE -> {
                 Log.d(TAG, "Success from BARCODE")
+                bundle.putString(ScannerConstants.MODE, ScannerConstants.BARCODE)
                 if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_BARCODE_INTENT) {
                     bundle.putString(ScannerConstants.IDPASS_ODK_INTENT_DATA, barcodeResult?.value)
                 }
@@ -703,9 +709,10 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
             }
             AnalyzerType.IDPASS_LITE -> {
                 Log.d(TAG, "Success from IDPASS_LITE")
-                val idPassReader = IDPassReader()
-                var card: Card?
+                bundle.putString(ScannerConstants.MODE, ScannerConstants.IDPASS_LITE)
                 try {
+                    val idPassReader = IDPassReader()
+                    var card: Card?
                     try {
                         card = idPassReader.open(idPassLiteRaw)
                     } catch (ice: InvalidCardException) {
@@ -713,8 +720,15 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                         ice.printStackTrace()
                     }
                     if (card != null) {
+                        if (pinCode.isNotEmpty()) {
+                            try {
+                                card.authenticateWithPIN(pinCode)
+                            } catch (ve: CardVerificationException) {
+                                ve.printStackTrace()
+                            }
+                        }
                         val fullName = card.getfullName()
-                        val givenName = card.givenName
+                        val givenNames = card.givenName
                         val surname = card.surname
                         val dateOfBirth = card.dateOfBirth
                         val placeOfBirth = card.placeOfBirth
@@ -729,9 +743,8 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                         if (fullName != null) {
                             bundle.putString(ScannerConstants.IDPASS_LITE_FULL_NAME, fullName)
                         }
-
-                        if (givenName != null) {
-                            bundle.putString(ScannerConstants.IDPASS_LITE_GIVEN_NAMES, givenName)
+                        if (givenNames != null) {
+                            bundle.putString(ScannerConstants.IDPASS_LITE_GIVEN_NAMES, givenNames)
                         }
                         if (surname != null) {
                             bundle.putString(ScannerConstants.IDPASS_LITE_SURNAME, surname)
@@ -749,7 +762,6 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                         if (uin != null) {
                             bundle.putString(ScannerConstants.IDPASS_LITE_UIN, uin)
                         }
-
                         if (address != null) {
                             val addressLines = address.addressLinesList.joinToString("\n")
                             bundle.putString(ScannerConstants.IDPASS_LITE_ADDRESS_POSTAL_CODE, address.postalCode)
@@ -761,7 +773,6 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                             bundle.putString(ScannerConstants.IDPASS_LITE_ADDRESS_SUBLOCALITY, address.sublocality)
                             bundle.putString(ScannerConstants.IDPASS_LITE_ADDRESS_ORGANIZATION, address.organization)
                         }
-
                         bundle.putByteArray(ScannerConstants.IDPASS_LITE_RAW, idPassLiteRaw)
                     }
                 } catch (ike: InvalidKeyException) {
