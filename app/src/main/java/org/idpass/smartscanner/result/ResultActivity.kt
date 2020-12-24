@@ -142,11 +142,11 @@ class ResultActivity : AppCompatActivity() {
 
     private fun getResult(result: String? = null, bundle: Bundle? = null): StringBuilder {
         val dump = StringBuilder()
-        var givenNames: String? = null
-        var surname: String? = null
-        var dateOfBirth: String? = null
-        var nationality: String? = null
-        var documentNumber: String? = null
+        val givenNames: String?
+        val surname: String?
+        val dateOfBirth: String?
+        val nationality: String?
+        val documentNumber: String?
         if (bundle != null) {
             givenNames = bundle.getString(ScannerConstants.MRZ_GIVEN_NAMES)
             surname = bundle.getString(ScannerConstants.MRZ_SURNAME)

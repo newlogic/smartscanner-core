@@ -727,7 +727,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                             bundle.putString(ScannerConstants.IDPASS_LITE_FULL_NAME, fullName)
                         }
                         if (givenName != null) {
-                            bundle.putString(ScannerConstants.IDPASS_LITE_GIVEN_NAME, givenName)
+                            bundle.putString(ScannerConstants.IDPASS_LITE_GIVEN_NAMES, givenName)
                         }
                         if (surname != null) {
                             bundle.putString(ScannerConstants.IDPASS_LITE_SURNAME, surname)
