@@ -125,10 +125,8 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
                 val surname = card.surname
                 val dob = card.dateOfBirth
                 val pob = card.placeOfBirth
-                // TODO Display new fields in proper format
-                // val gender = card.gender
-                // val postalAdder = card.postalAddress
-                // val uin = card.uin
+                val uin = card.uin
+                val address = card.postalAddress
 
                 if (fullName != null) {
                     dump.append("Full Name: $fullName\n")
@@ -145,6 +143,20 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
                 }
                 if (pob.isNotEmpty()) {
                     dump.append("Place of Birth: $pob\n")
+                }
+                if (uin != null) {
+                    dump.append("UIN: $uin")
+                }
+                if (address != null) {
+                    val postalCode = address.postalCode
+                    val administrativeArea = address.administrativeArea
+                    val languageCode = address.languageCode
+                    val addressLines = address.addressLinesList.joinToString(",")
+
+                    dump.append("Language Code: $languageCode")
+                    dump.append("Postal Code: $postalCode")
+                    dump.append("Administrative Area: $administrativeArea")
+                    dump.append("Address: $addressLines")
                 }
                 dump.append("\n-------------------------\n\n")
                 for ((key, value) in card.cardExtras) {
