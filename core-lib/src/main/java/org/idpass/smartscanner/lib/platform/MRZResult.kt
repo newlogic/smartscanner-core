@@ -44,47 +44,47 @@ data class MRZResult(
     companion object {
         fun formatMrzResult(record: MrzRecord, image: String?) : MRZResult {
             return MRZResult(
-                    image,
-                    record.code.toString(),
-                    record.code1.toShort(),
-                    record.code2.toShort(),
-                    record.dateOfBirth?.toString()?.replace(Regex("[{}]"), ""),
-                    record.documentNumber.toString(),
-                    record.expirationDate?.toString()?.replace(Regex("[{}]"), ""),
-                    record.format.toString(),
-                    record.givenNames,
-                    record.issuingCountry,
-                    record.nationality,
-                    record.sex.toString(),
-                    record.surname,
-                    record.toMrz()
+                    image = image,
+                    code = record.code.toString(),
+                    code1 = record.code1.toShort(),
+                    code2 = record.code2.toShort(),
+                    dateOfBirth = record.dateOfBirth?.toString()?.replace(Regex("[{}]"), ""),
+                    documentNumber = record.documentNumber.toString(),
+                    expirationDate = record.expirationDate?.toString()?.replace(Regex("[{}]"), ""),
+                    format = record.format.toString(),
+                    givenNames = record.givenNames,
+                    issuingCountry = record.issuingCountry,
+                    nationality = record.nationality,
+                    sex = record.sex.toString(),
+                    surname = record.surname,
+                    mrz = record.toMrz()
             )
         }
 
         fun formatMrtdTd1Result(record: MrtdTd1, image: String?) : MRZResult {
             return MRZResult(
-                    image,
-                    record.code.toString(),
-                    record.code1.toShort(),
-                    record.code2.toShort(),
-                    record.dateOfBirth?.toString()?.replace(Regex("[{}]"), ""),
-                    record.documentNumber.toString(),
-                    record.expirationDate?.toString()?.replace(Regex("[{}]"), ""),
-                    record.format.toString(),
-                    record.givenNames,
-                    record.issuingCountry,
-                    record.nationality,
-                    record.sex.toString(),
-                    record.surname,
-                    record.toMrz(),
-                    record.optional,
-                    record.optional2
+                    image = image,
+                    code = record.code.toString(),
+                    code1 = record.code1.toShort(),
+                    code2 = record.code2.toShort(),
+                    dateOfBirth = record.dateOfBirth?.toString()?.replace(Regex("[{}]"), ""),
+                    documentNumber = record.documentNumber.toString(),
+                    expirationDate = record.expirationDate?.toString()?.replace(Regex("[{}]"), ""),
+                    format = record.format.toString(),
+                    givenNames = record.givenNames,
+                    issuingCountry = record.issuingCountry,
+                    nationality = record.nationality,
+                    sex = record.sex.toString(),
+                    surname = record.surname,
+                    mrz = record.toMrz(),
+                    optional = record.optional,
+                    optional2 = record.optional2
             )
         }
 
         fun getImageOnly(image: String?) : MRZResult {
             return MRZResult(
-                    image,
+                    image = image,
                     String.empty(),
                     Int.noValue().toShort(),
                     Int.noValue().toShort(),
