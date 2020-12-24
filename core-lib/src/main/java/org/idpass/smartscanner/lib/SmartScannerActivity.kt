@@ -163,22 +163,18 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
         supportActionBar?.setDisplayShowTitleEnabled(false)
         actionBar?.hide()
         actionBar?.setDisplayShowTitleEnabled(false)
-        // Scanner type or options
-        val type : String? = intent.getStringExtra(ScannerConstants.SCANNER)
-        type?.let {
-            // Check for options on specific scanner type call out
-            Log.d(TAG, "scannerType: $it")
-            if (it.isNotEmpty()) {
-                scannerOptions = when (it) {
-                    ScannerType.BARCODE.value -> ScannerType.barcodeOptions
-                    ScannerType.IDPASS_LITE.value -> ScannerType.idPassLiteOptions
-                    ScannerType.MRZ.value -> ScannerType.mrzOptions
-                    else -> throw SmartScannerException("Error: Wrong scanner type. Please set to either \"barcode\", \"idpass-lite\", \"mrz\" ")
-                }
-            } else {
-                throw SmartScannerException("Scanner type cannot be null or empty.")
+        // Scanner setup from intent
+        if (intent.action != null) {
+            scannerOptions = when (intent.action) {
+                ScannerConstants.IDPASS_SMARTSCANNER_BARCODE_INTENT,
+                ScannerConstants.IDPASS_SMARTSCANNER_ODK_BARCODE_INTENT -> ScannerType.barcodeOptions
+                ScannerConstants.IDPASS_SMARTSCANNER_IDPASS_LITE_INTENT,
+                ScannerConstants.IDPASS_SMARTSCANNER_ODK_IDPASS_LITE_INTENT -> ScannerType.idPassLiteOptions
+                ScannerConstants.IDPASS_SMARTSCANNER_MRZ_INTENT,
+                ScannerConstants.IDPASS_SMARTSCANNER_ODK_MRZ_INTENT -> ScannerType.mrzOptions
+                else -> throw SmartScannerException("Error: Wrong intent action. Please see ScannerConstants.kt for proper intent action strings.")
             }
-        } ?: run {
+        } else {
             // Use scanner options directly if no scanner type is called
             val options : ScannerOptions? = intent.getParcelableExtra(SCANNER_OPTIONS)
             options?.let {
@@ -431,7 +427,10 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                                 val gson = Gson()
                                 val barcodeResult = BarcodeResult(imageCachePathFile, cornersString, rawValue)
                                 val jsonString = gson.toJson(barcodeResult)
-                                if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_INTENT) {
+                                if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_BARCODE_INTENT ||
+                                    intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_BARCODE_INTENT ||
+                                    intent.action == ScannerConstants.IDPASS_SMARTSCANNER_IDPASS_LITE_INTENT ||
+                                    intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_IDPASS_LITE_INTENT) {
                                     if (barcodeOptions.idPassLiteSupport == true) {
                                         sendBundleResult(AnalyzerType.IDPASS_LITE, idPassLiteRaw = barcodes[0].rawBytes!!)
                                     } else {
@@ -511,7 +510,8 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                                         else -> formatMrzResult(MRZCleaner.parseAndClean(mrz), imageString)
                                     }
                                     // Send Result
-                                    if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_INTENT) {
+                                    if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_MRZ_INTENT ||
+                                        intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_MRZ_INTENT) {
                                         sendBundleResult(AnalyzerType.MLKIT, mrzResult = mrzResult)
                                     } else {
                                         val gson = Gson()
@@ -601,7 +601,8 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                                         record.toMrz()
                                 )
                                 // Send Result
-                                if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_INTENT) {
+                                if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_MRZ_INTENT ||
+                                    intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_MRZ_INTENT) {
                                     sendBundleResult(AnalyzerType.TESSERACT, mrzResult = mrzResult)
                                 } else {
                                     val gson = Gson()
@@ -664,12 +665,15 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
     private fun sendBundleResult(analyzerType: AnalyzerType, barcodeResult: BarcodeResult? = null, mrzResult : MRZResult? = null, idPassLiteRaw: ByteArray? = null) {
         val bundle = Bundle()
         bundle.putString(ScannerConstants.MODE, mode)
+        val prefix = if (intent.hasExtra(ScannerConstants.IDPASS_ODK_PREFIX_EXTRA)) {
+            intent.getStringExtra(ScannerConstants.IDPASS_ODK_PREFIX_EXTRA)
+        } else { "" }
         when (analyzerType) {
             AnalyzerType.MLKIT, AnalyzerType.TESSERACT -> {
                 Log.d(TAG, "Success from MRZ")
                 mrzResult?.let { result ->
-                    if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_INTENT) {
-                        bundle.putString(ScannerConstants.ODK_INTENT_DATA, result.documentNumber)
+                    if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_MRZ_INTENT) {
+                        bundle.putString(ScannerConstants.IDPASS_ODK_INTENT_DATA, result.documentNumber)
                     }
                     // TODO implement proper image passing
                     //  bundle.putString(ScannerConstants.MRZ_IMAGE, result.image)
@@ -689,8 +693,8 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
             }
             AnalyzerType.BARCODE -> {
                 Log.d(TAG, "Success from BARCODE")
-                if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_INTENT) {
-                    bundle.putString(ScannerConstants.ODK_INTENT_DATA, barcodeResult?.value)
+                if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_BARCODE_INTENT) {
+                    bundle.putString(ScannerConstants.IDPASS_ODK_INTENT_DATA, barcodeResult?.value)
                 }
                 bundle.putString(ScannerConstants.BARCODE_IMAGE, barcodeResult?.imagePath)
                 bundle.putString(ScannerConstants.BARCODE_CORNERS, barcodeResult?.corners)
@@ -714,9 +718,9 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                         val dateOfBirth = card.dateOfBirth
                         val placeOfBirth = card.placeOfBirth
                         val uin = card.uin
-                        if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_INTENT) {
+                        if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_IDPASS_LITE_INTENT) {
                             if (uin != null) {
-                                bundle.putString(ScannerConstants.ODK_INTENT_DATA, uin)
+                                bundle.putString(ScannerConstants.IDPASS_ODK_INTENT_DATA, uin)
                             }
                         }
                         if (fullName != null) {
@@ -747,9 +751,13 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                 }
             }
         }
-        val data = Intent()
-        data.putExtra(ScannerConstants.RESULT, bundle)
-        setResult(Activity.RESULT_OK, data)
+        val result = Intent()
+        result.putExtra(ScannerConstants.RESULT, bundle)
+        // Copy all the values in the intent result to be compatible with other implementations than commcare
+        for (key in bundle.keySet()) {
+            result.putExtra(prefix + key, bundle.getString(key))
+        }
+        setResult(Activity.RESULT_OK, result)
         finish()
     }
 

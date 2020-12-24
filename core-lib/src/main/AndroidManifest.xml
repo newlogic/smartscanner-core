@@ -16,8 +16,12 @@
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="portrait">
             <intent-filter>
-                <action android:name="org.idpass.smartscanner.SCAN" />
-                <action android:name="org.idpass.smartscanner.odk.SCAN" />
+                <action android:name="org.idpass.smartscanner.MRZ_SCAN" />
+                <action android:name="org.idpass.smartscanner.BARCODE_SCAN" />
+                <action android:name="org.idpass.smartscanner.IDPASS_LITE_SCAN" />
+                <action android:name="org.idpass.smartscanner.odk.MRZ_SCAN" />
+                <action android:name="org.idpass.smartscanner.odk.BARCODE_SCAN" />
+                <action android:name="org.idpass.smartscanner.odk.IDPASS_LITE_SCAN" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
