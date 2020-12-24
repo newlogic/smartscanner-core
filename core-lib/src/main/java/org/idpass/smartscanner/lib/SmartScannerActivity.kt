@@ -719,6 +719,8 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                         val dateOfBirth = card.dateOfBirth
                         val placeOfBirth = card.placeOfBirth
                         val uin = card.uin
+                        val address = card.postalAddress
+
                         if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_IDPASS_LITE_INTENT) {
                             if (uin != null) {
                                 bundle.putString(ScannerConstants.IDPASS_ODK_INTENT_DATA, uin)
@@ -727,11 +729,15 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                         if (fullName != null) {
                             bundle.putString(ScannerConstants.IDPASS_LITE_FULL_NAME, fullName)
                         }
+
                         if (givenName != null) {
                             bundle.putString(ScannerConstants.IDPASS_LITE_GIVEN_NAMES, givenName)
                         }
                         if (surname != null) {
                             bundle.putString(ScannerConstants.IDPASS_LITE_SURNAME, surname)
+                        }
+                        if (card.gender != 0) {
+                            bundle.putString(ScannerConstants.IDPASS_LITE_GENDER, card.gender.toString())
                         }
                         if (dateOfBirth != null) {
                             val birthday = if (isValidDate(formatDate(dateOfBirth))) formatDate(dateOfBirth) else ""
@@ -743,6 +749,19 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                         if (uin != null) {
                             bundle.putString(ScannerConstants.IDPASS_LITE_UIN, uin)
                         }
+
+                        if (address != null) {
+                            val addressLines = address.addressLinesList.joinToString("\n")
+                            bundle.putString(ScannerConstants.IDPASS_LITE_ADDRESS_POSTAL_CODE, address.postalCode)
+                            bundle.putString(ScannerConstants.IDPASS_LITE_ADDRESS_ADMINISTRATIVE_AREA, address.administrativeArea)
+                            bundle.putString(ScannerConstants.IDPASS_LITE_ADDRESS_ADDRESS_LINES, address.languageCode)
+                            bundle.putString(ScannerConstants.IDPASS_LITE_ADDRESS_LANGUAGE_CODE, addressLines)
+                            bundle.putString(ScannerConstants.IDPASS_LITE_ADDRESS_SORTING_CODE, address.sortingCode)
+                            bundle.putString(ScannerConstants.IDPASS_LITE_ADDRESS_LOCALITY, address.locality)
+                            bundle.putString(ScannerConstants.IDPASS_LITE_ADDRESS_SUBLOCALITY, address.sublocality)
+                            bundle.putString(ScannerConstants.IDPASS_LITE_ADDRESS_ORGANIZATION, address.organization)
+                        }
+
                         bundle.putByteArray(ScannerConstants.IDPASS_LITE_RAW, idPassLiteRaw)
                     }
                 } catch (ike: InvalidKeyException) {
