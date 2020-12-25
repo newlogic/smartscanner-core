@@ -52,12 +52,12 @@ App Intent Call out
 Call scanner using the ff intent actions:
 - `"org.idpass.smartscanner.MRZ_SCAN"`
 - `"org.idpass.smartscanner.BARCODE_SCAN"`
-- `"org.idpass.smartscanner.IDPASS_LITE_CAN"`
+- `"org.idpass.smartscanner.IDPASS_LITE_SCAN"`
 
 ODK Support can be called using the ff intent actions:
 - `"org.idpass.smartscanner.odk.MRZ_SCAN"`
 - `"org.idpass.smartscanner.odk.BARCODE_SCAN"`
-- `"org.idpass.smartscanner.odk.IDPASS_LITE_CAN"`
+- `"org.idpass.smartscanner.odk.IDPASS_LITE_SCAN"`
 
 ```kotlin
     // Sample SmartScanner MRZ intent call out
