@@ -5,7 +5,7 @@ This is the core repository of the ID PASS SmartScanner that provides developers
 ---------------
 ```bash
 # 1. Clone this repository.
-git clone https://github.com/newlogic/idpass-smart-scanner-core.git
+git clone https://github.com/idpass/idpass-smart-scanner-core.git
 
 # 2. Enter your newly-cloned folder.
 cd idpass-smart-scanner-core
@@ -27,6 +27,7 @@ cd idpass-smart-scanner-core
 ## Quickstart
 This library is used to scan MRZ, Barcode, and ID PASS Lite cards. This also has an embedded standalone `app` for testing purposes
 
+<!--
 ### 1. Install
 Declare Maven Central repository in the dependency configuration. For example, in `build.gradle`:
 
@@ -39,7 +40,7 @@ dependencies {
     implementation "org.idpass:idpass-smartscanner:0.0.1-SNAPSHOT"
 }
 ```
-
+-->
 ### 2. Usage
 ---------------
 App Intent Call out
