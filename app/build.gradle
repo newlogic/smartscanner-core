@@ -1,7 +1,12 @@
+plugins {
+    id 'com.gladed.androidgitversion' version '0.4.14'
+}
+
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-parcelize'
 apply plugin: 'com.google.gms.google-services'
+
 
 android {
     compileSdkVersion 30
@@ -11,8 +16,8 @@ android {
         applicationId "org.idpass.smartscanner"
         minSdkVersion 24
         targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
+        versionName androidGitVersion.name()
+        versionCode androidGitVersion.code()
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
