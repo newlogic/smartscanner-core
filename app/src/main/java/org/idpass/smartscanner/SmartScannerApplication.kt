@@ -15,9 +15,17 @@
  *
  *
  */
-package org.idpass.smartscanner.lib.exceptions
+package org.idpass.smartscanner
 
-class SmartScannerException : Exception {
-    constructor() : super()
-    constructor(s: String?) : super(s)
+import android.app.Application
+import com.google.firebase.analytics.FirebaseAnalytics
+
+
+class SmartScannerApplication : Application() {
+    private lateinit var firebaseAnalytics: FirebaseAnalytics
+
+    override fun onCreate() {
+        super.onCreate()
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this)
+    }
 }

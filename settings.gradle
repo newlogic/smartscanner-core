@@ -1,4 +1,6 @@
-include ':idpass-lite'
 include ':app'
 include ':core-lib'
+include ':idpass-lite'
+include ':smartscanner-mrz-parser'
+include ':smartscanner-android-api'
 rootProject.name = "idpass-smart-scanner"

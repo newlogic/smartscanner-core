@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2020 Newlogic Pte. Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ */
 package org.idpass.smartscanner
 
 import android.content.ActivityNotFoundException
@@ -5,15 +22,18 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import org.idpass.smartscanner.api.ScannerConstants
+import org.idpass.smartscanner.api.ScannerIntent
 import org.idpass.smartscanner.databinding.ActivityMainBinding
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT_BYTES
-import org.idpass.smartscanner.lib.config.*
+import org.idpass.smartscanner.lib.config.BarcodeOptions
+import org.idpass.smartscanner.lib.config.Config
+import org.idpass.smartscanner.lib.config.ImageResultType
+import org.idpass.smartscanner.lib.config.ScannerOptions
 import org.idpass.smartscanner.result.IDPassResultActivity
 import org.idpass.smartscanner.result.ResultActivity
-import org.idpass.smartscanner.result.ResultActivity.Companion.SCAN_MODE
-import org.idpass.smartscanner.result.ResultActivity.Companion.SCAN_RESULT
 
 
 class MainActivity : AppCompatActivity() {
@@ -21,16 +41,16 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private val TAG = MainActivity::class.java.simpleName
         private const val OP_SCANNER = 1001
-        val imageType = ImageResultType.PATH.value
+        var imageType = ImageResultType.BASE_64.value
 
         private fun sampleConfig(isManualCapture : Boolean) = Config (
                 branding = true,
+                imageResultType = imageType,
                 isManualCapture = isManualCapture
         )
     }
 
     private lateinit var binding : ActivityMainBinding
-    private var mode = Modes.MRZ
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,15 +62,17 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         binding.itemMrz.item.setOnClickListener { startMrzScan() }
-        binding.itemBarcode.item.setOnClickListener { startBarcode(BarcodeOptions(BarcodeFormat.default))}
-        binding.itemIdpassLite.item.setOnClickListener { startBarcode(BarcodeOptions(arrayListOf("QR_CODE"), idPassLiteSupport = true)) }
+        binding.itemBarcode.item.setOnClickListener { startBarcode() }
+        binding.itemIdpassLite.item.setOnClickListener { startIDPassLite() }
     }
 
-    private fun startIntentCallOut(scannerType : String) {
+    private fun startIntentCallOut() {
         try {
-            val intent = Intent("org.idpass.smartscanner.SCAN")
-            // scannerType: can either be "barcode", "idpass-lite", "mrz"
-            intent.putExtra(SmartScannerActivity.SCANNER, scannerType)
+            // Note: Scanner via intent can either be for barcode, idpass-lite, mrz
+            // val intent = ScannerIntent.intentMrz(isManualCapture = true, mrzFormat = ScannerConstants.MRZ_FORMAT_MRTD_TD1)
+            // val intent = ScannerIntent.intentIDPassLite(useODK = true, pinCode = "1234")
+            // val intent = ScannerIntent.intentBarcode(useODK = true)
+            val intent = ScannerIntent.intentIDPassLite(useODK = true, pinCode = "1234")
             startActivityForResult(intent, OP_SCANNER)
         } catch (ex: ActivityNotFoundException) {
             ex.printStackTrace()
@@ -58,15 +80,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun startBarcode() = setupBarcode(BarcodeOptions.default)
+    private fun startIDPassLite() = setupBarcode(BarcodeOptions.defaultIdPassLite)
+
     private fun startMrzScan() {
-        mode = Modes.MRZ
+        imageType = ImageResultType.PATH.value
         val intent = Intent(this, SmartScannerActivity::class.java)
         intent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleMrz(config = sampleConfig(true)))
         startActivityForResult(intent, OP_SCANNER)
     }
 
-    private fun startBarcode(barcodeOptions: BarcodeOptions? = null) {
-        mode = Modes.BARCODE
+    private fun setupBarcode(barcodeOptions: BarcodeOptions? = null) {
         val intent = Intent(this,SmartScannerActivity::class.java)
         intent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleBarcode(config = sampleConfig(false), barcodeOptions = barcodeOptions))
         startActivityForResult(intent, OP_SCANNER)
@@ -77,17 +101,30 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == OP_SCANNER) {
             Log.d(TAG, "Plugin post SmartScanner Activity resultCode $resultCode")
             if (resultCode == RESULT_OK) {
-                val result = intent?.getStringExtra(SCANNER_RESULT)
-                if (result != null) {
-                    val resultIntent = Intent(this, ResultActivity::class.java)
-                    resultIntent.putExtra(SCAN_RESULT, result)
-                    resultIntent.putExtra(SCAN_MODE, mode.value)
-                    startActivity(resultIntent)
-                } else {
-                    val resultBytes = intent?.getByteArrayExtra(SCANNER_RESULT_BYTES)
-                    val myIntent = Intent(this, IDPassResultActivity::class.java)
-                    myIntent.putExtra(IDPassResultActivity.RESULT, resultBytes)
-                    startActivity(myIntent)
+                // Get Result from Bundle Intent Call Out
+                intent?.getBundleExtra(ScannerConstants.RESULT)?.let {
+                    if (it.getString(ScannerConstants.MODE) == ScannerConstants.MRZ || it.getString(ScannerConstants.MODE) == ScannerConstants.BARCODE) {
+                        val resultIntent = Intent(this, ResultActivity::class.java)
+                        resultIntent.putExtra(ResultActivity.RESULT, it)
+                        startActivity(resultIntent)
+                    } else {
+                        val myIntent = Intent(this, IDPassResultActivity::class.java)
+                        myIntent.putExtra(IDPassResultActivity.RESULT, it)
+                        startActivity(myIntent)
+                    }
+                } ?: run {
+                    // Get Result from JSON String
+                    val result = intent?.getStringExtra(SCANNER_RESULT)
+                    if (result != null) {
+                        val resultIntent = Intent(this, ResultActivity::class.java)
+                        resultIntent.putExtra(ResultActivity.RESULT, result)
+                        startActivity(resultIntent)
+                    } else {
+                        val resultBytes = intent?.getByteArrayExtra(SCANNER_RESULT_BYTES)
+                        val myIntent = Intent(this, IDPassResultActivity::class.java)
+                        myIntent.putExtra(IDPassResultActivity.RESULT, resultBytes)
+                        startActivity(myIntent)
+                    }
                 }
             }
         }

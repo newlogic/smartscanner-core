@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2020 Newlogic Pte. Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ */
 package org.idpass.smartscanner.result
 
 import android.content.Intent
@@ -18,16 +35,17 @@ import org.idpass.lite.exceptions.CardVerificationException
 import org.idpass.lite.exceptions.InvalidCardException
 import org.idpass.lite.exceptions.InvalidKeyException
 import org.idpass.smartscanner.R
+import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.extension.empty
 import org.idpass.smartscanner.lib.extension.hideKeyboard
-import org.idpass.smartscanner.utils.DateUtils.formatDate
-import org.idpass.smartscanner.utils.DateUtils.isValidDate
+import org.idpass.smartscanner.lib.utils.DateUtils.formatDate
+import org.idpass.smartscanner.lib.utils.DateUtils.isValidDate
 
 class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
 
     companion object {
-        const val RESULT = "idpass_result"
+        const val RESULT = "IDPASS_RESULT"
         private var idPassReader = IDPassReader()
     }
 
@@ -50,10 +68,16 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
         supportActionBar?.setHomeButtonEnabled(true)
         supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_close)
         // Display ID PASS Lite Result
-        displayResult(intent.getByteArrayExtra(RESULT))
+        intent.getByteArrayExtra(RESULT)?.let {
+            displayResult(it)
+        } ?: run {
+            intent.getBundleExtra(RESULT)?.let {
+                displayResult(it.getByteArray(ScannerConstants.IDPASS_LITE_RAW))
+            }
+        }
     }
 
-    private fun displayResult(qrbytes: ByteArray?) {
+    private fun displayResult(qrbytes: ByteArray? = null) {
         val tv =  (findViewById<TextView>(R.id.hex))
         val qrstr = qrbytes?.let { readCard(idPassReader, it) }
         tv.text = "\n" + qrstr + "\n"
@@ -74,8 +98,8 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
             return ""
         }
         val dump = StringBuilder()
-        var authStatus = "NO"
-        var certStatus = ""
+        var authStatus = ""
+        var certStatus: String
         var card: Card?
         try {
             try {
@@ -93,6 +117,7 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
                         authStatus = "YES"
                         Toast.makeText(applicationContext, "Authentication Success", Toast.LENGTH_SHORT).show()
                     } catch (ve: CardVerificationException) {
+                        authStatus = "NO"
                         Toast.makeText(applicationContext, "Authentication Fail", Toast.LENGTH_SHORT).show()
                     }
                 }
@@ -101,10 +126,8 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
                 val surname = card.surname
                 val dob = card.dateOfBirth
                 val pob = card.placeOfBirth
-                // TODO Display new fields in proper format
-                // val gender = card.gender
-                // val postalAdder = card.postalAddress
-                // val UIN = card.uin
+                val uin = card.uin
+                val address = card.postalAddress
 
                 if (fullName != null) {
                     dump.append("Full Name: $fullName\n")
@@ -121,6 +144,29 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
                 }
                 if (pob.isNotEmpty()) {
                     dump.append("Place of Birth: $pob\n")
+                }
+                if (uin != null) {
+                    dump.append("UIN: $uin\n")
+                }
+                if (address != null) {
+                    dump.append("Address:\n")
+                    val postalCode = address.postalCode
+                    val administrativeArea = address.administrativeArea
+                    val languageCode = address.languageCode
+                    val addressLines = address.addressLinesList.joinToString("\n")
+                    val sortingCode = address.sortingCode
+                    val locality = address.locality
+                    val sublocality = address.sublocality
+                    val organization = address.organization
+
+                    dump.append("    Language Code: $languageCode\n")
+                    dump.append("    Postal Code: $postalCode\n")
+                    dump.append("    Administrative Area: $administrativeArea\n")
+                    dump.append("    Address Lines: \n$addressLines\n")
+                    dump.append("    Sorting Code: $sortingCode\n")
+                    dump.append("    Locality: $locality\n")
+                    dump.append("    Sublocality: $sublocality\n")
+                    dump.append("    Organization: $organization\n")
                 }
                 dump.append("\n-------------------------\n\n")
                 for ((key, value) in card.cardExtras) {
@@ -140,7 +186,7 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
             return "Error: Reader keyset is not authorized"
         } catch (e: Exception) {
             Log.d(SmartScannerActivity.Companion.TAG, "ID PASS exception: ${e.localizedMessage}")
-            return "ERROR: NOT AN IDPASS CARD"
+            return "Error: SmartScanner cannot read IDPASS CARD"
         }
     }
 
