@@ -1,6 +1,6 @@
 # ID PASS SmartScanner
 
-This is the core repository for the ID PASS SmartScanner, an Android library for scanning MRZ, Barcode, and ID PASS Lite cards.
+An Android library for scanning MRZ, Barcode, and [ID PASS Lite](https://github.com/idpass/idpass-lite) cards.
 
 ## Features
 
