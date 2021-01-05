@@ -5,7 +5,7 @@ Thank you for your interest to contribute to ID PASS SmartScanner! We want to ma
 - Reporting a bug
 - Discussing the current state of the code
 - Submitting a fix
-- Propositing new features
+- Proposing new features
 
 ## We develop with GitHub
 
