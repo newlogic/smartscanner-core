@@ -75,10 +75,12 @@ fun Bitmap.cacheImageToLocal(localPath: String, rotation: Int = 0, quality: Int 
     val b = Bitmap.createBitmap(this, 0, 0, this.width, this.height, matrix, true)
     val file = File(localPath)
     file.createNewFile()
-    val ostream = FileOutputStream(file)
-    b.compress(Bitmap.CompressFormat.JPEG, quality, ostream)
-    ostream.flush()
-    ostream.close()
+    if (file.exists()) {
+        val ostream = FileOutputStream(file)
+        b.compress(Bitmap.CompressFormat.JPEG, quality, ostream)
+        ostream.flush()
+        ostream.close()
+    }
 }
 
 fun Bitmap.resizeBitmap( newWidth: Int, newHeight: Int): Bitmap? {
