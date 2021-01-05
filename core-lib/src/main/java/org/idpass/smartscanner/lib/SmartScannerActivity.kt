@@ -317,7 +317,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
                 .also {
-                    it.setAnalyzer(cameraExecutor, getMrzAnalyzer())
+                    it.setAnalyzer(cameraExecutor, getAnalyzer())
                 }
             // Create configuration object for the image capture use case
             imageCapture = ImageCapture.Builder()
@@ -371,7 +371,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
     }
 
     @SuppressLint("UnsafeExperimentalUsageError")
-    private fun getMrzAnalyzer(): SmartScannerAnalyzer {
+    private fun getAnalyzer(): SmartScannerAnalyzer {
         var barcodeBusy = false
         var mrzBusy = false
 
