@@ -1,6 +1,6 @@
-# Contributing to ID PASS SmartScanner
+# Contributing to SmartScanner Core
 
-Thank you for your interest to contribute to ID PASS SmartScanner! We want to make contributing to this project as easy as possible, whether it's:
+Thank you for your interest to contribute to SmartScanner Core! We want to make contributing to this project as easy as possible, whether it's:
 
 - Reporting a bug
 - Discussing the current state of the code
@@ -23,7 +23,7 @@ We use [Gitflow](https://www.atlassian.com/git/tutorials/comparing-workflows/git
 
 ## Reporting bugs
 
-We use [GitHub issues](https://github.com/idpass/idpass-smart-scanner-core/issues) to track bugs. Report a bug by [opening a new issue](https://github.com/idpass/idpass-smart-scanner-core/issues/new).
+We use [GitHub issues](https://github.com/idpass/smartscanner-core/issues) to track bugs. Report a bug by [opening a new issue](https://github.com/idpass/smartscanner-core/issues/new).
 
 Write bug reports with detail, background, and sample code. An issue template is provided when opening a new issue, make sure to provide all the requested information to make it easier to address the issue.
 

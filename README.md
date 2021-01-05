@@ -1,4 +1,4 @@
-# ID PASS SmartScanner
+# SmartScanner Core
 
 An Android library for scanning MRZ, Barcode, and [ID PASS Lite](https://github.com/idpass/idpass-lite) cards.
 
@@ -13,9 +13,9 @@ This repository also includes an Android [demo app](app) to test what the librar
 
 ## Related projects
 
-- [smartscanner-android-api](https://github.com/idpass/smartscanner-android-api) - Provides convenience methods to simplify the ID PASS SmartScanner intent call out process
-- [idpass-smart-scanner-capacitor](https://github.com/idpass/idpass-smart-scanner-capacitor) - ID PASS SmartScanner [Capacitor](https://capacitorjs.com/) plugin
-- [idpass-smart-scanner-cordova](https://github.com/idpass/idpass-smart-scanner-cordova) - ID PASS SmartScanner [Cordova](https://cordova.apache.org/) plugin
+- [smartscanner-android](https://github.com/idpass/smartscanner-android) - Provides convenience methods to simplify the SmartScanner intent call out process
+- [smartscanner-capacitor](https://github.com/idpass/smartscanner-capacitor) - SmartScanner [Capacitor](https://capacitorjs.com/) plugin
+- [smartscanner-cordova](https://github.com/idpass/smartscanner-cordova) - SmartScanner [Cordova](https://cordova.apache.org/) plugin
 
 ## Installation
 
@@ -31,7 +31,7 @@ dependencies {
 }
 ```
 
-If you want to build this library from source, instructions to do so can be found in the [Building from source](https://github.com/idpass/idpass-smart-scanner-core/wiki/Building-from-source) wiki page.
+If you want to build this library from source, instructions to do so can be found in the [Building from source](https://github.com/idpass/smartscanner-core/wiki/Building-from-source) wiki page.
 
 ## Usage
 
@@ -86,11 +86,11 @@ The `bundle` variable is a [`Bundle`](https://developer.android.com/reference/ko
 val surname = bundle.getString("surname")
 ```
 
-Refer to the [Result fields reference](https://github.com/idpass/idpass-smart-scanner-core/wiki/Result-fields-reference) for the different fields available from the scan results.
+Refer to the [Result fields reference](https://github.com/idpass/smartscanner-core/wiki/Result-fields-reference) for the different fields available from the scan results.
 
-Refer to the [API Reference](https://github.com/idpass/idpass-smart-scanner-core/wiki/API-Reference) for complete information about each scan operation and the different options available.
+Refer to the [API Reference](https://github.com/idpass/smartscanner-core/wiki/API-Reference) for complete information about each scan operation and the different options available.
 
-Finally, for convenience we recommend using the [smartscanner-android-api](https://github.com/idpass/smartscanner-android-api) library which simplifies the app intent call out process.
+Finally, for convenience we recommend using the [smartscanner-android](https://github.com/idpass/smartscanner-android) library which simplifies the app intent call out process.
 
 ## Running the demo app
 
