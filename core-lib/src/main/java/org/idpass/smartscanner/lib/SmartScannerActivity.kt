@@ -45,6 +45,7 @@ import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.Guideline
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
@@ -223,6 +224,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
             barcodeStrings = barcodeOptions.barcodeFormats ?: BarcodeFormat.default
             barcodeFormats = barcodeStrings.map { BarcodeFormat.valueOf(it).value }
             val layoutParams = modelLayoutView.layoutParams as ConstraintLayout.LayoutParams
+            val topGuideline = findViewById<Guideline>(R.id.top)
             when (barcodeOptions.barcodeScannerSize) {
                 ScannerSize.CUSTOM_QR.value -> {
                     layoutParams.dimensionRatio = "4:6"
@@ -231,7 +233,8 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                     modelLayoutView.layoutParams = layoutParams
                 }
                 ScannerSize.LARGE.value -> {
-                    layoutParams.dimensionRatio = "4:7"
+                    topGuideline.setGuidelinePercent(0.1F)
+                    layoutParams.dimensionRatio = "3:4"
                     modelLayoutView.layoutParams = layoutParams
                 }
                 ScannerSize.SMALL.value -> {
@@ -358,7 +361,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
                     imageAnalyzer,
                     imageCapture
                 )
-                preview?.setSurfaceProvider(viewFinder.createSurfaceProvider())
+                preview?.setSurfaceProvider(viewFinder.surfaceProvider)
                 Log.d(
                     TAG,
                     "Measured size: ${viewFinder.width}x${viewFinder.height}"
@@ -807,7 +810,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
         val resultCode = availability.isGooglePlayServicesAvailable(this)
         if (resultCode != ConnectionResult.SUCCESS) {
             val dialog = availability.getErrorDialog(this, resultCode, 0)
-            if (showErrorDialog) dialog.show()
+            if (showErrorDialog) dialog?.show()
             return false
         }
         return true
