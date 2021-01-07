@@ -382,7 +382,7 @@ class SmartScannerActivity : AppCompatActivity(), OnClickListener {
             val mediaImage = imageProxy.image
             if (mediaImage != null) {
                 val rot = imageProxy.imageInfo.rotationDegrees
-                val bf = mediaImage.toBitmap(rot)
+                val bf = mediaImage.toBitmap(rot, mode)
                 val cropped = if (rot == 90 || rot == 270) Bitmap.createBitmap(
                     bf,
                     bf.width / 2,
