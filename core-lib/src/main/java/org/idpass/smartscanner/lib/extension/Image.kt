@@ -22,12 +22,13 @@ import android.media.Image
 import android.util.Base64
 import android.util.Log
 import org.idpass.smartscanner.lib.SmartScannerActivity
+import org.idpass.smartscanner.lib.config.Modes
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 
 
-fun Image.toBitmap(rotation: Int = 0): Bitmap {
+fun Image.toBitmap(rotation: Int = 0, mode: String?): Bitmap {
     val yBuffer = planes[0].buffer // Y
     val uBuffer = planes[1].buffer // U
     val vBuffer = planes[2].buffer // V
@@ -47,14 +48,17 @@ fun Image.toBitmap(rotation: Int = 0): Bitmap {
     val out = ByteArrayOutputStream()
 
     val rect =  Rect()
+    // Use higher value of 6 for barcode which fixes bounding box issues upon scanning,
+    // and mrz uses previous default value of 4
+    val scaleIdentifier = if (mode == Modes.BARCODE.value) 6 else 4
     if (rotation == 90 || rotation == 270) {
-        rect.left = this.width / 4
+        rect.left = this.width / scaleIdentifier
         rect.top = 0
         rect.right = this.width - rect.left
         rect.bottom = this.height
     } else {
         rect.left = 0
-        rect.top = this.height / 4
+        rect.top = this.height / scaleIdentifier
         rect.right = this.width
         rect.bottom =  this.height - rect.top
     }
