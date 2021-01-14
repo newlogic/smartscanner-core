@@ -32,8 +32,8 @@ import org.idpass.smartscanner.MainActivity.Companion.imageType
 import org.idpass.smartscanner.R
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.databinding.ActivityResultBinding
-import org.idpass.smartscanner.lib.config.ImageResultType
-import org.idpass.smartscanner.lib.extension.decodeBase64
+import org.idpass.smartscanner.lib.platform.extension.decodeBase64
+import org.idpass.smartscanner.lib.scanner.config.ImageResultType
 
 
 class ResultActivity : AppCompatActivity() {
