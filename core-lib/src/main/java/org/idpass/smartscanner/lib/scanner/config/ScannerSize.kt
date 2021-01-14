@@ -15,12 +15,11 @@
  *
  *
  */
-package org.idpass.smartscanner.lib.config
+package org.idpass.smartscanner.lib.scanner.config
 
-enum class MrzFormat (val value : String) {
-    MRP("MRP"),
-    MRTD_TD1("MRTD_TD1"),
-    MRTD_TD2("MRTD_TD2"),
-    MRV_A("MRV_A"),
-    MRV_B("MRV_B")
+enum class ScannerSize (val value : String) {
+    SMALL("SMALL"),
+    MEDIUM("MEDIUM"),
+    LARGE("LARGE"),
+    CUSTOM_QR("CUSTOM_QR"),
 }

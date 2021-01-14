@@ -15,12 +15,12 @@
  *
  *
  */
-package org.idpass.smartscanner.lib.config
+package org.idpass.smartscanner.lib.scanner.config
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
-import org.idpass.smartscanner.lib.config.Modes.BARCODE
-import org.idpass.smartscanner.lib.config.Modes.MRZ
+import org.idpass.smartscanner.lib.scanner.config.Modes.BARCODE
+import org.idpass.smartscanner.lib.scanner.config.Modes.MRZ
 
 @Parcelize
 data class ScannerOptions(

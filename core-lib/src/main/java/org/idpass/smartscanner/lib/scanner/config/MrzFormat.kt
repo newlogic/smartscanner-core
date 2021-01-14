@@ -15,9 +15,12 @@
  *
  *
  */
-package org.idpass.smartscanner.lib.config
+package org.idpass.smartscanner.lib.scanner.config
 
-enum class ImageResultType (val value : String) {
-    PATH("path"),
-    BASE_64("base_64")
+enum class MrzFormat (val value : String) {
+    MRP("MRP"),
+    MRTD_TD1("MRTD_TD1"),
+    MRTD_TD2("MRTD_TD2"),
+    MRV_A("MRV_A"),
+    MRV_B("MRV_B")
 }
