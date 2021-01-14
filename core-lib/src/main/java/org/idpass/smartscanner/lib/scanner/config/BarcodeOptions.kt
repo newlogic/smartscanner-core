@@ -15,29 +15,26 @@
  *
  *
  */
-package org.idpass.smartscanner.lib.config
+package org.idpass.smartscanner.lib.scanner.config
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
-import org.idpass.smartscanner.lib.extension.empty
 
 @Parcelize
-data class Config(
-    val background: String? = null,
-    val font: String? = null,
-    val imageResultType: String? = null,
-    val label: String? = null,
-    val isManualCapture: Boolean? = null,
-    val branding: Boolean? = null,
+data class BarcodeOptions(
+    val barcodeFormats: List<String>? = null,
+    val barcodeScannerSize: String? = null,
+    val idPassLiteSupport: Boolean? = null
 ) : Parcelable {
     companion object {
-        val default = Config(
-            background = String.empty(),
-            font = String.empty(),
-            imageResultType = ImageResultType.PATH.value,
-            label = String.empty(),
-            isManualCapture = false,
-            branding = true
+        val default = BarcodeOptions(
+            barcodeFormats = BarcodeFormat.default,
+            idPassLiteSupport = false
+        )
+        val defaultIdPassLite = BarcodeOptions(
+            barcodeScannerSize = ScannerSize.LARGE.value,
+            barcodeFormats = arrayListOf(BarcodeFormat.QR_CODE.label),
+            idPassLiteSupport = true
         )
     }
 }

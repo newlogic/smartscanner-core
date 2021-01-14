@@ -15,7 +15,7 @@
  *
  *
  */
-package org.idpass.smartscanner.lib.config
+package org.idpass.smartscanner.lib.scanner.config
 
 import com.google.mlkit.vision.barcode.Barcode.*
 

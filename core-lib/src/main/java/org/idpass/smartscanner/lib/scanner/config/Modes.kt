@@ -15,11 +15,9 @@
  *
  *
  */
-package org.idpass.smartscanner.lib.config
+package org.idpass.smartscanner.lib.scanner.config
 
-enum class ScannerSize (val value : String) {
-    SMALL("SMALL"),
-    MEDIUM("MEDIUM"),
-    LARGE("LARGE"),
-    CUSTOM_QR("CUSTOM_QR"),
+enum class Modes (val value : String) {
+    BARCODE("barcode"),
+    MRZ("mrz")
 }

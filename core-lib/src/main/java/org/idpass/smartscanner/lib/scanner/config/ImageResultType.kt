@@ -15,10 +15,9 @@
  *
  *
  */
-package org.idpass.smartscanner.lib.config
+package org.idpass.smartscanner.lib.scanner.config
 
-enum class Fonts (val value : String) {
-    NOTO_SANS_ARABIC("NOTO_SANS_ARABIC"),
-    ROBOTO("ROBOTO"),
-    SOURCE_SANS_PRO("SOURCE_SANS_PRO")
+enum class ImageResultType (val value : String) {
+    PATH("path"),
+    BASE_64("base_64")
 }

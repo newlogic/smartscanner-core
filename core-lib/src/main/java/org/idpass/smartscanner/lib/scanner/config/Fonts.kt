@@ -15,9 +15,10 @@
  *
  *
  */
-package org.idpass.smartscanner.lib.config
+package org.idpass.smartscanner.lib.scanner.config
 
-enum class Modes (val value : String) {
-    BARCODE("barcode"),
-    MRZ("mrz")
+enum class Fonts (val value : String) {
+    NOTO_SANS_ARABIC("NOTO_SANS_ARABIC"),
+    ROBOTO("ROBOTO"),
+    SOURCE_SANS_PRO("SOURCE_SANS_PRO")
 }
