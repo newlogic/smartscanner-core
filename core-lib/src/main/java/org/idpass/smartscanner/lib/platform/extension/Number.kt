@@ -15,7 +15,7 @@
  *
  *
  */
-package org.idpass.smartscanner.lib.extension
+package org.idpass.smartscanner.lib.platform.extension
 
 
 fun Double.Companion.noValue() = 0.0

@@ -15,17 +15,20 @@
  *
  *
  */
-package org.idpass.smartscanner.lib.extension
+package org.idpass.smartscanner.lib.platform.extension
 
+import android.content.Context
 import android.graphics.*
 import android.media.Image
 import android.util.Base64
 import android.util.Log
 import org.idpass.smartscanner.lib.SmartScannerActivity
-import org.idpass.smartscanner.lib.config.Modes
+import org.idpass.smartscanner.lib.scanner.config.Modes
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 fun Image.toBitmap(rotation: Int = 0, mode: String?): Bitmap {
@@ -69,7 +72,6 @@ fun Image.toBitmap(rotation: Int = 0, mode: String?): Bitmap {
     )
 
     yuvImage.compressToJpeg(rect, 100, out) // Ugly but it works
-    //yuvImage.compressToJpeg(Rect(270, 20, 370, 460), 100, out)
     val imageBytes = out.toByteArray()
     return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
 }
@@ -85,20 +87,6 @@ fun Bitmap.cacheImageToLocal(localPath: String, rotation: Int = 0, quality: Int 
         ostream.flush()
         ostream.close()
     }
-}
-
-fun Bitmap.resizeBitmap( newWidth: Int, newHeight: Int): Bitmap? {
-    val width = this.width
-    val height = this.height
-    val scaleWidth = newWidth.toFloat() / width
-    val scaleHeight = newHeight.toFloat() / height
-    // CREATE A MATRIX FOR THE MANIPULATION
-    val matrix = Matrix()
-    // RESIZE THE BIT MAP
-    matrix.postScale(scaleWidth, scaleHeight)
-
-    // "RECREATE" THE NEW BITMAP
-    return Bitmap.createBitmap(this, 0, 0, width, height, matrix, false)
 }
 
 fun String.decodeBase64(): Bitmap? {
@@ -120,3 +108,10 @@ fun Bitmap.rotate(rotation: Int = 0): Bitmap {
 }
 
 fun String.toBitmap() : Bitmap =  BitmapFactory.decodeFile(this)
+
+fun Context.cacheImagePath(identifier : String = "Scanner") : String {
+    val date = Calendar.getInstance().time
+    val formatter = SimpleDateFormat("yyyyMMddHHmmss", Locale.ROOT)
+    val currentDateTime = formatter.format(date)
+    return "${this.cacheDir}/$identifier-$currentDateTime.jpg"
+}
