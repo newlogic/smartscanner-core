@@ -17,13 +17,8 @@
  */
 package org.idpass.smartscanner.lib.platform
 
-import android.content.pm.PackageManager
 import android.os.Bundle
-import android.view.Window
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.GoogleApiAvailability
 
 abstract class BaseActivity : AppCompatActivity() {
 
@@ -35,25 +30,9 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 
     fun hideActionBar() {
-        supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
         supportActionBar?.hide()
         supportActionBar?.setDisplayShowTitleEnabled(false)
         actionBar?.hide()
         actionBar?.setDisplayShowTitleEnabled(false)
-    }
-
-    fun allPermissionsGranted(permissions: Array<String>) = permissions.all {
-        ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
-    }
-
-    fun checkGooglePlayServices(showErrorDialog: Boolean = false): Boolean {
-        val availability = GoogleApiAvailability.getInstance()
-        val resultCode = availability.isGooglePlayServicesAvailable(this)
-        if (resultCode != ConnectionResult.SUCCESS) {
-            val dialog = availability.getErrorDialog(this, resultCode, 0)
-            if (showErrorDialog) dialog?.show()
-            return false
-        }
-        return true
     }
 }
