@@ -15,9 +15,11 @@
  *
  *
  */
-package org.idpass.smartscanner.lib.exceptions
+package org.idpass.smartscanner.lib.scanner
 
-class SmartScannerException : Exception {
-    constructor() : super()
-    constructor(s: String?) : super(s)
+enum class AnalyzerType {
+    BARCODE,
+    IDPASS_LITE,
+    MLKIT,
+    TESSERACT,
 }

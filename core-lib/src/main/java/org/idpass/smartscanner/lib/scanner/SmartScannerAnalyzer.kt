@@ -15,11 +15,13 @@
  *
  *
  */
-package org.idpass.smartscanner.lib.platform
+package org.idpass.smartscanner.lib.scanner
 
-enum class AnalyzerType {
-    BARCODE,
-    IDPASS_LITE,
-    MLKIT,
-    TESSERACT,
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageProxy
+
+class SmartScannerAnalyzer (private val analyze: ((ImageProxy) -> Unit)) : ImageAnalysis.Analyzer {
+    override fun analyze(imageProxy: ImageProxy) {
+        analyze.invoke(imageProxy)
+    }
 }
