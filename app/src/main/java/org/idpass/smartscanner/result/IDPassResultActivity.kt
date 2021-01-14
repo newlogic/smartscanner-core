@@ -37,8 +37,8 @@ import org.idpass.lite.exceptions.InvalidKeyException
 import org.idpass.smartscanner.R
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.SmartScannerActivity
-import org.idpass.smartscanner.lib.extension.empty
-import org.idpass.smartscanner.lib.extension.hideKeyboard
+import org.idpass.smartscanner.lib.platform.extension.empty
+import org.idpass.smartscanner.lib.platform.extension.hideKeyboard
 import org.idpass.smartscanner.lib.platform.utils.DateUtils.formatDate
 import org.idpass.smartscanner.lib.platform.utils.DateUtils.isValidDate
 
