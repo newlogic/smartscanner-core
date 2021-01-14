@@ -15,10 +15,10 @@
  *
  *
  */
-package org.idpass.smartscanner.lib.platform
+package org.idpass.smartscanner.lib.mrz
 
-import org.idpass.smartscanner.lib.extension.empty
-import org.idpass.smartscanner.lib.extension.noValue
+import org.idpass.smartscanner.lib.platform.extension.empty
+import org.idpass.smartscanner.lib.platform.extension.noValue
 import org.idpass.smartscanner.mrz.parser.innovatrics.MrzRecord
 import org.idpass.smartscanner.mrz.parser.innovatrics.records.MrtdTd1
 
