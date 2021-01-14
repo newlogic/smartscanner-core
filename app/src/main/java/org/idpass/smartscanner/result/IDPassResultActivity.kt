@@ -39,8 +39,8 @@ import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.extension.empty
 import org.idpass.smartscanner.lib.extension.hideKeyboard
-import org.idpass.smartscanner.lib.utils.DateUtils.formatDate
-import org.idpass.smartscanner.lib.utils.DateUtils.isValidDate
+import org.idpass.smartscanner.lib.platform.utils.DateUtils.formatDate
+import org.idpass.smartscanner.lib.platform.utils.DateUtils.isValidDate
 
 class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
 
