@@ -21,19 +21,19 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.api.ScannerIntent
 import org.idpass.smartscanner.databinding.ActivityMainBinding
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT_BYTES
-import org.idpass.smartscanner.lib.platform.BaseActivity
 import org.idpass.smartscanner.lib.scanner.config.*
 import org.idpass.smartscanner.result.IDPassResultActivity
 import org.idpass.smartscanner.result.ResultActivity
 
 
-class MainActivity : BaseActivity() {
+class MainActivity : AppCompatActivity() {
 
     companion object {
         private val TAG = MainActivity::class.java.simpleName
@@ -49,11 +49,11 @@ class MainActivity : BaseActivity() {
 
     private lateinit var binding : ActivityMainBinding
 
-    override fun layoutId(): Int = R.layout.activity_main
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
     }
 
     override fun onStart() {
