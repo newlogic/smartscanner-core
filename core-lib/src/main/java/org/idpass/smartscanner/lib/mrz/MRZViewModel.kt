@@ -1,15 +1,11 @@
 package org.idpass.smartscanner.lib.mrz
 
-import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.util.Log
-import androidx.annotation.MainThread
 import androidx.camera.core.ImageProxy
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.googlecode.tesseract.android.TessBaseAPI
@@ -26,32 +22,11 @@ import org.idpass.smartscanner.lib.scanner.config.MrzFormat
 import java.net.URLEncoder
 import kotlin.concurrent.thread
 
-class MRZViewModel(application: Application) : AndroidViewModel(application) {
+class MRZViewModel : ViewModel() {
 
     private lateinit var tessBaseAPI: TessBaseAPI
-    private val context: Context
-        get() = getApplication<Application>().applicationContext
 
-    private val mrzResultData = MutableLiveData<MRZResult>()
-    private val startTimeData = MutableLiveData<Long>()
-    private val connectionTextData = MutableLiveData<String>()
-    private val connectionVisibilityData = MutableLiveData<Boolean>()
-
-
-    @MainThread
-    fun result() : LiveData<MRZResult> = mrzResultData
-
-    @MainThread
-    fun startTime() : LiveData<Long>  = startTimeData
-
-    @MainThread
-    fun connectionText() : LiveData<String>  = connectionTextData
-
-    @MainThread
-    fun connectionVisibility() : LiveData<Boolean>  = connectionVisibilityData
-
-    @MainThread
-    fun initializeTesseract() {
+    fun initializeTesseract(context : Context) {
         val extDirPath: String = context.getExternalFilesDir(null)!!.absolutePath
         Log.d(SmartScannerActivity.TAG, "path: $extDirPath")
         FileUtils.copyAssets(context, "tessdata", extDirPath)
@@ -60,31 +35,26 @@ class MRZViewModel(application: Application) : AndroidViewModel(application) {
         tessBaseAPI.pageSegMode = TessBaseAPI.PageSegMode.PSM_SINGLE_BLOCK
     }
 
-    @MainThread
-    fun analyze(isMlKit: Boolean, original : Bitmap, cropped : Bitmap, imageProxy : ImageProxy, config : Config?, mrzFormat: String? ) {
-        config?.let {
-            if (isMlKit) {
-                analyzeByMLKit(original = original, cropped = cropped, imageProxy = imageProxy, config = it, mrzFormat = mrzFormat)
-            } else {
-                analyzeByTesseract(original = original, cropped = cropped, imageProxy = imageProxy, config = it, mrzFormat = mrzFormat)
-            }
-        }
-    }
-
-    @MainThread
-    private fun analyzeByMLKit(original : Bitmap, cropped : Bitmap, imageProxy : ImageProxy, config : Config, mrzFormat: String? ) {
-        Log.d("${SmartScannerActivity.TAG}/SmartScanner", "MRZ MLKit: start")
-        val image = InputImage.fromBitmap(
-            cropped,
-            imageProxy.imageInfo.rotationDegrees
-        )
+    fun analyzeByMLKit(context: Context,
+                       bitmap : Bitmap,
+                       imageProxy : ImageProxy,
+                       config : Config?,
+                       mrzFormat: String?,
+                       onStartTime: (Long) -> Unit,
+                       onResult: (MRZResult) -> Unit,
+                       onConnectFail: (String) -> Unit
+    ) {
         // Pass image to an ML Kit Vision API
+        Log.d("${SmartScannerActivity.TAG}/SmartScanner", "MRZ MLKit: start")
+        val start = System.currentTimeMillis()
+        onStartTime.invoke(start)
+        val rotation = imageProxy.imageInfo.rotationDegrees
+        val cropped = getCroppedBitmap(bitmap, rotation)
+        val image = InputImage.fromBitmap(cropped, rotation)
         val recognizer = TextRecognition.getClient()
         Log.d("${SmartScannerActivity.TAG}/SmartScanner", "MRZ MLKit TextRecognition: process")
-        val start = System.currentTimeMillis()
         recognizer.process(image)
             .addOnSuccessListener { visionText ->
-                connectionVisibilityData.postValue(false)
                 val timeRequired = System.currentTimeMillis() - start
                 Log.d("${SmartScannerActivity.TAG}/SmartScanner", "MRZ MLKit TextRecognition: success: $timeRequired ms")
                 var rawFullRead = ""
@@ -113,28 +83,40 @@ class MRZViewModel(application: Application) : AndroidViewModel(application) {
                                 .replace("%3C", "<").replace("%0A", "↩")
                         }]"
                     )
-                    processMRZResult(mrz = mrz, bitmap = original, rotation = imageProxy.imageInfo.rotationDegrees ,config = config, format = mrzFormat)
+                    val result = processMRZResult(context = context, mrz = mrz, bitmap = bitmap, rotation = rotation, config = config, format = mrzFormat)
+                    onResult.invoke(result)
+                    imageProxy.close()
                 } catch (e: Exception) { // MrzParseException, IllegalArgumentException
                     Log.d("${SmartScannerActivity.TAG}/SmartScanner", e.toString())
+                    imageProxy.close()
                 }
             }
             .addOnFailureListener { e ->
                 Log.d("${SmartScannerActivity.TAG}/SmartScanner", "MRZ MLKit TextRecognition: failure: ${e.message}")
                 val connectionId = if (context.getConnectionType() == 0) R.string.connection_text else R.string.model_text
-                connectionTextData.postValue(context.getString(connectionId))
-                connectionVisibilityData.postValue(true)
+                onConnectFail.invoke(context.getString(connectionId))
+                imageProxy.close()
             }
-        startTimeData.postValue(start)
     }
 
-    @MainThread
-    private fun analyzeByTesseract(original : Bitmap, cropped : Bitmap, imageProxy : ImageProxy, config : Config, mrzFormat: String? ) {
+    fun analyzeByTesseract(context: Context,
+                           bitmap : Bitmap,
+                           imageProxy : ImageProxy,
+                           config : Config?,
+                           mrzFormat: String?,
+                           onStartTime: (Long) -> Unit,
+                           onResult: (MRZResult) -> Unit
+    ) {
         if (::tessBaseAPI.isInitialized) {
-            val matrix = Matrix()
+            Log.d("${SmartScannerActivity.TAG}/SmartScanner", "MRZ Tesseract: start")
             val start = System.currentTimeMillis()
+            onStartTime.invoke(start)
             thread(start = true) {
-                Log.d("${SmartScannerActivity.TAG}/SmartScanner", "MRZ Tesseract: start")
-                matrix.postRotate(imageProxy.imageInfo.rotationDegrees.toFloat())
+                Log.d("${SmartScannerActivity.TAG}/SmartScanner", "MRZ Tesseract: process")
+                val rotation = imageProxy.imageInfo.rotationDegrees
+                val cropped = getCroppedBitmap(bitmap, rotation)
+                val matrix = Matrix()
+                matrix.postRotate(rotation.toFloat())
                 val rotatedBitmap = Bitmap.createBitmap(
                     cropped,
                     0,
@@ -163,21 +145,35 @@ class MRZViewModel(application: Application) : AndroidViewModel(application) {
                                 .replace("%0A", "↩")
                         }]"
                     )
-                    processMRZResult(mrz = mrz, bitmap = original, rotation = imageProxy.imageInfo.rotationDegrees ,config = config, format = mrzFormat)
+                    val result = processMRZResult(context = context, mrz = mrz, bitmap = bitmap, rotation = imageProxy.imageInfo.rotationDegrees , config = config, format = mrzFormat)
+                    onResult.invoke(result)
+                    imageProxy.close()
                 } catch (e: Exception) { // MrzParseException, IllegalArgumentException
                     Log.d("${SmartScannerActivity.TAG}/Tesseract", e.toString())
+                    imageProxy.close()
                 }
-                startTimeData.postValue(start)
             }
         }
 
     }
 
-    @MainThread
-    private fun processMRZResult(mrz : String, bitmap : Bitmap, rotation : Int, config : Config, format: String?) {
+    private fun getCroppedBitmap(bf : Bitmap, rot: Int) : Bitmap {
+        val cropped = if (rot == 90 || rot == 270) Bitmap.createBitmap(
+            bf,
+            bf.width / 2,
+            0,
+            bf.width / 2,
+            bf.height
+        )
+        else Bitmap.createBitmap(bf, 0, bf.height / 2, bf.width, bf.height / 2)
+        Log.d(SmartScannerActivity.TAG, "Cropped: (${cropped.width}, ${cropped.height}), Rotation: $rot")
+        return cropped
+    }
+
+    private fun processMRZResult(context: Context, mrz : String, bitmap : Bitmap, rotation : Int, config : Config?, format: String?) : MRZResult{
         val imagePathFile = context.cacheImagePath()
         bitmap.cacheImageToLocal(imagePathFile, rotation)
-        val imageString = if (config.imageResultType == ImageResultType.BASE_64.value) bitmap.encodeBase64(rotation) else imagePathFile
+        val imageString = if (config?.imageResultType == ImageResultType.BASE_64.value) bitmap.encodeBase64(rotation) else imagePathFile
         val mrzResult: MRZResult = when (format) {
             MrzFormat.MRTD_TD1.value -> MRZResult.formatMrtdTd1Result(
                 MRZCleaner.parseAndCleanMrtdTd1(
@@ -189,6 +185,6 @@ class MRZViewModel(application: Application) : AndroidViewModel(application) {
                 imageString
             )
         }
-        mrzResultData.postValue(mrzResult)
+        return mrzResult
     }
 }

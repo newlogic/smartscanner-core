@@ -1,35 +1,25 @@
 package org.idpass.smartscanner.lib.idpasslite
 
-import android.app.Application
 import android.graphics.Bitmap
 import android.util.Log
-import androidx.annotation.MainThread
 import androidx.camera.core.ImageProxy
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.google.mlkit.vision.barcode.Barcode
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import org.idpass.smartscanner.lib.SmartScannerActivity
 
-class IDPassLiteViewModel(application: Application) : AndroidViewModel(application) {
+class IDPassLiteViewModel : ViewModel() {
 
-    private val idPassLiteData = MutableLiveData<ByteArray>()
-
-    @MainThread
-    fun result() : LiveData<ByteArray> = idPassLiteData
-
-    @MainThread
-    fun analyze(barcodeFormats : List<Int>, bf : Bitmap, imageProxy : ImageProxy) {
+    fun analyze(barcodeFormats : List<Int>, bitmap : Bitmap, imageProxy : ImageProxy, onResult: (ByteArray) -> Unit) {
         val start = System.currentTimeMillis()
         var barcodeFormat = Barcode.FORMAT_CODE_39 // Most common barcode format
         barcodeFormats.forEach {
             barcodeFormat = it or barcodeFormat // bitwise different barcode format options
         }
         val options = BarcodeScannerOptions.Builder().setBarcodeFormats(barcodeFormat).build()
-        val image = InputImage.fromBitmap(bf, imageProxy.imageInfo.rotationDegrees)
+        val image = InputImage.fromBitmap(bitmap, imageProxy.imageInfo.rotationDegrees)
         val scanner = BarcodeScanning.getClient(options)
         Log.d("${SmartScannerActivity.TAG}/SmartScanner", "ID PASS Lite: process")
         scanner.process(image)
@@ -37,7 +27,7 @@ class IDPassLiteViewModel(application: Application) : AndroidViewModel(applicati
                 val timeRequired = System.currentTimeMillis() - start
                 Log.d("${SmartScannerActivity.TAG}/SmartScanner", "ID PASS Lite: success: $timeRequired ms")
                 if (barcodes.isNotEmpty()) {
-                    idPassLiteData.postValue(barcodes[0].rawBytes!!)
+                    onResult.invoke(barcodes[0].rawBytes!!)
                 } else {
                     Log.d("${SmartScannerActivity.TAG}/SmartScanner", "ID PASS Lite: nothing detected")
                 }
@@ -45,5 +35,6 @@ class IDPassLiteViewModel(application: Application) : AndroidViewModel(applicati
             .addOnFailureListener { e ->
                 Log.d("${SmartScannerActivity.TAG}/SmartScanner", "ID PASS Lite: failure: ${e.message}")
             }
+        imageProxy.close()
     }
 }
