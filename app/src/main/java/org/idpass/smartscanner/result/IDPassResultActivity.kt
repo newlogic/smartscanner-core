@@ -27,6 +27,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import org.idpass.lite.Card
 import org.idpass.lite.IDPassReader
@@ -36,13 +37,12 @@ import org.idpass.lite.exceptions.InvalidKeyException
 import org.idpass.smartscanner.R
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.SmartScannerActivity
-import org.idpass.smartscanner.lib.platform.BaseActivity
 import org.idpass.smartscanner.lib.platform.extension.empty
 import org.idpass.smartscanner.lib.platform.extension.hideKeyboard
 import org.idpass.smartscanner.lib.platform.utils.DateUtils.formatDate
 import org.idpass.smartscanner.lib.platform.utils.DateUtils.isValidDate
 
-class IDPassResultActivity : BaseActivity(), View.OnClickListener {
+class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
 
     companion object {
         const val RESULT = "IDPASS_RESULT"
@@ -53,11 +53,10 @@ class IDPassResultActivity : BaseActivity(), View.OnClickListener {
     private var qrBytes:ByteArray? = null
     private var resultString : String? = null
 
-    override fun layoutId(): Int = R.layout.activity_idpass_result
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         overridePendingTransition(R.anim.slide_in_up, android.R.anim.fade_out)
+        setContentView(R.layout.activity_idpass_result)
         // Initialize UI
         val toolbar : Toolbar? = findViewById(R.id.toolbar)
         val pinCodeBtn: Button = findViewById(R.id.pinCodeAuth)

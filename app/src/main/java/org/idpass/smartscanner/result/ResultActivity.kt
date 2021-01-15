@@ -25,17 +25,17 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.google.gson.JsonParser
 import org.idpass.smartscanner.MainActivity.Companion.imageType
 import org.idpass.smartscanner.R
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.databinding.ActivityResultBinding
-import org.idpass.smartscanner.lib.platform.BaseActivity
 import org.idpass.smartscanner.lib.platform.extension.decodeBase64
 import org.idpass.smartscanner.lib.scanner.config.ImageResultType
 
-class ResultActivity : BaseActivity() {
+class ResultActivity : AppCompatActivity() {
 
     companion object {
         const val RESULT = "SCAN_RESULT"
@@ -44,11 +44,11 @@ class ResultActivity : BaseActivity() {
     private lateinit var binding : ActivityResultBinding
     private var resultString : String? = null
 
-    override fun layoutId(): Int = R.layout.activity_result
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityResultBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
         overridePendingTransition(R.anim.slide_in_up, android.R.anim.fade_out)
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
