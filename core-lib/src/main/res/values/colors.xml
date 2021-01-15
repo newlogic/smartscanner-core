@@ -5,6 +5,7 @@
   <color name="idpass_orange">#ff6d37</color>
   <color name="transparent">#00000000</color>
   <color name="white">#FFFFFFFF</color>
+  <color name="white_30">#DDDDDD</color>
   <color name="black">#FF000000</color>
   <color name="grey">#C3555555</color>
   <color name="lighter_grey">#DDDDDD</color>
