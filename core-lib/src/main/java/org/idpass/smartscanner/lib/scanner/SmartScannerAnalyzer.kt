@@ -17,11 +17,32 @@
  */
 package org.idpass.smartscanner.lib.scanner
 
+import android.annotation.SuppressLint
+import android.graphics.Bitmap
+import android.util.Log
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
+import org.idpass.smartscanner.lib.SmartScannerActivity
+import org.idpass.smartscanner.lib.platform.extension.toBitmap
+import org.idpass.smartscanner.lib.scanner.config.Modes
 
-class SmartScannerAnalyzer (private val analyze: ((ImageProxy) -> Unit)) : ImageAnalysis.Analyzer {
+class SmartScannerAnalyzer (private val mode : String?,
+                            private val barcodeAnalysis: ((Bitmap, ImageProxy) -> Unit),
+                            private val mrzAnalysis: ((Bitmap, ImageProxy) -> Unit)) : ImageAnalysis.Analyzer {
+
+    @SuppressLint("UnsafeExperimentalUsageError")
     override fun analyze(imageProxy: ImageProxy) {
-        analyze.invoke(imageProxy)
+        val mediaImage = imageProxy.image
+        if (mediaImage != null) {
+            Log.d(SmartScannerActivity.TAG, "Bitmap: (${mediaImage.width}, ${mediaImage.height})")
+            val rot = imageProxy.imageInfo.rotationDegrees
+            val bf = mediaImage.toBitmap(rot, mode)
+            if (mode == Modes.BARCODE.value) {
+                barcodeAnalysis.invoke(bf, imageProxy)
+            }
+            if (mode == Modes.MRZ.value) {
+                mrzAnalysis.invoke(bf, imageProxy)
+            }
+        }
     }
 }
