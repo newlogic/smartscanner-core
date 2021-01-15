@@ -23,7 +23,6 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class BarcodeOptions(
     val barcodeFormats: List<String>? = null,
-    val barcodeScannerSize: String? = null,
     val idPassLiteSupport: Boolean? = null
 ) : Parcelable {
     companion object {
@@ -32,7 +31,6 @@ data class BarcodeOptions(
             idPassLiteSupport = false
         )
         val defaultIdPassLite = BarcodeOptions(
-            barcodeScannerSize = ScannerSize.LARGE.value,
             barcodeFormats = arrayListOf(BarcodeFormat.QR_CODE.label),
             idPassLiteSupport = true
         )
