@@ -19,5 +19,6 @@ package org.idpass.smartscanner.lib.scanner.config
 
 enum class Modes (val value : String) {
     BARCODE("barcode"),
+    IDPASS_LITE("idpass-lite"),
     MRZ("mrz")
 }
