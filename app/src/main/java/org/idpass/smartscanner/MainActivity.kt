@@ -58,9 +58,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        binding.itemMrz.item.setOnClickListener { startMrzScan() }
         binding.itemBarcode.item.setOnClickListener { startBarcode(BarcodeOptions.default)}
-        binding.itemIdpassLite.item.setOnClickListener { startBarcode(BarcodeOptions.defaultIdPassLite) }
+        binding.itemIdpassLite.item.setOnClickListener { startIDPassLite() }
+        binding.itemMrz.item.setOnClickListener { startMrzScan() }
     }
 
     private fun startIntentCallOut() {
@@ -87,6 +87,12 @@ class MainActivity : AppCompatActivity() {
     private fun startBarcode(barcodeOptions: BarcodeOptions? = null) {
         val intent = Intent(this,SmartScannerActivity::class.java)
         intent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleBarcode(config = sampleConfig(false), barcodeOptions = barcodeOptions))
+        startActivityForResult(intent, OP_SCANNER)
+    }
+
+    private fun startIDPassLite() {
+        val intent = Intent(this,SmartScannerActivity::class.java)
+        intent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleIdPassLite(config = sampleConfig(false)))
         startActivityForResult(intent, OP_SCANNER)
     }
 
