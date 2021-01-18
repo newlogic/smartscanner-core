@@ -48,9 +48,8 @@ import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.barcode.BarcodeAnalyzer
 import org.idpass.smartscanner.lib.databinding.ActivitySmartScannerBinding
 import org.idpass.smartscanner.lib.idpasslite.IDPassLiteAnalyzer
+import org.idpass.smartscanner.lib.mrz.MRZAnalyzer
 import org.idpass.smartscanner.lib.mrz.MRZResult
-import org.idpass.smartscanner.lib.mrz.analyzers.MrzMlKitAnalyzer
-import org.idpass.smartscanner.lib.mrz.analyzers.MrzTesseractAnalyzer
 import org.idpass.smartscanner.lib.platform.BaseActivity
 import org.idpass.smartscanner.lib.platform.extension.*
 import org.idpass.smartscanner.lib.platform.utils.CameraUtils.isLedFlashAvailable
@@ -151,27 +150,19 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 )
             }
             if (mode == Modes.MRZ.value) {
-                if (!isPlayServicesAvailable()) {
-                    // use Tesseract if MLKit is unavailable
-                    analyzer = MrzTesseractAnalyzer(
+                val isMLKit = isPlayServicesAvailable()
+                analyzer = MRZAnalyzer(
                         activity = this,
                         intent = intent,
-                        imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
-                        format = scannerOptions?.mrzFormat ?: intent.getStringExtra(ScannerConstants.MRZ_FORMAT_EXTRA)
-                    ).also {
-                        it.initializeTesseract(this)
-                    }
-                } else {
-                    analyzer = MrzMlKitAnalyzer(
-                        activity = this,
-                        intent = intent,
+                        isMLKit = isMLKit,
                         imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
                         format = scannerOptions?.mrzFormat ?: intent.getStringExtra(ScannerConstants.MRZ_FORMAT_EXTRA),
                         onConnectFail = {
-                            binding.modelText.visibility =  if (it.isNotEmpty()) VISIBLE else INVISIBLE
+                            binding.modelText.visibility = if (it.isNotEmpty()) VISIBLE else INVISIBLE
                             binding.modelText.text = it
                         }
-                    )
+                ).also {
+                    if (!isMLKit) it.initializeTesseract(this)
                 }
             }
             // set Analyzer and start camera
