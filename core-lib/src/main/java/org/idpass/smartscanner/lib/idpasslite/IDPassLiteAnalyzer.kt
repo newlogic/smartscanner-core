@@ -29,8 +29,11 @@ import com.google.mlkit.vision.barcode.Barcode
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
+import org.api.proto.Certificates
+import org.api.proto.KeySet
 import org.idpass.lite.Card
 import org.idpass.lite.IDPassReader
+import org.idpass.lite.android.IDPassLite
 import org.idpass.lite.exceptions.InvalidCardException
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.SmartScannerActivity
@@ -40,7 +43,7 @@ import org.idpass.smartscanner.lib.scanner.config.Modes
 
 class IDPassLiteAnalyzer(
     private val activity: Activity,
-    private val intent : Intent
+    private val intent: Intent
 ) : ImageAnalysis.Analyzer {
 
     @SuppressLint("UnsafeExperimentalUsageError")
@@ -51,7 +54,7 @@ class IDPassLiteAnalyzer(
             val rot = imageProxy.imageInfo.rotationDegrees
             val bf = mediaImage.toBitmap(rot, Modes.BARCODE.value)
             val start = System.currentTimeMillis()
-            val options = BarcodeScannerOptions.Builder().setBarcodeFormats(Barcode.FORMAT_QR_CODE ).build()
+            val options = BarcodeScannerOptions.Builder().setBarcodeFormats(Barcode.FORMAT_QR_CODE).build()
             val image = InputImage.fromBitmap(bf, imageProxy.imageInfo.rotationDegrees)
             val scanner = BarcodeScanning.getClient(options)
             Log.d("${SmartScannerActivity.TAG}/SmartScanner", "ID PASS Lite: process")
@@ -60,8 +63,18 @@ class IDPassLiteAnalyzer(
                     val timeRequired = System.currentTimeMillis() - start
                     Log.d("${SmartScannerActivity.TAG}/SmartScanner", "ID PASS Lite: success: $timeRequired ms")
                     if (barcodes.isNotEmpty()) {
+                        // Initialize needed ks and rootcert from demo key values
+                        val keysetbuf = IDPassLite.generateAndroidKeyset()
+                        val rootcertbuf = IDPassLite.generateAndroidRootcert()
+                        val ks = KeySet.parseFrom(keysetbuf)
+                        val rootcert = Certificates.parseFrom(rootcertbuf)
+                        // Initialize reader with ks and rootcert
+                        val  idPassReader = IDPassReader(ks, rootcert)
+                        val loaded = IDPassLite.loadModels(activity.cacheDir, activity.assets)
+                        if (!loaded) {
+                            Log.d("${SmartScannerActivity.TAG}/SmartScanner", "ID PASS Lite: Load models Failure")
+                        }
                         val raw = barcodes[0].rawBytes
-                        val idPassReader = IDPassReader()
                         var card: Card?
                         try {
                             card = idPassReader.open(raw)

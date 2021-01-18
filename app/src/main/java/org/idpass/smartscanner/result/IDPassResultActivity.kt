@@ -29,8 +29,11 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import org.api.proto.Certificates
+import org.api.proto.KeySet
 import org.idpass.lite.Card
 import org.idpass.lite.IDPassReader
+import org.idpass.lite.android.IDPassLite
 import org.idpass.lite.exceptions.CardVerificationException
 import org.idpass.lite.exceptions.InvalidCardException
 import org.idpass.lite.exceptions.InvalidKeyException
@@ -46,7 +49,13 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
 
     companion object {
         const val RESULT = "IDPASS_RESULT"
-        private var idPassReader = IDPassReader()
+        // Initialize needed ks and rootcert from demo key values
+        private val keysetbuf = IDPassLite.generateAndroidKeyset()
+        private val rootcertbuf = IDPassLite.generateAndroidRootcert()
+        private val ks = KeySet.parseFrom(keysetbuf)
+        private val rootcert = Certificates.parseFrom(rootcertbuf)
+        // Initialize reader with ks and rootcert
+        private val idPassReader = IDPassReader(ks, rootcert)
     }
 
     private var pinCode: String = ""
@@ -70,6 +79,10 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
         // Display ID PASS Lite Result
         intent.getByteArrayExtra(RESULT)?.let {
             displayResult(it)
+            val loaded = IDPassLite.loadModels(cacheDir, assets)
+            if (!loaded) {
+                Log.d("${SmartScannerActivity.TAG}/SmartScanner", "ID PASS Lite: Load models Failure")
+            }
         } ?: run {
             intent.getBundleExtra(ResultActivity.RESULT)?.let {
                 displayResult(it.getByteArray(ScannerConstants.IDPASS_LITE_RAW))
