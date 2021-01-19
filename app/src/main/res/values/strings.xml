@@ -21,7 +21,7 @@
     <string name="label_name">Name: %1$s</string>
     <string name="label_nationality">Nationality: %1$s</string>
     <string name="label_newlogic">Developed by Newlogic</string>
-    <string name="label_result_details">Scan Results</string>
+    <string name="label_result">Scan Results</string>
     <string name="label_result_image">Image</string>
     <string name="label_result_none">NO RESULT FOUND</string>
     <string name="label_result_raw">Raw Result</string>
