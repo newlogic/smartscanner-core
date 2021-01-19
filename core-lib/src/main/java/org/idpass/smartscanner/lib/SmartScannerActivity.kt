@@ -18,6 +18,7 @@
 package org.idpass.smartscanner.lib
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -27,12 +28,16 @@ import android.hardware.camera2.CameraManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.util.Size
 import android.view.Surface
 import android.view.View
 import android.view.View.*
 import android.view.Window
+import android.widget.Button
+import android.widget.EditText
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -42,12 +47,14 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.barcode.BarcodeAnalyzer
 import org.idpass.smartscanner.lib.databinding.ActivitySmartScannerBinding
 import org.idpass.smartscanner.lib.idpasslite.IDPassLiteAnalyzer
+import org.idpass.smartscanner.lib.idpasslite.IDPassManager
 import org.idpass.smartscanner.lib.mrz.MRZAnalyzer
 import org.idpass.smartscanner.lib.mrz.MRZResult
 import org.idpass.smartscanner.lib.platform.BaseActivity
@@ -66,6 +73,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         const val SCANNER_OPTIONS = "scanner_options"
         const val SCANNER_RESULT = "scanner_result"
         const val SCANNER_RESULT_BYTES = "scanner_result_bytes"
+        private val idPassReader = IDPassManager.getIDPassReader()
     }
 
     private val REQUEST_CODE_PERMISSIONS = 10
@@ -80,6 +88,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
     private var camera: Camera? = null
     private var scannerOptions: ScannerOptions? = null
     private var mode: String? = null
+    private var cameraProvider: ProcessCameraProvider? = null
 
     private lateinit var binding : ActivitySmartScannerBinding
     private lateinit var cameraExecutor: ExecutorService
@@ -146,7 +155,12 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             if (mode == Modes.IDPASS_LITE.value) {
                 analyzer = IDPassLiteAnalyzer(
                     activity = this,
-                    intent = intent
+                    intent = intent,
+                    onVerify = { raw, prefix ->
+                        raw?.let {
+                            showIDPassLiteVerification (it, prefix)
+                        }
+                    }
                 )
             }
             if (mode == Modes.MRZ.value) {
@@ -180,7 +194,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         cameraProviderFuture.addListener({
             // Used to bind the lifecycle of cameras to the lifecycle owner
-            val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
+            cameraProvider = cameraProviderFuture.get()
             // Preview
             preview = Preview.Builder().build()
             val size = Size(480, 640)
@@ -201,9 +215,9 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             val cameraSelector = CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build()
             try {
                 // Unbind use cases before rebinding
-                cameraProvider.unbindAll()
+                cameraProvider?.unbindAll()
                 // Bind use cases to camera
-                camera = cameraProvider.bindToLifecycle(
+                camera = cameraProvider?.bindToLifecycle(
                     this,
                     cameraSelector,
                     preview,
@@ -349,5 +363,52 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 )
             }
         }
+    }
+
+    @SuppressLint("InflateParams")
+    private fun showIDPassLiteVerification(qrBytes : ByteArray, prefix : String)  {
+        val bottomSheetDialog = BottomSheetDialog(this)
+        val sheetView = layoutInflater.inflate(R.layout.dialog_idpass_verify, null)
+        bottomSheetDialog.setContentView(sheetView)
+        // bottom sheet ids
+        val pinCodeInpt = sheetView.findViewById<EditText>(R.id.cardPinCode)
+        val verifyBtn = sheetView.findViewById<Button>(R.id.pinCodeVerify)
+        val skipBtn = sheetView.findViewById<Button>(R.id.pinCodeSkip)
+        // stop smartscanner camera scanning
+        cameraProvider?.unbindAll()
+        // bottom sheet listeners
+        pinCodeInpt.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(text: Editable) {}
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                verifyBtn.isEnabled = s?.isEmpty() != true
+            }
+        })
+        verifyBtn.setOnClickListener {
+            val pinCode = pinCodeInpt.text.trim().toString()
+            IDPassManager.verifyCard(
+                    activity = this,
+                    idPassReader = idPassReader,
+                    intent = intent,
+                    raw = qrBytes,
+                    prefix = prefix,
+                    pinCode = pinCode,
+                    onResult = { bottomSheetDialog.dismiss() }
+            )
+        }
+        skipBtn.setOnClickListener {
+            IDPassManager.verifyCard(
+                    activity = this,
+                    idPassReader = idPassReader,
+                    intent = intent,
+                    raw = qrBytes,
+                    prefix = prefix,
+                    onResult = { bottomSheetDialog.dismiss() }
+            )
+        }
+        bottomSheetDialog.setOnDismissListener {
+            setupConfiguration()
+        }
+        bottomSheetDialog.show()
     }
 }
