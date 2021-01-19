@@ -29,10 +29,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import org.api.proto.Certificates
-import org.api.proto.KeySet
 import org.idpass.lite.Card
-import org.idpass.lite.IDPassReader
 import org.idpass.lite.android.IDPassLite
 import org.idpass.lite.exceptions.CardVerificationException
 import org.idpass.lite.exceptions.InvalidCardException
@@ -40,6 +37,7 @@ import org.idpass.lite.exceptions.InvalidKeyException
 import org.idpass.smartscanner.R
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.SmartScannerActivity
+import org.idpass.smartscanner.lib.idpasslite.IDPassManager
 import org.idpass.smartscanner.lib.platform.extension.empty
 import org.idpass.smartscanner.lib.platform.extension.hideKeyboard
 import org.idpass.smartscanner.lib.platform.utils.DateUtils.formatDate
@@ -49,17 +47,12 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
 
     companion object {
         const val RESULT = "IDPASS_RESULT"
-        // Initialize needed ks and rootcert from demo key values
-        private val keysetbuf = IDPassLite.generateAndroidKeyset()
-        private val rootcertbuf = IDPassLite.generateAndroidRootcert()
-        private val ks = KeySet.parseFrom(keysetbuf)
-        private val rootcert = Certificates.parseFrom(rootcertbuf)
-        // Initialize reader with ks and rootcert
-        private val idPassReader = IDPassReader(ks, rootcert)
+        const val BUNDLE_RESULT = "IDPASS_BUNDLE_RESULT"
+        private val idPassReader = IDPassManager.getIDPassReader()
     }
 
     private var pinCode: String = ""
-    private var qrBytes:ByteArray? = null
+    private var qrBytes: ByteArray? = null
     private var resultString : String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,15 +69,17 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
         supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_close)
+        // load ID Pass Lite models
+        val loaded = IDPassLite.loadModels(cacheDir, assets)
+        if (!loaded) {
+            Log.d("${SmartScannerActivity.TAG}/SmartScanner", "ID PASS Lite: Load models Failure")
+        }
         // Display ID PASS Lite Result
         intent.getByteArrayExtra(RESULT)?.let {
             displayResult(it)
-            val loaded = IDPassLite.loadModels(cacheDir, assets)
-            if (!loaded) {
-                Log.d("${SmartScannerActivity.TAG}/SmartScanner", "ID PASS Lite: Load models Failure")
-            }
         } ?: run {
-            intent.getBundleExtra(ResultActivity.RESULT)?.let {
+            intent.getBundleExtra(BUNDLE_RESULT)?.let {
+                Log.d("${SmartScannerActivity.TAG}/SmartScanner", "ID PASS Lite: bundle $it")
                 displayResult(it.getByteArray(ScannerConstants.IDPASS_LITE_RAW))
             }
         }
@@ -92,7 +87,7 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun displayResult(qrbytes: ByteArray? = null) {
         val tv =  (findViewById<TextView>(R.id.hex))
-        val qrstr = qrbytes?.let { readCard(idPassReader, it) }
+        val qrstr = qrbytes?.let { readCard(it) }
         tv.text = "\n" + qrstr + "\n"
         resultString = getShareResult(qrstr)
     }
@@ -106,7 +101,7 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
         return dump.toString()
     }
 
-    private fun readCard(idPassReader: IDPassReader, qrbytes: ByteArray, charsPerLine: Int = 33): String {
+    private fun readCard(qrbytes: ByteArray, charsPerLine: Int = 33): String {
         if (charsPerLine < 4 || qrbytes.isEmpty()) {
             return ""
         }

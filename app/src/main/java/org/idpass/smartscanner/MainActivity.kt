@@ -109,7 +109,7 @@ class MainActivity : AppCompatActivity() {
                         startActivity(resultIntent)
                     } else {
                         val myIntent = Intent(this, IDPassResultActivity::class.java)
-                        myIntent.putExtra(IDPassResultActivity.RESULT, it)
+                        myIntent.putExtra(IDPassResultActivity.BUNDLE_RESULT, it)
                         startActivity(myIntent)
                     }
                 } ?: run {
