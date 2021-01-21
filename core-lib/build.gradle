@@ -84,4 +84,6 @@ dependencies {
     implementation project(path: ':smartscanner-mrz-parser')
     // SmartScanner API Intent Call Out
     implementation project(path: ':smartscanner-android-api')
+    // Gzip JSON
+    implementation 'com.jayway.jsonpath:json-path:2.5.0'
 }
