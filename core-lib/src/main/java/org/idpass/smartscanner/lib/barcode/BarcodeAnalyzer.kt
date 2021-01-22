@@ -153,6 +153,7 @@ class BarcodeAnalyzer(
         if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_BARCODE_INTENT) {
             bundle.putString(ScannerConstants.IDPASS_ODK_INTENT_DATA, barcodeResult?.value)
         }
+        bundle.putString(ScannerConstants.MODE, Modes.BARCODE.value)
         bundle.putString(ScannerConstants.BARCODE_IMAGE, barcodeResult?.imagePath)
         bundle.putString(ScannerConstants.BARCODE_CORNERS, barcodeResult?.corners)
         bundle.putString(ScannerConstants.BARCODE_VALUE, barcodeResult?.value)

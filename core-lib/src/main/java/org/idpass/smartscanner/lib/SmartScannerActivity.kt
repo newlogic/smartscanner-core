@@ -157,9 +157,9 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 analyzer = IDPassLiteAnalyzer(
                     activity = this,
                     intent = intent,
-                    onVerify = { raw, prefix ->
+                    onVerify = { raw ->
                         raw?.let {
-                            showIDPassLiteVerification (it, prefix)
+                            showIDPassLiteVerification (it)
                         }
                     }
                 )
@@ -367,7 +367,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
     }
 
     @SuppressLint("InflateParams")
-    private fun showIDPassLiteVerification(qrBytes : ByteArray, prefix : String)  {
+    private fun showIDPassLiteVerification(qrBytes : ByteArray)  {
         val bottomSheetDialog = BottomSheetDialog(this)
         val sheetView = layoutInflater.inflate(R.layout.dialog_idpass_verify, null)
         bottomSheetDialog.setContentView(sheetView)
@@ -392,7 +392,6 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     idPassReader = idPassReader,
                     intent = intent,
                     raw = qrBytes,
-                    prefix = prefix,
                     pinCode = pinCode,
                     onResult = { bottomSheetDialog.dismiss() }
             )
@@ -403,7 +402,6 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     idPassReader = idPassReader,
                     intent = intent,
                     raw = qrBytes,
-                    prefix = prefix,
                     onResult = { bottomSheetDialog.dismiss() }
             )
         }

@@ -33,6 +33,7 @@ import org.idpass.lite.exceptions.InvalidKeyException
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.platform.utils.DateUtils
+import org.idpass.smartscanner.lib.scanner.config.Modes
 
 
 object IDPassManager {
@@ -47,24 +48,28 @@ object IDPassManager {
         return IDPassReader(ks, rootcert)
     }
 
-    fun verifyCard(activity: Activity, idPassReader: IDPassReader, intent: Intent, raw: ByteArray,
-                   prefix: String, pinCode: String = "", onResult : () -> Unit) {
+    fun verifyCard(activity: Activity,
+                   idPassReader: IDPassReader,
+                   intent: Intent, raw: ByteArray,
+                   pinCode: String = "",
+                   onResult : () -> Unit) {
         val card: Card? = readCard(idPassReader, raw)
         try {
             if (card != null) {
+                val idPassLiteResult = IDPassLiteResult(card, raw.toList())
                 if (pinCode.isNotEmpty()) {
                     // verify id pass lite when pin code is inputted
                     try {
                         card.authenticateWithPIN(pinCode)
                         Toast.makeText(activity, "Authentication Success", Toast.LENGTH_SHORT).show()
-                        sendBundleResult(activity, prefix, intent, card)
+                        sendBundleResult(activity, intent, idPassLiteResult)
                         onResult.invoke()
                     } catch (ve: CardVerificationException) {
                         Toast.makeText(activity, "Authentication Fail", Toast.LENGTH_SHORT).show()
                     }
                 } else {
                     // send result bundle if verification is skipped
-                    sendBundleResult(activity, prefix, intent, card)
+                    sendBundleResult(activity, intent, idPassLiteResult)
                     onResult.invoke()
                 }
             } else {
@@ -94,10 +99,20 @@ object IDPassManager {
         return card
     }
 
-    private fun sendBundleResult(activity: Activity, prefix: String, intent: Intent, card: Card? = null) {
-        val bundle = Bundle()
+    fun sendAnalyzerResult(activity: Activity, result: ByteArray? = null) {
+        val data = Intent()
         Log.d(SmartScannerActivity.TAG, "Success from IDPASS LITE")
+        Log.d(SmartScannerActivity.TAG, "value: $result")
+        data.putExtra(SmartScannerActivity.SCANNER_RESULT_BYTES, result)
+        activity.setResult(Activity.RESULT_OK, data)
+        activity.finish()
+    }
+
+    private fun sendBundleResult(activity: Activity, intent: Intent, idPassLiteResult: IDPassLiteResult) {
+        val bundle = Bundle()
+        val card = idPassLiteResult.card
         if (card != null) {
+            Log.d(SmartScannerActivity.TAG, "Success from IDPASS LITE")
             val fullName = card.getfullName()
             val givenName = card.givenName
             val surname = card.surname
@@ -146,8 +161,13 @@ object IDPassManager {
                 bundle.putString(ScannerConstants.IDPASS_LITE_ADDRESS_ORGANIZATION, address.organization)
             }
         }
+        bundle.putString(ScannerConstants.MODE, Modes.IDPASS_LITE.value)
+        bundle.putByteArray(ScannerConstants.IDPASS_LITE_RAW, idPassLiteResult.raw?.toByteArray())
 
         val result = Intent()
+        val prefix = if (intent.hasExtra(ScannerConstants.IDPASS_ODK_PREFIX_EXTRA)) {
+            intent.getStringExtra(ScannerConstants.IDPASS_ODK_PREFIX_EXTRA)
+        } else { "" }
         result.putExtra(ScannerConstants.RESULT, bundle)
         // Copy all the values in the intent result to be compatible with other implementations than commcare
         for (key in bundle.keySet()) {

@@ -243,6 +243,8 @@ open class MRZAnalyzer(
             bundle.putString(ScannerConstants.MRZ_SEX, result.sex)
             bundle.putString(ScannerConstants.MRZ_RAW, result.mrz)
         }
+        bundle.putString(ScannerConstants.MODE, Modes.MRZ.value)
+
         val result = Intent()
         val prefix = if (intent.hasExtra(ScannerConstants.IDPASS_ODK_PREFIX_EXTRA)) {
             intent.getStringExtra(ScannerConstants.IDPASS_ODK_PREFIX_EXTRA)
