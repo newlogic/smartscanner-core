@@ -39,6 +39,7 @@ class ResultActivity : AppCompatActivity() {
 
     companion object {
         const val RESULT = "SCAN_RESULT"
+        const val BUNDLE_RESULT = "SCAN_BUNDLE_RESULT"
     }
 
     private lateinit var binding : ActivityResultBinding
@@ -55,12 +56,12 @@ class ResultActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
         supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_close)
-        if (intent.getStringExtra(RESULT) != null) {
+        intent.getStringExtra(RESULT)?.let {
             val scanResult = intent.getStringExtra(RESULT)
             setupResult(result = scanResult, imageType = imageType)
             resultString = getShareResult(result = scanResult)
-        } else {
-            intent.getBundleExtra(RESULT)?.let {
+        } ?: run {
+            intent.getBundleExtra(BUNDLE_RESULT)?.let {
                 setupResult(bundle = it, imageType = imageType)
                 resultString = getShareResult(bundle = it)
             } ?: run {

@@ -158,6 +158,11 @@ open class MRZAnalyzer(
                         )
                         tessBaseAPI.setImage(rotatedBitmap)
                         val tessResult = tessBaseAPI.utF8Text
+                        val timeRequired = System.currentTimeMillis() - start
+                        Log.d(
+                            "${SmartScannerActivity.TAG}/SmartScanner",
+                            "MRZ Tesseract result: success: $timeRequired ms"
+                        )
                         try {
                             Log.d(
                                     "${SmartScannerActivity.TAG}/Tesseract",

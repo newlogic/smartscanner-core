@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity() {
             // barcode -> val intent = ScannerIntent.intentBarcode()
             // idpass-lite -> val intent = ScannerIntent.intentIDPassLite()
             // mrz -> val intent = ScannerIntent.intentMrz()
-            val intent = ScannerIntent.intentMrz(isManualCapture = true, mrzFormat = ScannerConstants.MRZ_FORMAT_MRTD_TD1)
+            val intent = ScannerIntent.intentMRZ(isManualCapture = true, mrzFormat = ScannerConstants.MRZ_FORMAT_MRTD_TD1)
             startActivityForResult(intent, OP_SCANNER)
         } catch (ex: ActivityNotFoundException) {
             ex.printStackTrace()
@@ -103,18 +103,20 @@ class MainActivity : AppCompatActivity() {
             if (resultCode == RESULT_OK) {
                 // Get Result from Bundle Intent Call Out
                 intent?.getBundleExtra(ScannerConstants.RESULT)?.let {
-                    if (it.getString(ScannerConstants.MODE) == Modes.MRZ.value || it.getString(ScannerConstants.MODE) == Modes.BARCODE.value) {
-                        val resultIntent = Intent(this, ResultActivity::class.java)
-                        resultIntent.putExtra(ResultActivity.RESULT, it)
-                        startActivity(resultIntent)
-                    } else {
+                    Log.d("${SmartScannerActivity.TAG}/SmartScanner", "Scanner result bundle: $it")
+                    if (it.getString(ScannerConstants.MODE) == Modes.IDPASS_LITE.value) {
                         val myIntent = Intent(this, IDPassResultActivity::class.java)
                         myIntent.putExtra(IDPassResultActivity.BUNDLE_RESULT, it)
                         startActivity(myIntent)
+                    } else {
+                        val resultIntent = Intent(this, ResultActivity::class.java)
+                        resultIntent.putExtra(ResultActivity.BUNDLE_RESULT, it)
+                        startActivity(resultIntent)
                     }
                 } ?: run {
                     // Get Result from JSON String
                     val result = intent?.getStringExtra(SCANNER_RESULT)
+                    Log.d("${SmartScannerActivity.TAG}/SmartScanner", "Scanner result string: $result")
                     if (result != null) {
                         val resultIntent = Intent(this, ResultActivity::class.java)
                         resultIntent.putExtra(ResultActivity.RESULT, result)
