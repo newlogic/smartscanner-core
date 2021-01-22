@@ -40,10 +40,10 @@ class MainActivity : AppCompatActivity() {
         private const val OP_SCANNER = 1001
         var imageType = ImageResultType.BASE_64.value
 
-        private fun sampleConfig(isManualCapture : Boolean) = Config (
-                branding = true,
-                imageResultType = imageType,
-                isManualCapture = isManualCapture
+        private fun sampleConfig(isManualCapture: Boolean) = Config(
+            branding = true,
+            imageResultType = imageType,
+            isManualCapture = isManualCapture
         )
     }
 
@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        binding.itemBarcode.item.setOnClickListener { startBarcode(BarcodeOptions.default)}
+        binding.itemBarcode.item.setOnClickListener { startBarcode(BarcodeOptions.default) }
         binding.itemIdpassLite.item.setOnClickListener { startIDPassLite() }
         binding.itemMrz.item.setOnClickListener { startMrzScan() }
     }
@@ -69,7 +69,10 @@ class MainActivity : AppCompatActivity() {
             // barcode -> val intent = ScannerIntent.intentBarcode()
             // idpass-lite -> val intent = ScannerIntent.intentIDPassLite()
             // mrz -> val intent = ScannerIntent.intentMrz()
-            val intent = ScannerIntent.intentMRZ(isManualCapture = true, mrzFormat = ScannerConstants.MRZ_FORMAT_MRTD_TD1)
+            val intent = ScannerIntent.intentMRZ(
+                isManualCapture = true,
+                mrzFormat = ScannerConstants.MRZ_FORMAT_MRTD_TD1
+            )
             startActivityForResult(intent, OP_SCANNER)
         } catch (ex: ActivityNotFoundException) {
             ex.printStackTrace()
@@ -80,26 +83,38 @@ class MainActivity : AppCompatActivity() {
     private fun startMrzScan() {
         imageType = ImageResultType.PATH.value
         val intent = Intent(this, SmartScannerActivity::class.java)
-        intent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleMrz(config = sampleConfig(true)))
+        intent.putExtra(
+            SmartScannerActivity.SCANNER_OPTIONS,
+            ScannerOptions.sampleMrz(config = sampleConfig(true))
+        )
         startActivityForResult(intent, OP_SCANNER)
     }
 
     private fun startBarcode(barcodeOptions: BarcodeOptions? = null) {
-        val intent = Intent(this,SmartScannerActivity::class.java)
-        intent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleBarcode(config = sampleConfig(false), barcodeOptions = barcodeOptions))
+        val intent = Intent(this, SmartScannerActivity::class.java)
+        intent.putExtra(
+            SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleBarcode(
+                config = sampleConfig(false),
+                scannerSize = ScannerSize.LARGE.value,
+                barcodeOptions = barcodeOptions
+            )
+        )
         startActivityForResult(intent, OP_SCANNER)
     }
 
     private fun startIDPassLite() {
-        val intent = Intent(this,SmartScannerActivity::class.java)
-        intent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleIdPassLite(config = sampleConfig(false)))
+        val intent = Intent(this, SmartScannerActivity::class.java)
+        intent.putExtra(
+            SmartScannerActivity.SCANNER_OPTIONS,
+            ScannerOptions.sampleIdPassLite(config = sampleConfig(false))
+        )
         startActivityForResult(intent, OP_SCANNER)
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
         super.onActivityResult(requestCode, resultCode, intent)
         if (requestCode == OP_SCANNER) {
-            Log.d(TAG, "Plugin post SmartScanner Activity resultCode $resultCode")
+            Log.d("${SmartScannerActivity.TAG}/SmartScanner", "Scanner resultCode $resultCode")
             if (resultCode == RESULT_OK) {
                 // Get Result from Bundle Intent Call Out
                 intent?.getBundleExtra(ScannerConstants.RESULT)?.let {

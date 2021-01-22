@@ -31,7 +31,7 @@ data class ScannerOptions(
 ) : Parcelable {
     companion object {
         // Default
-        val defaultForBarcode = ScannerOptions(mode = BARCODE.value, config = Config.default)
+        val defaultForBarcode = ScannerOptions(mode = BARCODE.value, scannerSize = ScannerSize.LARGE.value, config = Config.default)
         val defaultForMRZ = ScannerOptions(mode = MRZ.value, config = Config.default)
         val defaultForIdPassLite = ScannerOptions(
             mode = IDPASS_LITE.value,
@@ -44,8 +44,8 @@ data class ScannerOptions(
         fun sampleMrz(config: Config? = null, mrzFormat: String? = null) =
             ScannerOptions(mode = MRZ.value, config = config, mrzFormat = mrzFormat)
 
-        fun sampleBarcode(config: Config? = null, barcodeOptions: BarcodeOptions?) =
-            ScannerOptions(mode = BARCODE.value, config = config, barcodeOptions = barcodeOptions)
+        fun sampleBarcode(config: Config? = null, scannerSize: String? = null, barcodeOptions: BarcodeOptions?) =
+            ScannerOptions(mode = BARCODE.value, scannerSize = scannerSize, config = config, barcodeOptions = barcodeOptions)
 
         fun sampleIdPassLite(config: Config? = null) =
             ScannerOptions(
