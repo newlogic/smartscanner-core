@@ -64,7 +64,7 @@ class IDPassLiteAnalyzer(
                             } else { "" }
                             onVerify.invoke(raw, prefix ?: "")
                         } else {
-                            sendAnalyzerResult(activity, raw)
+                            sendAnalyzerResult(result = raw)
                         }
                     } else {
                         Log.d("${SmartScannerActivity.TAG}/SmartScanner", "ID PASS Lite: nothing detected")
@@ -78,7 +78,7 @@ class IDPassLiteAnalyzer(
         }
     }
 
-    private fun sendAnalyzerResult(activity: Activity, result: ByteArray? = null) {
+    private fun sendAnalyzerResult(result: ByteArray? = null) {
         val data = Intent()
         Log.d(SmartScannerActivity.TAG, "Success from IDPASS LITE")
         Log.d(SmartScannerActivity.TAG, "value: $result")
