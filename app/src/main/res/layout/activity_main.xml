@@ -63,6 +63,17 @@
         app:layout_constraintTop_toBottomOf="@+id/itemMrz" />
 
     <include
+        android:id="@+id/itemQR"
+        layout="@layout/item_qr"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/itemBarcode" />
+
+    <include
         android:id="@+id/itemIdpassLite"
         layout="@layout/item_idpass_lite"
         android:layout_width="match_parent"
@@ -71,7 +82,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="24dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/itemBarcode" />
+        app:layout_constraintTop_toBottomOf="@+id/itemQR" />
 
     <TextView
         android:id="@+id/bottomText"

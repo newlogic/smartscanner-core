@@ -61,6 +61,14 @@ class MainActivity : AppCompatActivity() {
         binding.itemBarcode.item.setOnClickListener { startBarcode(BarcodeOptions.default) }
         binding.itemIdpassLite.item.setOnClickListener { startIDPassLite() }
         binding.itemMrz.item.setOnClickListener { startMrzScan() }
+        binding.itemQR.item.setOnClickListener {
+            val intent = ScannerIntent.intentQRCode(
+                isGzipped = true,
+                isJson  = true,
+                jsonPath = "$.members[1].lastName"
+            )
+            startActivityForResult(intent, OP_SCANNER)
+        }
     }
 
     private fun startIntentCallOut() {
@@ -121,6 +129,8 @@ class MainActivity : AppCompatActivity() {
                 // Get Result from Bundle Intent Call Out
                 intent?.getBundleExtra(ScannerConstants.RESULT)?.let {
                     Log.d("${SmartScannerActivity.TAG}/SmartScanner", "Scanner result bundle: $it")
+                    Log.d("${SmartScannerActivity.TAG}/SmartScanner", "Scanner result bundle qr_code_json_value (from path): ${it.getString(ScannerConstants.QRCODE_JSON_VALUE)}")
+                    Log.d("${SmartScannerActivity.TAG}/SmartScanner", "Scanner result bundle qr_code_text: ${it.getString(ScannerConstants.QRCODE_TEXT)}")
                     if (it.getString(ScannerConstants.MODE) == Modes.IDPASS_LITE.value) {
                         // Go to ID PASS Lite Results Screen via bundle
                         val myIntent = Intent(this, IDPassResultActivity::class.java)
