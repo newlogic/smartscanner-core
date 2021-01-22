@@ -105,10 +105,12 @@ class MainActivity : AppCompatActivity() {
                 intent?.getBundleExtra(ScannerConstants.RESULT)?.let {
                     Log.d("${SmartScannerActivity.TAG}/SmartScanner", "Scanner result bundle: $it")
                     if (it.getString(ScannerConstants.MODE) == Modes.IDPASS_LITE.value) {
+                        // Go to ID PASS Lite Results Screen via bundle
                         val myIntent = Intent(this, IDPassResultActivity::class.java)
                         myIntent.putExtra(IDPassResultActivity.BUNDLE_RESULT, it)
                         startActivity(myIntent)
                     } else {
+                        // Go to Barcode/MRZ Results Screen via bundle
                         val resultIntent = Intent(this, ResultActivity::class.java)
                         resultIntent.putExtra(ResultActivity.BUNDLE_RESULT, it)
                         startActivity(resultIntent)
@@ -118,10 +120,12 @@ class MainActivity : AppCompatActivity() {
                     val result = intent?.getStringExtra(SCANNER_RESULT)
                     Log.d("${SmartScannerActivity.TAG}/SmartScanner", "Scanner result string: $result")
                     if (result != null) {
+                        // Go to Barcode/MRZ Results Screen
                         val resultIntent = Intent(this, ResultActivity::class.java)
                         resultIntent.putExtra(ResultActivity.RESULT, result)
                         startActivity(resultIntent)
                     } else {
+                        // Go to ID PASS Lite Results Screen
                         val resultBytes = intent?.getByteArrayExtra(SCANNER_RESULT_BYTES)
                         val myIntent = Intent(this, IDPassResultActivity::class.java)
                         myIntent.putExtra(IDPassResultActivity.RESULT, resultBytes)
