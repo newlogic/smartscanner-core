@@ -65,7 +65,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun startIntentCallOut() {
         try {
-            // Note: Scanner via intent can either be for barcode, idpass-lite, mrz, gzipped QR code
+            // Note: Scanner via intent can either be for barcode, idpass-lite, mrz, qrcode
             // Please see ScannerIntent class for more details
             // barcode -> val intent = ScannerIntent.intentBarcode()
             // idpass-lite -> val intent = ScannerIntent.intentIDPassLite()
