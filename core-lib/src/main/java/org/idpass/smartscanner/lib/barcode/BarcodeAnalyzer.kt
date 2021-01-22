@@ -29,12 +29,15 @@ import com.google.mlkit.vision.barcode.Barcode
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
+import com.jayway.jsonpath.JsonPath
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.platform.extension.cacheImagePath
 import org.idpass.smartscanner.lib.platform.extension.cacheImageToLocal
 import org.idpass.smartscanner.lib.platform.extension.toBitmap
+import org.idpass.smartscanner.lib.platform.utils.GzipUtils
 import org.idpass.smartscanner.lib.scanner.config.Modes
+import org.json.JSONObject
 
 class BarcodeAnalyzer(
     private val activity: Activity,
@@ -50,7 +53,7 @@ class BarcodeAnalyzer(
             val rot = imageProxy.imageInfo.rotationDegrees
             val bf = mediaImage.toBitmap(rot, Modes.BARCODE.value)
             val start = System.currentTimeMillis()
-            var barcodeFormat = Barcode.FORMAT_CODE_39 // Most common barcode format
+            var barcodeFormat = Barcode.FORMAT_QR_CODE
             barcodeFormats.forEach {
                 barcodeFormat = it or barcodeFormat // bitwise different barcode format options
             }
@@ -61,8 +64,8 @@ class BarcodeAnalyzer(
             scanner.process(image)
                 .addOnSuccessListener { barcodes ->
                     val timeRequired = System.currentTimeMillis() - start
-                    val rawValue: String
                     val cornersString: String
+                    val rawValue: String
                     Log.d(
                         "${SmartScannerActivity.TAG}/SmartScanner",
                         "barcode: success: $timeRequired ms"
@@ -76,20 +79,25 @@ class BarcodeAnalyzer(
                                 builder.append("${corner.x},${corner.y} ")
                             }
                         }
-                        cornersString = builder.toString()
-                        rawValue = barcodes[0].rawValue!!
                         bf.cacheImageToLocal(
                             filePath,
                             imageProxy.imageInfo.rotationDegrees
                         )
+                        cornersString = builder.toString()
+                        rawValue = barcodes[0].rawValue!!
                         val result = BarcodeResult(filePath, cornersString, rawValue)
-                        if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_BARCODE_INTENT ||
-                            intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_BARCODE_INTENT) {
-                            sendBundleResult(activity, intent, barcodeResult = result)
-                        }
-                        else {
-                            val jsonString = Gson().toJson(result)
-                            sendAnalyzerResult(activity, jsonString)
+                        when (intent.action) {
+                            ScannerConstants.IDPASS_SMARTSCANNER_GZIP_QRCODE_INTENT -> {
+                                sendGzippedResult(rawValue = rawValue, rawBytes = barcodes[0].rawBytes!!)
+                            }
+                            ScannerConstants.IDPASS_SMARTSCANNER_BARCODE_INTENT,
+                            ScannerConstants.IDPASS_SMARTSCANNER_ODK_BARCODE_INTENT -> {
+                                sendBundleResult(barcodeResult = result)
+                            }
+                            else -> {
+                                val jsonString = Gson().toJson(result)
+                                sendAnalyzerResult(result = jsonString)
+                            }
                         }
                     } else {
                         Log.d(
@@ -109,16 +117,37 @@ class BarcodeAnalyzer(
         }
     }
 
-    private fun sendAnalyzerResult(activity: Activity, result: String? = null) {
+    private fun sendGzippedResult(rawValue : String, rawBytes: ByteArray) {
+        // parse and read gzip json and add to bundle intent
+        val bundle = Bundle()
+        val isGzipped = intent.getBooleanExtra(ScannerConstants.GZIPPED_ENABLED, true)
+        val isJson = intent.getBooleanExtra(ScannerConstants.JSON_ENABLED, true)
+        val jsonPath = intent.getStringExtra(ScannerConstants.JSON_PATH)
+        // check gzipped parameters for bundle return result
+        if (isGzipped) {
+            val gzippedData = GzipUtils.decompress(rawBytes)
+            jsonPath?.let { path ->
+                val ctx = JsonPath.parse(gzippedData)
+                bundle.putString(ScannerConstants.QRCODE_JSON_VALUE, ctx.read<Any>(path).toString())
+            } ?: run {
+                if (isJson) {
+                    val json = JSONObject(gzippedData)
+                    bundle.putString(ScannerConstants.QRCODE_TEXT, json.toString())
+                } else {
+                    bundle.putString(ScannerConstants.QRCODE_TEXT, gzippedData)
+                }
+            }
+        } else {
+            bundle.putString(ScannerConstants.QRCODE_TEXT, rawValue)
+        }
+        // send gzip json data
         val data = Intent()
-        Log.d(SmartScannerActivity.TAG, "Success from BARCODE")
-        Log.d(SmartScannerActivity.TAG, "value: $result")
-        data.putExtra(SmartScannerActivity.SCANNER_RESULT, result)
+        data.putExtra(ScannerConstants.RESULT, bundle)
         activity.setResult(Activity.RESULT_OK, data)
         activity.finish()
     }
 
-    private fun sendBundleResult(activity: Activity, intent : Intent, barcodeResult : BarcodeResult? = null) {
+    private fun sendBundleResult(barcodeResult : BarcodeResult? = null) {
         val bundle = Bundle()
         Log.d(SmartScannerActivity.TAG, "Success from BARCODE")
         if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_BARCODE_INTENT) {
@@ -138,6 +167,15 @@ class BarcodeAnalyzer(
             result.putExtra(prefix + key, bundle.getString(key))
         }
         activity.setResult(Activity.RESULT_OK, result)
+        activity.finish()
+    }
+
+    private fun sendAnalyzerResult(result: String? = null) {
+        val data = Intent()
+        Log.d(SmartScannerActivity.TAG, "Success from BARCODE")
+        Log.d(SmartScannerActivity.TAG, "value: $result")
+        data.putExtra(SmartScannerActivity.SCANNER_RESULT, result)
+        activity.setResult(Activity.RESULT_OK, data)
         activity.finish()
     }
 }

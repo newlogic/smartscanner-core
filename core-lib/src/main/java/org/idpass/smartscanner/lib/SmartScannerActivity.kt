@@ -105,7 +105,9 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             scannerOptions = when (intent.action) {
                 // barcode
                 ScannerConstants.IDPASS_SMARTSCANNER_BARCODE_INTENT,
-                ScannerConstants.IDPASS_SMARTSCANNER_ODK_BARCODE_INTENT -> ScannerType.barcodeOptions
+                ScannerConstants.IDPASS_SMARTSCANNER_ODK_BARCODE_INTENT,
+                // gzipped qrcode
+                ScannerConstants.IDPASS_SMARTSCANNER_GZIP_QRCODE_INTENT -> ScannerType.barcodeOptions
                 // idpass lite
                 ScannerConstants.IDPASS_SMARTSCANNER_IDPASS_LITE_INTENT,
                 ScannerConstants.IDPASS_SMARTSCANNER_ODK_IDPASS_LITE_INTENT -> ScannerType.idPassLiteOptions

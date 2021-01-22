@@ -65,10 +65,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun startIntentCallOut() {
         try {
-            // Note: Scanner via intent can either be for barcode, idpass-lite, mrz
+            // Note: Scanner via intent can either be for barcode, idpass-lite, mrz, gzipped QR code
+            // Please see ScannerIntent class for more details
             // barcode -> val intent = ScannerIntent.intentBarcode()
             // idpass-lite -> val intent = ScannerIntent.intentIDPassLite()
             // mrz -> val intent = ScannerIntent.intentMrz()
+            // gzipped -> val intent = ScannerIntent.intentQRCode()
             val intent = ScannerIntent.intentMRZ(
                 isManualCapture = true,
                 mrzFormat = ScannerConstants.MRZ_FORMAT_MRTD_TD1
@@ -76,7 +78,7 @@ class MainActivity : AppCompatActivity() {
             startActivityForResult(intent, OP_SCANNER)
         } catch (ex: ActivityNotFoundException) {
             ex.printStackTrace()
-            Log.e(TAG, "smart scanner is not installed!")
+            Log.e(TAG, "ID PASS SmartScanner is not installed!")
         }
     }
 
