@@ -35,7 +35,7 @@ import org.idpass.smartscanner.lib.scanner.config.Modes
 class IDPassLiteAnalyzer(
     private val activity: Activity,
     private val intent: Intent,
-    private val onVerify: (ByteArray?, String) -> Unit
+    private val onVerify: (ByteArray?) -> Unit
 ) : ImageAnalysis.Analyzer {
 
     @SuppressLint("UnsafeExperimentalUsageError")
@@ -59,12 +59,9 @@ class IDPassLiteAnalyzer(
                         val raw = barcodes[0].rawBytes
                         if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_IDPASS_LITE_INTENT ||
                             intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_IDPASS_LITE_INTENT) {
-                            val prefix = if (intent.hasExtra(ScannerConstants.IDPASS_ODK_PREFIX_EXTRA)) {
-                                intent.getStringExtra(ScannerConstants.IDPASS_ODK_PREFIX_EXTRA)
-                            } else { "" }
-                            onVerify.invoke(raw, prefix ?: "")
+                            onVerify.invoke(raw)
                         } else {
-                            sendAnalyzerResult(result = raw)
+                            IDPassManager.sendAnalyzerResult(activity = activity, result = raw)
                         }
                     } else {
                         Log.d("${SmartScannerActivity.TAG}/SmartScanner", "ID PASS Lite: nothing detected")
@@ -76,14 +73,5 @@ class IDPassLiteAnalyzer(
                     Log.d("${SmartScannerActivity.TAG}/SmartScanner", "ID PASS Lite: failure: ${e.message}")
                 }
         }
-    }
-
-    private fun sendAnalyzerResult(result: ByteArray? = null) {
-        val data = Intent()
-        Log.d(SmartScannerActivity.TAG, "Success from IDPASS LITE")
-        Log.d(SmartScannerActivity.TAG, "value: $result")
-        data.putExtra(SmartScannerActivity.SCANNER_RESULT_BYTES, result)
-        activity.setResult(Activity.RESULT_OK, data)
-        activity.finish()
     }
 }
