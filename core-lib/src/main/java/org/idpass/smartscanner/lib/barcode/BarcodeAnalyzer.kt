@@ -87,7 +87,7 @@ class BarcodeAnalyzer(
                         rawValue = barcodes[0].rawValue!!
                         val result = BarcodeResult(filePath, cornersString, rawValue)
                         when (intent.action) {
-                            ScannerConstants.IDPASS_SMARTSCANNER_GZIP_QRCODE_INTENT -> {
+                            ScannerConstants.IDPASS_SMARTSCANNER_QRCODE_INTENT -> {
                                 sendGzippedResult(rawValue = rawValue, rawBytes = barcodes[0].rawBytes!!)
                             }
                             ScannerConstants.IDPASS_SMARTSCANNER_BARCODE_INTENT,

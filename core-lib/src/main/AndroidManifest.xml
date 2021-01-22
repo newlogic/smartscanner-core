@@ -20,8 +20,7 @@
                 <action android:name="org.idpass.smartscanner.MRZ_SCAN" />
                 <action android:name="org.idpass.smartscanner.BARCODE_SCAN" />
                 <action android:name="org.idpass.smartscanner.IDPASS_LITE_SCAN" />
-                <!--Gzipped bundle intent-->
-                <action android:name="org.idpass.smartscanner.gzip.QRCODE_SCAN" />
+                <action android:name="org.idpass.smartscanner.QRCODE_SCAN" />
                 <!--ODK bundle intent-->
                 <action android:name="org.idpass.smartscanner.odk.MRZ_SCAN" />
                 <action android:name="org.idpass.smartscanner.odk.BARCODE_SCAN" />
