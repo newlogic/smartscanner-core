@@ -146,8 +146,6 @@ class BarcodeAnalyzer(
             jsonPath?.let { path ->
                 val ctx = JsonPath.parse(data)
                 bundle.putString(ScannerConstants.QRCODE_JSON_VALUE, ctx.read<Any>(path).toString())
-
-
             } ?: run {
                 bundle.putString(ScannerConstants.QRCODE_TEXT, data)
             }
@@ -157,29 +155,33 @@ class BarcodeAnalyzer(
                 bundle.putString(k, v)
             }
         }
-
         Log.d(
             "${SmartScannerActivity.TAG}/SmartScanner",
             "bundle: ${bundle}"
         )
-
         bundle.putString("test", "OK")
-        
         val result = Intent()
+        val prefix = if (intent.hasExtra(ScannerConstants.IDPASS_ODK_PREFIX_EXTRA)) {
+            intent.getStringExtra(ScannerConstants.IDPASS_ODK_PREFIX_EXTRA)
+        } else { "" }
         result.putExtra(ScannerConstants.RESULT, bundle)
+        // Copy all the values in the intent result to be compatible with other implementations than commcare
+        for (key in bundle.keySet()) {
+            result.putExtra(prefix + key, bundle.getString(key))
+        }
         activity.setResult(Activity.RESULT_OK, result)
         activity.finish()
     }
 
     private fun flattenJson(json: String): HashMap<String, String> {
-        val flattenedMap = JsonFlattener.flattenAsMap(json);
+        val flattenedMap = JsonFlattener.flattenAsMap(json)
 
         val map: HashMap<String, String> = HashMap()
 
         for ((k, v) in flattenedMap) {
             val key = k.replace(".", "_").replace("[", "_").replace("]", "_").replace("__", "_")
             if(v != null) {
-                map[key] = v.toString();
+                map[key] = v.toString()
                 print("$key, ")
             }
         }
