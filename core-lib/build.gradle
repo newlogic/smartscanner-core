@@ -86,4 +86,5 @@ dependencies {
     implementation project(path: ':smartscanner-android-api')
     // Gzip JSON
     implementation 'com.jayway.jsonpath:json-path:2.5.0'
+    implementation 'com.github.wnameless.json:json-flattener:0.12.0'
 }
