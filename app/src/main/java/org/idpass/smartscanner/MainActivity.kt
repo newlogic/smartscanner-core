@@ -17,11 +17,14 @@
  */
 package org.idpass.smartscanner
 
+import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.api.ScannerIntent
 import org.idpass.smartscanner.databinding.ActivityMainBinding
@@ -58,17 +61,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        binding.itemBarcode.item.setOnClickListener { startBarcode(BarcodeOptions.default) }
-        binding.itemIdpassLite.item.setOnClickListener { startIDPassLite() }
-        binding.itemMrz.item.setOnClickListener { startMrzScan() }
-        binding.itemQR.item.setOnClickListener {
-            val intent = ScannerIntent.intentQRCode(
-                isGzipped = true,
-                isJson  = true,
-                jsonPath = "$.members[1].lastName"
-            )
-            startActivityForResult(intent, OP_SCANNER)
-        }
+        binding.itemBarcode.item.setOnClickListener { scanBarcode(BarcodeOptions.default) }
+        binding.itemIdpassLite.item.setOnClickListener { scanIDPassLite() }
+        binding.itemMrz.item.setOnClickListener { scanMRZ() }
+        binding.itemQR.item.setOnClickListener { scanQRCode() }
     }
 
     private fun startIntentCallOut() {
@@ -90,17 +86,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun startMrzScan() {
-        imageType = ImageResultType.PATH.value
-        val intent = Intent(this, SmartScannerActivity::class.java)
-        intent.putExtra(
-            SmartScannerActivity.SCANNER_OPTIONS,
-            ScannerOptions.sampleMrz(config = sampleConfig(true))
-        )
-        startActivityForResult(intent, OP_SCANNER)
-    }
-
-    private fun startBarcode(barcodeOptions: BarcodeOptions? = null) {
+    private fun scanBarcode(barcodeOptions: BarcodeOptions? = null) {
         val intent = Intent(this, SmartScannerActivity::class.java)
         intent.putExtra(
             SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleBarcode(
@@ -112,13 +98,51 @@ class MainActivity : AppCompatActivity() {
         startActivityForResult(intent, OP_SCANNER)
     }
 
-    private fun startIDPassLite() {
+    private fun scanIDPassLite() {
         val intent = Intent(this, SmartScannerActivity::class.java)
         intent.putExtra(
             SmartScannerActivity.SCANNER_OPTIONS,
             ScannerOptions.sampleIdPassLite(config = sampleConfig(false))
         )
         startActivityForResult(intent, OP_SCANNER)
+    }
+
+    private fun scanMRZ() {
+        imageType = ImageResultType.PATH.value
+        val intent = Intent(this, SmartScannerActivity::class.java)
+        intent.putExtra(
+            SmartScannerActivity.SCANNER_OPTIONS,
+            ScannerOptions.sampleMrz(config = sampleConfig(true))
+        )
+        startActivityForResult(intent, OP_SCANNER)
+    }
+
+    @SuppressLint("InflateParams")
+    private fun scanQRCode()  {
+        val bottomSheetDialog = BottomSheetDialog(this)
+        val sheetViewBarcode = layoutInflater.inflate(R.layout.sheet_qrcode, null)
+        bottomSheetDialog.setContentView(sheetViewBarcode)
+        // bottom sheet ids
+        val btnGzipped = sheetViewBarcode.findViewById<LinearLayout>(R.id.btnGzipped)
+        val btnRegular = sheetViewBarcode.findViewById<LinearLayout>(R.id.btnRegular)
+        val btnCancel = sheetViewBarcode.findViewById<LinearLayout>(R.id.btnCancel)
+        // bottom sheet listeners
+        btnGzipped.setOnClickListener {
+            val intent = ScannerIntent.intentQRCode(
+                isGzipped = true,
+                isJson  = true,
+                jsonPath = "" // ex: "$.members[1].lastName"
+            )
+            startActivityForResult(intent, OP_SCANNER)
+            bottomSheetDialog.dismiss()
+        }
+        btnRegular.setOnClickListener {
+            val intent = ScannerIntent.intentQRCode()
+            startActivityForResult(intent, OP_SCANNER)
+            bottomSheetDialog.dismiss()
+        }
+        btnCancel.setOnClickListener { bottomSheetDialog.dismiss() }
+        bottomSheetDialog.show()
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {

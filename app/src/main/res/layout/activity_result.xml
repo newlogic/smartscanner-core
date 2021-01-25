@@ -51,6 +51,7 @@
             android:textColor="@color/newlogic_black"
             android:textSize="16sp"
             tools:ignore="MissingConstraints"
+            android:visibility="gone"
             tools:text="54 65 73 74 20 51 52 20  Test QR\n43 6F 64 65              Code" />
 
         <TextView
