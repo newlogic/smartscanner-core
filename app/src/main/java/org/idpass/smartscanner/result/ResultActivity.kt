@@ -34,6 +34,7 @@ import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.databinding.ActivityResultBinding
 import org.idpass.smartscanner.lib.platform.extension.decodeBase64
 import org.idpass.smartscanner.lib.scanner.config.ImageResultType
+import org.idpass.smartscanner.lib.scanner.config.Modes
 
 class ResultActivity : AppCompatActivity() {
 
@@ -62,32 +63,32 @@ class ResultActivity : AppCompatActivity() {
             resultString = getShareResult(result = scanResult)
         } ?: run {
             intent.getBundleExtra(BUNDLE_RESULT)?.let {
-                setupResult(bundle = it, imageType = imageType)
-                resultString = getShareResult(bundle = it)
+                val result = when (it.getString(ScannerConstants.MODE)) {
+                    Modes.BARCODE.value -> it.getString(ScannerConstants.BARCODE_VALUE)
+                    Modes.QRCODE.value -> it.getString(ScannerConstants.QRCODE_TEXT)
+                    Modes.MRZ.value -> it.getString(ScannerConstants.MRZ_RAW)
+                    else -> null
+                }
+                resultString = result
+                displayRaw(result)
             } ?: run {
                 binding.textResult.text = getString(R.string.label_result_none)
             }
         }
     }
 
-    private fun setupResult(result: String? = null, bundle: Bundle? = null, imageType: String) {
-        val dump: StringBuilder
-        if (bundle != null) {
-            dump = getResult(bundle = bundle)
-        } else {
-            dump = getResult(result = result)
-        }
+    private fun setupResult(result: String? = null,  imageType: String) {
+        val dump: StringBuilder = getResult(result)
         // Text Data Result
         if (dump.isNotEmpty()) {
+            binding.textResult.visibility = VISIBLE
             binding.textResult.text = dump.toString()
-        } else {
-            binding.textResult.visibility = GONE
         }
         // Image & Raw Data Result
         result?.let {
             val image = JsonParser.parseString(it).asJsonObject["image"]
             if (image != null) {
-                showResultImage(image.asString, imageType)
+                displayImage(image.asString, imageType)
             }
         } ?: run {
             // TODO implement proper image passing
@@ -95,7 +96,10 @@ class ResultActivity : AppCompatActivity() {
             //  showResultImage(bundle.getString(ScannerConstants.MRZ_IMAGE) ?: "", imageType)
             //  }
         }
+        displayRaw(result)
+    }
 
+    private fun displayRaw(result : String?) {
         // Raw Data Result
         if (result?.isNotEmpty() != null) {
             binding.editTextRaw.setText(result)
@@ -108,7 +112,7 @@ class ResultActivity : AppCompatActivity() {
         }
     }
 
-    private fun showResultImage(image: String, imageType: String) {
+    private fun displayImage(image: String, imageType: String) {
         if (image.isNotEmpty()) {
             val imageBitmap = if (imageType == ImageResultType.PATH.value) BitmapFactory.decodeFile(image) else image.decodeBase64()
             Glide
@@ -127,12 +131,7 @@ class ResultActivity : AppCompatActivity() {
 
 
     private fun getShareResult(result: String? = null, bundle: Bundle? = null) : String {
-        val dump: StringBuilder
-        if (bundle != null) {
-            dump = getResult(bundle = bundle)
-        } else {
-            dump = getResult(result = result)
-        }
+        val dump: StringBuilder = getResult(result = result)
         if (dump.isEmpty()) {
             dump.append(result)
         }
@@ -140,27 +139,19 @@ class ResultActivity : AppCompatActivity() {
         return dump.toString()
     }
 
-    private fun getResult(result: String? = null, bundle: Bundle? = null): StringBuilder {
+    private fun getResult(result: String? = null, ): StringBuilder {
         val dump = StringBuilder()
         val givenNames: String?
         val surname: String?
         val dateOfBirth: String?
         val nationality: String?
         val documentNumber: String?
-        if (bundle != null) {
-            givenNames = bundle.getString(ScannerConstants.MRZ_GIVEN_NAMES)
-            surname = bundle.getString(ScannerConstants.MRZ_SURNAME)
-            dateOfBirth = bundle.getString(ScannerConstants.MRZ_DATE_OF_BIRTH)
-            nationality = bundle.getString(ScannerConstants.MRZ_NATIONALITY)
-            documentNumber = bundle.getString(ScannerConstants.MRZ_NATIONALITY)
-        } else {
-            val resultObject = JsonParser.parseString(result).asJsonObject
-            givenNames = if (resultObject["givenNames"] != null) resultObject["givenNames"].asString else ""
-            surname = if (resultObject["surname"]!= null) resultObject["surname"].asString else ""
-            dateOfBirth = if (resultObject["dateOfBirth"]!= null) resultObject["dateOfBirth"].asString else ""
-            nationality =  if (resultObject["nationality"]!= null) resultObject["nationality"].asString else ""
-            documentNumber = if (resultObject["documentNumber"]!= null) resultObject["documentNumber"].asString else ""
-        }
+        val resultObject = JsonParser.parseString(result).asJsonObject
+        givenNames = if (resultObject["givenNames"] != null) resultObject["givenNames"].asString else ""
+        surname = if (resultObject["surname"]!= null) resultObject["surname"].asString else ""
+        dateOfBirth = if (resultObject["dateOfBirth"]!= null) resultObject["dateOfBirth"].asString else ""
+        nationality =  if (resultObject["nationality"]!= null) resultObject["nationality"].asString else ""
+        documentNumber = if (resultObject["documentNumber"]!= null) resultObject["documentNumber"].asString else ""
         if (givenNames != null) {
             if (givenNames.isNotEmpty()) dump.append("Given Name: ${givenNames}\n")
         }
