@@ -25,6 +25,7 @@
                 <action android:name="org.idpass.smartscanner.odk.MRZ_SCAN" />
                 <action android:name="org.idpass.smartscanner.odk.BARCODE_SCAN" />
                 <action android:name="org.idpass.smartscanner.odk.IDPASS_LITE_SCAN" />
+                <action android:name="org.idpass.smartscanner.odk.QRCODE_SCAN" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
