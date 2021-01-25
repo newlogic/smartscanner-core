@@ -50,6 +50,7 @@ import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
+import com.google.mlkit.vision.barcode.Barcode
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.barcode.BarcodeAnalyzer
 import org.idpass.smartscanner.lib.databinding.ActivitySmartScannerBinding
@@ -106,7 +107,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 // barcode, qrcode
                 ScannerConstants.IDPASS_SMARTSCANNER_BARCODE_INTENT,
                 ScannerConstants.IDPASS_SMARTSCANNER_ODK_BARCODE_INTENT,
-                ScannerConstants.IDPASS_SMARTSCANNER_QRCODE_INTENT -> ScannerType.barcodeOptions
+                ScannerConstants.IDPASS_SMARTSCANNER_QRCODE_INTENT,
+                ScannerConstants.IDPASS_SMARTSCANNER_ODK_QRCODE_INTENT -> ScannerType.barcodeOptions
                 // idpass lite
                 ScannerConstants.IDPASS_SMARTSCANNER_IDPASS_LITE_INTENT,
                 ScannerConstants.IDPASS_SMARTSCANNER_ODK_IDPASS_LITE_INTENT -> ScannerType.idPassLiteOptions
@@ -151,6 +153,13 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     activity = this,
                     intent = intent,
                     barcodeFormats = barcodeFormats
+                )
+            }
+            if (mode == Modes.QRCODE.value) {
+                analyzer = BarcodeAnalyzer(
+                    activity = this,
+                    intent = intent,
+                    barcodeFormats = listOf(Barcode.FORMAT_QR_CODE)
                 )
             }
             if (mode == Modes.IDPASS_LITE.value) {

@@ -39,6 +39,7 @@ import org.idpass.smartscanner.lib.platform.extension.toBitmap
 import org.idpass.smartscanner.lib.platform.utils.GzipUtils
 import org.idpass.smartscanner.lib.scanner.config.Modes
 import org.json.JSONObject
+import java.util.zip.ZipException
 
 
 class BarcodeAnalyzer(
@@ -89,15 +90,16 @@ class BarcodeAnalyzer(
                         rawValue = barcodes[0].rawValue!!
                         val result = BarcodeResult(filePath, cornersString, rawValue)
                         when (intent.action) {
-                            ScannerConstants.IDPASS_SMARTSCANNER_QRCODE_INTENT -> {
-                                sendGzippedResult(
-                                    rawValue = rawValue,
-                                    rawBytes = barcodes[0].rawBytes!!
+                            ScannerConstants.IDPASS_SMARTSCANNER_QRCODE_INTENT,
+                            ScannerConstants.IDPASS_SMARTSCANNER_ODK_QRCODE_INTENT, -> {
+                                sendQRCodeResult(
+                                        rawValue = rawValue,
+                                        rawBytes = barcodes[0].rawBytes!!
                                 )
                             }
                             ScannerConstants.IDPASS_SMARTSCANNER_BARCODE_INTENT,
                             ScannerConstants.IDPASS_SMARTSCANNER_ODK_BARCODE_INTENT -> {
-                                sendBundleResult(barcodeResult = result)
+                                sendBarcodeResult(barcodeResult = result)
                             }
                             else -> {
                                 val jsonString = Gson().toJson(result)
@@ -122,79 +124,16 @@ class BarcodeAnalyzer(
         }
     }
 
-    private fun sendGzippedResult(rawValue: String, rawBytes: ByteArray) {
-        // parse and read gzip json and add to bundle intent
-        val bundle = Bundle()
-
-        //temporary fix to make it work with ODK
-        // TODO: @reuben fix when you add support for ODK
-        val isGzipped = intent.getStringExtra(ScannerConstants.GZIPPED_ENABLED) == "1"
-        val isJson = intent.getStringExtra(ScannerConstants.JSON_ENABLED) == "1"
-        val jsonPath = intent.getStringExtra(ScannerConstants.JSON_PATH)
-//        val isGzipped = intent.getBooleanExtra(ScannerConstants.GZIPPED_ENABLED, true)
-//        val isJson = intent.getBooleanExtra(ScannerConstants.JSON_ENABLED, true)
-//        val jsonPath = intent.getStringExtra(ScannerConstants.JSON_PATH)
-        // check gzipped parameters for bundle return result
-
-        val data = if (isGzipped) {
-            GzipUtils.decompress(rawBytes)
-        } else {
-            rawValue
-        }
-
-        if (isJson) {
-            jsonPath?.let { path ->
-                val ctx = JsonPath.parse(data)
-                bundle.putString(ScannerConstants.QRCODE_JSON_VALUE, ctx.read<Any>(path).toString())
-            } ?: run {
-                bundle.putString(ScannerConstants.QRCODE_TEXT, data)
-            }
-            val flattenMap = flattenJson(data)
-
-            for ((k, v) in flattenMap) {
-                bundle.putString(k, v)
-            }
-        }
-        Log.d(
-            "${SmartScannerActivity.TAG}/SmartScanner",
-            "bundle: ${bundle}"
-        )
-        bundle.putString("test", "OK")
-        val result = Intent()
-        val prefix = if (intent.hasExtra(ScannerConstants.IDPASS_ODK_PREFIX_EXTRA)) {
-            intent.getStringExtra(ScannerConstants.IDPASS_ODK_PREFIX_EXTRA)
-        } else { "" }
-        result.putExtra(ScannerConstants.RESULT, bundle)
-        // Copy all the values in the intent result to be compatible with other implementations than commcare
-        for (key in bundle.keySet()) {
-            result.putExtra(prefix + key, bundle.getString(key))
-        }
-        activity.setResult(Activity.RESULT_OK, result)
+    private fun sendAnalyzerResult(result: String? = null) {
+        val data = Intent()
+        Log.d(SmartScannerActivity.TAG, "Success from BARCODE")
+        Log.d(SmartScannerActivity.TAG, "value: $result")
+        data.putExtra(SmartScannerActivity.SCANNER_RESULT, result)
+        activity.setResult(Activity.RESULT_OK, data)
         activity.finish()
     }
 
-    private fun flattenJson(json: String): HashMap<String, String> {
-        val flattenedMap = JsonFlattener.flattenAsMap(json)
-
-        val map: HashMap<String, String> = HashMap()
-
-        for ((k, v) in flattenedMap) {
-            val key = k.replace(".", "_").replace("[", "_").replace("]", "_").replace("__", "_")
-            if(v != null) {
-                map[key] = v.toString()
-                print("$key, ")
-            }
-        }
-
-
-        Log.d(
-            "${SmartScannerActivity.TAG}/SmartScanner",
-            "flattenedMap: ${JSONObject(map as Map<*, *>)}"
-        )
-        return map
-    }
-
-    private fun sendBundleResult(barcodeResult: BarcodeResult? = null) {
+    private fun sendBarcodeResult(barcodeResult: BarcodeResult? = null) {
         val bundle = Bundle()
         Log.d(SmartScannerActivity.TAG, "Success from BARCODE")
         if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_BARCODE_INTENT) {
@@ -204,7 +143,48 @@ class BarcodeAnalyzer(
         bundle.putString(ScannerConstants.BARCODE_IMAGE, barcodeResult?.imagePath)
         bundle.putString(ScannerConstants.BARCODE_CORNERS, barcodeResult?.corners)
         bundle.putString(ScannerConstants.BARCODE_VALUE, barcodeResult?.value)
+        sendBundleResult(bundle)
+    }
 
+    private fun sendQRCodeResult(rawValue: String, rawBytes: ByteArray) {
+        // parse and read qr data and add to bundle intent
+        val bundle = Bundle()
+        Log.d(SmartScannerActivity.TAG, "Success from QRCODE")
+        val isOdk = intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_QRCODE_INTENT
+        val isGzipped = if (isOdk) intent.getStringExtra(ScannerConstants.GZIPPED_ENABLED) == "1" else intent.getBooleanExtra(ScannerConstants.GZIPPED_ENABLED, false)
+        val isJson = if (isOdk) intent.getStringExtra(ScannerConstants.JSON_ENABLED) == "1" else intent.getBooleanExtra(ScannerConstants.JSON_ENABLED, false)
+        val jsonPath = intent.getStringExtra(ScannerConstants.JSON_PATH)
+        // check gzipped parameters for bundle return result
+        var data : String? = if (isGzipped) {
+            getGzippedData(rawBytes)
+        } else {
+            rawValue
+        }
+        // check json parameters for bundle return result
+        if (isJson) {
+            if (data != null) {
+                jsonPath?.let { path ->
+                    val ctx = JsonPath.parse(data)
+                    bundle.putString(ScannerConstants.QRCODE_JSON_VALUE, ctx.read<Any>(path).toString())
+                }
+                val flattenMap = flattenJson(data)
+                for ((k, v) in flattenMap) {
+                    bundle.putString(k, v)
+                }
+            } else {
+                data = rawValue
+            }
+        }
+        Log.d(
+            "${SmartScannerActivity.TAG}/SmartScanner",
+            "bundle: $bundle"
+        )
+        bundle.putString(ScannerConstants.MODE, Modes.QRCODE.value)
+        bundle.putString(ScannerConstants.QRCODE_TEXT, data)
+        sendBundleResult(bundle)
+    }
+
+    private fun sendBundleResult(bundle: Bundle) {
         val result = Intent()
         val prefix = if (intent.hasExtra(ScannerConstants.IDPASS_ODK_PREFIX_EXTRA)) {
             intent.getStringExtra(ScannerConstants.IDPASS_ODK_PREFIX_EXTRA)
@@ -218,12 +198,29 @@ class BarcodeAnalyzer(
         activity.finish()
     }
 
-    private fun sendAnalyzerResult(result: String? = null) {
-        val data = Intent()
-        Log.d(SmartScannerActivity.TAG, "Success from BARCODE")
-        Log.d(SmartScannerActivity.TAG, "value: $result")
-        data.putExtra(SmartScannerActivity.SCANNER_RESULT, result)
-        activity.setResult(Activity.RESULT_OK, data)
-        activity.finish()
+    private fun getGzippedData(rawBytes: ByteArray) : String?{
+        return try {
+            GzipUtils.decompress(rawBytes)
+        } catch (ez : ZipException) {
+            ez.printStackTrace()
+            null
+        }
+    }
+
+    private fun flattenJson(json: String): HashMap<String, String> {
+        val flattenedMap = JsonFlattener.flattenAsMap(json)
+        val map: HashMap<String, String> = HashMap()
+        for ((k, v) in flattenedMap) {
+            val key = k.replace(".", "_").replace("[", "_").replace("]", "_").replace("__", "_")
+            if (v != null) {
+                map[key] = v.toString()
+                print("$key, ")
+            }
+        }
+        Log.d(
+            "${SmartScannerActivity.TAG}/SmartScanner",
+            "flattenedMap: ${JSONObject(map as Map<*, *>)}"
+        )
+        return map
     }
 }
