@@ -2,6 +2,8 @@
 
 An Android library for scanning MRZ, Barcode, and [ID PASS Lite](https://github.com/idpass/idpass-lite) cards.
 
+**Note: The library's API might keep evolving before we reach v1.0, so be careful when upgrading between these pre-v1.0 versions. Starting at v1.0 we will be careful in introducing breaking API changes.**
+
 ## Features
 
 - Scan MRZ
@@ -13,7 +15,7 @@ This repository also includes an Android [demo app](app) to test what the librar
 
 ## Related projects
 
-- [smartscanner-android](https://github.com/idpass/smartscanner-android) - Provides convenience methods to simplify the SmartScanner intent call out process
+- [smartscanner-android-api](https://github.com/idpass/smartscanner-android-api) - Provides convenience methods to simplify the SmartScanner intent call out process
 - [smartscanner-capacitor](https://github.com/idpass/smartscanner-capacitor) - SmartScanner [Capacitor](https://capacitorjs.com/) plugin
 - [smartscanner-cordova](https://github.com/idpass/smartscanner-cordova) - SmartScanner [Cordova](https://cordova.apache.org/) plugin
 
@@ -90,7 +92,7 @@ Refer to the [Result fields reference](https://github.com/idpass/smartscanner-co
 
 Refer to the [API Reference](https://github.com/idpass/smartscanner-core/wiki/API-Reference) for complete information about each scan operation and the different options available.
 
-Finally, for convenience we recommend using the [smartscanner-android](https://github.com/idpass/smartscanner-android) library which simplifies the app intent call out process.
+Finally, for convenience we recommend using the [smartscanner-android-api](https://github.com/idpass/smartscanner-android-api) library which simplifies the app intent call out process.
 
 ## Running the demo app
 
