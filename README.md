@@ -1,6 +1,6 @@
 # SmartScanner Core
 
-An Android library for scanning MRZ, Barcode, and [ID PASS Lite](https://github.com/idpass/idpass-lite) cards.
+ID scanning Android app and library. Supports MRZ, Barcodes, and [ID PASS Lite](https://github.com/idpass/idpass-lite) cards.
 
 **Note: The library's API might keep evolving before we reach v1.0, so be careful when upgrading between these pre-v1.0 versions. Starting at v1.0 we will be careful in introducing breaking API changes.**
 
