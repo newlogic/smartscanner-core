@@ -26,7 +26,7 @@ import org.api.proto.Certificates
 import org.api.proto.KeySet
 import org.idpass.lite.Card
 import org.idpass.lite.IDPassReader
-import org.idpass.lite.android.IDPassLite
+import org.idpass.lite.android.IDPassLiteHelper
 import org.idpass.lite.exceptions.CardVerificationException
 import org.idpass.lite.exceptions.InvalidCardException
 import org.idpass.lite.exceptions.InvalidKeyException
@@ -40,8 +40,8 @@ object IDPassManager {
 
     fun getIDPassReader(): IDPassReader {
         // Initialize needed ks and rootcert from demo key values
-        val keysetbuf = IDPassLite.generateAndroidKeyset()
-        val rootcertbuf = IDPassLite.generateAndroidRootcert()
+        val keysetbuf = IDPassLiteHelper.generateAndroidKeyset()
+        val rootcertbuf = IDPassLiteHelper.generateAndroidRootcert()
         val ks = KeySet.parseFrom(keysetbuf)
         val rootcert = Certificates.parseFrom(rootcertbuf)
         // Initialize reader with ks and rootcert

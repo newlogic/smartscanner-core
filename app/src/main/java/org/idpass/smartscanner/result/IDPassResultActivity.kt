@@ -30,7 +30,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import org.idpass.lite.Card
-import org.idpass.lite.android.IDPassLite
 import org.idpass.lite.exceptions.CardVerificationException
 import org.idpass.lite.exceptions.InvalidCardException
 import org.idpass.lite.exceptions.InvalidKeyException
@@ -69,11 +68,6 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
         supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_close)
-        // load ID Pass Lite models
-        val loaded = IDPassLite.loadModels(cacheDir, assets)
-        if (!loaded) {
-            Log.d("${SmartScannerActivity.TAG}/SmartScanner", "ID PASS Lite: Load models Failure")
-        }
         // Display ID PASS Lite Result
         intent.getByteArrayExtra(RESULT)?.let {
             displayResult(it)

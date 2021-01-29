@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId "org.idpass.smartscanner"
-        minSdkVersion 26
+        minSdkVersion 21
         targetSdkVersion 30
         versionName androidGitVersion.name()
         versionCode androidGitVersion.code()
@@ -76,8 +76,8 @@ dependencies {
     // ID PASS Smart Scanner
     implementation project(path: ':core-lib')
     //ID PASS lite
-    implementation project(path: ':idpass-lite')
-    implementation 'com.google.protobuf:protobuf-lite:3.0.1'
+    implementation 'com.google.protobuf:protobuf-lite:3.0.0'
+    implementation 'org.idpass:idpass-lite-java-android:0.1@aar'
     // SmartScanner API Intent Call Out
     implementation project(path: ':smartscanner-android-api')
 }

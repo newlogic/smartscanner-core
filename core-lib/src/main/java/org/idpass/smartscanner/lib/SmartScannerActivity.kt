@@ -192,7 +192,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 )
             }
             if (mode == Modes.IDPASS_LITE.value) {
-                val loaded = IDPassLite.loadModels(cacheDir, assets)
+                val loaded = IDPassLite.initialize(cacheDir, assets)
                 if (!loaded) Log.d("${TAG}/SmartScanner", "ID PASS Lite: Load models Failure")
                 analyzer = IDPassLiteAnalyzer(
                     activity = this,
