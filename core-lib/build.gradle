@@ -74,8 +74,8 @@ dependencies {
     // Gson
     implementation 'com.google.code.gson:gson:2.8.6'
     // ID PASS lite
-    implementation project(path: ':idpass-lite')
-    implementation 'com.google.protobuf:protobuf-lite:3.0.1'
+    implementation 'com.google.protobuf:protobuf-lite:3.0.0'
+    implementation 'org.idpass:idpass-lite-java-android:0.1@aar'
     // SmartScanner MRZ Parser
     implementation project(path: ':smartscanner-mrz-parser')
     // SmartScanner API Intent Call Out
