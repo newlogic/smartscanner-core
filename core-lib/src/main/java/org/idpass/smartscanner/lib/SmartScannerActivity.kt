@@ -38,8 +38,11 @@ import android.view.View.*
 import android.view.Window
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.Guideline
 import androidx.core.app.ActivityCompat
@@ -51,9 +54,9 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.google.mlkit.vision.barcode.Barcode
+import org.idpass.lite.android.IDPassLite
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.barcode.BarcodeAnalyzer
-import org.idpass.smartscanner.lib.databinding.ActivitySmartScannerBinding
 import org.idpass.smartscanner.lib.idpasslite.IDPassLiteAnalyzer
 import org.idpass.smartscanner.lib.idpasslite.IDPassManager
 import org.idpass.smartscanner.lib.mrz.MRZAnalyzer
@@ -74,7 +77,6 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         const val SCANNER_OPTIONS = "scanner_options"
         const val SCANNER_RESULT = "scanner_result"
         const val SCANNER_RESULT_BYTES = "scanner_result_bytes"
-        private val idPassReader = IDPassManager.getIDPassReader()
     }
 
     private val REQUEST_CODE_PERMISSIONS = 10
@@ -91,15 +93,42 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
     private var mode: String? = null
     private var cameraProvider: ProcessCameraProvider? = null
 
-    private lateinit var binding : ActivitySmartScannerBinding
+    private var flashButton: View? = null
+    private var closeButton: View? = null
+    private var rectangle: View? = null
+    private var debugLayout: View? = null
+    private var manualCapture: View? = null
+    private var brandingImage: ImageView? = null
+    private var captureLabelText: TextView? = null
+    private var modelText: TextView? = null
+    private var mlkitText: TextView? = null
+    private var mlkitMS: TextView? = null
+    private var mlkitTime: TextView? = null
+
+    private lateinit var modelLayoutView: View
+    private lateinit var coordinatorLayoutView: View
+    private lateinit var viewFinder: PreviewView
     private lateinit var cameraExecutor: ExecutorService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
         super.onCreate(savedInstanceState)
-        binding = ActivitySmartScannerBinding.inflate(layoutInflater)
-        val view = binding.root
-        setContentView(view)
+        setContentView(R.layout.activity_smart_scanner)
+        // assign view ids
+        coordinatorLayoutView = findViewById(R.id.coordinatorLayout)
+        modelLayoutView = findViewById(R.id.viewLayout)
+        viewFinder = findViewById(R.id.viewFinder)
+        flashButton = findViewById(R.id.flash_button)
+        closeButton = findViewById(R.id.close_button)
+        rectangle = findViewById(R.id.rectimage)
+        debugLayout = findViewById(R.id.debugLayout)
+        modelText = findViewById(R.id.modelText)
+        brandingImage = findViewById(R.id.brandingImage)
+        manualCapture = findViewById(R.id.manualCapture)
+        captureLabelText = findViewById(R.id.captureLabelText)
+        mlkitText = findViewById(R.id.mlkitText)
+        mlkitMS = findViewById(R.id.mlkitMS)
+        mlkitTime = findViewById(R.id.mlkitTime)
         // Scanner setup from intent
         hideActionBar()
         if (intent.action != null) {
@@ -137,9 +166,9 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
         }
         // assign click listeners
-        binding.actionBarMenu.closeButton.setOnClickListener(this)
-        binding.actionBarMenu.flashButton.setOnClickListener(this)
-        binding.manualCapture.setOnClickListener(this)
+        closeButton?.setOnClickListener(this)
+        flashButton?.setOnClickListener(this)
+        manualCapture?.setOnClickListener(this)
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
 
@@ -163,6 +192,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 )
             }
             if (mode == Modes.IDPASS_LITE.value) {
+                val loaded = IDPassLite.loadModels(cacheDir, assets)
+                if (!loaded) Log.d("${TAG}/SmartScanner", "ID PASS Lite: Load models Failure")
                 analyzer = IDPassLiteAnalyzer(
                     activity = this,
                     intent = intent,
@@ -182,8 +213,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                         imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
                         format = scannerOptions?.mrzFormat ?: intent.getStringExtra(ScannerConstants.MRZ_FORMAT_EXTRA),
                         onConnectFail = {
-                            binding.modelText.visibility = if (it.isNotEmpty()) VISIBLE else INVISIBLE
-                            binding.modelText.text = it
+                            modelText?.visibility = if (it.isNotEmpty()) VISIBLE else INVISIBLE
+                            modelText?.text = it
                         }
                 ).also {
                     if (!isMLKit) it.initializeTesseract(this)
@@ -234,10 +265,10 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     imageAnalyzer,
                     imageCapture
                 )
-                preview?.setSurfaceProvider(binding.viewFinder.surfaceProvider)
+                preview?.setSurfaceProvider(viewFinder.createSurfaceProvider())
                 Log.d(
                     TAG,
-                    "Measured size: ${binding.viewFinder.width}x${binding.viewFinder.height}"
+                    "Measured size: ${viewFinder.width}x${viewFinder.height}"
                 )
             } catch (exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
@@ -247,7 +278,6 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
 
     private fun setupViews() {
         // scanner layout size
-        val modelLayoutView = binding.viewLayout
         val layoutParams = modelLayoutView.layoutParams as ConstraintLayout.LayoutParams
         val topGuideline = findViewById<Guideline>(R.id.top)
         when (scannerOptions?.scannerSize) {
@@ -272,11 +302,11 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             }
         }
         // flash
-        binding.actionBarMenu.flashButton.visibility = if (isLedFlashAvailable(this)) VISIBLE else GONE
+        flashButton?.visibility = if (isLedFlashAvailable(this)) VISIBLE else GONE
         // capture text label
-        binding.captureLabelText.text = config?.label ?: String.empty()
+        captureLabelText?.text = config?.label ?: String.empty()
         // font to use
-        binding.captureLabelText.typeface = when (config?.font) {
+        captureLabelText?.typeface = when (config?.font) {
             Fonts.NOTO_SANS_ARABIC.value -> ResourcesCompat.getFont(this, R.font.notosansarabic_bold)
             Fonts.ROBOTO.value -> ResourcesCompat.getFont(this, R.font.roboto_regular)
             else -> ResourcesCompat.getFont(this, R.font.sourcesanspro_medium)
@@ -286,19 +316,19 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             config?.background?.let {
                 if (it.isNotEmpty()) {
                     val color = Color.parseColor(config?.background)
-                    binding.coordinatorLayout.setBackgroundColor(color)
+                    coordinatorLayoutView.setBackgroundColor(color)
                 }
             } ?: run {
-                binding.coordinatorLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.transparent_grey))
+                coordinatorLayoutView.setBackgroundColor(ContextCompat.getColor(this, R.color.transparent_grey))
             }
         } catch (iae: IllegalArgumentException) {
             // This color string is not valid
             throw SmartScannerException("Please set proper color string in setting background. Example: '#ffc234' " )
         }
         // branding
-        binding.brandingImage.visibility = config?.branding?.let { if (it) VISIBLE else GONE } ?: run { VISIBLE }
+        brandingImage?.visibility = config?.branding?.let { if (it) VISIBLE else GONE } ?: run { VISIBLE }
         // manual capture
-        binding.manualCapture.visibility = config?.isManualCapture?.let {
+        manualCapture?.visibility = config?.isManualCapture?.let {
             if (it) VISIBLE else GONE
         } ?: run {
             if (intent.getBooleanExtra(ScannerConstants.MRZ_MANUAL_CAPTURE_EXTRA, false)) VISIBLE else GONE
@@ -316,7 +346,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             if (allPermissionsGranted()) {
                 setupConfiguration()
             } else {
-                val snackBar: Snackbar = Snackbar.make(binding.coordinatorLayout, R.string.required_perms_not_given, Snackbar.LENGTH_INDEFINITE)
+                val snackBar: Snackbar = Snackbar.make(coordinatorLayoutView, R.string.required_perms_not_given, Snackbar.LENGTH_INDEFINITE)
                 snackBar.setAction(R.string.settings) {
                     val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                     val uri = Uri.fromParts("package", packageName, null)
@@ -336,7 +366,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         when (view.id) {
             R.id.close_button -> onBackPressed()
             R.id.flash_button -> {
-                binding.actionBarMenu.flashButton.let {
+                flashButton?.let {
                     if (it.isSelected) {
                         it.isSelected = false
                         camera?.cameraControl?.enableTorch(false)
@@ -348,8 +378,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             }
             R.id.manualCapture -> {
                 // hide capture button during image capture
-                binding.manualCapture.visibility = INVISIBLE
-                binding.loading.visibility = VISIBLE
+                manualCapture?.isEnabled = false
                 val imageFile = File(cacheImagePath())
                 val outputFileOptions = ImageCapture.OutputFileOptions.Builder(imageFile).build()
                 imageCapture?.takePicture(outputFileOptions, ContextCompat.getMainExecutor(baseContext),
@@ -366,8 +395,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                         }
                         override fun onError(exception: ImageCaptureException) {
                             exception.printStackTrace()
-                            binding.loading.visibility = INVISIBLE
-                            binding.manualCapture.visibility = VISIBLE
+                            manualCapture?.isEnabled = true
                         }
                     }
                 )
@@ -380,6 +408,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         val bottomSheetDialog = BottomSheetDialog(this)
         val sheetView = layoutInflater.inflate(R.layout.dialog_idpass_verify, null)
         bottomSheetDialog.setContentView(sheetView)
+        // id pass reader
+        val reader = IDPassManager.getIDPassReader()
         // bottom sheet ids
         val pinCodeInpt = sheetView.findViewById<EditText>(R.id.cardPinCode)
         val verifyBtn = sheetView.findViewById<Button>(R.id.pinCodeVerify)
@@ -398,7 +428,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             val pinCode = pinCodeInpt.text.trim().toString()
             IDPassManager.verifyCard(
                     activity = this,
-                    idPassReader = idPassReader,
+                    idPassReader = reader,
                     intent = intent,
                     raw = qrBytes,
                     pinCode = pinCode,
@@ -408,7 +438,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         skipBtn.setOnClickListener {
             IDPassManager.verifyCard(
                     activity = this,
-                    idPassReader = idPassReader,
+                    idPassReader = reader,
                     intent = intent,
                     raw = qrBytes,
                     onResult = { bottomSheetDialog.dismiss() }

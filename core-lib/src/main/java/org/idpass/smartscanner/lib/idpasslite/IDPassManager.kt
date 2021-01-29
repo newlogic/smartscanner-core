@@ -48,11 +48,13 @@ object IDPassManager {
         return IDPassReader(ks, rootcert)
     }
 
-    fun verifyCard(activity: Activity,
-                   idPassReader: IDPassReader,
-                   intent: Intent, raw: ByteArray,
-                   pinCode: String = "",
-                   onResult : () -> Unit) {
+    fun verifyCard(
+        activity: Activity,
+        idPassReader: IDPassReader,
+        intent: Intent, raw: ByteArray,
+        pinCode: String = "",
+        onResult: () -> Unit
+    ) {
         val card: Card? = readCard(idPassReader, raw)
         try {
             if (card != null) {
@@ -108,7 +110,11 @@ object IDPassManager {
         activity.finish()
     }
 
-    private fun sendBundleResult(activity: Activity, intent: Intent, idPassLiteResult: IDPassLiteResult) {
+    private fun sendBundleResult(
+        activity: Activity,
+        intent: Intent,
+        idPassLiteResult: IDPassLiteResult
+    ) {
         val bundle = Bundle()
         val card = idPassLiteResult.card
         if (card != null) {
@@ -137,9 +143,7 @@ object IDPassManager {
                 bundle.putString(ScannerConstants.IDPASS_LITE_SURNAME, surname)
             }
             if (dateOfBirth != null) {
-                val birthday = if (DateUtils.isValidDate(DateUtils.formatDate(dateOfBirth))) DateUtils.formatDate(
-                        dateOfBirth
-                ) else ""
+                val birthday = if (DateUtils.isValidDate(DateUtils.formatDate(dateOfBirth))) DateUtils.formatDate(dateOfBirth) else ""
                 bundle.putString(ScannerConstants.IDPASS_LITE_DATE_OF_BIRTH, birthday)
             }
             if (placeOfBirth.isNotEmpty()) {
