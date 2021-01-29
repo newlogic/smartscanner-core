@@ -43,6 +43,7 @@ The following table shows the intent actions available for each operation availa
 | -------------- | ---------------------------------------------- | ------------------------------------------ |
 | MRZ            | `org.idpass.smartscanner.odk.MRZ_SCAN`         | `org.idpass.smartscanner.MRZ_SCAN`         |
 | Barcode        | `org.idpass.smartscanner.odk.BARCODE_SCAN`     | `org.idpass.smartscanner.BARCODE_SCAN`     |
+| QR code        | `org.idpass.smartscanner.odk.QRCODE_SCAN`      | `org.idpass.smartscanner.QRCODE_SCAN`      |
 | ID PASS Lite   | `org.idpass.smartscanner.odk.IDPASS_LITE_SCAN` | `org.idpass.smartscanner.IDPASS_LITE_SCAN` |
 
 To perform an operation, create an intent for the desired operation. This example shows how to call an intent to scan an MRZ (ODK):
