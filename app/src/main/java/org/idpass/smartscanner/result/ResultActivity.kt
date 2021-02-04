@@ -130,7 +130,7 @@ class ResultActivity : AppCompatActivity() {
     }
 
 
-    private fun getShareResult(result: String? = null, bundle: Bundle? = null) : String {
+    private fun getShareResult(result: String? = null) : String {
         val dump: StringBuilder = getResult(result = result)
         if (dump.isEmpty()) {
             dump.append(result)
