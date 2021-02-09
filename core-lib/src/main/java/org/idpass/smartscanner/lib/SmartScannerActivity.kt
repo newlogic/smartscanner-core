@@ -326,7 +326,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             throw SmartScannerException("Please set proper color string in setting background. Example: '#ffc234' " )
         }
         // branding
-        brandingImage?.visibility = config?.branding?.let { if (it) VISIBLE else GONE } ?: run { VISIBLE }
+        brandingImage?.visibility = config?.branding?.let { if (it) VISIBLE else GONE } ?: run { INVISIBLE }
         // manual capture
         manualCapture?.visibility = config?.isManualCapture?.let {
             if (it) VISIBLE else GONE
