@@ -53,10 +53,10 @@ import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
-import com.google.mlkit.vision.barcode.Barcode
 import org.idpass.lite.android.IDPassLite
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.barcode.BarcodeAnalyzer
+import org.idpass.smartscanner.lib.barcode.qr.QRCodeAnalyzer
 import org.idpass.smartscanner.lib.idpasslite.IDPassLiteAnalyzer
 import org.idpass.smartscanner.lib.idpasslite.IDPassManager
 import org.idpass.smartscanner.lib.mrz.MRZAnalyzer
@@ -133,17 +133,18 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         hideActionBar()
         if (intent.action != null) {
             scannerOptions = when (intent.action) {
-                // barcode, qrcode
+                // barcode
                 ScannerConstants.IDPASS_SMARTSCANNER_BARCODE_INTENT,
-                ScannerConstants.IDPASS_SMARTSCANNER_ODK_BARCODE_INTENT,
+                ScannerConstants.IDPASS_SMARTSCANNER_ODK_BARCODE_INTENT -> ScannerOptions.defaultForBarcode
+                // qrcode
                 ScannerConstants.IDPASS_SMARTSCANNER_QRCODE_INTENT,
-                ScannerConstants.IDPASS_SMARTSCANNER_ODK_QRCODE_INTENT -> ScannerType.barcodeOptions
+                ScannerConstants.IDPASS_SMARTSCANNER_ODK_QRCODE_INTENT -> ScannerOptions.defaultForQRCode
                 // idpass lite
                 ScannerConstants.IDPASS_SMARTSCANNER_IDPASS_LITE_INTENT,
-                ScannerConstants.IDPASS_SMARTSCANNER_ODK_IDPASS_LITE_INTENT -> ScannerType.idPassLiteOptions
+                ScannerConstants.IDPASS_SMARTSCANNER_ODK_IDPASS_LITE_INTENT -> ScannerOptions.defaultForIdPassLite
                 // mrz
                 ScannerConstants.IDPASS_SMARTSCANNER_MRZ_INTENT,
-                ScannerConstants.IDPASS_SMARTSCANNER_ODK_MRZ_INTENT -> ScannerType.mrzOptions
+                ScannerConstants.IDPASS_SMARTSCANNER_ODK_MRZ_INTENT -> ScannerOptions.defaultForMRZ
                 else -> throw SmartScannerException("Error: Wrong intent action. Please see ScannerConstants.kt for proper intent action strings.")
             }
         } else {
@@ -185,10 +186,9 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 )
             }
             if (mode == Modes.QRCODE.value) {
-                analyzer = BarcodeAnalyzer(
+                analyzer = QRCodeAnalyzer(
                     activity = this,
-                    intent = intent,
-                    barcodeFormats = listOf(Barcode.FORMAT_QR_CODE)
+                    intent = intent
                 )
             }
             if (mode == Modes.IDPASS_LITE.value) {

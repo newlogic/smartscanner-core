@@ -32,6 +32,7 @@ data class ScannerOptions(
     companion object {
         // Default
         val defaultForBarcode = ScannerOptions(mode = BARCODE.value, scannerSize = ScannerSize.LARGE.value, config = Config.default)
+        val defaultForQRCode = ScannerOptions(mode = QRCODE.value, scannerSize = ScannerSize.LARGE.value, config = Config.default)
         val defaultForMRZ = ScannerOptions(mode = MRZ.value, config = Config.default)
         val defaultForIdPassLite = ScannerOptions(
             mode = IDPASS_LITE.value,
@@ -40,14 +41,17 @@ data class ScannerOptions(
             config = Config.default
         )
 
-        // Sample
-        fun sampleMrz(config: Config? = null, mrzFormat: String? = null) =
+        // Configure
+        fun configMrz(config: Config? = null, mrzFormat: String? = null) =
             ScannerOptions(mode = MRZ.value, config = config, mrzFormat = mrzFormat)
 
-        fun sampleBarcode(config: Config? = null, scannerSize: String? = null, barcodeOptions: BarcodeOptions?) =
+        fun configBarcode(config: Config? = null, scannerSize: String? = null, barcodeOptions: BarcodeOptions?) =
             ScannerOptions(mode = BARCODE.value, scannerSize = scannerSize, config = config, barcodeOptions = barcodeOptions)
 
-        fun sampleIdPassLite(config: Config? = null) =
+        fun configQRCode(config: Config? = null, scannerSize: String? = null, barcodeOptions: BarcodeOptions?) =
+            ScannerOptions(mode = BARCODE.value, scannerSize = scannerSize, config = config, barcodeOptions = barcodeOptions)
+
+        fun configIdPassLite(config: Config? = null) =
             ScannerOptions(
                 mode = IDPASS_LITE.value,
                 scannerSize = ScannerSize.LARGE.value,

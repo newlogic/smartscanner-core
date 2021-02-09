@@ -21,7 +21,6 @@ import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -34,6 +33,7 @@ import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT
 import org.idpass.smartscanner.lib.scanner.config.*
 import org.idpass.smartscanner.result.IDPassResultActivity
 import org.idpass.smartscanner.result.ResultActivity
+import timber.log.Timber
 
 
 class MainActivity : AppCompatActivity() {
@@ -82,14 +82,14 @@ class MainActivity : AppCompatActivity() {
             startActivityForResult(intent, OP_SCANNER)
         } catch (ex: ActivityNotFoundException) {
             ex.printStackTrace()
-            Log.e(TAG, "ID PASS SmartScanner is not installed!")
+            Timber.e( "ID PASS SmartScanner is not installed!")
         }
     }
 
     private fun scanBarcode(barcodeOptions: BarcodeOptions? = null) {
         val intent = Intent(this, SmartScannerActivity::class.java)
         intent.putExtra(
-            SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.sampleBarcode(
+            SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.configBarcode(
                 config = sampleConfig(false),
                 scannerSize = ScannerSize.LARGE.value,
                 barcodeOptions = barcodeOptions
@@ -102,7 +102,7 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, SmartScannerActivity::class.java)
         intent.putExtra(
             SmartScannerActivity.SCANNER_OPTIONS,
-            ScannerOptions.sampleIdPassLite(config = sampleConfig(false))
+            ScannerOptions.configIdPassLite(config = sampleConfig(false))
         )
         startActivityForResult(intent, OP_SCANNER)
     }
@@ -112,7 +112,7 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, SmartScannerActivity::class.java)
         intent.putExtra(
             SmartScannerActivity.SCANNER_OPTIONS,
-            ScannerOptions.sampleMrz(config = sampleConfig(true))
+            ScannerOptions.configMrz(config = sampleConfig(true))
         )
         startActivityForResult(intent, OP_SCANNER)
     }
@@ -148,13 +148,13 @@ class MainActivity : AppCompatActivity() {
     public override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
         super.onActivityResult(requestCode, resultCode, intent)
         if (requestCode == OP_SCANNER) {
-            Log.d("${SmartScannerActivity.TAG}/SmartScanner", "Scanner resultCode $resultCode")
+            Timber.d("Scanner resultCode $resultCode")
             if (resultCode == RESULT_OK) {
                 // Get Result from Bundle Intent Call Out
                 intent?.getBundleExtra(ScannerConstants.RESULT)?.let {
-                    Log.d("${SmartScannerActivity.TAG}/SmartScanner", "Scanner result bundle: $it")
-                    Log.d("${SmartScannerActivity.TAG}/SmartScanner", "Scanner result bundle qr_code_json_value (from path): ${it.getString(ScannerConstants.QRCODE_JSON_VALUE)}")
-                    Log.d("${SmartScannerActivity.TAG}/SmartScanner", "Scanner result bundle qr_code_text: ${it.getString(ScannerConstants.QRCODE_TEXT)}")
+                    Timber.d("Scanner result bundle: $it")
+                    Timber.d("Scanner result bundle qr_code_json_value (from path): ${it.getString(ScannerConstants.QRCODE_JSON_VALUE)}")
+                    Timber.d( "Scanner result bundle qr_code_text: ${it.getString(ScannerConstants.QRCODE_TEXT)}")
                     if (it.getString(ScannerConstants.MODE) == Modes.IDPASS_LITE.value) {
                         // Go to ID PASS Lite Results Screen via bundle
                         val myIntent = Intent(this, IDPassResultActivity::class.java)
@@ -169,7 +169,7 @@ class MainActivity : AppCompatActivity() {
                 } ?: run {
                     // Get Result from JSON String
                     val result = intent?.getStringExtra(SCANNER_RESULT)
-                    Log.d("${SmartScannerActivity.TAG}/SmartScanner", "Scanner result string: $result")
+                    Timber.d("Scanner result string: $result")
                     if (result != null) {
                         // Go to Barcode/MRZ Results Screen
                         val resultIntent = Intent(this, ResultActivity::class.java)
