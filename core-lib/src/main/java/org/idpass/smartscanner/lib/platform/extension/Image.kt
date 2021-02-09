@@ -51,9 +51,11 @@ fun Image.toBitmap(rotation: Int = 0, mode: String?): Bitmap {
     val out = ByteArrayOutputStream()
 
     val rect =  Rect()
-    // Use higher value of 6 for barcode which fixes bounding box issues upon scanning,
+    // Use higher value of 6 for barcode/qrcode/idpass-lite which fixes bounding box issues upon scanning,
     // and mrz uses previous default value of 4
-    val scaleIdentifier = if (mode == Modes.BARCODE.value) 6 else 4
+    val scaleIdentifier = if (mode == Modes.BARCODE.value ||
+                              mode == Modes.IDPASS_LITE.value ||
+                              mode == Modes.QRCODE.value ) 6 else 4
     if (rotation == 90 || rotation == 270) {
         rect.left = this.width / scaleIdentifier
         rect.top = 0

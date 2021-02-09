@@ -17,14 +17,12 @@
  */
 package org.idpass.smartscanner.lib.platform
 
-import androidx.appcompat.app.AppCompatActivity
+import android.app.Activity
+import android.content.Intent
+import androidx.camera.core.ImageAnalysis
 
-abstract class BaseActivity : AppCompatActivity() {
-
-    fun hideActionBar() {
-        supportActionBar?.hide()
-        supportActionBar?.setDisplayShowTitleEnabled(false)
-        actionBar?.hide()
-        actionBar?.setDisplayShowTitleEnabled(false)
-    }
+abstract class BaseImageAnalyzer : ImageAnalysis.Analyzer {
+    abstract val activity : Activity
+    abstract val intent: Intent
+    abstract val mode : String
 }

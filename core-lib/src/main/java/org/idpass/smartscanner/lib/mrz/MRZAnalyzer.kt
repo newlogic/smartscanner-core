@@ -25,7 +25,6 @@ import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.os.Bundle
 import android.util.Log
-import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import com.google.gson.Gson
 import com.google.mlkit.vision.common.InputImage
@@ -34,6 +33,7 @@ import com.googlecode.tesseract.android.TessBaseAPI
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.R
 import org.idpass.smartscanner.lib.SmartScannerActivity
+import org.idpass.smartscanner.lib.platform.BaseImageAnalyzer
 import org.idpass.smartscanner.lib.platform.extension.*
 import org.idpass.smartscanner.lib.platform.utils.FileUtils
 import org.idpass.smartscanner.lib.scanner.SmartScannerException
@@ -44,13 +44,14 @@ import java.net.URLEncoder
 import kotlin.concurrent.thread
 
 open class MRZAnalyzer(
-        private val activity: Activity,
-        private val intent: Intent,
+        override val activity: Activity,
+        override val intent: Intent,
+        override val mode: String = Modes.MRZ.value,
         private val isMLKit: Boolean,
         private val imageResultType: String,
         private val format: String?,
         private val onConnectFail: (String) -> Unit
-) : ImageAnalysis.Analyzer {
+) : BaseImageAnalyzer() {
 
     private lateinit var tessBaseAPI: TessBaseAPI
 
@@ -68,7 +69,7 @@ open class MRZAnalyzer(
         val mediaImage = imageProxy.image
         if (mediaImage != null) {
             val rot = imageProxy.imageInfo.rotationDegrees
-            val bf = mediaImage.toBitmap(rot, Modes.BARCODE.value)
+            val bf = mediaImage.toBitmap(rot, mode)
             val cropped = if (rot == 90 || rot == 270) Bitmap.createBitmap(
                     bf,
                     bf.width / 2,
@@ -243,7 +244,7 @@ open class MRZAnalyzer(
             bundle.putString(ScannerConstants.MRZ_SEX, result.sex)
             bundle.putString(ScannerConstants.MRZ_RAW, result.mrz)
         }
-        bundle.putString(ScannerConstants.MODE, Modes.MRZ.value)
+        bundle.putString(ScannerConstants.MODE, mode)
 
         val result = Intent()
         val prefix = if (intent.hasExtra(ScannerConstants.IDPASS_ODK_PREFIX_EXTRA)) {
