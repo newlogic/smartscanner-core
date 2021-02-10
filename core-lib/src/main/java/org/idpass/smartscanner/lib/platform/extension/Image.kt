@@ -18,6 +18,7 @@
 package org.idpass.smartscanner.lib.platform.extension
 
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.*
 import android.media.Image
 import android.util.Base64
@@ -30,6 +31,9 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
+
+val Float.px: Float get() = (this * Resources.getSystem().displayMetrics.density)
+val Int.px: Int get() = ((this * Resources.getSystem().displayMetrics.density).toInt())
 
 fun Image.toBitmap(rotation: Int = 0, mode: String?): Bitmap {
     val yBuffer = planes[0].buffer // Y

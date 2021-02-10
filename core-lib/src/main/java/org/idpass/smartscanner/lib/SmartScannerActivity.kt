@@ -48,11 +48,14 @@ import androidx.constraintlayout.widget.Guideline
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions.bitmapTransform
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
+import jp.wasabeef.glide.transformations.CropTransformation
 import org.idpass.lite.android.IDPassLite
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.barcode.BarcodeAnalyzer
@@ -166,10 +169,6 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         } else {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
         }
-        // assign click listeners
-        closeButton?.setOnClickListener(this)
-        flashButton?.setOnClickListener(this)
-        manualCapture?.setOnClickListener(this)
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
 
@@ -274,6 +273,10 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 Log.e(TAG, "Use case binding failed", exc)
             }
         }, ContextCompat.getMainExecutor(this))
+        // assign camera click listeners
+        closeButton?.setOnClickListener(this)
+        flashButton?.setOnClickListener(this)
+        manualCapture?.setOnClickListener(this)
     }
 
     private fun setupViews() {
@@ -381,14 +384,19 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 manualCapture?.isEnabled = false
                 val imageFile = File(cacheImagePath())
                 val outputFileOptions = ImageCapture.OutputFileOptions.Builder(imageFile).build()
-                imageCapture?.takePicture(outputFileOptions, ContextCompat.getMainExecutor(baseContext),
+                imageCapture?.takePicture(outputFileOptions, cameraExecutor,
                     object : ImageCapture.OnImageSavedCallback {
                         override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                             val data = Intent()
-                            val bf = imageFile.path.toBitmap()
-                            bf.cacheImageToLocal(imageFile.path, 90)
-                            val imageString = if (config?.imageResultType == ImageResultType.BASE_64.value) bf.encodeBase64(90) else imageFile.path
-                            val result = Gson().toJson(MRZResult.getImageOnly(imageString))
+                            val bf = Glide.with(this@SmartScannerActivity)
+                                            .asBitmap()
+                                            .load(imageFile.path)
+                                            .apply(bitmapTransform(CropTransformation(300.px, 200.px, CropTransformation.CropType.CENTER)))
+                                            .submit()
+                                            .get()
+                            bf.cacheImageToLocal(imageFile.path)
+                            val imageString = if (config?.imageResultType == ImageResultType.BASE_64.value) bf.encodeBase64() else imageFile.path
+                            val result = if(mode == Modes.MRZ.value) Gson().toJson(MRZResult.getImageOnly(imageString)) else imageString
                             data.putExtra(SCANNER_RESULT, result)
                             setResult(Activity.RESULT_OK, data)
                             finish()
