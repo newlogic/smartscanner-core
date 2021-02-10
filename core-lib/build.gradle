@@ -81,6 +81,10 @@ dependencies {
     implementation 'cz.adaptech.android:tesseract4android:2.1.0'
     // Gson
     implementation 'com.google.code.gson:gson:2.8.6'
+    // Glide
+    implementation 'com.github.bumptech.glide:glide:4.12.0'
+    implementation 'jp.wasabeef:glide-transformations:4.3.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
     // ID PASS lite
     implementation 'com.google.protobuf:protobuf-lite:3.0.0'
     implementation 'org.idpass:idpass-lite-java-android:0.1@aar'
