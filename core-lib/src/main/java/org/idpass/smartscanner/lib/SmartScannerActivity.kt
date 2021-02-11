@@ -388,10 +388,11 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     object : ImageCapture.OnImageSavedCallback {
                         override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                             val data = Intent()
+                            val transform = bitmapTransform(CropTransformation(290.px, 180.px, CropTransformation.CropType.CENTER)) // Initial MRZ Card Size
                             val bf = Glide.with(this@SmartScannerActivity)
                                             .asBitmap()
                                             .load(imageFile.path)
-                                            .apply(bitmapTransform(CropTransformation(320.px, 180.px, CropTransformation.CropType.CENTER)))
+                                            .apply(transform)
                                             .submit()
                                             .get()
                             bf.cacheImageToLocal(imageFile.path)
