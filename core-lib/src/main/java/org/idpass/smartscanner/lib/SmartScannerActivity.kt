@@ -391,7 +391,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                             val bf = Glide.with(this@SmartScannerActivity)
                                             .asBitmap()
                                             .load(imageFile.path)
-                                            .apply(bitmapTransform(CropTransformation(300.px, 200.px, CropTransformation.CropType.CENTER)))
+                                            .apply(bitmapTransform(CropTransformation(320.px, 180.px, CropTransformation.CropType.CENTER)))
                                             .submit()
                                             .get()
                             bf.cacheImageToLocal(imageFile.path)
