@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private val TAG = MainActivity::class.java.simpleName
         private const val OP_SCANNER = 1001
-        var imageType = ImageResultType.BASE_64.value
+        var imageType = ImageResultType.PATH.value
 
         private fun sampleConfig(isManualCapture: Boolean) = Config(
             branding = true,
