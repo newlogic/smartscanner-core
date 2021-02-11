@@ -55,7 +55,6 @@ import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
-import jp.wasabeef.glide.transformations.CropTransformation
 import org.idpass.lite.android.IDPassLite
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.barcode.BarcodeAnalyzer
@@ -67,6 +66,7 @@ import org.idpass.smartscanner.lib.mrz.MRZResult
 import org.idpass.smartscanner.lib.platform.BaseActivity
 import org.idpass.smartscanner.lib.platform.extension.*
 import org.idpass.smartscanner.lib.platform.utils.CameraUtils.isLedFlashAvailable
+import org.idpass.smartscanner.lib.platform.utils.CropTransformation
 import org.idpass.smartscanner.lib.scanner.SmartScannerException
 import org.idpass.smartscanner.lib.scanner.config.*
 import java.io.File
