@@ -41,8 +41,8 @@
         app:layout_constraintGuide_percent="0.54" />
 
     <include
-        android:id="@+id/itemMrz"
-        layout="@layout/item_mrz"
+        android:id="@+id/itemBarcode"
+        layout="@layout/item_barcode"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
@@ -52,8 +52,30 @@
         app:layout_constraintTop_toBottomOf="@+id/toolbarTitle" />
 
     <include
-        android:id="@+id/itemBarcode"
-        layout="@layout/item_barcode"
+        android:id="@+id/itemIdpassLite"
+        layout="@layout/item_idpass_lite"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/itemBarcode" />
+
+    <include
+        android:id="@+id/itemMrz"
+        layout="@layout/item_mrz"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/itemIdpassLite" />
+
+    <include
+        android:id="@+id/itemNfc"
+        layout="@layout/item_nfc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
@@ -71,18 +93,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="24dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/itemBarcode" />
-
-    <include
-        android:id="@+id/itemIdpassLite"
-        layout="@layout/item_idpass_lite"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="24dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/itemQR" />
+        app:layout_constraintTop_toBottomOf="@+id/itemNfc" />
 
     <TextView
         android:id="@+id/bottomText"
