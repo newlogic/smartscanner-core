@@ -95,4 +95,11 @@ dependencies {
     // Gzip JSON
     implementation 'com.jayway.jsonpath:json-path:2.5.0'
     implementation 'com.github.wnameless.json:json-flattener:0.12.0'
+    // NFC
+    implementation 'net.sf.scuba:scuba-sc-android:0.0.23'
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.65'
+    implementation 'edu.ucar:jj2000:5.2'
+    implementation 'com.github.mhshams:jnbis:1.1.0'
+    implementation files('libs/jmrtd-0.7.25.aar')
+    implementation 'org.ejbca.cvc:cert-cvc:1.4.6'
 }
