@@ -283,6 +283,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         // scanner layout size
         val layoutParams = modelLayoutView.layoutParams as ConstraintLayout.LayoutParams
         val topGuideline = findViewById<Guideline>(R.id.top)
+        val bottomGuideline = findViewById<Guideline>(R.id.bottom)
         when (scannerOptions?.scannerSize) {
             ScannerSize.CUSTOM_QR.value -> {
                 layoutParams.dimensionRatio = "4:6"
@@ -291,6 +292,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 modelLayoutView.layoutParams = layoutParams
             }
             ScannerSize.LARGE.value -> {
+                bottomGuideline.setGuidelinePercent(0.75F)
                 topGuideline.setGuidelinePercent(0.1F)
                 layoutParams.dimensionRatio = "3:4"
                 modelLayoutView.layoutParams = layoutParams
@@ -329,7 +331,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             throw SmartScannerException("Please set proper color string in setting background. Example: '#ffc234' " )
         }
         // branding
-        brandingImage?.visibility = config?.branding?.let { if (it) VISIBLE else GONE } ?: run { INVISIBLE }
+        brandingImage?.visibility = config?.branding?.let { if (it) VISIBLE else INVISIBLE } ?: run { INVISIBLE }
         // manual capture
         manualCapture?.visibility = config?.isManualCapture?.let {
             if (it) VISIBLE else GONE
