@@ -20,7 +20,9 @@ package org.idpass.smartscanner
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.nfc.NfcAdapter
 import android.os.Bundle
+import android.view.View.GONE
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -60,6 +62,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
+        checkNFCSupport()
     }
 
     override fun onStart() {
@@ -69,6 +72,13 @@ class MainActivity : AppCompatActivity() {
         binding.itemMrz.item.setOnClickListener { scanMRZ() }
         binding.itemNfc.item.setOnClickListener { scanNfcViaMRZ() }
         binding.itemQR.item.setOnClickListener { scanQRCode() }
+    }
+
+    private fun checkNFCSupport() {
+        val adapter = NfcAdapter.getDefaultAdapter(this)
+        if (adapter == null) {
+            binding.itemNfc.item.visibility = GONE
+        }
     }
 
     private fun startIntentCallOut() {
