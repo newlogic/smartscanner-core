@@ -81,6 +81,7 @@
 
                 <TextView
                     android:id="@+id/text_result"
+                    android:fontFamily="@font/sourcesanspro_regular"
                     android:gravity="center"
                     android:textSize="18sp"
                     android:layout_width="match_parent"
