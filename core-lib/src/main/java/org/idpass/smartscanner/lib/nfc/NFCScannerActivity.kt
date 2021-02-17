@@ -28,9 +28,11 @@ import android.nfc.Tag
 import android.nfc.tech.IsoDep
 import android.os.AsyncTask
 import android.os.Bundle
+import android.provider.Settings
 import android.view.MenuItem
 import android.view.View
 import android.view.View.VISIBLE
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.common.util.IOUtils
 import com.google.android.material.snackbar.Snackbar
@@ -67,6 +69,7 @@ import java.security.spec.MGF1ParameterSpec
 import java.security.spec.PSSParameterSpec
 import java.util.*
 
+
 class NFCScannerActivity : AppCompatActivity() {
 
     companion object {
@@ -100,8 +103,12 @@ class NFCScannerActivity : AppCompatActivity() {
     }
 
     private fun readCard(mrz: String) {
-        val mrzInfo = MRZInfo(mrz)
-        setMrzData(mrzInfo)
+        try {
+            val mrzInfo = MRZInfo(mrz)
+            setMrzData(mrzInfo)
+        } catch(e : Exception) {
+            e.printStackTrace()
+        }
     }
 
     private fun setMrzData(mrzInfo: MRZInfo) {
@@ -116,16 +123,18 @@ class NFCScannerActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         if (adapter != null) {
-            val intent = Intent(applicationContext, this.javaClass)
-            intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-            val pendingIntent = PendingIntent.getActivity(
-                this,
-                0,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT
-            )
-            val filter = arrayOf(arrayOf("android.nfc.tech.IsoDep"))
-            adapter!!.enableForegroundDispatch(this, pendingIntent, null, filter)
+            if (adapter?.isEnabled == true) {
+                val intent = Intent(applicationContext, this.javaClass)
+                intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+                val pendingIntent = PendingIntent.getActivity(
+                    this,
+                    0,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                )
+                val filter = arrayOf(arrayOf("android.nfc.tech.IsoDep"))
+                adapter!!.enableForegroundDispatch(this, pendingIntent, null, filter)
+            } else checkNFC()
         }
     }
 
@@ -160,6 +169,17 @@ class NFCScannerActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun checkNFC() {
+        val dialog: AlertDialog.Builder = AlertDialog.Builder(this)
+        dialog.setMessage(getString(R.string.label_nfc_on))
+        dialog.setPositiveButton(R.string.label_turn_on) { alert, which ->
+            val intent = Intent(Settings.ACTION_NFC_SETTINGS)
+            startActivity(intent)
+        }
+        dialog.setNegativeButton(R.string.label_close) { alert, which -> }
+        dialog.show()
     }
 
     @SuppressLint("StaticFieldLeak")

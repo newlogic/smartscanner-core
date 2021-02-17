@@ -15,11 +15,14 @@
 
     <string name="label_authenticate">Authenticate</string>
     <string name="label_content_description">Image of MRZ/BARCODE/IDPASSLITE</string>
+    <string name="label_close">Close</string>
     <string name="label_enter_pin">Enter pin code</string>
     <string name="label_idpass_result">Verify ID PASS Lite</string>
     <string name="label_info_loading">Reading data…</string>
     <string name="label_newlogic">Developed by Newlogic</string>
+    <string name="label_nfc_on">Please turn on NFC in settings</string>
     <string name="label_skip">Skip</string>
+    <string name="label_turn_on">Turn on</string>
     <string name="label_tooltip_camera">Point your camera to a %1$s</string>
     <string name="label_verify">Verify</string>
 </resources>
