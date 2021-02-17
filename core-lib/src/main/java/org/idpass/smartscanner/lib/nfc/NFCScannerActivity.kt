@@ -436,6 +436,7 @@ class NFCScannerActivity : AppCompatActivity() {
                     val dg11In = service.getInputStream(PassportService.EF_DG11)
                     val dg11File = DG11File(dg11In)
                     if (dg11File.length > 0) {
+                        additionalPersonDetails.fullName = dg11File.nameOfHolder?.replace("<", " ")?.trim()?.replace("[ ]{2,}", " ")
                         additionalPersonDetails.custodyInformation = dg11File.custodyInformation
                         additionalPersonDetails.nameOfHolder = dg11File.nameOfHolder
                         additionalPersonDetails.fullDateOfBirth = dg11File.fullDateOfBirth
@@ -506,6 +507,7 @@ class NFCScannerActivity : AppCompatActivity() {
         binding.viewPhoto.setImageBitmap(image)
         var result = """NAME: ${eDocument.personDetails.name}""".trimIndent()
         result += "\n"+ """SURNAME: ${eDocument.personDetails.surname}""".trimIndent()
+        result += "\n"+ """FULLNAME: ${eDocument.additionalPersonDetails.fullName}""".trimIndent()
         result += "\n"+ """PERSONAL NUMBER: ${eDocument.personDetails.personalNumber}""".trimIndent()
         result += "\n"+ """GENDER: ${eDocument.personDetails.gender}""".trimIndent()
         result += "\n"+ """BIRTH DATE: ${eDocument.personDetails.birthDate}""".trimIndent()

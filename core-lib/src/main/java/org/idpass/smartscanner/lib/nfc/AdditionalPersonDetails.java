@@ -21,6 +21,7 @@ import java.util.List;
 
 public class AdditionalPersonDetails {
 
+    private String fullName;
     private String custodyInformation;
     private String fullDateOfBirth;
     private String nameOfHolder;
@@ -36,6 +37,14 @@ public class AdditionalPersonDetails {
     private List<Integer> tagPresenceList;
     private String telephone;
     private String title;
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
 
     public String getCustodyInformation() {
         return custodyInformation;
