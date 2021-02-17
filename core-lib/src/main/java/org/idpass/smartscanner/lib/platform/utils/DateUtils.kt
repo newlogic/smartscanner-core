@@ -17,6 +17,7 @@
  */
 package org.idpass.smartscanner.lib.platform.utils
 
+import java.text.DateFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -34,5 +35,24 @@ object DateUtils {
         }
         return true
     }
-    fun formatDate(date : Date) : String = dateFormat.format(date)
+    fun formatDate(date: Date) : String = dateFormat.format(date)
+
+    fun stringToDate(dateStr: String?, dateFormat: DateFormat): Date? {
+        var date: Date? = null
+        try {
+            date = dateFormat.parse(dateStr)
+        } catch (e: ParseException) {
+            e.printStackTrace()
+        }
+        return date
+    }
+
+    fun dateToString(date: Date?, dateFormat: DateFormat): String? {
+        return dateFormat.format(date)
+    }
+
+    fun convertFromMrzDate(mrzDate: String?): String? {
+        val date = stringToDate(mrzDate, SimpleDateFormat("yyMMdd"))
+        return dateToString(date, SimpleDateFormat("dd.MM.yyyy"))
+    }
 }
