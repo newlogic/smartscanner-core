@@ -10,12 +10,14 @@
 
     <string name="cd_close_button">Back</string>
     <string name="cd_flash_button">Toggle camera flash</string>
+    <string name="error_input">Please provide details to read passport</string>
     <string name="mlkit">MLKit</string>
 
     <string name="label_authenticate">Authenticate</string>
     <string name="label_content_description">Image of MRZ/BARCODE/IDPASSLITE</string>
     <string name="label_enter_pin">Enter pin code</string>
     <string name="label_idpass_result">Verify ID PASS Lite</string>
+    <string name="label_info_loading">Reading data…</string>
     <string name="label_newlogic">Developed by Newlogic</string>
     <string name="label_skip">Skip</string>
     <string name="label_tooltip_camera">Point your camera to a %1$s</string>
