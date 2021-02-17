@@ -30,6 +30,7 @@ import org.idpass.smartscanner.databinding.ActivityMainBinding
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT_BYTES
+import org.idpass.smartscanner.lib.nfc.NFCScannerActivity
 import org.idpass.smartscanner.lib.scanner.config.*
 import org.idpass.smartscanner.result.IDPassResultActivity
 import org.idpass.smartscanner.result.ResultActivity
@@ -43,14 +44,16 @@ class MainActivity : AppCompatActivity() {
         private const val OP_SCANNER = 1001
         var imageType = ImageResultType.PATH.value
 
-        private fun sampleConfig(isManualCapture: Boolean) = Config(
+        private fun sampleConfig(isManualCapture: Boolean, label : String = "") = Config(
             branding = true,
             imageResultType = imageType,
+            label = label,
             isManualCapture = isManualCapture
         )
     }
 
     private lateinit var binding : ActivityMainBinding
+    private var isNFC = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,6 +67,7 @@ class MainActivity : AppCompatActivity() {
         binding.itemBarcode.item.setOnClickListener { scanBarcode(BarcodeOptions.default) }
         binding.itemIdpassLite.item.setOnClickListener { scanIDPassLite() }
         binding.itemMrz.item.setOnClickListener { scanMRZ() }
+        binding.itemNfc.item.setOnClickListener { scanNfcViaMRZ() }
         binding.itemQR.item.setOnClickListener { scanQRCode() }
     }
 
@@ -111,7 +115,17 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, SmartScannerActivity::class.java)
         intent.putExtra(
             SmartScannerActivity.SCANNER_OPTIONS,
-            ScannerOptions.configMrz(config = sampleConfig(true))
+            ScannerOptions.configMrz(config = sampleConfig(false))
+        )
+        startActivityForResult(intent, OP_SCANNER)
+    }
+
+    private fun scanNfcViaMRZ() {
+        isNFC = true
+        val intent = Intent(this, SmartScannerActivity::class.java)
+        intent.putExtra(
+            SmartScannerActivity.SCANNER_OPTIONS,
+            ScannerOptions.configMrz(config = sampleConfig(false, label = "Please scan MRZ to verify ID"))
         )
         startActivityForResult(intent, OP_SCANNER)
     }
@@ -170,10 +184,17 @@ class MainActivity : AppCompatActivity() {
                     val result = intent?.getStringExtra(SCANNER_RESULT)
                     Timber.d("Scanner result string: $result")
                     if (result != null) {
-                        // Go to Barcode/MRZ Results Screen
-                        val resultIntent = Intent(this, ResultActivity::class.java)
-                        resultIntent.putExtra(ResultActivity.RESULT, result)
-                        startActivity(resultIntent)
+                        if (isNFC) {
+                            // Go to NFC Scanner Screen
+                            val resultIntent = Intent(this, NFCScannerActivity::class.java)
+                            resultIntent.putExtra(NFCScannerActivity.RESULT, result)
+                            startActivity(resultIntent)
+                        } else {
+                            // Go to Barcode/MRZ Results Screen
+                            val resultIntent = Intent(this, ResultActivity::class.java)
+                            resultIntent.putExtra(ResultActivity.RESULT, result)
+                            startActivity(resultIntent)
+                        }
                     } else {
                         // Go to ID PASS Lite Results Screen
                         val resultBytes = intent?.getByteArrayExtra(SCANNER_RESULT_BYTES)
