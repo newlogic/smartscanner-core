@@ -147,7 +147,10 @@ class NFCScannerActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        if (NfcAdapter.ACTION_TECH_DISCOVERED == intent.action) {
+        if (NfcAdapter.ACTION_TECH_DISCOVERED == intent.action ||
+                NfcAdapter.ACTION_NDEF_DISCOVERED == intent.action ||
+                NfcAdapter.ACTION_TAG_DISCOVERED == intent.action
+        ) {
             val tag = intent.extras!!.getParcelable<Tag>(NfcAdapter.EXTRA_TAG)
             if (listOf(*tag!!.techList).contains("android.nfc.tech.IsoDep")) {
                 clearViews()
