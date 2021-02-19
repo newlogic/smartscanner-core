@@ -15,7 +15,7 @@
  *
  *
  */
-package org.idpass.smartscanner.lib.nfc;
+package org.idpass.smartscanner.lib.nfc.details;
 
 import java.security.PublicKey;
 

@@ -15,7 +15,7 @@
  *
  *
  */
-package org.idpass.smartscanner.lib.nfc;
+package org.idpass.smartscanner.lib.nfc.details;
 
 public enum DocType {
     PASSPORT,
