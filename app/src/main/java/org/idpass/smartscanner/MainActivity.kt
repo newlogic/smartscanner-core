@@ -17,15 +17,22 @@
  */
 package org.idpass.smartscanner
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.nfc.NfcAdapter
 import android.os.Bundle
+import android.provider.Settings
 import android.view.View.GONE
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.snackbar.Snackbar
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.api.ScannerIntent
 import org.idpass.smartscanner.databinding.ActivityMainBinding
@@ -33,10 +40,15 @@ import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT_BYTES
 import org.idpass.smartscanner.lib.nfc.NFCScannerActivity
+import org.idpass.smartscanner.lib.platform.utils.FileUtils
 import org.idpass.smartscanner.lib.scanner.config.*
 import org.idpass.smartscanner.result.IDPassResultActivity
 import org.idpass.smartscanner.result.ResultActivity
 import timber.log.Timber
+import java.io.BufferedReader
+import java.io.File
+import java.io.FileReader
+import java.io.IOException
 
 
 class MainActivity : AppCompatActivity() {
@@ -54,6 +66,9 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+    private val REQUEST_CODE_PERMISSIONS = 11
+    private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+
     private lateinit var binding : ActivityMainBinding
     private var isNFC = false
 
@@ -67,11 +82,27 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
+        // Request storage permissions
+        if (allPermissionsGranted()) {
+            FileUtils.createSmartScannerDirs()
+        } else {
+            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
+        }
         binding.itemBarcode.item.setOnClickListener { scanBarcode(BarcodeOptions.default) }
         binding.itemIdpassLite.item.setOnClickListener { scanIDPassLite() }
         binding.itemMrz.item.setOnClickListener { scanMRZ() }
-        binding.itemNfc.item.setOnClickListener { scanNFC() }
         binding.itemQR.item.setOnClickListener { scanQRCode() }
+        binding.itemNfc.item.setOnClickListener {
+            val mrzFromTxt = getMRZFromTxtFile()
+            if (mrzFromTxt.isNullOrEmpty()) {
+                scanNFC()
+            } else {
+                val resultIntent = Intent(this, NFCScannerActivity::class.java)
+                resultIntent.putExtra(NFCScannerActivity.RESULT_FROM_TXT, mrzFromTxt)
+                startActivity(resultIntent)
+                isNFC = false
+            }
+        }
     }
 
     private fun checkNFCSupport() {
@@ -140,6 +171,14 @@ class MainActivity : AppCompatActivity() {
         isNFC = true
     }
 
+    private fun gotoNFCReader(mrz: String?, mrzFromTxt: String? = null) {
+        val resultIntent = Intent(this, NFCScannerActivity::class.java)
+        resultIntent.putExtra(NFCScannerActivity.RESULT, mrz)
+        resultIntent.putExtra(NFCScannerActivity.RESULT_FROM_TXT, mrzFromTxt)
+        startActivity(resultIntent)
+        isNFC = false
+    }
+
     @SuppressLint("InflateParams")
     private fun scanQRCode()  {
         val bottomSheetDialog = BottomSheetDialog(this)
@@ -177,7 +216,7 @@ class MainActivity : AppCompatActivity() {
                 intent?.getBundleExtra(ScannerConstants.RESULT)?.let {
                     Timber.d("Scanner result bundle: $it")
                     Timber.d("Scanner result bundle qr_code_json_value (from path): ${it.getString(ScannerConstants.QRCODE_JSON_VALUE)}")
-                    Timber.d( "Scanner result bundle qr_code_text: ${it.getString(ScannerConstants.QRCODE_TEXT)}")
+                    Timber.d("Scanner result bundle qr_code_text: ${it.getString(ScannerConstants.QRCODE_TEXT)}")
                     if (it.getString(ScannerConstants.MODE) == Modes.IDPASS_LITE.value) {
                         // Go to ID PASS Lite Results Screen via bundle
                         val myIntent = Intent(this, IDPassResultActivity::class.java)
@@ -196,10 +235,10 @@ class MainActivity : AppCompatActivity() {
                     if (result != null) {
                         if (isNFC) {
                             // Go to NFC Scanner Screen
-                            isNFC = false
                             val resultIntent = Intent(this, NFCScannerActivity::class.java)
                             resultIntent.putExtra(NFCScannerActivity.RESULT, result)
                             startActivity(resultIntent)
+                            isNFC = false
                         } else {
                             // Go to Barcode/MRZ Results Screen
                             val resultIntent = Intent(this, ResultActivity::class.java)
@@ -216,5 +255,46 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
+        ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        if (requestCode == REQUEST_CODE_PERMISSIONS) {
+            if (allPermissionsGranted()) {
+                FileUtils.createSmartScannerDirs()
+            } else {
+                val snackBar: Snackbar = Snackbar.make(binding.main, org.idpass.smartscanner.lib.R.string.required_perms_not_given, Snackbar.LENGTH_INDEFINITE)
+                snackBar.setAction(org.idpass.smartscanner.lib.R.string.settings) {
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                    val uri = Uri.fromParts("package", packageName, null)
+                    intent.data = uri
+                    startActivity(intent)
+                }
+                snackBar.show()
+            }
+        }
+    }
+
+    private fun getMRZFromTxtFile() : String?{
+        val file = File("${FileUtils.directory}/ad769ced-7727-443e-b613-59d52299f979.txt")
+        var mrz : String? = null
+        if(file.exists()){
+            //Read text from file
+            val text = StringBuilder()
+            try {
+                val br = BufferedReader(FileReader(file))
+                var line: String?
+                while (br.readLine().also { line = it } != null) {
+                    text.append(line)
+                }
+                br.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+            mrz = text.toString()
+        }
+        return mrz
     }
 }
