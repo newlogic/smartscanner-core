@@ -49,16 +49,14 @@ import org.bouncycastle.asn1.ASN1Primitive
 import org.bouncycastle.asn1.ASN1Sequence
 import org.bouncycastle.asn1.ASN1Set
 import org.bouncycastle.asn1.x509.Certificate
+import org.idpass.smartscanner.lib.BuildConfig
 import org.idpass.smartscanner.lib.R
 import org.idpass.smartscanner.lib.databinding.ActivityNfcScannerBinding
 import org.idpass.smartscanner.lib.nfc.details.AdditionalPersonDetails
 import org.idpass.smartscanner.lib.nfc.details.DocType
 import org.idpass.smartscanner.lib.nfc.details.EDocument
 import org.idpass.smartscanner.lib.nfc.details.PersonDetails
-import org.idpass.smartscanner.lib.platform.utils.DateUtils
-import org.idpass.smartscanner.lib.platform.utils.Image
-import org.idpass.smartscanner.lib.platform.utils.ImageUtils
-import org.idpass.smartscanner.lib.platform.utils.LoggerUtils
+import org.idpass.smartscanner.lib.platform.utils.*
 import org.jmrtd.BACKey
 import org.jmrtd.BACKeySpec
 import org.jmrtd.PassportService
@@ -120,7 +118,9 @@ class NFCScannerActivity : AppCompatActivity() {
     private fun setupConfiguration() {
         mrzString?.let {
             readCard(it)
-            LoggerUtils.writeLogToFile(this, identifier = "NFC")
+            if (BuildConfig.DEBUG) {
+                LoggerUtils.writeLogToFile(FileUtils.directory, identifier = "NFC")
+            }
         }
     }
 
