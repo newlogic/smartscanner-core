@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity() {
         binding.itemBarcode.item.setOnClickListener { scanBarcode(BarcodeOptions.default) }
         binding.itemIdpassLite.item.setOnClickListener { scanIDPassLite() }
         binding.itemMrz.item.setOnClickListener { scanMRZ() }
-        binding.itemNfc.item.setOnClickListener { scanNfcViaMRZ() }
+        binding.itemNfc.item.setOnClickListener { scanNFC() }
         binding.itemQR.item.setOnClickListener { scanQRCode() }
     }
 
@@ -125,19 +125,19 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, SmartScannerActivity::class.java)
         intent.putExtra(
             SmartScannerActivity.SCANNER_OPTIONS,
-            ScannerOptions.configMrz(config = sampleConfig(false))
+            ScannerOptions.configMrz(config = sampleConfig(true))
         )
         startActivityForResult(intent, OP_SCANNER)
     }
 
-    private fun scanNfcViaMRZ() {
-        isNFC = true
+    private fun scanNFC() {
         val intent = Intent(this, SmartScannerActivity::class.java)
         intent.putExtra(
             SmartScannerActivity.SCANNER_OPTIONS,
             ScannerOptions.configMrz(config = sampleConfig(false, label = "Please scan MRZ to verify ID"))
         )
         startActivityForResult(intent, OP_SCANNER)
+        isNFC = true
     }
 
     @SuppressLint("InflateParams")
@@ -196,6 +196,7 @@ class MainActivity : AppCompatActivity() {
                     if (result != null) {
                         if (isNFC) {
                             // Go to NFC Scanner Screen
+                            isNFC = false
                             val resultIntent = Intent(this, NFCScannerActivity::class.java)
                             resultIntent.putExtra(NFCScannerActivity.RESULT, result)
                             startActivity(resultIntent)
