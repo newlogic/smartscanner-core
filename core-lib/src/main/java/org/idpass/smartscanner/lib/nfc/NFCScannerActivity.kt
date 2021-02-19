@@ -17,12 +17,15 @@
  */
 package org.idpass.smartscanner.lib.nfc
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.AssetManager
 import android.graphics.Bitmap
+import android.net.Uri
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
@@ -34,6 +37,8 @@ import android.view.View
 import android.view.View.VISIBLE
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.google.android.gms.common.util.IOUtils
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonParser
@@ -46,9 +51,14 @@ import org.bouncycastle.asn1.ASN1Set
 import org.bouncycastle.asn1.x509.Certificate
 import org.idpass.smartscanner.lib.R
 import org.idpass.smartscanner.lib.databinding.ActivityNfcScannerBinding
+import org.idpass.smartscanner.lib.nfc.details.AdditionalPersonDetails
+import org.idpass.smartscanner.lib.nfc.details.DocType
+import org.idpass.smartscanner.lib.nfc.details.EDocument
+import org.idpass.smartscanner.lib.nfc.details.PersonDetails
 import org.idpass.smartscanner.lib.platform.utils.DateUtils
 import org.idpass.smartscanner.lib.platform.utils.Image
 import org.idpass.smartscanner.lib.platform.utils.ImageUtils
+import org.idpass.smartscanner.lib.platform.utils.LoggerUtils
 import org.jmrtd.BACKey
 import org.jmrtd.BACKeySpec
 import org.jmrtd.PassportService
@@ -75,12 +85,15 @@ class NFCScannerActivity : AppCompatActivity() {
     companion object {
         const val RESULT = "SCAN_RESULT"
     }
+    private val REQUEST_CODE_PERMISSIONS = 11
+    private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
     private lateinit var binding: ActivityNfcScannerBinding
     private var adapter: NfcAdapter? = null
-    private var passportNumber: String? = null
-    private var expirationDate: String? = null
     private var birthDate: String? = null
+    private var expirationDate: String? = null
+    private var mrzString: String? = null
+    private var passportNumber: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,11 +107,20 @@ class NFCScannerActivity : AppCompatActivity() {
         supportActionBar?.setHomeButtonEnabled(true)
         supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_close)
         intent.getStringExtra(RESULT)?.let {
-            val result = JsonParser.parseString(it).asJsonObject
-            val mrz = result["mrz"].asString
-            if (mrz != null) {
-                readCard(mrz)
-            }
+            mrzString = JsonParser.parseString(it).asJsonObject["mrz"].asString
+        }
+        // Request storage permissions
+        if (allPermissionsGranted()) {
+            setupConfiguration()
+        } else {
+            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
+        }
+    }
+
+    private fun setupConfiguration() {
+        mrzString?.let {
+            readCard(it)
+            LoggerUtils.writeLogToFile(this, identifier = "NFC")
         }
     }
 
@@ -106,7 +128,7 @@ class NFCScannerActivity : AppCompatActivity() {
         try {
             val mrzInfo = MRZInfo(mrz)
             setMrzData(mrzInfo)
-        } catch(e : Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
     }
@@ -514,6 +536,8 @@ class NFCScannerActivity : AppCompatActivity() {
                     activeAuthSucceeded
                 )
             } else {
+                binding.imageLayout.visibility = VISIBLE
+                binding.loadingLayout.visibility = View.GONE
                 Snackbar.make(binding.mainLayout, exception.localizedMessage ?: "", Snackbar.LENGTH_LONG).show()
             }
         }
@@ -521,10 +545,10 @@ class NFCScannerActivity : AppCompatActivity() {
 
 
     private fun setResultToView(
-        eDocument: EDocument,
-        chipAuth: Boolean,
-        passiveAuth: Boolean,
-        activeAuth: Boolean
+            eDocument: EDocument,
+            chipAuth: Boolean,
+            passiveAuth: Boolean,
+            activeAuth: Boolean
     ) {
         val image = ImageUtils.scaleImage(eDocument.personDetails.faceImage)
         binding.viewPhoto.setImageBitmap(image)
@@ -554,5 +578,26 @@ class NFCScannerActivity : AppCompatActivity() {
             android.R.id.home -> finish()
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
+        ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        if (requestCode == REQUEST_CODE_PERMISSIONS) {
+            if (allPermissionsGranted()) {
+                setupConfiguration()
+            } else {
+                val snackBar: Snackbar = Snackbar.make(binding.nfcScanner, R.string.required_perms_not_given, Snackbar.LENGTH_INDEFINITE)
+                snackBar.setAction(R.string.settings) {
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                    val uri = Uri.fromParts("package", packageName, null)
+                    intent.data = uri
+                    startActivity(intent)
+                }
+                snackBar.show()
+            }
+        }
     }
 }
