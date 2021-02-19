@@ -32,6 +32,7 @@ import android.nfc.tech.IsoDep
 import android.os.AsyncTask
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.view.View.VISIBLE
@@ -51,6 +52,7 @@ import org.bouncycastle.asn1.ASN1Set
 import org.bouncycastle.asn1.x509.Certificate
 import org.idpass.smartscanner.lib.BuildConfig
 import org.idpass.smartscanner.lib.R
+import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.databinding.ActivityNfcScannerBinding
 import org.idpass.smartscanner.lib.nfc.details.AdditionalPersonDetails
 import org.idpass.smartscanner.lib.nfc.details.DocType
@@ -82,6 +84,7 @@ class NFCScannerActivity : AppCompatActivity() {
 
     companion object {
         const val RESULT = "SCAN_RESULT"
+        const val RESULT_FROM_TXT = "SCAN_RESULT_FROM_TXT"
     }
     private val REQUEST_CODE_PERMISSIONS = 11
     private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -106,7 +109,10 @@ class NFCScannerActivity : AppCompatActivity() {
         supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_close)
         intent.getStringExtra(RESULT)?.let {
             mrzString = JsonParser.parseString(it).asJsonObject["mrz"].asString
+        } ?: run {
+            mrzString = intent.getStringExtra(RESULT_FROM_TXT)
         }
+        Log.d("${SmartScannerActivity.TAG}/NFC", "result mrz: $mrzString" )
         // Request storage permissions
         if (allPermissionsGranted()) {
             setupConfiguration()

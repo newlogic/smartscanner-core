@@ -17,14 +17,11 @@
  */
 package org.idpass.smartscanner.lib.platform.utils
 
-import android.content.Context
-import android.os.Environment
 import java.io.File
 
 
 object LoggerUtils {
-    fun writeLogToFile(context: Context, identifier : String = "default") {
-        val directory = File("${Environment.getExternalStorageDirectory()?.absolutePath}/SmartScanner").also { it.mkdirs() }
+    fun writeLogToFile(directory : String, identifier : String = "default") {
         val fileName = "logcat-$identifier.txt"
         val file = File(directory, fileName)
         if (!file.exists()) {

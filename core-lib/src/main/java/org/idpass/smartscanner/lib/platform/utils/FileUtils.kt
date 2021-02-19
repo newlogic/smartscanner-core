@@ -19,12 +19,14 @@ package org.idpass.smartscanner.lib.platform.utils
 
 import android.content.Context
 import android.content.res.AssetManager
+import android.os.Environment
 import android.util.Log
 import java.io.*
 
 
 object FileUtils {
     private val TAG = FileUtils::class.java.simpleName
+    val directory : String = "${Environment.getExternalStorageDirectory()?.absolutePath}/SmartScanner"
 
     fun copyAssets(context: Context,path: String, outPath: String) {
         val assetManager: AssetManager = context.assets
@@ -69,4 +71,6 @@ object FileUtils {
             e.printStackTrace()
         }
     }
+
+    fun createSmartScannerDirs() = File(directory).also { if(!it.exists()) it.mkdirs() }
 }
