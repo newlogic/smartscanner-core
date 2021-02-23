@@ -359,6 +359,7 @@ class NFCScannerActivity : AppCompatActivity() {
 
         override fun doInBackground(vararg params: Void?): Exception? {
             try {
+                isoDep.timeout = 5*1000
                 val cardService = CardService.getInstance(isoDep)
                 cardService.open()
                 val service = PassportService(
@@ -487,7 +488,8 @@ class NFCScannerActivity : AppCompatActivity() {
                     val dg11In = service.getInputStream(PassportService.EF_DG11)
                     val dg11File = DG11File(dg11In)
                     if (dg11File.length > 0) {
-                        additionalPersonDetails.fullName = dg11File.nameOfHolder?.replace("<", " ")?.trim()?.replace("[ ]{2,}", " ")
+                        additionalPersonDetails.fullName =
+                            dg11File.nameOfHolder.replace("<", " ").trim().replace("[ ]{2,}", " ")
                         additionalPersonDetails.custodyInformation = dg11File.custodyInformation
                         additionalPersonDetails.nameOfHolder = dg11File.nameOfHolder
                         additionalPersonDetails.fullDateOfBirth = dg11File.fullDateOfBirth
