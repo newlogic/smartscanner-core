@@ -17,8 +17,7 @@
  */
 package org.idpass.smartscanner.lib.mrz
 
-import org.idpass.smartscanner.lib.platform.extension.empty
-import org.idpass.smartscanner.lib.platform.extension.noValue
+import org.idpass.smartscanner.lib.platform.utils.MrzUtils
 import org.idpass.smartscanner.mrz.parser.innovatrics.MrzRecord
 import org.idpass.smartscanner.mrz.parser.innovatrics.records.MrtdTd1
 
@@ -43,14 +42,16 @@ data class MRZResult(
 ) {
     companion object {
         fun formatMrzResult(record: MrzRecord, image: String?) : MRZResult {
+            val dateOfBirth = MrzUtils.formatToAdjustedMrzDate(record.dateOfBirth?.toString()?.replace(Regex("[{}]"), ""))
+            val expirationDate = MrzUtils.formatToReadableMrzDate(record.expirationDate?.toString()?.replace(Regex("[{}]"), ""))
             return MRZResult(
                     image = image,
                     code = record.code.toString(),
                     code1 = record.code1.toShort(),
                     code2 = record.code2.toShort(),
-                    dateOfBirth = record.dateOfBirth?.toString()?.replace(Regex("[{}]"), ""),
+                    dateOfBirth = dateOfBirth,
                     documentNumber = record.documentNumber.toString(),
-                    expirationDate = record.expirationDate?.toString()?.replace(Regex("[{}]"), ""),
+                    expirationDate = expirationDate,
                     format = record.format.toString(),
                     givenNames = record.givenNames,
                     issuingCountry = record.issuingCountry,
@@ -62,14 +63,16 @@ data class MRZResult(
         }
 
         fun formatMrtdTd1Result(record: MrtdTd1, image: String?) : MRZResult {
+            val dateOfBirth = MrzUtils.formatToAdjustedMrzDate(record.dateOfBirth?.toString()?.replace(Regex("[{}]"), ""))
+            val expirationDate = MrzUtils.formatToReadableMrzDate(record.expirationDate?.toString()?.replace(Regex("[{}]"), ""))
             return MRZResult(
                     image = image,
                     code = record.code.toString(),
                     code1 = record.code1.toShort(),
                     code2 = record.code2.toShort(),
-                    dateOfBirth = record.dateOfBirth?.toString()?.replace(Regex("[{}]"), ""),
+                    dateOfBirth = dateOfBirth,
                     documentNumber = record.documentNumber.toString(),
-                    expirationDate = record.expirationDate?.toString()?.replace(Regex("[{}]"), ""),
+                    expirationDate = expirationDate,
                     format = record.format.toString(),
                     givenNames = record.givenNames,
                     issuingCountry = record.issuingCountry,
@@ -79,25 +82,6 @@ data class MRZResult(
                     mrz = record.toMrz(),
                     optional = record.optional,
                     optional2 = record.optional2
-            )
-        }
-
-        fun getImageOnly(image: String?) : MRZResult {
-            return MRZResult(
-                    image = image,
-                    String.empty(),
-                    Int.noValue().toShort(),
-                    Int.noValue().toShort(),
-                    String.empty(),
-                    String.empty(),
-                    String.empty(),
-                    String.empty(),
-                    String.empty(),
-                    String.empty(),
-                    String.empty(),
-                    String.empty(),
-                    String.empty(),
-                    String.empty()
             )
         }
     }

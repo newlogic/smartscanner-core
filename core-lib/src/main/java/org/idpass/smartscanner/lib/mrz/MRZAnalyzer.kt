@@ -204,7 +204,7 @@ open class MRZAnalyzer(
             else -> MRZResult.formatMrzResult(MRZCleaner.parseAndClean(mrz), imageString)
         }
         if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_MRZ_INTENT ||
-                intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_MRZ_INTENT) {
+            intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_MRZ_INTENT) {
             sendBundleResult(mrzResult = result)
         } else {
             val jsonString = Gson().toJson(result)
