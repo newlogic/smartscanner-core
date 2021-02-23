@@ -62,11 +62,11 @@ import org.idpass.smartscanner.lib.barcode.qr.QRCodeAnalyzer
 import org.idpass.smartscanner.lib.idpasslite.IDPassLiteAnalyzer
 import org.idpass.smartscanner.lib.idpasslite.IDPassManager
 import org.idpass.smartscanner.lib.mrz.MRZAnalyzer
-import org.idpass.smartscanner.lib.mrz.MRZResult
 import org.idpass.smartscanner.lib.platform.BaseActivity
 import org.idpass.smartscanner.lib.platform.extension.*
 import org.idpass.smartscanner.lib.platform.utils.CameraUtils.isLedFlashAvailable
 import org.idpass.smartscanner.lib.platform.utils.CropTransformation
+import org.idpass.smartscanner.lib.platform.utils.MrzUtils
 import org.idpass.smartscanner.lib.scanner.SmartScannerException
 import org.idpass.smartscanner.lib.scanner.config.*
 import java.io.File
@@ -397,7 +397,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                                             .get()
                             bf.cacheImageToLocal(imageFile.path)
                             val imageString = if (config?.imageResultType == ImageResultType.BASE_64.value) bf.encodeBase64() else imageFile.path
-                            val result = if(mode == Modes.MRZ.value) Gson().toJson(MRZResult.getImageOnly(imageString)) else imageString
+                            val result = if(mode == Modes.MRZ.value) Gson().toJson(MrzUtils.getImageOnly(imageString)) else imageString
                             data.putExtra(SCANNER_RESULT, result)
                             setResult(Activity.RESULT_OK, data)
                             finish()
