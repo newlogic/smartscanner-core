@@ -37,7 +37,6 @@ import org.idpass.smartscanner.lib.databinding.ActivityNfcBinding
 import org.idpass.smartscanner.lib.nfc.passport.Passport
 import org.idpass.smartscanner.lib.nfc.passport.PassportDetailsFragment
 import org.idpass.smartscanner.lib.nfc.passport.PassportPhotoFragment
-import org.idpass.smartscanner.lib.platform.utils.FileUtils
 import org.idpass.smartscanner.lib.platform.utils.LoggerUtils
 import org.jmrtd.lds.icao.MRZInfo
 
@@ -68,27 +67,31 @@ class NFCActivity : androidx.fragment.app.FragmentActivity(), NFCFragment.NfcFra
         binding = ActivityNfcBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
+        if (allPermissionsGranted()) {
+            setupLogs()
+        } else {
+            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
+        }
+
         val mrz = intent.getStringExtra(RESULT)?.let {
             JsonParser.parseString(it).asJsonObject["mrz"].asString
         } ?: run {
             intent.getStringExtra(RESULT_FOR_LOG)
         }
-        mrzInfo = MRZInfo(mrz)
+
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         pendingIntent = PendingIntent.getActivity(this, 0,
                 Intent(this, this.javaClass)
                         .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0)
-
-        if (null == savedInstanceState) {
-            supportFragmentManager.beginTransaction()
-                    .replace(R.id.container, NFCFragment.newInstance(mrzInfo!!), TAG_NFC)
+        try {
+            mrzInfo = MRZInfo(mrz)
+            mrzInfo?.let {
+                supportFragmentManager.beginTransaction()
+                    .replace(R.id.container, NFCFragment.newInstance(it), TAG_NFC)
                     .commit()
-        }
-
-        if (!allPermissionsGranted()) {
-            setupLogs()
-        } else {
-            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
@@ -170,7 +173,7 @@ class NFCActivity : androidx.fragment.app.FragmentActivity(), NFCFragment.NfcFra
     }
 
     private fun setupLogs() {
-        if (BuildConfig.DEBUG) LoggerUtils.writeLogToFile(FileUtils.directory, identifier = "NFC")
+        if (BuildConfig.DEBUG) LoggerUtils.writeLogToFile(identifier = "NFC")
     }
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
