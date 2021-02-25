@@ -21,9 +21,10 @@ import java.io.File
 
 
 object LoggerUtils {
-    fun writeLogToFile(directory : String, identifier : String = "default") {
+    fun writeLogToFile(identifier : String = "default") {
+        FileUtils.createSmartScannerDirs()
         val fileName = "logcat-$identifier.txt"
-        val file = File(directory, fileName)
+        val file = File(FileUtils.directory, fileName)
         if (!file.exists()) {
             file.createNewFile()
         } else {
