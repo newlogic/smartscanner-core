@@ -87,8 +87,9 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
         }
 
         val personDetails = passport.personDetails
+        val additionalPersonDetails = passport.additionalPersonDetails
         if (personDetails != null) {
-            val name = personDetails.primaryIdentifier!!.replace("<", "")
+            val name = additionalPersonDetails!!.nameOfHolder
             val surname = personDetails.secondaryIdentifier!!.replace("<", "")
             binding.valueName.text = getString(R.string.name, name, surname)
             binding.valueDOB.text = personDetails.dateOfBirth
@@ -99,7 +100,6 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
             binding.valueNationality.text = personDetails.nationality
         }
 
-        val additionalPersonDetails = passport.additionalPersonDetails
         if (additionalPersonDetails != null) {
             //This object it's not available in the majority of passports
             binding.cardViewAdditionalPersonInformation.visibility = View.VISIBLE
