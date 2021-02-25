@@ -39,7 +39,7 @@ import org.idpass.smartscanner.databinding.ActivityMainBinding
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT_BYTES
-import org.idpass.smartscanner.lib.nfc.NFCScannerActivity
+import org.idpass.smartscanner.lib.nfc.NFCActivity
 import org.idpass.smartscanner.lib.platform.utils.FileUtils
 import org.idpass.smartscanner.lib.scanner.config.*
 import org.idpass.smartscanner.result.IDPassResultActivity
@@ -97,8 +97,8 @@ class MainActivity : AppCompatActivity() {
             if (mrzFromTxt.isNullOrEmpty()) {
                 scanNFC()
             } else {
-                val resultIntent = Intent(this, NFCScannerActivity::class.java)
-                resultIntent.putExtra(NFCScannerActivity.RESULT_FROM_TXT, mrzFromTxt)
+                val resultIntent = Intent(this, NFCActivity::class.java)
+                resultIntent.putExtra(NFCActivity.RESULT_FOR_LOG, mrzFromTxt)
                 startActivity(resultIntent)
                 isNFC = false
             }
@@ -171,14 +171,6 @@ class MainActivity : AppCompatActivity() {
         isNFC = true
     }
 
-    private fun gotoNFCReader(mrz: String?, mrzFromTxt: String? = null) {
-        val resultIntent = Intent(this, NFCScannerActivity::class.java)
-        resultIntent.putExtra(NFCScannerActivity.RESULT, mrz)
-        resultIntent.putExtra(NFCScannerActivity.RESULT_FROM_TXT, mrzFromTxt)
-        startActivity(resultIntent)
-        isNFC = false
-    }
-
     @SuppressLint("InflateParams")
     private fun scanQRCode()  {
         val bottomSheetDialog = BottomSheetDialog(this)
@@ -235,8 +227,8 @@ class MainActivity : AppCompatActivity() {
                     if (result != null) {
                         if (isNFC) {
                             // Go to NFC Scanner Screen
-                            val resultIntent = Intent(this, NFCScannerActivity::class.java)
-                            resultIntent.putExtra(NFCScannerActivity.RESULT, result)
+                            val resultIntent = Intent(this, NFCActivity::class.java)
+                            resultIntent.putExtra(NFCActivity.RESULT, result)
                             startActivity(resultIntent)
                             isNFC = false
                         } else {
