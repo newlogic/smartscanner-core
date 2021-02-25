@@ -15,9 +15,8 @@
  *
  *
  */
-package org.idpass.smartscanner.lib.platform.utils
+package org.idpass.smartscanner.lib.mrz
 
-import org.idpass.smartscanner.lib.mrz.MRZResult
 import org.idpass.smartscanner.lib.platform.extension.empty
 import org.idpass.smartscanner.lib.platform.extension.noValue
 import java.util.*
