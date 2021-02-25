@@ -20,8 +20,20 @@ package org.idpass.smartscanner.lib.platform.extension
 import java.text.SimpleDateFormat
 import java.util.*
 
+private val hexArray = "0123456789ABCDEF".toCharArray()
+
 fun String.Companion.empty() = ""
 
 fun String.Companion.space() = " "
 
 fun String.Companion.formatToSimpleDate(date : Date): String = SimpleDateFormat("yyyyMMddHHmmss", Locale.ROOT).format(date)
+
+fun ByteArray.bytesToHex(): String {
+    val hexChars = CharArray(this.size * 2)
+    for (j in this.indices) {
+        val v = this[j].toInt() and 0xFF
+        hexChars[j * 2] = hexArray[v.ushr(4)]
+        hexChars[j * 2 + 1] = hexArray[v and 0x0F]
+    }
+    return String(hexChars)
+}

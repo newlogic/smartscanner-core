@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+  <color name="colorPrimary">@color/white</color>
+  <color name="colorPrimaryDark">@color/idpass_black</color>
+  <color name="colorAccent">@color/idpass_orange</color>
+
   <color name="idpass_black">#231f20</color>
   <color name="idpass_orange">#ff6d37</color>
   <color name="transparent">#00000000</color>
@@ -28,4 +32,6 @@
   <color name="barcode_field_value">#797979</color>
   <color name="barcode_field_box_stroke">#757575</color>
   <color name="product_description">#5F6368</color>
+  <color name="toogle_text_color">#2A3764</color>
+  <color name="status_text">#ffffffff</color> <!-- status_view_top/status_view_bottom text color -->
 </resources>

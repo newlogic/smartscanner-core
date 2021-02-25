@@ -62,11 +62,11 @@ import org.idpass.smartscanner.lib.barcode.qr.QRCodeAnalyzer
 import org.idpass.smartscanner.lib.idpasslite.IDPassLiteAnalyzer
 import org.idpass.smartscanner.lib.idpasslite.IDPassManager
 import org.idpass.smartscanner.lib.mrz.MRZAnalyzer
+import org.idpass.smartscanner.lib.mrz.MrzUtils
 import org.idpass.smartscanner.lib.platform.BaseActivity
 import org.idpass.smartscanner.lib.platform.extension.*
 import org.idpass.smartscanner.lib.platform.utils.CameraUtils.isLedFlashAvailable
-import org.idpass.smartscanner.lib.platform.utils.CropTransformation
-import org.idpass.smartscanner.lib.platform.utils.MrzUtils
+import org.idpass.smartscanner.lib.platform.utils.transform.CropTransformation
 import org.idpass.smartscanner.lib.scanner.SmartScannerException
 import org.idpass.smartscanner.lib.scanner.config.*
 import java.io.File

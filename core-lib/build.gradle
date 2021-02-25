@@ -5,6 +5,7 @@ plugins {
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-parcelize'
+apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 30
@@ -28,6 +29,8 @@ android {
     buildTypes {
         debug {
             minifyEnabled false
+            debuggable true
+            jniDebuggable true
         }
         release {
             minifyEnabled false
@@ -56,12 +59,14 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.0-M1'
     implementation 'androidx.core:core-ktx:1.3.2'
     implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'com.google.android.material:material:1.2.1'
     implementation 'com.google.firebase:firebase-analytics-ktx:18.0.1'
     implementation 'com.google.firebase:firebase-crashlytics-ktx:17.3.0'
     implementation 'com.google.firebase:firebase-crashlytics:17.3.0'
     implementation 'com.google.firebase:firebase-analytics:18.0.1'
+    implementation files('/Users/reubenjamesmangubat/Workfiles/NewLogic/idpass-smart-scanner-core/core-lib/libs/jj2000_imageutil.jar')
     testImplementation 'junit:junit:4.13.1'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
@@ -79,7 +84,6 @@ dependencies {
     implementation "androidx.camera:camera-view:1.0.0-alpha12"
     // MRZ
     implementation 'org.slf4j:slf4j-android:1.7.30'
-    // Tesseract4Android
     implementation 'cz.adaptech.android:tesseract4android:2.1.0'
     // Gson
     implementation 'com.google.code.gson:gson:2.8.6'
@@ -98,10 +102,18 @@ dependencies {
     implementation 'com.jayway.jsonpath:json-path:2.5.0'
     implementation 'com.github.wnameless.json:json-flattener:0.12.0'
     // NFC
-    implementation 'net.sf.scuba:scuba-sc-android:0.0.23'
-    implementation 'org.bouncycastle:bcprov-jdk15on:1.65'
-    implementation 'edu.ucar:jj2000:5.2'
-    implementation 'com.github.mhshams:jnbis:1.1.0'
-    implementation files('libs/jmrtd-0.7.25.aar')
-    implementation 'org.ejbca.cvc:cert-cvc:1.4.6'
+    implementation 'org.jmrtd:jmrtd:0.7.18'
+    implementation 'com.madgag.spongycastle:prov:1.58.0.0'
+    implementation 'net.sf.scuba:scuba-sc-android:0.0.20'
+    implementation group: 'org.ejbca.cvc', name: 'cert-cvc', version: '1.4.6'
+    //WSQ
+    implementation 'com.github.mhshams:jnbis:2.0.2'
+    //DatatypeConverter
+    implementation 'commons-codec:commons-codec:1.12'
+    //RX
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.19'
+    //Annotations
+    kapt "org.androidannotations:androidannotations:4.4.0"
+    implementation "org.androidannotations:androidannotations-api:4.4.0"
 }
