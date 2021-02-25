@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.idpass.smartscanner.lib.platform.utils;
+package org.idpass.smartscanner.lib.platform.utils.transform;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -25,6 +25,7 @@ import androidx.annotation.NonNull;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 
 import java.security.MessageDigest;
+
 
 public class CropTransformation extends BitmapTransformation {
 

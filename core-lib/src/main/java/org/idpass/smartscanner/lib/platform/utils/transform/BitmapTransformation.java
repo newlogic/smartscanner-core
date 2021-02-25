@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.idpass.smartscanner.lib.platform.utils;
-
+package org.idpass.smartscanner.lib.platform.utils.transform;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -30,6 +29,7 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.util.Util;
 
 import java.security.MessageDigest;
+
 
 public abstract class BitmapTransformation implements Transformation<Bitmap> {
 
