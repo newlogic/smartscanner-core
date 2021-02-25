@@ -36,9 +36,9 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".nfc.NFCScannerActivity"
-            android:screenOrientation="portrait" >
+        <activity android:name=".nfc.NFCActivity"
+            android:screenOrientation="nosensor"
+            android:keepScreenOn="true">
             <intent-filter>
                 <action android:name="org.idpass.smartscanner.NFC_SCAN" />
                 <action android:name="org.idpass.smartscanner.odk.NFC_SCAN" />
