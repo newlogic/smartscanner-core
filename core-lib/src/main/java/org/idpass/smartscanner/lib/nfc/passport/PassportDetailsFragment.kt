@@ -28,6 +28,7 @@ import androidx.core.content.ContextCompat
 import org.idpass.smartscanner.lib.R
 import org.idpass.smartscanner.lib.databinding.FragmentPassportDetailsBinding
 import org.idpass.smartscanner.lib.nfc.details.IntentData
+import org.idpass.smartscanner.lib.platform.extension.arrayToString
 import org.idpass.smartscanner.lib.platform.extension.bytesToHex
 import org.jmrtd.FeatureStatus
 import org.jmrtd.VerificationStatus
@@ -47,7 +48,7 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
     private lateinit var binding : FragmentPassportDetailsBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+                              savedInstanceState: Bundle?): View {
         binding = FragmentPassportDetailsBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -89,7 +90,7 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
         val personDetails = passport.personDetails
         val additionalPersonDetails = passport.additionalPersonDetails
         if (personDetails != null) {
-            val name = additionalPersonDetails!!.nameOfHolder
+            val name = additionalPersonDetails?.nameOfHolder!!.replace("<<", " ").replace("<", " ")
             val surname = personDetails.secondaryIdentifier!!.replace("<", "")
             binding.valueName.text = getString(R.string.name, name, surname)
             binding.valueDOB.text = personDetails.dateOfBirth
@@ -111,13 +112,13 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
                 binding.valueDateOfBirth.text = additionalPersonDetails.fullDateOfBirth
             }
             if (additionalPersonDetails.otherNames != null && additionalPersonDetails.otherNames!!.isNotEmpty()) {
-                binding.valueOtherNames.text = arrayToString(additionalPersonDetails.otherNames!!)
+                binding.valueOtherNames.text = additionalPersonDetails.otherNames?.arrayToString()
             }
             if (additionalPersonDetails.otherValidTDNumbers != null && additionalPersonDetails.otherValidTDNumbers!!.isNotEmpty()) {
-                binding.valueOtherTdNumbers.text = arrayToString(additionalPersonDetails.otherValidTDNumbers!!)
+                binding.valueOtherTdNumbers.text = additionalPersonDetails.otherValidTDNumbers?.arrayToString()
             }
             if (additionalPersonDetails.permanentAddress != null && additionalPersonDetails.permanentAddress!!.isNotEmpty()) {
-                binding.valuePermanentAddress.text = arrayToString(additionalPersonDetails.permanentAddress!!)
+                binding.valuePermanentAddress.text = additionalPersonDetails.permanentAddress?.arrayToString()
             }
 
             if (additionalPersonDetails.personalNumber != null) {
@@ -129,7 +130,7 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
             }
 
             if (additionalPersonDetails.placeOfBirth != null && additionalPersonDetails.placeOfBirth!!.isNotEmpty()) {
-                binding.valuePlaceOfBirth.text = arrayToString(additionalPersonDetails.placeOfBirth!!)
+                binding.valuePlaceOfBirth.text = additionalPersonDetails.placeOfBirth?.arrayToString()
             }
 
             if (additionalPersonDetails.profession != null) {
@@ -167,7 +168,7 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
             }
 
             if (additionalDocumentDetails.namesOfOtherPersons != null) {
-                binding.valueNamesOtherPersons.text = arrayToString(additionalDocumentDetails.namesOfOtherPersons!!)
+                binding.valueNamesOtherPersons.text = additionalPersonDetails?.otherNames?.arrayToString()
             }
 
             if (additionalDocumentDetails.personalizationSystemSerialNumber != null) {
@@ -378,21 +379,8 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
         fun onImageSelected(bitmap: Bitmap?)
     }
 
-
-    private fun arrayToString(array: List<String>): String {
-        var temp = ""
-        val iterator = array.iterator()
-        while (iterator.hasNext()) {
-            temp += iterator.next() + "\n"
-        }
-        if (temp.endsWith("\n")) {
-            temp = temp.substring(0, temp.length - "\n".length)
-        }
-        return temp
-    }
-
     companion object {
-        fun newInstance(passport: Passport): PassportDetailsFragment {
+        fun newInstance(passport: Passport?): PassportDetailsFragment {
             val myFragment = PassportDetailsFragment()
             val args = Bundle()
             args.putParcelable(IntentData.KEY_PASSPORT, passport)
