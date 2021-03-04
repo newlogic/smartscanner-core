@@ -21,5 +21,6 @@ enum class Modes (val value : String) {
     BARCODE("barcode"),
     IDPASS_LITE("idpass-lite"),
     MRZ("mrz"),
+    NFC_SCAN("nfc-scan"),
     QRCODE("qrcode")
 }
