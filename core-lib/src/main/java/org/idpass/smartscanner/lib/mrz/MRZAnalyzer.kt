@@ -195,7 +195,7 @@ open class MRZAnalyzer(
         }
     }
 
-    private fun processResult(mrz: String, bitmap: Bitmap, rotation: Int) {
+    internal open fun processResult(mrz: String, bitmap: Bitmap, rotation: Int) {
         val imagePathFile = activity.cacheImagePath()
         bitmap.cacheImageToLocal(imagePathFile, rotation)
         val imageString = if (imageResultType == ImageResultType.BASE_64.value) bitmap.encodeBase64(rotation) else imagePathFile
@@ -214,7 +214,7 @@ open class MRZAnalyzer(
 
     private fun sendAnalyzerResult(result: String? = null) {
         val data = Intent()
-        Log.d(SmartScannerActivity.TAG, "Success from BARCODE")
+        Log.d(SmartScannerActivity.TAG, "Success from MRZ")
         Log.d(SmartScannerActivity.TAG, "value: $result")
         data.putExtra(SmartScannerActivity.SCANNER_RESULT, result)
         activity.setResult(Activity.RESULT_OK, data)
