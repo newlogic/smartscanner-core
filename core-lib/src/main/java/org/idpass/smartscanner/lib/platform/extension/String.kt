@@ -37,3 +37,15 @@ fun ByteArray.bytesToHex(): String {
     }
     return String(hexChars)
 }
+
+fun List<String>.arrayToString(): String {
+    var temp = ""
+    val iterator = this.iterator()
+    while (iterator.hasNext()) {
+        temp += iterator.next() + "\n"
+    }
+    if (temp.endsWith("\n")) {
+        temp = temp.substring(0, temp.length - "\n".length)
+    }
+    return temp
+}
