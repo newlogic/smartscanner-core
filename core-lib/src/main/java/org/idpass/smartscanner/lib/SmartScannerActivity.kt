@@ -63,6 +63,7 @@ import org.idpass.smartscanner.lib.idpasslite.IDPassLiteAnalyzer
 import org.idpass.smartscanner.lib.idpasslite.IDPassManager
 import org.idpass.smartscanner.lib.mrz.MRZAnalyzer
 import org.idpass.smartscanner.lib.mrz.MrzUtils
+import org.idpass.smartscanner.lib.nfc.NFCScanAnalyzer
 import org.idpass.smartscanner.lib.platform.BaseActivity
 import org.idpass.smartscanner.lib.platform.extension.*
 import org.idpass.smartscanner.lib.platform.utils.CameraUtils.isLedFlashAvailable
@@ -139,15 +140,18 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 // barcode
                 ScannerConstants.IDPASS_SMARTSCANNER_BARCODE_INTENT,
                 ScannerConstants.IDPASS_SMARTSCANNER_ODK_BARCODE_INTENT -> ScannerOptions.defaultForBarcode
-                // qrcode
-                ScannerConstants.IDPASS_SMARTSCANNER_QRCODE_INTENT,
-                ScannerConstants.IDPASS_SMARTSCANNER_ODK_QRCODE_INTENT -> ScannerOptions.defaultForQRCode
                 // idpass lite
                 ScannerConstants.IDPASS_SMARTSCANNER_IDPASS_LITE_INTENT,
                 ScannerConstants.IDPASS_SMARTSCANNER_ODK_IDPASS_LITE_INTENT -> ScannerOptions.defaultForIdPassLite
                 // mrz
                 ScannerConstants.IDPASS_SMARTSCANNER_MRZ_INTENT,
                 ScannerConstants.IDPASS_SMARTSCANNER_ODK_MRZ_INTENT -> ScannerOptions.defaultForMRZ
+                // nfc
+                ScannerConstants.IDPASS_SMARTSCANNER_NFC_SCAN_INTENT,
+                ScannerConstants.IDPASS_SMARTSCANNER_ODK_NFC_SCAN_INTENT -> ScannerOptions.defaultForNFCScan
+                // qrcode
+                ScannerConstants.IDPASS_SMARTSCANNER_QRCODE_INTENT,
+                ScannerConstants.IDPASS_SMARTSCANNER_ODK_QRCODE_INTENT -> ScannerOptions.defaultForQRCode
                 else -> throw SmartScannerException("Error: Wrong intent action. Please see ScannerConstants.kt for proper intent action strings.")
             }
         } else {
@@ -174,6 +178,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
 
     private fun setupConfiguration() {
         runOnUiThread {
+            val isMLKit = isPlayServicesAvailable()
             var analyzer : ImageAnalysis.Analyzer? = null
             if (mode == Modes.BARCODE.value) {
                 val barcodeStrings = scannerOptions?.barcodeOptions?.barcodeFormats ?: BarcodeFormat.default
@@ -204,8 +209,22 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 )
             }
             if (mode == Modes.MRZ.value) {
-                val isMLKit = isPlayServicesAvailable()
                 analyzer = MRZAnalyzer(
+                        activity = this,
+                        intent = intent,
+                        isMLKit = isMLKit,
+                        imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
+                        format = scannerOptions?.mrzFormat ?: intent.getStringExtra(ScannerConstants.MRZ_FORMAT_EXTRA),
+                        onConnectFail = {
+                            modelText?.visibility = if (it.isNotEmpty()) VISIBLE else INVISIBLE
+                            modelText?.text = it
+                        }
+                ).also {
+                    if (!isMLKit) it.initializeTesseract(this)
+                }
+            }
+            if (mode == Modes.NFC_SCAN.value) {
+                analyzer = NFCScanAnalyzer(
                         activity = this,
                         intent = intent,
                         isMLKit = isMLKit,
