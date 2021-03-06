@@ -28,6 +28,7 @@ object FileUtils {
     private val TAG = FileUtils::class.java.simpleName
     val directory : String = "${Environment.getExternalStorageDirectory()?.absolutePath}/SmartScanner"
 
+    fun createSmartScannerDirs() = File(directory).also { if(!it.exists()) it.mkdirs() }
     fun copyAssets(context: Context,path: String, outPath: String) {
         val assetManager: AssetManager = context.assets
         val assets: Array<String>?
@@ -72,5 +73,24 @@ object FileUtils {
         }
     }
 
-    fun createSmartScannerDirs() = File(directory).also { if(!it.exists()) it.mkdirs() }
+    fun getMRZFromTxtFile() : String? {
+        val file = File("${directory}/ad769ced-7727-443e-b613-59d52299f979.txt")
+        var mrz : String? = null
+        if(file.exists()){
+            //Read text from file
+            val text = StringBuilder()
+            try {
+                val br = BufferedReader(FileReader(file))
+                var line: String?
+                while (br.readLine().also { line = it } != null) {
+                    text.append(line)
+                }
+                br.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+            mrz = text.toString()
+        }
+        return mrz
+    }
 }
