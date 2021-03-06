@@ -22,30 +22,36 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.util.Log
 import org.idpass.smartscanner.api.ScannerConstants
-import org.idpass.smartscanner.api.ScannerIntent
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.mrz.MRZAnalyzer
+import org.idpass.smartscanner.lib.mrz.MRZCleaner
+import org.idpass.smartscanner.lib.mrz.MRZResult
+import org.idpass.smartscanner.lib.nfc.NFCActivity.Companion.FOR_SMARTSCANNER
 import org.idpass.smartscanner.lib.scanner.config.Modes
 
 open class NFCScanAnalyzer(
     override val activity: Activity,
     override val intent: Intent,
-    override val mode: String = Modes.MRZ.value,
+    override val mode: String = Modes.NFC_SCAN.value,
     isMLKit: Boolean,
     imageResultType: String,
     format: String?,
     onConnectFail: (String) -> Unit
 ) : MRZAnalyzer(activity, intent, mode, isMLKit, imageResultType, format, onConnectFail) {
 
-    override fun processResult(mrz: String, bitmap: Bitmap, rotation: Int) {
-        Log.d(SmartScannerActivity.TAG, "Success from NFC -- SCAN mrz")
-        if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_NFC_SCAN_INTENT ||
-            intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_NFC_SCAN_INTENT) {
-            ScannerIntent.intentNFC(mrz)
-        } else {
-            val intent = Intent(activity, NFCActivity::class.java)
-            intent.putExtra(ScannerConstants.NFC_MRZ_STRING, mrz)
-            activity.startActivity(intent)
+    override fun processResult(result: String, bitmap: Bitmap, rotation: Int) {
+        val mrzResult =  MRZResult.formatMrzResult(MRZCleaner.parseAndClean(result))
+        mrzResult.mrz?.let { mrzString ->
+            Log.d(SmartScannerActivity.TAG, "Success from NFC -- SCAN")
+            val nfcIntent = Intent(activity, NFCActivity::class.java)
+            when {
+                intent.hasExtra(FOR_SMARTSCANNER) -> nfcIntent.putExtra(FOR_SMARTSCANNER, true)
+                intent.action == ScannerConstants.IDPASS_SMARTSCANNER_NFC_INTENT ||
+                intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_NFC_INTENT -> nfcIntent.putExtra(ScannerConstants.NFC_ACTION, intent.action)
+            }
+            nfcIntent.putExtra(ScannerConstants.NFC_MRZ_STRING, mrzString)
+            nfcIntent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT)
+            activity.startActivity(nfcIntent)
             activity.finish()
         }
     }
