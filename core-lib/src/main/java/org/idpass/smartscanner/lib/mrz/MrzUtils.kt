@@ -19,7 +19,6 @@ package org.idpass.smartscanner.lib.mrz
 
 import org.idpass.smartscanner.lib.platform.extension.empty
 import org.idpass.smartscanner.lib.platform.extension.noValue
-import java.util.*
 
 
 object MrzUtils {
@@ -41,32 +40,5 @@ object MrzUtils {
                 String.empty(),
                 String.empty()
         )
-    }
-
-    fun formatToAdjustedMrzDate(date: String?) : String {
-        val parts: Array<String> = date?.split("/")!!.toTypedArray()
-        // Convert 2 digit date to 4 digits
-        if (parts.size == 3 && parts[2].length == 2) {
-            var year: Int = Integer.valueOf(parts[2])
-            // Allow 5 years in the future for a 2 digit date
-            year = if (year + 100 > Date().year + 5) {
-                year + 1900
-            } else {
-                year + 2000
-            }
-            return parts[0] + "/" + parts[1] + "/" + year.toString()
-        }
-        return date
-    }
-
-   fun formatToReadableMrzDate(date: String?) : String {
-        val parts: Array<String> = date?.split("/")!!.toTypedArray()
-        // Convert 2 digit date to 4 digits
-        if (parts.size == 3 && parts[2].length == 2) {
-            var year: Int = Integer.valueOf(parts[2])
-            year += 2000
-            return parts[0] + "/" + parts[1] + "/" + year.toString()
-        }
-        return date
     }
 }

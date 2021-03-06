@@ -17,6 +17,7 @@
  */
 package org.idpass.smartscanner.lib.platform.utils
 
+import android.annotation.SuppressLint
 import java.text.DateFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -37,7 +38,14 @@ object DateUtils {
     }
     fun formatDate(date: Date) : String = dateFormat.format(date)
 
-    fun stringToDate(dateStr: String?, dateFormat: DateFormat): Date? {
+    @SuppressLint("SimpleDateFormat")
+    fun formatStandardDate(dateString: String?, pattern : String = "yyMMdd"): String? {
+        val date = stringToDate(dateString, SimpleDateFormat(pattern)) ?: return null
+        return dateToString(date, SimpleDateFormat("MM/dd/yyyy"))
+    }
+
+    private fun stringToDate(dateStr: String?, dateFormat: DateFormat): Date? {
+        if (dateStr == null) return null
         var date: Date? = null
         try {
             date = dateFormat.parse(dateStr)
@@ -47,12 +55,34 @@ object DateUtils {
         return date
     }
 
-    fun dateToString(date: Date?, dateFormat: DateFormat): String? {
+    private fun dateToString(date: Date, dateFormat: DateFormat): String? {
         return dateFormat.format(date)
     }
 
-    fun convertFromMrzDate(mrzDate: String?): String? {
-        val date = stringToDate(mrzDate, SimpleDateFormat("yyMMdd"))
-        return dateToString(date, SimpleDateFormat("dd.MM.yyyy"))
+    fun toAdjustedDate(date: String?) : String {
+        val parts: Array<String> = date?.split("/")!!.toTypedArray()
+        // Convert 2 digit date to 4 digits
+        if (parts.size == 3 && parts[2].length == 2) {
+            var year: Int = Integer.valueOf(parts[2])
+            // Allow 5 years in the future for a 2 digit date
+            year = if (year + 100 > Date().year + 5) {
+                year + 1900
+            } else {
+                year + 2000
+            }
+            return parts[0] + "/" + parts[1] + "/" + year.toString()
+        }
+        return date
+    }
+
+    fun toReadableDate(date: String?) : String {
+        val parts: Array<String> = date?.split("/")!!.toTypedArray()
+        // Convert 2 digit date to 4 digits
+        if (parts.size == 3 && parts[2].length == 2) {
+            var year: Int = Integer.valueOf(parts[2])
+            year += 2000
+            return parts[0] + "/" + parts[1] + "/" + year.toString()
+        }
+        return date
     }
 }
