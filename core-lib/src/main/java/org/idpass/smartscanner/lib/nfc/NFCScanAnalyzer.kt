@@ -26,7 +26,7 @@ import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.mrz.MRZAnalyzer
 import org.idpass.smartscanner.lib.mrz.MRZCleaner
 import org.idpass.smartscanner.lib.mrz.MRZResult
-import org.idpass.smartscanner.lib.nfc.NFCActivity.Companion.FOR_SMARTSCANNER
+import org.idpass.smartscanner.lib.nfc.NFCActivity.Companion.FOR_SMARTSCANNER_APP
 import org.idpass.smartscanner.lib.scanner.config.Modes
 
 open class NFCScanAnalyzer(
@@ -45,7 +45,7 @@ open class NFCScanAnalyzer(
             Log.d(SmartScannerActivity.TAG, "Success from NFC -- SCAN")
             val nfcIntent = Intent(activity, NFCActivity::class.java)
             when {
-                intent.hasExtra(FOR_SMARTSCANNER) -> nfcIntent.putExtra(FOR_SMARTSCANNER, true)
+                intent.hasExtra(FOR_SMARTSCANNER_APP) -> nfcIntent.putExtra(FOR_SMARTSCANNER_APP, true)
                 intent.action == ScannerConstants.IDPASS_SMARTSCANNER_NFC_INTENT ||
                 intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_NFC_INTENT -> nfcIntent.putExtra(ScannerConstants.NFC_ACTION, intent.action)
             }
