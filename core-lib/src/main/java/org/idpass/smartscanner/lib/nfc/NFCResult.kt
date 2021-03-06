@@ -19,7 +19,7 @@ package org.idpass.smartscanner.lib.nfc
 
 
 data class NFCResult(
-        var fullName: String? = null,
+        var givenNames: String? = null,
         var surname: String? = null,
         var dateOfBirth: String? = null,
         var gender: String? = null,

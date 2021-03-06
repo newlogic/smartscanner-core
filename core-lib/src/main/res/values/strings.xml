@@ -5,6 +5,7 @@
     <string name="connection_text">No connection to download OCR models</string>
 
     <string name="required_perms_not_given">Error: Permissions denied.</string>
+    <string name="required_nfc_not_supported">Error: NFC is not supported in this device.</string>
     <string name="settings">Settings</string>
     <string name="rectangle">Rectangle</string>
 

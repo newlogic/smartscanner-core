@@ -25,13 +25,16 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import android.nfc.NfcAdapter
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import org.idpass.smartscanner.api.ScannerConstants
@@ -50,7 +53,7 @@ import org.idpass.smartscanner.lib.scanner.config.Modes
 import org.jmrtd.lds.icao.MRZInfo
 
 
-class NFCActivity : androidx.fragment.app.FragmentActivity(), NFCFragment.NfcFragmentListener, PassportDetailsFragment.PassportDetailsFragmentListener, PassportPhotoFragment.PassportPhotoFragmentListener {
+class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, PassportDetailsFragment.PassportDetailsFragmentListener, PassportPhotoFragment.PassportPhotoFragmentListener {
 
     companion object {
         private val TAG = NFCActivity::class.java.simpleName
@@ -63,6 +66,7 @@ class NFCActivity : androidx.fragment.app.FragmentActivity(), NFCFragment.NfcFra
         const val FOR_SMARTSCANNER_APP = "FOR_SMARTSCANNER_APP"
     }
     private val REQUEST_CODE_PERMISSIONS = 11
+    private val REQUEST_CODE_PERMISSIONS_VERSION_R = 2296
     private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
     private var mrzInfo: MRZInfo? = null
@@ -76,10 +80,8 @@ class NFCActivity : androidx.fragment.app.FragmentActivity(), NFCFragment.NfcFra
         binding = ActivityNfcBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
-        if (allPermissionsGranted()) {
+        if (BuildConfig.DEBUG) {
             setupLogs()
-        } else {
-            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
         }
         val mrz = intent.getStringExtra(ScannerConstants.NFC_MRZ_STRING) ?: run {
             intent.getStringExtra(FOR_MRZ_LOG)
@@ -165,21 +167,21 @@ class NFCActivity : androidx.fragment.app.FragmentActivity(), NFCFragment.NfcFra
                 if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_NFC_INTENT) {
                     bundle.putString(ScannerConstants.IDPASS_ODK_INTENT_DATA, personDetails?.documentNumber)
                 }
-                bundle.putString(ScannerConstants.NFC_FULL_NAME, additionalPersonDetails?.nameOfHolder?.replace("<<", " ")?.replace("<", " "))
+                bundle.putString(ScannerConstants.NFC_GIVEN_NAMES, additionalPersonDetails?.nameOfHolder?.replace("<<", " ")?.replace("<", " "))
                 bundle.putString(ScannerConstants.NFC_SURNAME, personDetails?.primaryIdentifier?.replace("<", ""))
                 bundle.putString(ScannerConstants.NFC_GENDER, personDetails?.gender?.name)
                 bundle.putString(ScannerConstants.NFC_DOCUMENT_NUMBER, personDetails?.documentNumber)
-                bundle.putString(ScannerConstants.NFC_EXPIRY_DATE, personDetails?.dateOfExpiry)
+                bundle.putString(ScannerConstants.NFC_EXPIRY_DATE, DateUtils.toReadableDate(formatStandardDate(personDetails?.dateOfExpiry)))
                 bundle.putString(ScannerConstants.NFC_ISSUING_STATE, personDetails?.issuingState)
                 bundle.putString(ScannerConstants.NFC_NATIONALITY, personDetails?.nationality)
                 bundle.putString(ScannerConstants.NFC_OTHER_NAMES, additionalPersonDetails?.otherNames?.arrayToString())
-                bundle.putString(ScannerConstants.NFC_DATE_OF_BIRTH, additionalPersonDetails?.fullDateOfBirth)
+                bundle.putString(ScannerConstants.NFC_DATE_OF_BIRTH, formatStandardDate(additionalPersonDetails?.fullDateOfBirth,"yyyyMMdd"))
                 bundle.putString(ScannerConstants.NFC_CUSTODY_INFO, additionalPersonDetails?.custodyInformation)
                 bundle.putString(ScannerConstants.NFC_PROFESSION, additionalPersonDetails?.profession)
                 bundle.putString(ScannerConstants.NFC_TELEPHONE, additionalPersonDetails?.telephone)
                 bundle.putString(ScannerConstants.NFC_TITLE, additionalPersonDetails?.title)
                 bundle.putString(ScannerConstants.NFC_DATE_TIME_PERSONALIZATION, additionalDocumentDetails?.dateAndTimeOfPersonalization)
-                bundle.putString(ScannerConstants.NFC_DATE_OF_ISSUE, additionalDocumentDetails?.dateOfIssue)
+                bundle.putString(ScannerConstants.NFC_DATE_OF_ISSUE, formatStandardDate(additionalDocumentDetails?.dateOfIssue, "yyyyMMdd"))
                 bundle.putString(ScannerConstants.NFC_ENDORSEMENTS_AND_OBSERVATIONS, additionalDocumentDetails?.endorsementsAndObservations)
                 bundle.putString(ScannerConstants.NFC_ISSUING_AUTHORITY, additionalDocumentDetails?.issuingAuthority)
                 bundle.putString(ScannerConstants.NFC_PERSONAL_SYSTEM_SERIAL_NUMBER, additionalDocumentDetails?.personalizationSystemSerialNumber)
@@ -200,7 +202,7 @@ class NFCActivity : androidx.fragment.app.FragmentActivity(), NFCFragment.NfcFra
                 if (intent.hasExtra(FOR_SMARTSCANNER_APP)) showFragmentDetails(passport)
                 else {
                     val result = NFCResult(
-                        fullName = additionalPersonDetails?.nameOfHolder?.replace("<<", " ")?.replace("<", " "),
+                        givenNames = additionalPersonDetails?.nameOfHolder?.replace("<<", " ")?.replace("<", " "),
                         surname = personDetails?.primaryIdentifier?.replace("<", ""),
                         gender = personDetails?.gender?.name,
                         documentNumber = personDetails?.documentNumber,
@@ -258,30 +260,63 @@ class NFCActivity : androidx.fragment.app.FragmentActivity(), NFCFragment.NfcFra
 
 
     override fun onImageSelected(bitmap: Bitmap?) {
-        showFragmentPhoto(bitmap!!)
+        if (bitmap != null) {
+            showFragmentPhoto(bitmap)
+        }
     }
 
     private fun setupLogs() {
-        if (BuildConfig.DEBUG) LoggerUtils.writeLogToFile(context = this, identifier = "NFC")
-    }
-
-    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
-        ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
+        if (allPermissionsGranted()) {
+            LoggerUtils.writeLogToFile(identifier = "NFC")
+        } else {
+            requestStoragePermissions()
+        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        if (requestCode == REQUEST_CODE_PERMISSIONS) {
-            if (allPermissionsGranted()) {
-                setupLogs()
-            } else {
-                val snackBar: Snackbar = Snackbar.make(binding.container, R.string.required_perms_not_given, Snackbar.LENGTH_INDEFINITE)
-                snackBar.setAction(R.string.settings) {
-                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                    val uri = Uri.fromParts("package", packageName, null)
-                    intent.data = uri
-                    startActivity(intent)
+        when (requestCode) {
+            REQUEST_CODE_PERMISSIONS_VERSION_R,
+            REQUEST_CODE_PERMISSIONS -> {
+                if (allPermissionsGranted()) {
+                    LoggerUtils.writeLogToFile(identifier = "NFC")
+                } else {
+                    val snackBar: Snackbar = Snackbar.make(binding.container, R.string.required_perms_not_given, Snackbar.LENGTH_INDEFINITE)
+                    snackBar.setAction(R.string.settings) {
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                        val uri = Uri.fromParts("package", packageName, null)
+                        intent.data = uri
+                        startActivity(intent)
+                    }
+                    snackBar.show()
                 }
-                snackBar.show()
+            }
+        }
+    }
+
+    private fun requestStoragePermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            try {
+                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+                intent.addCategory("android.intent.category.DEFAULT")
+                intent.data = Uri.parse(String.format("package:%s", applicationContext.packageName))
+                startActivityForResult(intent, REQUEST_CODE_PERMISSIONS_VERSION_R)
+            } catch (e: Exception) {
+                val intent = Intent()
+                intent.action = Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
+                startActivityForResult(intent, REQUEST_CODE_PERMISSIONS_VERSION_R)
+            }
+        } else {
+            //below android 11
+            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
+        }
+    }
+
+    private fun allPermissionsGranted() : Boolean{
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Environment.isExternalStorageManager()
+        } else {
+            REQUIRED_PERMISSIONS.all {
+                ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
             }
         }
     }
