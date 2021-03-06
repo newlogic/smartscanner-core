@@ -26,7 +26,7 @@ import android.net.Uri
 import android.nfc.NfcAdapter
 import android.os.Bundle
 import android.provider.Settings
-import android.view.View.GONE
+import android.util.Log
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -36,6 +36,8 @@ import com.google.android.material.snackbar.Snackbar
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.api.ScannerIntent
 import org.idpass.smartscanner.databinding.ActivityMainBinding
+import org.idpass.smartscanner.lib.R.string.required_nfc_not_supported
+import org.idpass.smartscanner.lib.R.string.required_perms_not_given
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT_BYTES
@@ -45,17 +47,12 @@ import org.idpass.smartscanner.lib.scanner.config.*
 import org.idpass.smartscanner.result.IDPassResultActivity
 import org.idpass.smartscanner.result.ResultActivity
 import timber.log.Timber
-import java.io.BufferedReader
-import java.io.File
-import java.io.FileReader
-import java.io.IOException
 
 
 class MainActivity : AppCompatActivity() {
 
     companion object {
-        private val TAG = MainActivity::class.java.simpleName
-        private const val OP_SCANNER = 1001
+        const val OP_SCANNER = 1001
         var imageType = ImageResultType.PATH.value
 
         private fun sampleConfig(isManualCapture: Boolean, label : String = "") = Config(
@@ -70,60 +67,54 @@ class MainActivity : AppCompatActivity() {
     private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
     private lateinit var binding : ActivityMainBinding
-    private var isNFC = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
-        checkNFCSupport()
-    }
-
-    override fun onStart() {
-        super.onStart()
-        // Request storage permissions
         if (allPermissionsGranted()) {
             FileUtils.createSmartScannerDirs()
         } else {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
         binding.itemBarcode.item.setOnClickListener { scanBarcode(BarcodeOptions.default) }
         binding.itemIdpassLite.item.setOnClickListener { scanIDPassLite() }
         binding.itemMrz.item.setOnClickListener { scanMRZ() }
         binding.itemQR.item.setOnClickListener { scanQRCode() }
         binding.itemNfc.item.setOnClickListener {
-            val mrzFromTxt = getMRZFromTxtFile()
-            if (mrzFromTxt.isNullOrEmpty()) {
-                scanNFC()
-            } else {
-                val resultIntent = Intent(this, NFCActivity::class.java)
-                resultIntent.putExtra(NFCActivity.RESULT_FOR_LOG, mrzFromTxt)
-                startActivity(resultIntent)
-                isNFC = false
-            }
+            if (isNFCSupported()) {
+                val mrzFromTxt = FileUtils.getMRZFromTxtFile()
+                if (mrzFromTxt.isNullOrEmpty()) {
+                    scanNFC()
+                } else {
+                    val resultIntent = Intent(this, NFCActivity::class.java)
+                    resultIntent.putExtra(NFCActivity.FOR_MRZ_LOG, mrzFromTxt)
+                    startActivity(resultIntent)
+                }
+            } else Snackbar.make(binding.main, required_nfc_not_supported, Snackbar.LENGTH_LONG).show()
         }
     }
 
-    private fun checkNFCSupport() {
+    private fun isNFCSupported() : Boolean {
         val adapter = NfcAdapter.getDefaultAdapter(this)
-        if (adapter == null) {
-            binding.itemNfc.item.visibility = GONE
-        }
+        return adapter != null
     }
 
     private fun startIntentCallOut() {
         try {
-            // Note: Scanner via intent can either be for barcode, idpass-lite, mrz, qrcode
+            // Note: Scanner via intent can either be for barcode, idpass-lite, mrz, nfc, qrcode
             // Please see ScannerIntent class for more details
             // barcode -> val intent = ScannerIntent.intentBarcode()
             // idpass-lite -> val intent = ScannerIntent.intentIDPassLite()
             // mrz -> val intent = ScannerIntent.intentMrz()
-            // gzipped -> val intent = ScannerIntent.intentQRCode()
-            val intent = ScannerIntent.intentMRZ(
-                isManualCapture = true,
-                mrzFormat = ScannerConstants.MRZ_FORMAT_MRTD_TD1
-            )
+            // nfc -> val intent = ScannerIntent.intentNFCScan()
+            // qrcode -> val intent = ScannerIntent.intentQRCode()
+            val intent = ScannerIntent.intentNFCScan()
             startActivityForResult(intent, OP_SCANNER)
         } catch (ex: ActivityNotFoundException) {
             ex.printStackTrace()
@@ -134,9 +125,11 @@ class MainActivity : AppCompatActivity() {
     private fun scanBarcode(barcodeOptions: BarcodeOptions? = null) {
         val intent = Intent(this, SmartScannerActivity::class.java)
         intent.putExtra(
-            SmartScannerActivity.SCANNER_OPTIONS, ScannerOptions.configBarcode(
-                config = sampleConfig(false),
+            SmartScannerActivity.SCANNER_OPTIONS,
+            ScannerOptions(
+                mode = Modes.BARCODE.value,
                 scannerSize = ScannerSize.LARGE.value,
+                config = sampleConfig(false),
                 barcodeOptions = barcodeOptions
             )
         )
@@ -147,7 +140,11 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, SmartScannerActivity::class.java)
         intent.putExtra(
             SmartScannerActivity.SCANNER_OPTIONS,
-            ScannerOptions.configIdPassLite(config = sampleConfig(false))
+            ScannerOptions(
+                mode = Modes.IDPASS_LITE.value,
+                scannerSize = ScannerSize.LARGE.value,
+                config = sampleConfig(false)
+            )
         )
         startActivityForResult(intent, OP_SCANNER)
     }
@@ -156,19 +153,19 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, SmartScannerActivity::class.java)
         intent.putExtra(
             SmartScannerActivity.SCANNER_OPTIONS,
-            ScannerOptions.configMrz(config = sampleConfig(true))
+            ScannerOptions(mode = Modes.MRZ.value, config = sampleConfig(true))
         )
         startActivityForResult(intent, OP_SCANNER)
     }
 
     private fun scanNFC() {
         val intent = Intent(this, SmartScannerActivity::class.java)
+        intent.putExtra(NFCActivity.FOR_SMARTSCANNER_APP, true)
         intent.putExtra(
             SmartScannerActivity.SCANNER_OPTIONS,
-            ScannerOptions.configMrz(config = sampleConfig(false, label = "Please scan MRZ to verify ID"))
+            ScannerOptions.defaultForNFCScan
         )
         startActivityForResult(intent, OP_SCANNER)
-        isNFC = true
     }
 
     @SuppressLint("InflateParams")
@@ -199,44 +196,36 @@ class MainActivity : AppCompatActivity() {
         bottomSheetDialog.show()
     }
 
-    public override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
+    @SuppressLint("LogNotTimber")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
         super.onActivityResult(requestCode, resultCode, intent)
+        Log.d(SmartScannerActivity.TAG, "Scanner requestCode $requestCode")
         if (requestCode == OP_SCANNER) {
-            Timber.d("Scanner resultCode $resultCode")
+            Log.d(SmartScannerActivity.TAG, "Scanner resultCode $resultCode")
             if (resultCode == RESULT_OK) {
                 // Get Result from Bundle Intent Call Out
-                intent?.getBundleExtra(ScannerConstants.RESULT)?.let {
-                    Timber.d("Scanner result bundle: $it")
-                    Timber.d("Scanner result bundle qr_code_json_value (from path): ${it.getString(ScannerConstants.QRCODE_JSON_VALUE)}")
-                    Timber.d("Scanner result bundle qr_code_text: ${it.getString(ScannerConstants.QRCODE_TEXT)}")
-                    if (it.getString(ScannerConstants.MODE) == Modes.IDPASS_LITE.value) {
+                intent?.getBundleExtra(ScannerConstants.RESULT)?.let { bundleResult ->
+                    Log.d(SmartScannerActivity.TAG, "Scanner result bundle: $bundleResult")
+                    if (bundleResult.getString(ScannerConstants.MODE) == Modes.IDPASS_LITE.value) {
                         // Go to ID PASS Lite Results Screen via bundle
                         val myIntent = Intent(this, IDPassResultActivity::class.java)
-                        myIntent.putExtra(IDPassResultActivity.BUNDLE_RESULT, it)
+                        myIntent.putExtra(IDPassResultActivity.BUNDLE_RESULT, bundleResult)
                         startActivity(myIntent)
                     } else {
                         // Go to Barcode/MRZ Results Screen via bundle
                         val resultIntent = Intent(this, ResultActivity::class.java)
-                        resultIntent.putExtra(ResultActivity.BUNDLE_RESULT, it)
+                        resultIntent.putExtra(ResultActivity.BUNDLE_RESULT, bundleResult)
                         startActivity(resultIntent)
                     }
                 } ?: run {
                     // Get Result from JSON String
                     val result = intent?.getStringExtra(SCANNER_RESULT)
-                    Timber.d("Scanner result string: $result")
+                    Log.d(SmartScannerActivity.TAG, "Scanner result string: $result")
                     if (result != null) {
-                        if (isNFC) {
-                            // Go to NFC Scanner Screen
-                            val resultIntent = Intent(this, NFCActivity::class.java)
-                            resultIntent.putExtra(NFCActivity.RESULT, result)
-                            startActivity(resultIntent)
-                            isNFC = false
-                        } else {
-                            // Go to Barcode/MRZ Results Screen
-                            val resultIntent = Intent(this, ResultActivity::class.java)
-                            resultIntent.putExtra(ResultActivity.RESULT, result)
-                            startActivity(resultIntent)
-                        }
+                        // Go to Barcode/MRZ Results Screen
+                        val resultIntent = Intent(this, ResultActivity::class.java)
+                        resultIntent.putExtra(ResultActivity.RESULT, result)
+                        startActivity(resultIntent)
                     } else {
                         // Go to ID PASS Lite Results Screen
                         val resultBytes = intent?.getByteArrayExtra(SCANNER_RESULT_BYTES)
@@ -257,7 +246,7 @@ class MainActivity : AppCompatActivity() {
             if (allPermissionsGranted()) {
                 FileUtils.createSmartScannerDirs()
             } else {
-                val snackBar: Snackbar = Snackbar.make(binding.main, org.idpass.smartscanner.lib.R.string.required_perms_not_given, Snackbar.LENGTH_INDEFINITE)
+                val snackBar: Snackbar = Snackbar.make(binding.main, required_perms_not_given, Snackbar.LENGTH_INDEFINITE)
                 snackBar.setAction(org.idpass.smartscanner.lib.R.string.settings) {
                     val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                     val uri = Uri.fromParts("package", packageName, null)
@@ -267,26 +256,5 @@ class MainActivity : AppCompatActivity() {
                 snackBar.show()
             }
         }
-    }
-
-    private fun getMRZFromTxtFile() : String?{
-        val file = File("${FileUtils.directory}/ad769ced-7727-443e-b613-59d52299f979.txt")
-        var mrz : String? = null
-        if(file.exists()){
-            //Read text from file
-            val text = StringBuilder()
-            try {
-                val br = BufferedReader(FileReader(file))
-                var line: String?
-                while (br.readLine().also { line = it } != null) {
-                    text.append(line)
-                }
-                br.close()
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-            mrz = text.toString()
-        }
-        return mrz
     }
 }
