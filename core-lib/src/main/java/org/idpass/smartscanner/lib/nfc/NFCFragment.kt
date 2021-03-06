@@ -39,6 +39,8 @@ import org.idpass.smartscanner.lib.R
 import org.idpass.smartscanner.lib.nfc.details.IntentData
 import org.idpass.smartscanner.lib.nfc.details.NFCDocumentTag
 import org.idpass.smartscanner.lib.nfc.passport.Passport
+import org.idpass.smartscanner.lib.platform.utils.DateUtils
+import org.idpass.smartscanner.lib.platform.utils.DateUtils.formatStandardDate
 import org.idpass.smartscanner.lib.platform.utils.KeyStoreUtils
 import org.jmrtd.AccessDeniedException
 import org.jmrtd.BACDeniedException
@@ -165,9 +167,9 @@ class  NFCFragment : androidx.fragment.app.Fragment() {
 
     override fun onResume() {
         super.onResume()
-        textViewPassportNumber!!.text = getString(R.string.doc_number, mrzInfo!!.documentNumber)
-        textViewDateOfBirth!!.text = getString(R.string.doc_dob, mrzInfo!!.dateOfBirth)
-        textViewDateOfExpiry!!.text = getString(R.string.doc_expiry, mrzInfo!!.dateOfExpiry)
+        textViewPassportNumber?.text = getString(R.string.doc_number, mrzInfo?.documentNumber)
+        textViewDateOfBirth?.text = getString(R.string.doc_dob, DateUtils.toAdjustedDate(formatStandardDate(mrzInfo?.dateOfBirth)))
+        textViewDateOfExpiry?.text = getString(R.string.doc_expiry, DateUtils.toReadableDate(formatStandardDate(mrzInfo?.dateOfExpiry)))
 
         if (nfcFragmentListener != null) {
             nfcFragmentListener!!.onEnableNfc()
