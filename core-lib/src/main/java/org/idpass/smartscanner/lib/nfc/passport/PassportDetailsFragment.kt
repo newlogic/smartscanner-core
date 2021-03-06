@@ -364,15 +364,15 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         val activity = activity
-        if (activity is PassportDetailsFragment.PassportDetailsFragmentListener) {
+        if (activity is PassportDetailsFragmentListener) {
             passportDetailsFragmentListener = activity
         }
     }
 
     override fun onDetach() {
-        passportDetailsFragmentListener = null
         super.onDetach()
-
+        passportDetailsFragmentListener = null
+        activity?.finish()
     }
 
     interface PassportDetailsFragmentListener {
