@@ -147,8 +147,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 ScannerConstants.IDPASS_SMARTSCANNER_MRZ_INTENT,
                 ScannerConstants.IDPASS_SMARTSCANNER_ODK_MRZ_INTENT -> ScannerOptions.defaultForMRZ
                 // nfc
-                ScannerConstants.IDPASS_SMARTSCANNER_NFC_SCAN_INTENT,
-                ScannerConstants.IDPASS_SMARTSCANNER_ODK_NFC_SCAN_INTENT -> ScannerOptions.defaultForNFCScan
+                ScannerConstants.IDPASS_SMARTSCANNER_NFC_INTENT,
+                ScannerConstants.IDPASS_SMARTSCANNER_ODK_NFC_INTENT -> ScannerOptions.defaultForNFCScan
                 // qrcode
                 ScannerConstants.IDPASS_SMARTSCANNER_QRCODE_INTENT,
                 ScannerConstants.IDPASS_SMARTSCANNER_ODK_QRCODE_INTENT -> ScannerOptions.defaultForQRCode

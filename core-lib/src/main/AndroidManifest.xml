@@ -21,29 +21,27 @@
         <activity
             android:name="SmartScannerActivity"
             android:configChanges="orientation|keyboardHidden"
-            android:screenOrientation="portrait">
+            android:screenOrientation="nosensor"
+            android:keepScreenOn="true">
             <intent-filter>
                 <!--Bundle intent-->
-                <action android:name="org.idpass.smartscanner.MRZ_SCAN" />
                 <action android:name="org.idpass.smartscanner.BARCODE_SCAN" />
                 <action android:name="org.idpass.smartscanner.IDPASS_LITE_SCAN" />
+                <action android:name="org.idpass.smartscanner.MRZ_SCAN" />
+                <action android:name="org.idpass.smartscanner.NFC_SCAN" />
                 <action android:name="org.idpass.smartscanner.QRCODE_SCAN" />
                 <!--ODK bundle intent-->
-                <action android:name="org.idpass.smartscanner.odk.MRZ_SCAN" />
                 <action android:name="org.idpass.smartscanner.odk.BARCODE_SCAN" />
                 <action android:name="org.idpass.smartscanner.odk.IDPASS_LITE_SCAN" />
+                <action android:name="org.idpass.smartscanner.odk.MRZ_SCAN" />
+                <action android:name="org.idpass.smartscanner.odk.NFC_SCAN" />
                 <action android:name="org.idpass.smartscanner.odk.QRCODE_SCAN" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <activity android:name=".nfc.NFCActivity"
             android:screenOrientation="nosensor"
-            android:keepScreenOn="true">
-            <intent-filter>
-                <action android:name="org.idpass.smartscanner.NFC_SCAN" />
-                <action android:name="org.idpass.smartscanner.odk.NFC_SCAN" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
+            android:launchMode="singleInstance"
+            android:keepScreenOn="true"/>
     </application>
 </manifest>
