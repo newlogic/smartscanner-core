@@ -17,6 +17,7 @@
  */
 package org.idpass.smartscanner.lib.mrz
 
+import org.idpass.smartscanner.lib.platform.utils.DateUtils
 import org.idpass.smartscanner.mrz.parser.innovatrics.MrzRecord
 import org.idpass.smartscanner.mrz.parser.innovatrics.records.MrtdTd1
 
@@ -40,9 +41,9 @@ data class MRZResult(
         val optional2: String? = null
 ) {
     companion object {
-        fun formatMrzResult(record: MrzRecord, image: String?) : MRZResult {
-            val dateOfBirth = MrzUtils.formatToAdjustedMrzDate(record.dateOfBirth?.toString()?.replace(Regex("[{}]"), ""))
-            val expirationDate = MrzUtils.formatToReadableMrzDate(record.expirationDate?.toString()?.replace(Regex("[{}]"), ""))
+        fun formatMrzResult(record: MrzRecord, image: String? = "") : MRZResult {
+            val dateOfBirth = DateUtils.toAdjustedDate(record.dateOfBirth?.toString()?.replace(Regex("[{}]"), ""))
+            val expirationDate = DateUtils.toReadableDate(record.expirationDate?.toString()?.replace(Regex("[{}]"), ""))
             return MRZResult(
                     image = image,
                     code = record.code.toString(),
@@ -62,8 +63,8 @@ data class MRZResult(
         }
 
         fun formatMrtdTd1Result(record: MrtdTd1, image: String?) : MRZResult {
-            val dateOfBirth = MrzUtils.formatToAdjustedMrzDate(record.dateOfBirth?.toString()?.replace(Regex("[{}]"), ""))
-            val expirationDate = MrzUtils.formatToReadableMrzDate(record.expirationDate?.toString()?.replace(Regex("[{}]"), ""))
+            val dateOfBirth = DateUtils.toAdjustedDate(record.dateOfBirth?.toString()?.replace(Regex("[{}]"), ""))
+            val expirationDate = DateUtils.toReadableDate(record.expirationDate?.toString()?.replace(Regex("[{}]"), ""))
             return MRZResult(
                     image = image,
                     code = record.code.toString(),

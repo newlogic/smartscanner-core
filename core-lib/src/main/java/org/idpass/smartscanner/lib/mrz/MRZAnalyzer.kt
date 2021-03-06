@@ -116,15 +116,15 @@ open class MRZAnalyzer(
                                                     .replace("%3C", "<").replace("%0A", "↩")
                                         }]"
                                 )
-                                val mrz = MRZCleaner.clean(rawFullRead)
+                                val cleanMRZ = MRZCleaner.clean(rawFullRead)
                                 Log.d(
                                         "${SmartScannerActivity.TAG}/SmartScanner",
                                         "After cleaner = [${
-                                            URLEncoder.encode(mrz, "UTF-8")
+                                            URLEncoder.encode(cleanMRZ, "UTF-8")
                                                     .replace("%3C", "<").replace("%0A", "↩")
                                         }]"
                                 )
-                                processResult(mrz = mrz, bitmap = bf, rotation = rotation)
+                                processResult(result = cleanMRZ, bitmap = bf, rotation = rotation)
                             } catch (e: Exception) {
                                 Log.d("${SmartScannerActivity.TAG}/SmartScanner", e.toString())
                             }
@@ -172,16 +172,16 @@ open class MRZAnalyzer(
                                                 .replace("%3C", "<").replace("%0A", "↩")
                                     }]"
                             )
-                            val mrz = MRZCleaner.clean(tessResult)
+                            val cleanMRZ = MRZCleaner.clean(tessResult)
                             Log.d(
                                     "${SmartScannerActivity.TAG}/Tesseract",
                                     "After cleaner = [${
-                                        URLEncoder.encode(mrz, "UTF-8")
+                                        URLEncoder.encode(cleanMRZ, "UTF-8")
                                                 .replace("%3C", "<")
                                                 .replace("%0A", "↩")
                                     }]"
                             )
-                            processResult(mrz = mrz, bitmap = bf, rotation = imageProxy.imageInfo.rotationDegrees)
+                            processResult(result = cleanMRZ, bitmap = bf, rotation = imageProxy.imageInfo.rotationDegrees)
                         } catch (e: Exception) { // MrzParseException, IllegalArgumentException
                             Log.d("${SmartScannerActivity.TAG}/Tesseract", e.toString())
                         }
@@ -195,19 +195,19 @@ open class MRZAnalyzer(
         }
     }
 
-    internal open fun processResult(mrz: String, bitmap: Bitmap, rotation: Int) {
+    internal open fun processResult(result: String, bitmap: Bitmap, rotation: Int) {
         val imagePathFile = activity.cacheImagePath()
         bitmap.cacheImageToLocal(imagePathFile, rotation)
         val imageString = if (imageResultType == ImageResultType.BASE_64.value) bitmap.encodeBase64(rotation) else imagePathFile
-        val result = when (format) {
-            MrzFormat.MRTD_TD1.value -> MRZResult.formatMrtdTd1Result(MRZCleaner.parseAndCleanMrtdTd1(mrz), imageString)
-            else -> MRZResult.formatMrzResult(MRZCleaner.parseAndClean(mrz), imageString)
+        val mrz = when (format) {
+            MrzFormat.MRTD_TD1.value -> MRZResult.formatMrtdTd1Result(MRZCleaner.parseAndCleanMrtdTd1(result), imageString)
+            else -> MRZResult.formatMrzResult(MRZCleaner.parseAndClean(result), imageString)
         }
         if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_MRZ_INTENT ||
             intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_MRZ_INTENT) {
-            sendBundleResult(mrzResult = result)
+            sendBundleResult(mrzResult = mrz)
         } else {
-            val jsonString = Gson().toJson(result)
+            val jsonString = Gson().toJson(mrz)
             sendAnalyzerResult(result = jsonString)
         }
     }
