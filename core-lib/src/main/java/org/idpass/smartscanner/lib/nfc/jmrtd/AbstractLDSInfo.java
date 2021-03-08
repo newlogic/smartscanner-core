@@ -34,7 +34,7 @@ import java.util.logging.Logger;
  *
  * @version $Revision: 1751 $
  */
-public abstract class MRTDAbstractLDSInfo implements MRTDLdsElement {
+public abstract class AbstractLDSInfo implements LdsElement {
 
     private static final Logger LOGGER = Logger.getLogger("org.idpass.smartscanner.lib");
 

@@ -19,7 +19,7 @@
  *
  * $Id: Gender.java 314 2018-05-25 13:42:16Z martijno $
  */
-package org.idpass.smartscanner.lib.nfc.jmrtd;
+package org.idpass.smartscanner.lib.nfc.scuba;
 
 
 /**
@@ -31,7 +31,7 @@ package org.idpass.smartscanner.lib.nfc.jmrtd;
  *
  * @version $Revision: 314 $
  */
-public enum MRTDGender {
+public enum Gender {
 
     MALE { @Override
     public int toInt() {
@@ -71,8 +71,8 @@ public enum MRTDGender {
      *
      * @return a gender
      */
-    public static MRTDGender getInstance(int code) {
-        for(MRTDGender g: MRTDGender.values()) {
+    public static Gender getInstance(int code) {
+        for(Gender g: Gender.values()) {
             if (g.toInt() == code) {
                 return g;
             }

@@ -30,7 +30,7 @@ import java.io.Serializable;
  *
  * @version $Revision: 1799 $
  */
-public interface MRTDLdsElement extends Serializable {
+public interface LdsElement extends Serializable {
 
     /**
      * Returns the encoded contents of this LDS info.

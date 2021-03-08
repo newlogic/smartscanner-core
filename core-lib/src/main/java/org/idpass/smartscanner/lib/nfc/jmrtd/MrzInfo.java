@@ -22,6 +22,8 @@
 package org.idpass.smartscanner.lib.nfc.jmrtd;
 
 
+import org.idpass.smartscanner.lib.nfc.scuba.Gender;
+
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -39,7 +41,7 @@ import java.nio.charset.StandardCharsets;
  *
  * @version $Revision: 1813 $
  */
-public class MRTDMrzInfo extends MRTDAbstractLDSInfo {
+public class MrzInfo extends AbstractLDSInfo {
 
     private static final long serialVersionUID = 7054965914471297804L;
 
@@ -69,7 +71,7 @@ public class MRTDMrzInfo extends MRTDAbstractLDSInfo {
     private String nationality;
     private String documentNumber;
     private String dateOfBirth;
-    private MRTDGender gender;
+    private Gender gender;
     private String dateOfExpiry;
     private char documentNumberCheckDigit;
     private char dateOfBirthCheckDigit;
@@ -92,10 +94,10 @@ public class MRTDMrzInfo extends MRTDAbstractLDSInfo {
      * @param dateOfExpiry date of expiry
      * @param personalNumber either empty, or a personal number of maximum length 14, or other optional data of exact length 15
      */
-    public MRTDMrzInfo(String documentCode, String issuingState,
+    public MrzInfo(String documentCode, String issuingState,
                    String primaryIdentifier, String secondaryIdentifier,
                    String documentNumber, String nationality, String dateOfBirth,
-                       MRTDGender gender, String dateOfExpiry, String personalNumber) {
+                   Gender gender, String dateOfExpiry, String personalNumber) {
         if (documentCode == null || documentCode.length() < 1 || documentCode.length() > 2
                 || !(documentCode.startsWith("P") || documentCode.startsWith("V"))) {
             throw new IllegalArgumentException("Wrong document code: " + documentCode);
@@ -140,12 +142,12 @@ public class MRTDMrzInfo extends MRTDAbstractLDSInfo {
      * @param optionalData1 optional data in line 1 of maximum length 15
      * @param optionalData2 optional data in line 2 of maximum length 11
      */
-    public MRTDMrzInfo(String documentCode,
+    public MrzInfo(String documentCode,
                    String issuingState,
                    String documentNumber,
                    String optionalData1,
                    String dateOfBirth,
-                   MRTDGender gender,
+                   Gender gender,
                    String dateOfExpiry,
                    String nationality,
                    String optionalData2,
@@ -180,7 +182,7 @@ public class MRTDMrzInfo extends MRTDAbstractLDSInfo {
      * @param inputStream contains the contents (value) of DG1 (without the tag and length)
      * @param length the length of the MRZInfo structure
      */
-    public MRTDMrzInfo(InputStream inputStream, int length) {
+    public MrzInfo(InputStream inputStream, int length) {
         try {
             readObject(inputStream, length);
         } catch (IOException ioe) {
@@ -194,7 +196,7 @@ public class MRTDMrzInfo extends MRTDAbstractLDSInfo {
      *
      * @param str input text
      */
-    public MRTDMrzInfo(String str) {
+    public MrzInfo(String str) {
         if (str == null) {
             throw new IllegalArgumentException("Null string");
         }
@@ -633,7 +635,7 @@ public class MRTDMrzInfo extends MRTDAbstractLDSInfo {
      *
      * @return gender
      */
-    public MRTDGender getGender() {
+    public Gender getGender() {
         return gender;
     }
 
@@ -642,7 +644,7 @@ public class MRTDMrzInfo extends MRTDAbstractLDSInfo {
      *
      * @param gender new gender
      */
-    public void setGender(MRTDGender gender) {
+    public void setGender(Gender gender) {
         this.gender = gender;
         checkDigit();
     }
@@ -701,7 +703,7 @@ public class MRTDMrzInfo extends MRTDAbstractLDSInfo {
             return false;
         }
 
-        MRTDMrzInfo other = (MRTDMrzInfo)obj;
+        MrzInfo other = (MrzInfo)obj;
 
         return
                 ((documentCode == null && other.documentCode == null) || documentCode !=  null && documentCode.equals(other.documentCode))
@@ -856,7 +858,7 @@ public class MRTDMrzInfo extends MRTDAbstractLDSInfo {
      *
      * @return a string to be used in an MRZ
      */
-    private static String genderToString(MRTDGender gender) {
+    private static String genderToString(Gender gender) {
         switch (gender) {
             case MALE:
                 return "M";
@@ -945,15 +947,15 @@ public class MRTDMrzInfo extends MRTDAbstractLDSInfo {
      *
      * @throws IOException if something goes wrong
      */
-    private MRTDGender readGender(DataInputStream inputStream) throws IOException {
+    private Gender readGender(DataInputStream inputStream) throws IOException {
         String genderStr = readString(inputStream, 1);
         if ("M".equalsIgnoreCase(genderStr)) {
-            return MRTDGender.MALE;
+            return Gender.MALE;
         }
         if ("F".equalsIgnoreCase(genderStr)) {
-            return MRTDGender.FEMALE;
+            return Gender.FEMALE;
         }
-        return MRTDGender.UNKNOWN;
+        return Gender.UNKNOWN;
     }
 
     /**
