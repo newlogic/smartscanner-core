@@ -30,6 +30,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
 import android.util.Log
+import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
@@ -41,7 +42,6 @@ import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.BuildConfig
 import org.idpass.smartscanner.lib.R
 import org.idpass.smartscanner.lib.SmartScannerActivity
-import org.idpass.smartscanner.lib.databinding.ActivityNfcBinding
 import org.idpass.smartscanner.lib.nfc.passport.Passport
 import org.idpass.smartscanner.lib.nfc.passport.PassportDetailsFragment
 import org.idpass.smartscanner.lib.nfc.passport.PassportPhotoFragment
@@ -73,13 +73,9 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
     private var nfcAdapter: NfcAdapter? = null
     private var pendingIntent: PendingIntent? = null
 
-    private lateinit var binding: ActivityNfcBinding
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityNfcBinding.inflate(layoutInflater)
-        val view = binding.root
-        setContentView(view)
+        setContentView(R.layout.activity_nfc)
         if (BuildConfig.DEBUG) {
             setupLogs()
         }
@@ -280,7 +276,8 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
                 if (allPermissionsGranted()) {
                     LoggerUtils.writeLogToFile(identifier = "NFC")
                 } else {
-                    val snackBar: Snackbar = Snackbar.make(binding.container, R.string.required_perms_not_given, Snackbar.LENGTH_INDEFINITE)
+                    val container = findViewById<FrameLayout>(R.id.container)
+                    val snackBar: Snackbar = Snackbar.make(container, R.string.required_perms_not_given, Snackbar.LENGTH_INDEFINITE)
                     snackBar.setAction(R.string.settings) {
                         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                         val uri = Uri.fromParts("package", packageName, null)
