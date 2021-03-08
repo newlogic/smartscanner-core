@@ -92,7 +92,7 @@ dependencies {
     implementation 'jp.wasabeef:glide-transformations:4.3.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
     // ID PASS lite
-    implementation 'com.google.protobuf:protobuf-lite:3.0.0'
+    implementation 'com.google.protobuf:protobuf-lite:3.0.1'
     implementation 'org.idpass:idpass-lite-java-android:0.1@aar'
     // SmartScanner MRZ Parser
     implementation project(path: ':smartscanner-mrz-parser')
@@ -104,7 +104,7 @@ dependencies {
     // NFC
     implementation 'org.jmrtd:jmrtd:0.7.18'
     implementation 'com.madgag.spongycastle:prov:1.58.0.0'
-    implementation 'net.sf.scuba:scuba-sc-android:0.0.20'
+    implementation 'net.sf.scuba:scuba-sc-android:0.0.23'
     implementation group: 'org.ejbca.cvc', name: 'cert-cvc', version: '1.4.6'
     //WSQ
     implementation 'com.github.mhshams:jnbis:2.0.2'
