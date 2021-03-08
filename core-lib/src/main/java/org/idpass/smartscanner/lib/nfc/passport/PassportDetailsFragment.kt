@@ -56,17 +56,17 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val arguments = arguments
-        if (arguments!!.containsKey(IntentData.KEY_PASSPORT)) {
+        if (arguments?.containsKey(IntentData.KEY_PASSPORT) == true) {
             passport = arguments.getParcelable<Passport>(IntentData.KEY_PASSPORT)
         }
 
         binding.iconPhoto.setOnClickListener {
-            var bitmap = passport!!.face
+            var bitmap = passport?.face
             if (bitmap == null) {
-                bitmap = passport!!.portrait
+                bitmap = passport?.portrait
             }
             if (passportDetailsFragmentListener != null) {
-                passportDetailsFragmentListener!!.onImageSelected(bitmap)
+                passportDetailsFragmentListener?.onImageSelected(bitmap)
             }
         }
     }
@@ -90,11 +90,11 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
         val personDetails = passport.personDetails
         val additionalPersonDetails = passport.additionalPersonDetails
         if (personDetails != null) {
-            val name = additionalPersonDetails?.nameOfHolder!!.replace("<<", " ").replace("<", " ")
-            val surname = personDetails.secondaryIdentifier!!.replace("<", "")
+            val name = additionalPersonDetails?.nameOfHolder?.replace("<<", " ")?.replace("<", " ")
+            val surname = personDetails.secondaryIdentifier?.replace("<", "")
             binding.valueName.text = getString(R.string.name, name, surname)
             binding.valueDOB.text = personDetails.dateOfBirth
-            binding.valueGender.text = personDetails.gender!!.name
+            binding.valueGender.text = personDetails.gender?.name
             binding.valuePassportNumber.text = personDetails.documentNumber
             binding.valueExpirationDate.text = personDetails.dateOfExpiry
             binding.valueIssuingState.text = personDetails.issuingState
@@ -111,13 +111,13 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
             if (additionalPersonDetails.fullDateOfBirth != null) {
                 binding.valueDateOfBirth.text = additionalPersonDetails.fullDateOfBirth
             }
-            if (additionalPersonDetails.otherNames != null && additionalPersonDetails.otherNames!!.isNotEmpty()) {
+            if (additionalPersonDetails.otherNames != null && additionalPersonDetails.otherNames?.isNotEmpty() == true) {
                 binding.valueOtherNames.text = additionalPersonDetails.otherNames?.arrayToString()
             }
-            if (additionalPersonDetails.otherValidTDNumbers != null && additionalPersonDetails.otherValidTDNumbers!!.isNotEmpty()) {
+            if (additionalPersonDetails.otherValidTDNumbers != null && additionalPersonDetails.otherValidTDNumbers?.isNotEmpty() == true) {
                 binding.valueOtherTdNumbers.text = additionalPersonDetails.otherValidTDNumbers?.arrayToString()
             }
-            if (additionalPersonDetails.permanentAddress != null && additionalPersonDetails.permanentAddress!!.isNotEmpty()) {
+            if (additionalPersonDetails.permanentAddress != null && additionalPersonDetails.permanentAddress?.isNotEmpty() == true) {
                 binding.valuePermanentAddress.text = additionalPersonDetails.permanentAddress?.arrayToString()
             }
 
@@ -129,7 +129,7 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
                 binding.valuePersonalSummary.text = additionalPersonDetails.personalSummary
             }
 
-            if (additionalPersonDetails.placeOfBirth != null && additionalPersonDetails.placeOfBirth!!.isNotEmpty()) {
+            if (additionalPersonDetails.placeOfBirth != null && additionalPersonDetails.placeOfBirth?.isNotEmpty() == true) {
                 binding.valuePlaceOfBirth.text = additionalPersonDetails.placeOfBirth?.arrayToString()
             }
 
@@ -182,8 +182,8 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
             binding.cardViewAdditionalDocumentInformation.visibility = View.GONE
         }
 
-        displayAuthenticationStatus(passport.verificationStatus, passport.featureStatus!!)
-        displayWarningTitle(passport.verificationStatus, passport.featureStatus!!)
+        displayAuthenticationStatus(passport.verificationStatus, passport.featureStatus)
+        displayWarningTitle(passport.verificationStatus, passport.featureStatus)
 
 
         val sodFile = passport.sodFile
@@ -220,27 +220,27 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
         }
     }
 
-    private fun displayWarningTitle(verificationStatus: VerificationStatus?, featureStatus: FeatureStatus) {
+    private fun displayWarningTitle(verificationStatus: VerificationStatus?, featureStatus: FeatureStatus?) {
         var colorCard = android.R.color.holo_green_light
         var message = ""
         var title = ""
-        if (featureStatus.hasCA() == FeatureStatus.Verdict.PRESENT) {
-            if (verificationStatus!!.ca == VerificationStatus.Verdict.SUCCEEDED && verificationStatus.ht == VerificationStatus.Verdict.SUCCEEDED && verificationStatus.cs == VerificationStatus.Verdict.SUCCEEDED) {
+        if (featureStatus?.hasCA() == FeatureStatus.Verdict.PRESENT) {
+            if (verificationStatus?.ca == VerificationStatus.Verdict.SUCCEEDED && verificationStatus.ht == VerificationStatus.Verdict.SUCCEEDED && verificationStatus.cs == VerificationStatus.Verdict.SUCCEEDED) {
                 //Everything is fine
                 colorCard = android.R.color.holo_green_light
                 title = getString(R.string.document_valid_passport)
                 message = getString(R.string.document_chip_content_success)
-            } else if (verificationStatus.ca == VerificationStatus.Verdict.FAILED) {
+            } else if (verificationStatus?.ca == VerificationStatus.Verdict.FAILED) {
                 //Chip authentication failed
                 colorCard = android.R.color.holo_red_light
                 title = getString(R.string.document_invalid_passport)
                 message = getString(R.string.document_chip_failure)
-            } else if (verificationStatus.ht == VerificationStatus.Verdict.FAILED) {
+            } else if (verificationStatus?.ht == VerificationStatus.Verdict.FAILED) {
                 //Document information
                 colorCard = android.R.color.holo_red_light
                 title = getString(R.string.document_invalid_passport)
                 message = getString(R.string.document_document_failure)
-            } else if (verificationStatus.cs == VerificationStatus.Verdict.FAILED) {
+            } else if (verificationStatus?.cs == VerificationStatus.Verdict.FAILED) {
                 //CSCA information
                 colorCard = android.R.color.holo_red_light
                 title = getString(R.string.document_invalid_passport)
@@ -251,18 +251,18 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
                 title = getString(R.string.document_unknown_passport_title)
                 message = getString(R.string.document_unknown_passport_message)
             }
-        } else if (featureStatus.hasCA() == FeatureStatus.Verdict.NOT_PRESENT) {
-            if (verificationStatus!!.ht == VerificationStatus.Verdict.SUCCEEDED) {
+        } else if (featureStatus?.hasCA() == FeatureStatus.Verdict.NOT_PRESENT) {
+            if (verificationStatus?.ht == VerificationStatus.Verdict.SUCCEEDED) {
                 //Document information is fine
                 colorCard = android.R.color.holo_green_light
                 title = getString(R.string.document_valid_passport)
                 message = getString(R.string.document_content_success)
-            } else if (verificationStatus.ht == VerificationStatus.Verdict.FAILED) {
+            } else if (verificationStatus?.ht == VerificationStatus.Verdict.FAILED) {
                 //Document information
                 colorCard = android.R.color.holo_red_light
                 title = getString(R.string.document_invalid_passport)
                 message = getString(R.string.document_document_failure)
-            } else if (verificationStatus.cs == VerificationStatus.Verdict.FAILED) {
+            } else if (verificationStatus?.cs == VerificationStatus.Verdict.FAILED) {
                 //CSCA information
                 colorCard = android.R.color.holo_red_light
                 title = getString(R.string.document_invalid_passport)
@@ -285,46 +285,46 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
     }
 
 
-    private fun displayAuthenticationStatus(verificationStatus: VerificationStatus?, featureStatus: FeatureStatus) {
+    private fun displayAuthenticationStatus(verificationStatus: VerificationStatus?, featureStatus: FeatureStatus?) {
 
-        if (featureStatus.hasBAC() == FeatureStatus.Verdict.PRESENT) {
+        if (featureStatus?.hasBAC() == FeatureStatus.Verdict.PRESENT) {
             binding.rowBac.visibility = View.VISIBLE
         } else {
             binding.rowBac.visibility = View.GONE
         }
 
-        if (featureStatus.hasAA() == FeatureStatus.Verdict.PRESENT) {
+        if (featureStatus?.hasAA() == FeatureStatus.Verdict.PRESENT) {
             binding.rowActive.visibility = View.VISIBLE
         } else {
             binding.rowActive.visibility = View.GONE
         }
 
-        if (featureStatus.hasSAC() == FeatureStatus.Verdict.PRESENT) {
+        if (featureStatus?.hasSAC() == FeatureStatus.Verdict.PRESENT) {
             binding.rowPace.visibility = View.VISIBLE
         } else {
             binding.rowPace.visibility = View.GONE
         }
 
-        if (featureStatus.hasCA() == FeatureStatus.Verdict.PRESENT) {
+        if (featureStatus?.hasCA() == FeatureStatus.Verdict.PRESENT) {
             binding.rowChip.visibility = View.VISIBLE
         } else {
             binding.rowChip.visibility = View.GONE
         }
 
-        if (featureStatus.hasEAC() == FeatureStatus.Verdict.PRESENT) {
+        if (featureStatus?.hasEAC() == FeatureStatus.Verdict.PRESENT) {
             binding.rowEac.visibility = View.VISIBLE
         } else {
             binding.rowEac.visibility = View.GONE
         }
 
-        displayVerificationStatusIcon(binding.valueBac, verificationStatus!!.bac)
-        displayVerificationStatusIcon(binding.valuePace, verificationStatus.sac)
-        displayVerificationStatusIcon(binding.valuePassive, verificationStatus.ht)
-        displayVerificationStatusIcon(binding.valueActive, verificationStatus.aa)
-        displayVerificationStatusIcon(binding.valueDocumentSigning, verificationStatus.ds)
-        displayVerificationStatusIcon(binding.valueCountrySigning, verificationStatus.cs)
-        displayVerificationStatusIcon(binding.valueChip, verificationStatus.ca)
-        displayVerificationStatusIcon(binding.valueEac, verificationStatus.eac)
+        displayVerificationStatusIcon(binding.valueBac, verificationStatus?.bac)
+        displayVerificationStatusIcon(binding.valuePace, verificationStatus?.sac)
+        displayVerificationStatusIcon(binding.valuePassive, verificationStatus?.ht)
+        displayVerificationStatusIcon(binding.valueActive, verificationStatus?.aa)
+        displayVerificationStatusIcon(binding.valueDocumentSigning, verificationStatus?.ds)
+        displayVerificationStatusIcon(binding.valueCountrySigning, verificationStatus?.cs)
+        displayVerificationStatusIcon(binding.valueChip, verificationStatus?.ca)
+        displayVerificationStatusIcon(binding.valueEac, verificationStatus?.eac)
     }
 
     private fun displayVerificationStatusIcon(imageView: ImageView, verdictStatus: VerificationStatus.Verdict?) {
@@ -357,7 +357,7 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
             }
         }
         imageView.setImageResource(resourceIconId)
-        imageView.setColorFilter(ContextCompat.getColor(activity!!, resourceColorId), android.graphics.PorterDuff.Mode.SRC_IN)
+        imageView.setColorFilter(ContextCompat.getColor(requireActivity(), resourceColorId), android.graphics.PorterDuff.Mode.SRC_IN)
     }
 
 
