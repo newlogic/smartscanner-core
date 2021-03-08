@@ -38,7 +38,7 @@ import net.sf.scuba.smartcards.ISO7816
 import org.idpass.smartscanner.lib.R
 import org.idpass.smartscanner.lib.nfc.details.IntentData
 import org.idpass.smartscanner.lib.nfc.details.NFCDocumentTag
-import org.idpass.smartscanner.lib.nfc.jmrtd.MRTDMrzInfo
+import org.idpass.smartscanner.lib.nfc.jmrtd.MrzInfo
 import org.idpass.smartscanner.lib.nfc.passport.Passport
 import org.idpass.smartscanner.lib.platform.utils.DateUtils
 import org.idpass.smartscanner.lib.platform.utils.DateUtils.formatStandardDate
@@ -49,7 +49,7 @@ import java.security.Security
 
 class  NFCFragment : androidx.fragment.app.Fragment() {
 
-    private var mrzInfo: MRTDMrzInfo? = null
+    private var mrzInfo: MrzInfo? = null
     private var nfcFragmentListener: NfcFragmentListener? = null
     private var textViewPassportNumber: TextView? = null
     private var textViewDateOfBirth: TextView? = null
@@ -68,7 +68,7 @@ class  NFCFragment : androidx.fragment.app.Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         if (arguments?.containsKey(IntentData.KEY_MRZ_INFO) == true) {
-            mrzInfo = arguments?.getSerializable(IntentData.KEY_MRZ_INFO) as MRTDMrzInfo
+            mrzInfo = arguments?.getSerializable(IntentData.KEY_MRZ_INFO) as MrzInfo
         }
 
         textViewPassportNumber = view.findViewById(R.id.value_passport_number)
@@ -227,7 +227,7 @@ class  NFCFragment : androidx.fragment.app.Fragment() {
         init {
             Security.insertProviderAt(org.spongycastle.jce.provider.BouncyCastleProvider(), 1)
         }
-        fun newInstance(mrzInfo: MRTDMrzInfo): NFCFragment {
+        fun newInstance(mrzInfo: MrzInfo): NFCFragment {
             val myFragment = NFCFragment()
             val args = Bundle()
             args.putSerializable(IntentData.KEY_MRZ_INFO, mrzInfo)
