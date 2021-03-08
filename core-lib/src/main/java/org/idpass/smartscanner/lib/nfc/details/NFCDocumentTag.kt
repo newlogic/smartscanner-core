@@ -28,18 +28,18 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import net.sf.scuba.smartcards.CardService
 import net.sf.scuba.smartcards.CardServiceException
+import org.idpass.smartscanner.lib.nfc.jmrtd.MRTDMrzInfo
 import org.idpass.smartscanner.lib.nfc.passport.Passport
 import org.idpass.smartscanner.lib.nfc.passport.PassportNFC
 import org.idpass.smartscanner.lib.nfc.passport.PassportNfcUtils
 import org.jmrtd.*
 import org.jmrtd.lds.icao.DG1File
-import org.jmrtd.lds.icao.MRZInfo
 import java.security.Security
 
 
 class NFCDocumentTag {
 
-    fun handleTag(context: Context, tag: Tag, mrzInfo: MRZInfo, mrtdTrustStore: MRTDTrustStore, passportCallback: PassportCallback):Disposable{
+    fun handleTag(context: Context, tag: Tag, mrtdMrzInfo: MRTDMrzInfo, mrtdTrustStore: MRTDTrustStore, passportCallback: PassportCallback):Disposable{
         return  Single.fromCallable {
             var passport: Passport? = null
             var cardServiceException: Exception? = null
@@ -52,7 +52,7 @@ class NFCDocumentTag {
                 ps = PassportService(cs, 256, 224, false, true)
                 ps.open()
 
-                val passportNFC = PassportNFC(ps, mrtdTrustStore, mrzInfo)
+                val passportNFC = PassportNFC(ps, mrtdTrustStore, mrtdMrzInfo)
                 val verifySecurity = passportNFC.verifySecurity()
                 val features = passportNFC.features
 

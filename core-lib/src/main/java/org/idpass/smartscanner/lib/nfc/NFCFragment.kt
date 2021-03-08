@@ -38,21 +38,18 @@ import net.sf.scuba.smartcards.ISO7816
 import org.idpass.smartscanner.lib.R
 import org.idpass.smartscanner.lib.nfc.details.IntentData
 import org.idpass.smartscanner.lib.nfc.details.NFCDocumentTag
+import org.idpass.smartscanner.lib.nfc.jmrtd.MRTDMrzInfo
 import org.idpass.smartscanner.lib.nfc.passport.Passport
 import org.idpass.smartscanner.lib.platform.utils.DateUtils
 import org.idpass.smartscanner.lib.platform.utils.DateUtils.formatStandardDate
 import org.idpass.smartscanner.lib.platform.utils.KeyStoreUtils
-import org.jmrtd.AccessDeniedException
-import org.jmrtd.BACDeniedException
-import org.jmrtd.MRTDTrustStore
-import org.jmrtd.PACEException
-import org.jmrtd.lds.icao.MRZInfo
+import org.jmrtd.*
 import java.security.Security
 
 
 class  NFCFragment : androidx.fragment.app.Fragment() {
 
-    private var mrzInfo: MRZInfo? = null
+    private var mrzInfo: MRTDMrzInfo? = null
     private var nfcFragmentListener: NfcFragmentListener? = null
     private var textViewPassportNumber: TextView? = null
     private var textViewDateOfBirth: TextView? = null
@@ -71,7 +68,7 @@ class  NFCFragment : androidx.fragment.app.Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         if (arguments?.containsKey(IntentData.KEY_MRZ_INFO) == true) {
-            mrzInfo = arguments?.getSerializable(IntentData.KEY_MRZ_INFO) as MRZInfo
+            mrzInfo = arguments?.getSerializable(IntentData.KEY_MRZ_INFO) as MRTDMrzInfo
         }
 
         textViewPassportNumber = view.findViewById(R.id.value_passport_number)
@@ -230,7 +227,7 @@ class  NFCFragment : androidx.fragment.app.Fragment() {
         init {
             Security.insertProviderAt(org.spongycastle.jce.provider.BouncyCastleProvider(), 1)
         }
-        fun newInstance(mrzInfo: MRZInfo): NFCFragment {
+        fun newInstance(mrzInfo: MRTDMrzInfo): NFCFragment {
             val myFragment = NFCFragment()
             val args = Bundle()
             args.putSerializable(IntentData.KEY_MRZ_INFO, mrzInfo)
