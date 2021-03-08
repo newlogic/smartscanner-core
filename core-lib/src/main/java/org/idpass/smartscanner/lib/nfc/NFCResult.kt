@@ -19,6 +19,7 @@ package org.idpass.smartscanner.lib.nfc
 
 
 data class NFCResult(
+        val image: String? = null,
         var givenNames: String? = null,
         var surname: String? = null,
         var dateOfBirth: String? = null,

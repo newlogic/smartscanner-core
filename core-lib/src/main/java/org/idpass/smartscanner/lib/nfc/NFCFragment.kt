@@ -44,6 +44,7 @@ import org.idpass.smartscanner.lib.platform.utils.DateUtils
 import org.idpass.smartscanner.lib.platform.utils.DateUtils.formatStandardDate
 import org.idpass.smartscanner.lib.platform.utils.KeyStoreUtils
 import org.jmrtd.*
+import org.spongycastle.jce.provider.BouncyCastleProvider
 import java.security.Security
 
 
@@ -225,7 +226,7 @@ class  NFCFragment : androidx.fragment.app.Fragment() {
         private val TAG = NFCFragment::class.java.simpleName
 
         init {
-            Security.insertProviderAt(org.spongycastle.jce.provider.BouncyCastleProvider(), 1)
+            Security.insertProviderAt(BouncyCastleProvider(), 1)
         }
         fun newInstance(mrzInfo: MrzInfo): NFCFragment {
             val myFragment = NFCFragment()
