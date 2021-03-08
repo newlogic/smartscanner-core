@@ -42,6 +42,7 @@ import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.BuildConfig
 import org.idpass.smartscanner.lib.R
 import org.idpass.smartscanner.lib.SmartScannerActivity
+import org.idpass.smartscanner.lib.nfc.jmrtd.MRTDMrzInfo
 import org.idpass.smartscanner.lib.nfc.passport.Passport
 import org.idpass.smartscanner.lib.nfc.passport.PassportDetailsFragment
 import org.idpass.smartscanner.lib.nfc.passport.PassportPhotoFragment
@@ -50,7 +51,6 @@ import org.idpass.smartscanner.lib.platform.utils.DateUtils
 import org.idpass.smartscanner.lib.platform.utils.DateUtils.formatStandardDate
 import org.idpass.smartscanner.lib.platform.utils.LoggerUtils
 import org.idpass.smartscanner.lib.scanner.config.Modes
-import org.jmrtd.lds.icao.MRZInfo
 
 
 class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, PassportDetailsFragment.PassportDetailsFragmentListener, PassportPhotoFragment.PassportPhotoFragmentListener {
@@ -69,7 +69,7 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
     private val REQUEST_CODE_PERMISSIONS_VERSION_R = 2296
     private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
-    private var mrzInfo: MRZInfo? = null
+    private var mrzInfo: MRTDMrzInfo? = null
     private var nfcAdapter: NfcAdapter? = null
     private var pendingIntent: PendingIntent? = null
 
@@ -84,7 +84,7 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
         }
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         try {
-            mrzInfo = MRZInfo(mrz)
+            mrzInfo = MRTDMrzInfo(mrz)
             mrzInfo?.let {
                 supportFragmentManager.beginTransaction()
                     .replace(R.id.container, NFCFragment.newInstance(it), TAG_NFC)
