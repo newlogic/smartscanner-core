@@ -102,7 +102,7 @@ dependencies {
     implementation 'com.jayway.jsonpath:json-path:2.5.0'
     implementation 'com.github.wnameless.json:json-flattener:0.12.0'
     // NFC
-    implementation 'org.jmrtd:jmrtd:0.7.18'
+    implementation files('libs/jmrtd-0.7.25.aar')
     implementation 'com.madgag.spongycastle:prov:1.58.0.0'
     implementation 'net.sf.scuba:scuba-sc-android:0.0.23'
     implementation group: 'org.ejbca.cvc', name: 'cert-cvc', version: '1.4.6'
