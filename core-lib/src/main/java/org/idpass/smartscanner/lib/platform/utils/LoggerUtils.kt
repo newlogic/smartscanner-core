@@ -24,18 +24,20 @@ object LoggerUtils {
     fun writeLogToFile(identifier : String = "default") {
         try {
             val directory = FileUtils.directory
-            val fileName = "logcat-$identifier.txt"
-            if (File(directory).exists()) {
-                val file = File(directory, fileName)
-                if (!file.exists()) {
-                    file.createNewFile()
-                } else {
-                    file.delete()
-                }
-                //"logcat -f *:S NFCScannerActivity:D SmartScannerActivity:D"
-                val command = "logcat -f " + file.absolutePath
-                Runtime.getRuntime().exec(command)
+            if (!File(directory).exists()) {
+                FileUtils.createSmartScannerDirs()
             }
+            val fileName = "logcat-$identifier.txt"
+            val file = File(directory, fileName)
+            if (!file.exists()) {
+                file.createNewFile()
+            } else {
+                file.delete()
+            }
+            //"logcat -f *:S NFCScannerActivity:D SmartScannerActivity:D"
+            val command = "logcat -f " + file.absolutePath
+            Runtime.getRuntime().exec(command)
+
         } catch (e : Exception) {
             e.printStackTrace()
         }
