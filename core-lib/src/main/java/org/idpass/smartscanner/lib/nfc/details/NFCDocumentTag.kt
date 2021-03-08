@@ -26,6 +26,7 @@ import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import net.sf.scuba.smartcards.APDUListener
 import net.sf.scuba.smartcards.CardService
 import net.sf.scuba.smartcards.CardServiceException
 import org.idpass.smartscanner.lib.nfc.jmrtd.MrzInfo
@@ -39,7 +40,7 @@ import java.security.Security
 
 class NFCDocumentTag {
 
-    fun handleTag(context: Context, tag: Tag, mrzInfo: MrzInfo, mrtdTrustStore: MRTDTrustStore, passportCallback: PassportCallback):Disposable{
+    fun handleTag(context: Context, tag: Tag, mrz: MrzInfo, mrtdTrustStore: MRTDTrustStore, passportCallback: PassportCallback):Disposable{
         return  Single.fromCallable {
             var passport: Passport? = null
             var cardServiceException: Exception? = null
@@ -50,9 +51,17 @@ class NFCDocumentTag {
                 nfc.timeout = 5 * 1000 //5 seconds timeout
                 val cs = CardService.getInstance(nfc)
                 ps = PassportService(cs, 256, 224, false, true)
+                ps.addAPDUListener(APDUListener { e ->
+                    val cmdBuf = e.commandAPDU.bytes
+                    val respBuf = e.responseAPDU.bytes
+                    val cmdBufStr: String = printLine(cmdBuf, "PACKET ==> ")
+                    val respBufStr: String = printLine(respBuf, "PACKET <== ")
+                    Log.w(TAG, cmdBufStr)
+                    Log.w(TAG, respBufStr)
+                })
                 ps.open()
 
-                val passportNFC = PassportNFC(ps, mrtdTrustStore, mrzInfo)
+                val passportNFC = PassportNFC(ps, mrtdTrustStore, mrz)
                 val verifySecurity = passportNFC.verifySecurity()
                 val features = passportNFC.features
 
@@ -226,6 +235,17 @@ class NFCDocumentTag {
                 }
                 passportCallback.onPassportReadFinish()
             }
+    }
+
+    private fun printLine(bytes: ByteArray, title: String?): String {
+        val sb = StringBuilder()
+        if (title != null) {
+            sb.append(title)
+        }
+        for (b in bytes) {
+            sb.append(String.format("%02X", b))
+        }
+        return sb.toString()
     }
 
     data class PassportDTO(val passport: Passport? = null, val cardServiceException: Exception? = null)
