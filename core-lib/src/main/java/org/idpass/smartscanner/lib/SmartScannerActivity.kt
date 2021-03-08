@@ -26,9 +26,7 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.hardware.camera2.CameraManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
@@ -174,7 +172,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         if (allPermissionsGranted()) {
             setupConfiguration()
         } else {
-            requestStoragePermissions()
+            requestPermissions()
         }
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
@@ -388,32 +386,12 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         }
     }
 
-    private fun requestStoragePermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            try {
-                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
-                intent.addCategory("android.intent.category.DEFAULT")
-                intent.data = Uri.parse(String.format("package:%s", applicationContext.packageName))
-                startActivityForResult(intent, REQUEST_CODE_PERMISSIONS_VERSION_R)
-            } catch (e: Exception) {
-                val intent = Intent()
-                intent.action = Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
-                startActivityForResult(intent, REQUEST_CODE_PERMISSIONS_VERSION_R)
-            }
-        } else {
-            //below android 11
-            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
-        }
+    private fun requestPermissions() {
+        ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
     }
 
-    private fun allPermissionsGranted() : Boolean{
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            Environment.isExternalStorageManager()
-        } else {
-            REQUIRED_PERMISSIONS.all {
-                ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
-            }
-        }
+    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
+        ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
     }
 
     override fun onClick(view: View) {
