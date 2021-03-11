@@ -2,7 +2,8 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/white">
 
     <TableLayout
         android:layout_gravity="center"
@@ -49,6 +50,7 @@
                             android:layout_weight="1"
                             android:layout_height="wrap_content"
                             android:padding="@dimen/margin_tiny"
+                            android:textColor="@color/idpass_black"
                             android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
                     </TableRow>
 
@@ -62,6 +64,7 @@
                             android:layout_weight="1"
                             android:layout_height="wrap_content"
                             android:padding="@dimen/margin_tiny"
+                            android:textColor="@color/idpass_black"
                             android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
                     </TableRow>
 
@@ -75,6 +78,7 @@
                             android:layout_weight="1"
                             android:layout_height="wrap_content"
                             android:padding="@dimen/margin_tiny"
+                            android:textColor="@color/idpass_black"
                             android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
                     </TableRow>
                 </TableLayout>
@@ -91,6 +95,7 @@
         android:layout_alignLeft="@+id/textViewNfcTitle"
         android:layout_alignRight="@+id/textViewNfcTitle"
         android:layout_above="@+id/textViewNfcTitle"
+        android:indeterminateTint="@color/grey"
         android:indeterminate="true"
         android:visibility="gone"
         />
@@ -103,6 +108,7 @@
         android:gravity="center"
         android:layout_centerInParent="true"
         android:textSize="14sp"
+        android:textColor="@color/grey"
         android:layout_margin="14dp"/>
 
     <TextView android:id="@+id/status_view_bottom"
