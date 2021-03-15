@@ -1,12 +1,13 @@
 # SmartScanner Core
 
-ID scanning Android app and library. Supports MRZ, Barcodes, and [ID PASS Lite](https://github.com/idpass/idpass-lite) cards.
+ID scanning Android app and library. Supports MRZ, NFC, Barcodes, and [ID PASS Lite](https://github.com/idpass/idpass-lite) cards.
 
 **Note: The library's API might keep evolving before we reach v1.0, so be careful when upgrading between these pre-v1.0 versions. Starting at v1.0 we will be careful in introducing breaking API changes.**
 
 ## Features
 
 - Scan MRZ
+- Scan NFC
 - Scan Barcode
 - Scan [ID PASS Lite](https://github.com/idpass/idpass-lite)
 - Supports Intent Call Out (ODK & Non-ODK)
@@ -42,6 +43,7 @@ The following table shows the intent actions available for each operation availa
 | Scan Operation |                                            ODK |                                    Non-ODK |
 | -------------- | ---------------------------------------------- | ------------------------------------------ |
 | MRZ            | `org.idpass.smartscanner.odk.MRZ_SCAN`         | `org.idpass.smartscanner.MRZ_SCAN`         |
+| NFC            | `org.idpass.smartscanner.odk.NFC_SCAN`         | `org.idpass.smartscanner.NFC_SCAN`         |
 | Barcode        | `org.idpass.smartscanner.odk.BARCODE_SCAN`     | `org.idpass.smartscanner.BARCODE_SCAN`     |
 | QR code        | `org.idpass.smartscanner.odk.QRCODE_SCAN`      | `org.idpass.smartscanner.QRCODE_SCAN`      |
 | ID PASS Lite   | `org.idpass.smartscanner.odk.IDPASS_LITE_SCAN` | `org.idpass.smartscanner.IDPASS_LITE_SCAN` |
