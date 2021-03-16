@@ -1,31 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">ID PASS SmartScanner</string>
-    <string name="model_text">Downloading OCR models…</string>
-    <string name="connection_text">No connection to download OCR models</string>
+    <string name="model_text" translatable="false">Downloading OCR models…</string>
+    <string name="connection_text" translatable="false">No connection to download OCR models</string>
 
-    <string name="required_perms_not_given">Error: Permissions denied.</string>
-    <string name="required_nfc_not_supported">Error: NFC is not supported in this device.</string>
-    <string name="settings">Settings</string>
-    <string name="rectangle">Rectangle</string>
+    <string name="required_perms_not_given" translatable="false">Error: Permissions denied.</string>
+    <string name="required_nfc_not_supported" translatable="false">Error: NFC is not supported in this device.</string>
 
-    <string name="cd_close_button">Back</string>
-    <string name="cd_flash_button">Toggle camera flash</string>
-    <string name="error_input">Please provide details to read passport</string>
-    <string name="mlkit">MLKit</string>
+    <string name="settings" translatable="false">Settings</string>
+    <string name="rectangle" translatable="false">Rectangle</string>
 
-    <string name="label_authenticate">Authenticate</string>
-    <string name="label_content_description">Image of MRZ/BARCODE/IDPASSLITE</string>
-    <string name="label_close">Close</string>
-    <string name="label_enter_pin">Enter pin code</string>
-    <string name="label_idpass_result">Verify ID PASS Lite</string>
-    <string name="label_info_loading">Reading data…</string>
+    <string name="cd_close_button" translatable="false">Back</string>
+    <string name="cd_flash_button" translatable="false">Toggle camera flash</string>
+    <string name="error_input" translatable="false">Please provide details to read passport</string>
+    <string name="mlkit" translatable="false">MLKit</string>
+
+    <string name="label_authenticate" translatable="false">Authenticate</string>
+    <string name="label_content_description" translatable="false">Image of MRZ/BARCODE/IDPASSLITE</string>
+    <string name="label_close" translatable="false">Close</string>
+    <string name="label_enter_pin" translatable="false">Enter pin code</string>
+    <string name="label_idpass_result" translatable="false">Verify ID PASS Lite</string>
+    <string name="label_info_loading" translatable="false">Reading data…</string>
     <string name="label_newlogic">Developed by Newlogic</string>
-    <string name="label_nfc_on">Please turn on NFC in settings</string>
-    <string name="label_skip">Skip</string>
-    <string name="label_turn_on">Turn on</string>
-    <string name="label_tooltip_camera">Point your camera to a %1$s</string>
-    <string name="label_verify">Verify</string>
+    <string name="label_nfc_on" translatable="false">Please turn on NFC in settings</string>
+    <string name="label_skip" translatable="false">Skip</string>
+    <string name="label_turn_on" translatable="false">Turn on</string>
+    <string name="label_tooltip_camera" translatable="false">Point your camera to a %1$s</string>
+    <string name="label_verify" translatable="false">Verify</string>
 
     <string name="camera_error">This device doesn\'t support Camera2 API.</string>
     <string-array name="ocrenginemodes">
@@ -84,7 +85,7 @@
     <string name="label_additional_information">Additional person information</string>
     <string name="label_additional_information_custody">Custody</string>
     <string name="label_additional_information_dob">Date of birth</string>
-    <string name="label_additional_information_other_names">Other names</string>
+    <string name="label_additional_information_other_names">Mother Name</string>
     <string name="label_additional_information_other_valid_td_numbers">Other Td numbers</string>
     <string name="label_additional_information_permanent_address">Permanent address</string>
     <string name="label_additional_information_personal_number">Personal number</string>

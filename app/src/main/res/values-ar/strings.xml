@@ -1,0 +1,39 @@
+<resources>
+    <string name="app_name">الماسح الذكي</string>
+
+    <!--Action items-->
+    <string name="action_hide">إخفاء</string>
+    <string name="action_show">إظهار</string>
+    <string name="action_show_hide">إظهار/إخفاء</string>
+
+    <!--Modes-->
+    <string name="mode_barcode">الباركود</string>
+    <string name="mode_idpass_lite">معرف باس لايت</string>
+    <string name="mode_mrz">كود MRZ</string>
+    <string name="mode_nfc">الجواز الالكتروني/بطاقة الهوية (NFC)</string>
+    <string name="mode_qr">كيو ار كود</string>
+
+    <!--Labels-->
+    <string name="label_authenticate">المصادقة</string>
+    <string name="label_birthday">تاريخ الميلاد: %1$s</string>
+    <string name="label_choose_codetype">حدد نوع الرمز لبدء المسح.</string>
+    <string name="label_enter_pin">أدخل الرقم السري</string>
+    <string name="label_hex">JOHN DOE The Quick Brown Fox Jump Over the Back of Lazy dog. The Quick Brown Fox Jump Over the Back of Lazy Dog.</string>
+    <string name="label_name">الاسم: %1$s</string>
+    <string name="label_nationality">الهويه: %1$s</string>
+    <string name="label_newlogic">طور بواسطة Newlogic</string>
+    <string name="label_result">نتائج المسح</string>
+    <string name="label_result_image">صوره</string>
+    <string name="label_result_none">لم يتم العثور على نتيجة</string>
+    <string name="label_result_raw">نتيجة أولية</string>
+    <string name="label_surname">اسم العائلة: %1$s</string>
+    <string name="regular">منتظم</string>
+    <string name="cancel">الفاء</string>
+    <string name="gzip_json">GZIP/JSON</string>
+    <string name="please">يرجى مسح MRZ للتحقق من الهوية</string>
+    <string name="english">اللغه الانجليزيه</string>
+    <string name="developed_by_newlogic">طور بواسطة Newlogic</string>
+    <string name="languages">اللغات</string>
+    <string name="language_and_region">اللغه والمنطقة</string>
+
+</resources>
