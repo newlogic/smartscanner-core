@@ -17,6 +17,7 @@
  */
 package org.idpass.smartscanner.lib.nfc.passport
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -30,6 +31,8 @@ import org.idpass.smartscanner.lib.databinding.FragmentPassportDetailsBinding
 import org.idpass.smartscanner.lib.nfc.details.IntentData
 import org.idpass.smartscanner.lib.platform.extension.arrayToString
 import org.idpass.smartscanner.lib.platform.extension.bytesToHex
+import org.idpass.smartscanner.lib.platform.utils.DateUtils
+import org.idpass.smartscanner.lib.platform.utils.DateUtils.formatStandardDate
 import org.jmrtd.FeatureStatus
 import org.jmrtd.VerificationStatus
 import java.security.MessageDigest
@@ -76,11 +79,12 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
         refreshData(passport)
     }
 
+    @SuppressLint("SetTextI18n")
     private fun refreshData(passport: Passport?) {
         if (passport == null) return
 
         if (passport.face != null) {
-            //Add teh face
+            //Add the face
             binding.iconPhoto.setImageBitmap(passport.face)
         } else if (passport.portrait != null) {
             //If we don't have the face, we try with the portrait
@@ -90,13 +94,22 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
         val personDetails = passport.personDetails
         val additionalPersonDetails = passport.additionalPersonDetails
         if (personDetails != null) {
-            val name = additionalPersonDetails?.nameOfHolder?.replace("<<", " ")?.replace("<", " ")
-            val surname = personDetails.secondaryIdentifier?.replace("<", "")
-            binding.valueName.text = getString(R.string.name, name, surname)
-            binding.valueDOB.text = personDetails.dateOfBirth
+            val currentLanguage = Locale.getDefault().displayLanguage
+            if (currentLanguage.toLowerCase(Locale.ROOT).contains("en")) {
+                binding.valueName.text = personDetails.secondaryIdentifier?.replace("<<", " ")?.replace("<", "") ?: "NA"
+                binding.lname.text = personDetails.primaryIdentifier?.replace("<<", " ")?.replace("<", "") ?: "NA"
+            } else {
+                val full = additionalPersonDetails?.nameOfHolder?.replace("<<", " ")?.replace("<", " ")
+                val parts  = full?.split(" ")?.toMutableList()
+                val firstName = parts!!.firstOrNull()
+                parts.removeAt(0)
+                binding.valueName.text = firstName+" "+parts[0]+" "+parts[1]
+                binding.lname.text = parts[3]
+            }
+            binding.valueDOB.text = DateUtils.toAdjustedDate(formatStandardDate(personDetails.dateOfBirth))
             binding.valueGender.text = personDetails.gender?.name
             binding.valuePassportNumber.text = personDetails.documentNumber
-            binding.valueExpirationDate.text = personDetails.dateOfExpiry
+            binding.valueExpirationDate.text = DateUtils.toReadableDate(formatStandardDate(personDetails.dateOfExpiry))
             binding.valueIssuingState.text = personDetails.issuingState
             binding.valueNationality.text = personDetails.nationality
         }
@@ -109,7 +122,7 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
                 binding.valueCustody.text = additionalPersonDetails.custodyInformation
             }
             if (additionalPersonDetails.fullDateOfBirth != null) {
-                binding.valueDateOfBirth.text = additionalPersonDetails.fullDateOfBirth
+                binding.valueDateOfBirth.text = formatStandardDate(additionalPersonDetails.fullDateOfBirth, "yyyyMMdd")
             }
             if (additionalPersonDetails.otherNames != null && additionalPersonDetails.otherNames?.isNotEmpty() == true) {
                 binding.valueOtherNames.text = additionalPersonDetails.otherNames?.arrayToString()
@@ -156,7 +169,7 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
                 binding.valueDatePersonalization.text = additionalDocumentDetails.dateAndTimeOfPersonalization
             }
             if (additionalDocumentDetails.dateOfIssue != null) {
-                binding.valueDateIssue.text = additionalDocumentDetails.dateOfIssue
+                binding.valueDateIssue.text = DateUtils.toReadableDate(formatStandardDate(additionalDocumentDetails.dateOfIssue, "yyyyMMdd"))
             }
 
             if (additionalDocumentDetails.endorsementsAndObservations != null) {

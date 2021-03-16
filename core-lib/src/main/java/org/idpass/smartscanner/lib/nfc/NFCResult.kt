@@ -22,6 +22,7 @@ data class NFCResult(
         val image: String? = null,
         var givenNames: String? = null,
         var surname: String? = null,
+        var nameOfHolder: String? = null,
         var dateOfBirth: String? = null,
         var gender: String? = null,
         var documentNumber: String? = null,

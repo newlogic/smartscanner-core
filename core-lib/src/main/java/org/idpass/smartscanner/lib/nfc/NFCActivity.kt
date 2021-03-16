@@ -51,6 +51,7 @@ import org.idpass.smartscanner.lib.platform.utils.DateUtils.formatStandardDate
 import org.idpass.smartscanner.lib.platform.utils.LoggerUtils
 import org.idpass.smartscanner.lib.scanner.config.Modes
 import org.jmrtd.lds.icao.MRZInfo
+import java.util.*
 
 
 class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, PassportDetailsFragment.PassportDetailsFragmentListener, PassportPhotoFragment.PassportPhotoFragmentListener {
@@ -155,6 +156,29 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
             val personDetails = it.personDetails
             val additionalPersonDetails = it.additionalPersonDetails
             val additionalDocumentDetails = it.additionalDocumentDetails
+            val currentLanguage = Locale.getDefault().displayLanguage
+            // Get proper names
+            var givenNames : String? = ""
+            var surname : String? = ""
+            if (currentLanguage.toLowerCase(Locale.ROOT).contains("en")) {
+                givenNames = personDetails?.secondaryIdentifier?.replace("<<", " ")?.replace("<", "")
+                surname = personDetails?.primaryIdentifier?.replace("<<", " ")?.replace("<", "")
+            } else {
+                val full = additionalPersonDetails?.nameOfHolder?.replace("<<", " ")?.replace("<", " ")
+                val parts  = full?.split(" ")?.toMutableList()
+                val firstName = parts!!.firstOrNull()
+                parts.removeAt(0)
+                givenNames = firstName+" "+parts[0]+" "+parts[1]
+                surname = parts[3]
+            }
+            // Get proper date of birth
+            val dateOfBirth = if (additionalPersonDetails?.fullDateOfBirth.isNullOrEmpty()) {
+                DateUtils.toAdjustedDate (
+                    formatStandardDate(personDetails?.dateOfBirth)
+                )
+            } else formatStandardDate(additionalPersonDetails?.fullDateOfBirth,"yyyyMMdd")
+
+            // Send NFC Results
             if (action == ScannerConstants.IDPASS_SMARTSCANNER_NFC_INTENT ||
                 action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_NFC_INTENT ) {
                 val bundle = Bundle()
@@ -163,15 +187,16 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
                 if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_NFC_INTENT) {
                     bundle.putString(ScannerConstants.IDPASS_ODK_INTENT_DATA, personDetails?.documentNumber)
                 }
-                bundle.putString(ScannerConstants.NFC_GIVEN_NAMES, additionalPersonDetails?.nameOfHolder?.replace("<<", " ")?.replace("<", " "))
-                bundle.putString(ScannerConstants.NFC_SURNAME, personDetails?.primaryIdentifier?.replace("<", ""))
+                bundle.putString(ScannerConstants.NFC_GIVEN_NAMES, givenNames)
+                bundle.putString(ScannerConstants.NFC_SURNAME, surname)
+                bundle.putString(ScannerConstants.NFC_NAME_OF_HOLDER, additionalPersonDetails?.nameOfHolder)
                 bundle.putString(ScannerConstants.NFC_GENDER, personDetails?.gender?.name)
                 bundle.putString(ScannerConstants.NFC_DOCUMENT_NUMBER, personDetails?.documentNumber)
                 bundle.putString(ScannerConstants.NFC_EXPIRY_DATE, DateUtils.toReadableDate(formatStandardDate(personDetails?.dateOfExpiry)))
                 bundle.putString(ScannerConstants.NFC_ISSUING_STATE, personDetails?.issuingState)
                 bundle.putString(ScannerConstants.NFC_NATIONALITY, personDetails?.nationality)
                 bundle.putString(ScannerConstants.NFC_OTHER_NAMES, additionalPersonDetails?.otherNames?.arrayToString())
-                bundle.putString(ScannerConstants.NFC_DATE_OF_BIRTH, formatStandardDate(additionalPersonDetails?.fullDateOfBirth,"yyyyMMdd"))
+                bundle.putString(ScannerConstants.NFC_DATE_OF_BIRTH, dateOfBirth)
                 bundle.putString(ScannerConstants.NFC_CUSTODY_INFO, additionalPersonDetails?.custodyInformation)
                 bundle.putString(ScannerConstants.NFC_PROFESSION, additionalPersonDetails?.profession)
                 bundle.putString(ScannerConstants.NFC_TELEPHONE, additionalPersonDetails?.telephone)
@@ -198,15 +223,16 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
                 if (intent.hasExtra(FOR_SMARTSCANNER_APP)) showFragmentDetails(passport)
                 else {
                     val result = NFCResult(
-                        givenNames = additionalPersonDetails?.nameOfHolder?.replace("<<", " ")?.replace("<", " "),
-                        surname = personDetails?.primaryIdentifier?.replace("<", ""),
+                        givenNames = givenNames,
+                        surname = surname,
+                        nameOfHolder = additionalPersonDetails?.nameOfHolder,
                         gender = personDetails?.gender?.name,
                         documentNumber = personDetails?.documentNumber,
                         dateOfExpiry = DateUtils.toReadableDate(formatStandardDate(personDetails?.dateOfExpiry)),
                         issuingState = personDetails?.issuingState,
                         nationality = personDetails?.nationality,
                         otherNames = additionalPersonDetails?.otherNames?.arrayToString(),
-                        dateOfBirth = formatStandardDate(additionalPersonDetails?.fullDateOfBirth,"yyyyMMdd"),
+                        dateOfBirth = dateOfBirth,
                         custodyInformation = additionalPersonDetails?.custodyInformation,
                         profession = additionalPersonDetails?.profession,
                         telephone = additionalPersonDetails?.telephone,
@@ -308,7 +334,7 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
         }
     }
 
-    private fun allPermissionsGranted() : Boolean{
+    private fun allPermissionsGranted() : Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             Environment.isExternalStorageManager()
         } else {
