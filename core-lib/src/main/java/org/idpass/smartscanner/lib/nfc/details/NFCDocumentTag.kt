@@ -29,18 +29,18 @@ import io.reactivex.schedulers.Schedulers
 import net.sf.scuba.smartcards.APDUListener
 import net.sf.scuba.smartcards.CardService
 import net.sf.scuba.smartcards.CardServiceException
-import org.idpass.smartscanner.lib.nfc.jmrtd.MrzInfo
 import org.idpass.smartscanner.lib.nfc.passport.Passport
 import org.idpass.smartscanner.lib.nfc.passport.PassportNFC
 import org.idpass.smartscanner.lib.nfc.passport.PassportNfcUtils
 import org.jmrtd.*
 import org.jmrtd.lds.icao.DG1File
+import org.jmrtd.lds.icao.MRZInfo
 import java.security.Security
 
 
 class NFCDocumentTag {
 
-    fun handleTag(context: Context, tag: Tag, mrz: MrzInfo, mrtdTrustStore: MRTDTrustStore, passportCallback: PassportCallback):Disposable{
+    fun handleTag(context: Context, tag: Tag, mrz: MRZInfo, mrtdTrustStore: MRTDTrustStore, passportCallback: PassportCallback):Disposable{
         return  Single.fromCallable {
             var passport: Passport? = null
             var cardServiceException: Exception? = null

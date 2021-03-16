@@ -24,7 +24,6 @@ import net.sf.scuba.smartcards.CardServiceException
 import org.bouncycastle.asn1.ASN1Encodable
 import org.bouncycastle.asn1.ASN1Integer
 import org.bouncycastle.asn1.DERSequence
-import org.idpass.smartscanner.lib.nfc.jmrtd.MrzInfo
 import org.jmrtd.*
 import org.jmrtd.cert.CardVerifiableCertificate
 import org.jmrtd.lds.*
@@ -213,7 +212,7 @@ private constructor() {
      * @throws GeneralSecurityException if certain security primitives are not supported
      */
     @Throws(CardServiceException::class, GeneralSecurityException::class)
-    constructor(ps: PassportService?, trustManager: MRTDTrustStore, mrzInfo: MrzInfo) : this() {
+    constructor(ps: PassportService?, trustManager: MRTDTrustStore, mrzInfo: MRZInfo) : this() {
         if (ps == null) {
             throw IllegalArgumentException("Service cannot be null")
         }
@@ -1150,7 +1149,7 @@ private constructor() {
     ////////////////////////////
 
     @Throws(IOException::class, CardServiceException::class, GeneralSecurityException::class)
-    private fun doPACE(ps: PassportService, mrzInfo: MrzInfo): PACEResult? {
+    private fun doPACE(ps: PassportService, mrzInfo: MRZInfo): PACEResult? {
         var paceResult: PACEResult? = null
         var isCardAccessFile: InputStream? = null
         try {
@@ -1180,13 +1179,13 @@ private constructor() {
     }
 
     @Throws(CardServiceException::class)
-    private fun doBAC(ps: PassportService, mrzInfo: MrzInfo): BACResult {
+    private fun doBAC(ps: PassportService, mrzInfo: MRZInfo): BACResult {
         val bacKey = BACKey(mrzInfo.documentNumber, mrzInfo.dateOfBirth, mrzInfo.dateOfExpiry)
         return ps.doBAC(bacKey)
     }
 
 
-    private fun doEACCA(ps: PassportService, mrzInfo: MrzInfo, dg14File: DG14File?, sodFile: SODFile?): List<EACCAResult> {
+    private fun doEACCA(ps: PassportService, mrzInfo: MRZInfo, dg14File: DG14File?, sodFile: SODFile?): List<EACCAResult> {
         if (dg14File == null) {
             throw NullPointerException("dg14File is null")
         }
@@ -1231,7 +1230,7 @@ private constructor() {
     }
 
     @Throws(IOException::class, CardServiceException::class, GeneralSecurityException::class, IllegalArgumentException::class, NullPointerException::class)
-    private fun doEACTA(ps: PassportService, mrzInfo: MrzInfo, cvcaFile: CVCAFile?, paceResult: PACEResult?, eaccaResult: EACCAResult?, cvcaKeyStores: List<KeyStore>): List<EACTAResult> {
+    private fun doEACTA(ps: PassportService, mrzInfo: MRZInfo, cvcaFile: CVCAFile?, paceResult: PACEResult?, eaccaResult: EACCAResult?, cvcaKeyStores: List<KeyStore>): List<EACTAResult> {
         if (cvcaFile == null) {
             throw NullPointerException("CVCAFile is null")
         }
