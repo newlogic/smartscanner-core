@@ -924,17 +924,16 @@ private constructor() {
         val ef = efdgMap[n]!!
 
         try {
-            val cardFileInputStream = service.getInputStream(ef)
             val dgInputStream = service.getInputStream(ef)
-            val buf12 = ByteArray(cardFileInputStream.getLength())
+            val buf = ByteArray(dgInputStream.getLength())
             var qb: Int
             var i = 0
             while (dgInputStream.read().also { qb = it } != -1) {
-                buf12[i] = qb.toByte()
+                buf[i] = qb.toByte()
                 i++
             }
             val retbuf = ByteArray(i)
-            System.arraycopy(buf12, 0, retbuf, 0, retbuf.size)
+            System.arraycopy(buf, 0, retbuf, 0, retbuf.size)
             return retbuf.clone()
         } catch (e: IOException) {
         } catch (e: CardServiceException) {
