@@ -925,7 +925,7 @@ private constructor() {
 
         try {
             val dgInputStream = service.getInputStream(ef)
-            val buf = ByteArray(dgInputStream.getLength())
+            val buf = ByteArray(dgInputStream.length)
             var qb: Int
             var i = 0
             while (dgInputStream.read().also { qb = it } != -1) {
