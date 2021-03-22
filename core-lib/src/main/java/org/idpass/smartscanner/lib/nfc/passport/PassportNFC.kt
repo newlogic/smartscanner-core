@@ -894,6 +894,56 @@ private constructor() {
     }
 
     /**
+     * Read a data group content as bytes.
+     *
+     * @param service JMRTD Service API to communicate to the secure chip
+     * @param n The Data Group Number ([1,2,11,12,15])
+     *
+     * @return Content of a Data Group in byte array representation
+     */
+    fun readEF(service: PassportService, n: Int): ByteArray? {
+
+        val efdgMap = mapOf<Int, Short>(
+                1 to PassportService.EF_DG1,
+                2 to PassportService.EF_DG2,
+                3 to PassportService.EF_DG3,
+                4 to PassportService.EF_DG4,
+                5 to PassportService.EF_DG5,
+                6 to PassportService.EF_DG6,
+                7 to PassportService.EF_DG7,
+                11 to PassportService.EF_DG11,
+                12 to PassportService.EF_DG12,
+                14 to PassportService.EF_DG14,
+                15 to PassportService.EF_DG15,
+        )
+
+        if (!efdgMap.containsKey(n)) {
+            return null
+        }
+
+        val ef = efdgMap[n]!!
+
+        try {
+            val cardFileInputStream = service.getInputStream(ef)
+            val dgInputStream = service.getInputStream(ef)
+            val buf12 = ByteArray(cardFileInputStream.getLength())
+            var qb: Int
+            var i = 0
+            while (dgInputStream.read().also { qb = it } != -1) {
+                buf12[i] = qb.toByte()
+                i++
+            }
+            val retbuf = ByteArray(i)
+            System.arraycopy(buf12, 0, retbuf, 0, retbuf.size)
+            return retbuf.clone()
+        } catch (e: IOException) {
+        } catch (e: CardServiceException) {
+            e.message?.let { Log.w(TAG, it) }
+        }
+        return null
+    }
+
+    /**
      * Verifies the hash for the given datagroup.
      * Note that this will block until all bytes of the datagroup
      * are loaded.
@@ -937,9 +987,9 @@ private constructor() {
                 dgDataIn.readFully(dgBytes);
             }*/
 
-            val abstractTaggedLDSFile = getDG(fid.toInt())
+            val abstractTaggedLDSFile = getDG(dgNumber)
             if (abstractTaggedLDSFile != null) {
-                dgBytes = abstractTaggedLDSFile.encoded
+                dgBytes = readEF(service!!, dgNumber)
             }
 
             if (abstractTaggedLDSFile == null && verificationStatus.eac != VerificationStatus.Verdict.SUCCEEDED && (fid == PassportService.EF_DG3 || fid == PassportService.EF_DG4)) {
