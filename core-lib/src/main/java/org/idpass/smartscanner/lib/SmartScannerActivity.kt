@@ -36,10 +36,7 @@ import android.view.Surface
 import android.view.View
 import android.view.View.*
 import android.view.Window
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
@@ -101,14 +98,11 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
     private var flashButton: View? = null
     private var closeButton: View? = null
     private var rectangle: View? = null
-    private var debugLayout: View? = null
     private var manualCapture: View? = null
     private var brandingImage: ImageView? = null
     private var captureLabelText: TextView? = null
     private var modelText: TextView? = null
-    private var mlkitText: TextView? = null
-    private var mlkitMS: TextView? = null
-    private var mlkitTime: TextView? = null
+    private var modelTextLoading: ProgressBar? = null
 
     private lateinit var modelLayoutView: View
     private lateinit var coordinatorLayoutView: View
@@ -126,14 +120,11 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         flashButton = findViewById(R.id.flash_button)
         closeButton = findViewById(R.id.close_button)
         rectangle = findViewById(R.id.rectimage)
-        debugLayout = findViewById(R.id.debugLayout)
         modelText = findViewById(R.id.modelText)
+        modelTextLoading = findViewById(R.id.modelTextLoading)
         brandingImage = findViewById(R.id.brandingImage)
         manualCapture = findViewById(R.id.manualCapture)
         captureLabelText = findViewById(R.id.captureLabelText)
-        mlkitText = findViewById(R.id.mlkitText)
-        mlkitMS = findViewById(R.id.mlkitMS)
-        mlkitTime = findViewById(R.id.mlkitTime)
         // Scanner setup from intent
         hideActionBar()
         if (intent.action != null) {
@@ -216,8 +207,17 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                         isMLKit = isMLKit,
                         imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
                         format = scannerOptions?.mrzFormat ?: intent.getStringExtra(ScannerConstants.MRZ_FORMAT_EXTRA),
+                        analyzeStart = System.currentTimeMillis(),
+                        onConnectSuccess = {
+                            if (modelText?.visibility == VISIBLE) {
+                                modelText?.text = it
+                            }
+                            modelTextLoading?.visibility = INVISIBLE
+                            modelText?.visibility = INVISIBLE
+                        },
                         onConnectFail = {
-                            modelText?.visibility = if (it.isNotEmpty()) VISIBLE else INVISIBLE
+                            modelTextLoading?.visibility = VISIBLE
+                            modelText?.visibility = VISIBLE
                             modelText?.text = it
                         }
                 ).also {
@@ -231,8 +231,14 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                         isMLKit = isMLKit,
                         imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
                         format = scannerOptions?.mrzFormat ?: intent.getStringExtra(ScannerConstants.MRZ_FORMAT_EXTRA),
+                        analyzeStart = System.currentTimeMillis(),
+                        onConnectSuccess = {
+                            modelTextLoading?.visibility = INVISIBLE
+                            modelText?.visibility = INVISIBLE
+                        },
                         onConnectFail = {
-                            modelText?.visibility = if (it.isNotEmpty()) VISIBLE else INVISIBLE
+                            modelTextLoading?.visibility = VISIBLE
+                            modelText?.visibility = VISIBLE
                             modelText?.text = it
                         }
                 ).also {

@@ -50,6 +50,8 @@ open class MRZAnalyzer(
         private val isMLKit: Boolean,
         private val imageResultType: String,
         private val format: String?,
+        private val analyzeStart: Long,
+        private val onConnectSuccess: (String) -> Unit,
         private val onConnectFail: (String) -> Unit
 ) : BaseImageAnalyzer() {
 
@@ -93,6 +95,7 @@ open class MRZAnalyzer(
                 Log.d("${SmartScannerActivity.TAG}/SmartScanner", "MRZ MLKit TextRecognition: process")
                 recognizer.process(image)
                         .addOnSuccessListener { visionText ->
+                            onConnectSuccess.invoke(activity.getString(R.string.model_text_loaded))
                             val timeRequired = System.currentTimeMillis() - start
                             Log.d(
                                     "${SmartScannerActivity.TAG}/SmartScanner",
@@ -131,11 +134,24 @@ open class MRZAnalyzer(
                             imageProxy.close()
                         }
                         .addOnFailureListener { e ->
+                            e.printStackTrace()
+                            val timeElapsed = (System.currentTimeMillis() - analyzeStart).toDouble() / 1000
                             Log.d(
                                     "${SmartScannerActivity.TAG}/SmartScanner",
                                     "MRZ MLKit TextRecognition: failure: ${e.message}"
                             )
-                            val connectionId = if (activity.getConnectionType() == 0) R.string.connection_text else R.string.model_text
+                            val connectionId = if (activity.getConnectionType() == 0) {
+                                R.string.connection_text
+                            }
+                            else {
+                                when (timeElapsed) {
+                                    in 0.0..10.0 -> R.string.model_text_waiting // 0-10 secs msg
+                                    in 10.0..60.0 -> R.string.model_text // 10-60 secs msg
+                                    in 60.0..180.0-> R.string.model_text_download // 60-180 secs msg
+                                    in 180.0..300.0-> R.string.model_text_process // 180-300 secs msg
+                                    else -> R.string.model_text_process_wait
+                                }
+                            }
                             onConnectFail.invoke(activity.getString(connectionId))
                             imageProxy.close()
                         }

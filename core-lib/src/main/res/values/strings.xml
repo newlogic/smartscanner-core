@@ -2,6 +2,11 @@
 <resources>
     <string name="app_name">ID PASS SmartScanner</string>
     <string name="model_text" translatable="false">Downloading OCR models…</string>
+    <string name="model_text_download" translatable="false">Downloading OCR models. Please wait…</string>
+    <string name="model_text_loaded" translatable="false">OCR models are loaded…</string>
+    <string name="model_text_process" translatable="false">Processing OCR models…</string>
+    <string name="model_text_process_wait" translatable="false">Processing OCR models. Please wait…</string>
+    <string name="model_text_waiting" translatable="false">Waiting for OCR models to be downloaded.</string>
     <string name="connection_text" translatable="false">No connection to download OCR models</string>
 
     <string name="required_perms_not_given" translatable="false">Error: Permissions denied.</string>
