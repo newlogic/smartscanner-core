@@ -48,6 +48,7 @@ import java.security.spec.PSSParameterSpec
 import java.util.*
 import javax.crypto.Cipher
 import javax.security.auth.x500.X500Principal
+import kotlin.jvm.Throws
 
 
 class PassportNFC @Throws(GeneralSecurityException::class)
@@ -901,6 +902,7 @@ private constructor() {
      *
      * @return Content of a Data Group in byte array representation
      */
+    @Throws(CardServiceException::class, IOException::class)
     fun readEF(service: PassportService, n: Int): ByteArray? {
 
         val efdgMap = mapOf<Int, Short>(
@@ -915,7 +917,7 @@ private constructor() {
                 12 to PassportService.EF_DG12,
                 14 to PassportService.EF_DG14,
                 15 to PassportService.EF_DG15,
-        )
+                )
 
         if (!efdgMap.containsKey(n)) {
             return null
@@ -923,23 +925,17 @@ private constructor() {
 
         val ef = efdgMap[n]!!
 
-        try {
-            val dgInputStream = service.getInputStream(ef)
-            val buf = ByteArray(dgInputStream.length)
-            var qb: Int
-            var i = 0
-            while (dgInputStream.read().also { qb = it } != -1) {
-                buf[i] = qb.toByte()
-                i++
-            }
-            val retbuf = ByteArray(i)
-            System.arraycopy(buf, 0, retbuf, 0, retbuf.size)
-            return retbuf.clone()
-        } catch (e: IOException) {
-        } catch (e: CardServiceException) {
-            e.message?.let { Log.w(TAG, it) }
+        val dgInputStream = service.getInputStream(ef)
+        val buf = ByteArray(dgInputStream.length)
+        var qb: Int
+        var i = 0
+        while (dgInputStream.read().also { qb = it } != -1) {
+            buf[i] = qb.toByte()
+            i++
         }
-        return null
+        val retbuf = ByteArray(i)
+        System.arraycopy(buf, 0, retbuf, 0, retbuf.size)
+        return retbuf.clone()
     }
 
     /**
