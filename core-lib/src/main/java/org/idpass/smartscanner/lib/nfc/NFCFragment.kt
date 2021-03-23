@@ -84,7 +84,7 @@ class  NFCFragment : androidx.fragment.app.Fragment() {
         }
         val tag = intent.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG) ?: return
 
-        val folder = context!!.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
+        val folder = context?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
         val keyStore = KeyStoreUtils().readKeystoreFromFile(folder)
 
         val mrtdTrustStore = MRTDTrustStore()
@@ -94,7 +94,7 @@ class  NFCFragment : androidx.fragment.app.Fragment() {
         }
 
 
-        val subscribe = NFCDocumentTag().handleTag(context!!, tag, mrzInfo!!, mrtdTrustStore, object : NFCDocumentTag.PassportCallback {
+        val subscribe = NFCDocumentTag().handleTag(requireContext(), tag, mrzInfo!!, mrtdTrustStore, object : NFCDocumentTag.PassportCallback {
 
             override fun onPassportReadStart() {
                 onNFCSReadStart()
@@ -140,7 +140,7 @@ class  NFCFragment : androidx.fragment.app.Fragment() {
             }
 
             override fun onGeneralException(exception: Exception?) {
-                Toast.makeText(context, exception!!.toString(), Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, exception?.toString(), Toast.LENGTH_SHORT).show()
                 this@NFCFragment.onCardException(exception)
             }
         })
@@ -170,14 +170,14 @@ class  NFCFragment : androidx.fragment.app.Fragment() {
         textViewDateOfExpiry?.text = getString(R.string.doc_expiry, DateUtils.toReadableDate(formatStandardDate(mrzInfo?.dateOfExpiry)))
 
         if (nfcFragmentListener != null) {
-            nfcFragmentListener!!.onEnableNfc()
+            nfcFragmentListener?.onEnableNfc()
         }
     }
 
     override fun onPause() {
         super.onPause()
         if (nfcFragmentListener != null) {
-            nfcFragmentListener!!.onDisableNfc()
+            nfcFragmentListener?.onDisableNfc()
         }
     }
 
@@ -190,19 +190,19 @@ class  NFCFragment : androidx.fragment.app.Fragment() {
 
     private fun onNFCSReadStart() {
         Log.d(TAG, "onNFCSReadStart")
-        mHandler.post { progressBar!!.visibility = View.VISIBLE }
+        mHandler.post { progressBar?.visibility = View.VISIBLE }
 
     }
 
     private fun onNFCReadFinish() {
         Log.d(TAG, "onNFCReadFinish")
-        mHandler.post { progressBar!!.visibility = View.GONE }
+        mHandler.post { progressBar?.visibility = View.GONE }
     }
 
     private fun onCardException(cardException: Exception?) {
         mHandler.post {
             if (nfcFragmentListener != null) {
-                nfcFragmentListener!!.onCardException(cardException)
+                nfcFragmentListener?.onCardException(cardException)
             }
         }
     }
@@ -210,7 +210,7 @@ class  NFCFragment : androidx.fragment.app.Fragment() {
     private fun onPassportRead(passport: Passport?) {
         mHandler.post {
             if (nfcFragmentListener != null) {
-                nfcFragmentListener!!.onPassportRead(passport)
+                nfcFragmentListener?.onPassportRead(passport)
             }
         }
     }

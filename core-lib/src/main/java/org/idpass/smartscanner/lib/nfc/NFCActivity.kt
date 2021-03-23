@@ -243,6 +243,8 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
                         issuingAuthority = additionalDocumentDetails?.issuingAuthority,
                         personalizationSystemSerialNumber = additionalDocumentDetails?.personalizationSystemSerialNumber,
                         taxOrExitRequirements = additionalDocumentDetails?.taxOrExitRequirements,
+                        mrzOptional = mrzInfo?.optionalData1,
+                        mrzOptional2 = mrzInfo?.optionalData2
                     )
                     val data = Intent()
                     Log.d(TAG, "Success from NFC -- RESULT")

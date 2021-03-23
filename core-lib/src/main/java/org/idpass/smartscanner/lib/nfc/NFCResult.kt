@@ -39,5 +39,7 @@ data class NFCResult(
         var endorsementsAndObservations: String? = null,
         var issuingAuthority: String? = null,
         var personalizationSystemSerialNumber: String? = null,
-        var taxOrExitRequirements: String? = null
+        var taxOrExitRequirements: String? = null,
+        var mrzOptional: String? = null,
+        var mrzOptional2: String? = null
 )

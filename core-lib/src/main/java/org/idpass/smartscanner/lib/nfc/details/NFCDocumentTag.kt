@@ -40,7 +40,7 @@ import java.security.Security
 
 class NFCDocumentTag {
 
-    fun handleTag(context: Context, tag: Tag, mrz: MRZInfo, mrtdTrustStore: MRTDTrustStore, passportCallback: PassportCallback):Disposable{
+    fun handleTag(context: Context, tag: Tag, mrzInfo: MRZInfo, mrtdTrustStore: MRTDTrustStore, passportCallback: PassportCallback):Disposable{
         return  Single.fromCallable {
             var passport: Passport? = null
             var cardServiceException: Exception? = null
@@ -61,7 +61,7 @@ class NFCDocumentTag {
                 })
                 ps.open()
 
-                val passportNFC = PassportNFC(ps, mrtdTrustStore, mrz)
+                val passportNFC = PassportNFC(ps, mrtdTrustStore, mrzInfo)
                 val verifySecurity = passportNFC.verifySecurity()
                 val features = passportNFC.features
 
@@ -72,19 +72,19 @@ class NFCDocumentTag {
 
                 //Basic Information
                 if (passportNFC.dg1File != null) {
-                    val mrzInfo = (passportNFC.dg1File as DG1File).mrzInfo
+                    val info = (passportNFC.dg1File as DG1File).mrzInfo
                     val personDetails = PersonDetails()
-                    personDetails.dateOfBirth = mrzInfo.dateOfBirth
-                    personDetails.dateOfExpiry = mrzInfo.dateOfExpiry
-                    personDetails.documentCode = mrzInfo.documentCode
-                    personDetails.documentNumber = mrzInfo.documentNumber
-                    personDetails.optionalData1 = mrzInfo.optionalData1
-                    personDetails.optionalData2 = mrzInfo.optionalData2
-                    personDetails.issuingState = mrzInfo.issuingState
-                    personDetails.primaryIdentifier = mrzInfo.primaryIdentifier
-                    personDetails.secondaryIdentifier = mrzInfo.secondaryIdentifier
-                    personDetails.nationality = mrzInfo.nationality
-                    personDetails.gender = mrzInfo.gender
+                    personDetails.dateOfBirth = info.dateOfBirth
+                    personDetails.dateOfExpiry = info.dateOfExpiry
+                    personDetails.documentCode = info.documentCode
+                    personDetails.documentNumber = info.documentNumber
+                    personDetails.optionalData1 = info.optionalData1
+                    personDetails.optionalData2 = info.optionalData2
+                    personDetails.issuingState = info.issuingState
+                    personDetails.primaryIdentifier = info.primaryIdentifier
+                    personDetails.secondaryIdentifier = info.secondaryIdentifier
+                    personDetails.nationality = info.nationality
+                    personDetails.gender = info.gender
                     passport.personDetails = personDetails
                 }
 
