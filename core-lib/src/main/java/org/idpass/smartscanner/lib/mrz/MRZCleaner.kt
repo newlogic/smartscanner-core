@@ -86,38 +86,38 @@ object MRZCleaner {
     fun parseAndClean(mrz: String): MrzRecord {
         val record = MrzParser.parse(mrz)
 
-        Log.d(SmartScannerActivity.TAG, "Previous Scan: $previousMRZString")
-        if (!record.validComposite || !record.validDateOfBirth || !record.validDocumentNumber || !record.validExpirationDate) {
+        if (record.validComposite && record.validDateOfBirth && record.validDocumentNumber && record.validExpirationDate) {
+            record.givenNames = record.givenNames.replaceNumbertoChar()
+            record.surname = record.surname.replaceNumbertoChar()
+            record.issuingCountry = record.issuingCountry.replaceNumbertoChar()
+            record.nationality = record.nationality.replaceNumbertoChar()
+            return record
+        } else {
+            Log.d(SmartScannerActivity.TAG, "Still accept scanning.")
+            Log.d(SmartScannerActivity.TAG, "Previous Scan: $previousMRZString")
             if (mrz != previousMRZString) {
                 previousMRZString = mrz
-                throw IllegalArgumentException("Invalid check digits.")
             }
-            Log.d(SmartScannerActivity.TAG, "Still accept scanning.")
+            throw IllegalArgumentException("Invalid check digits.")
         }
-
-        record.givenNames = record.givenNames.replaceNumbertoChar()
-        record.surname = record.surname.replaceNumbertoChar()
-        record.issuingCountry = record.issuingCountry.replaceNumbertoChar()
-        record.nationality = record.nationality.replaceNumbertoChar()
-        return record
     }
 
     fun parseAndCleanMrtdTd1(mrz: String): MrtdTd1 {
         val record = MrzParser.parseToMrtdTd1(mrz)
 
         Log.d(SmartScannerActivity.TAG, "Previous Scan: $previousMRZString")
-        if (!record.validComposite || !record.validDateOfBirth || !record.validDocumentNumber || !record.validExpirationDate) {
+        if (record.validComposite && record.validDateOfBirth && record.validDocumentNumber && record.validExpirationDate) {
+            record.givenNames = record.givenNames.replaceNumbertoChar()
+            record.surname = record.surname.replaceNumbertoChar()
+            record.issuingCountry = record.issuingCountry.replaceNumbertoChar()
+            record.nationality = record.nationality.replaceNumbertoChar()
+            return record
+        } else {
+            Log.d(SmartScannerActivity.TAG, "Still accept scanning.")
             if (mrz != previousMRZString) {
                 previousMRZString = mrz
-                throw IllegalArgumentException("Invalid check digits.")
             }
-            Log.d(SmartScannerActivity.TAG, "Still accept scanning.")
+            throw IllegalArgumentException("Invalid check digits.")
         }
-
-        record.givenNames = record.givenNames.replaceNumbertoChar()
-        record.surname = record.surname.replaceNumbertoChar()
-        record.issuingCountry = record.issuingCountry.replaceNumbertoChar()
-        record.nationality = record.nationality.replaceNumbertoChar()
-        return record
     }
 }
