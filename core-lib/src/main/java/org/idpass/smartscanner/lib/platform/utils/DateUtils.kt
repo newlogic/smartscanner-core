@@ -59,10 +59,10 @@ object DateUtils {
         return dateFormat.format(date)
     }
 
-    fun toAdjustedDate(date: String?) : String {
-        val parts: Array<String> = date?.split("/")!!.toTypedArray()
+    fun toAdjustedDate(date: String?) : String? {
+        val parts: Array<String>? = date?.split("/")?.toTypedArray()
         // Convert 2 digit date to 4 digits
-        if (parts.size == 3 && parts[2].length == 2) {
+        if (parts?.size == 3 && parts[2].length == 2) {
             var year: Int = Integer.valueOf(parts[2])
             // Allow 5 years in the future for a 2 digit date
             year = if (year + 100 > Date().year + 5) {
@@ -75,10 +75,10 @@ object DateUtils {
         return date
     }
 
-    fun toReadableDate(date: String?) : String {
-        val parts: Array<String> = date?.split("/")!!.toTypedArray()
+    fun toReadableDate(date: String?) : String? {
+        val parts: Array<String>? = date?.split("/")?.toTypedArray()
         // Convert 2 digit date to 4 digits
-        if (parts.size == 3 && parts[2].length == 2) {
+        if (parts?.size == 3 && parts[2].length == 2) {
             var year: Int = Integer.valueOf(parts[2])
             year += 2000
             return parts[0] + "/" + parts[1] + "/" + year.toString()
