@@ -1260,7 +1260,7 @@ private constructor() {
 
         var keyid = BigInteger.ZERO
         var pubkeyIdentifier = ""
-        var protIdentifier = ""
+        var protIdentifier:String?
 
         val publicKeyInfoIterator = chipAuthenticationPublicKeyInfos.iterator()
         while (publicKeyInfoIterator.hasNext()) {
@@ -1273,7 +1273,7 @@ private constructor() {
             } else {
                 keyid = authenticationPublicKeyInfo.keyId
                 pubkeyIdentifier = authenticationPublicKeyInfo.objectIdentifier
-                protIdentifier = authenticationPublicKeyInfo.protocolOIDString
+                protIdentifier = inferChipAuthenticationOIDfromPublicKeyOID(pubkeyIdentifier)
             }
 
             try {
@@ -1282,7 +1282,7 @@ private constructor() {
                 eaccaResults.add(doEACCA)
                 Log.i("EMRTD", "Chip Authentication succeeded")
             } catch (cse: CardServiceException) {
-                cse.printStackTrace()
+                //cse.printStackTrace()
                 /* NOTE: Failed? Too bad, try next public key. */
                 Log.w(TAG, "try next public key")
             }
@@ -1291,6 +1291,26 @@ private constructor() {
 
         Log.i(TAG, "doEACCA exit")
         return eaccaResults
+    }
+
+    private fun inferChipAuthenticationOIDfromPublicKeyOID(publicKeyOID: String): String? {
+        if (SecurityInfo.ID_PK_ECDH.equals(publicKeyOID)) {
+            /*
+            * This seems to work for French passports (generation 2013, 2014),
+            * but it is best effort.
+            */
+            Log.w(TAG,"Could not determine ChipAuthentication algorithm, defaulting to id-CA-ECDH-3DES-CBC-CBC")
+            return SecurityInfo.ID_CA_ECDH_3DES_CBC_CBC
+        } else if (SecurityInfo.ID_PK_DH.equals(publicKeyOID)) {
+            /*
+            * Not tested. Best effort.
+            */
+            Log.w(TAG,"Could not determine ChipAuthentication algorithm, defaulting to id-CA-DH-3DES-CBC-CBC")
+            return SecurityInfo.ID_CA_DH_3DES_CBC_CBC
+        } else {
+            Log.w(TAG,"No ChipAuthenticationInfo and unsupported ChipAuthenticationPublicKeyInfo public key OID $publicKeyOID")
+        }
+        return null
     }
 
     @Throws(IOException::class, CardServiceException::class, GeneralSecurityException::class, IllegalArgumentException::class, NullPointerException::class)
