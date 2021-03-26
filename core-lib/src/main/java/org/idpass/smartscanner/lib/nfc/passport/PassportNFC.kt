@@ -1230,6 +1230,7 @@ private constructor() {
 
 
     private fun doEACCA(ps: PassportService, mrzInfo: MRZInfo, dg14File: DG14File?, sodFile: SODFile?): List<EACCAResult> {
+        Log.i(TAG, "doEACCA entry")
         if (dg14File == null) {
             throw NullPointerException("dg14File is null")
         }
@@ -1249,27 +1250,46 @@ private constructor() {
         while (securityInfoIterator.hasNext()) {
             val securityInfo = securityInfoIterator.next()
             if (securityInfo is ChipAuthenticationInfo) {
+                Log.i(TAG, "doEACCA: found ChipAuthenticationInfo")
                 chipAuthenticationInfo = securityInfo
             } else if (securityInfo is ChipAuthenticationPublicKeyInfo) {
+                Log.i(TAG,"doEACCA: found ChipAuthenticationPublicKeyInfo")
                 chipAuthenticationPublicKeyInfos.add(securityInfo)
             }
         }
 
+        var keyid = BigInteger.ZERO
+        var pubkeyIdentifier = ""
+        var protIdentifier = ""
+
         val publicKeyInfoIterator = chipAuthenticationPublicKeyInfos.iterator()
         while (publicKeyInfoIterator.hasNext()) {
             val authenticationPublicKeyInfo = publicKeyInfoIterator.next()
+
+            if (chipAuthenticationInfo != null) {
+                keyid = chipAuthenticationInfo.keyId
+                pubkeyIdentifier = chipAuthenticationInfo.objectIdentifier
+                protIdentifier = chipAuthenticationInfo.protocolOIDString
+            } else {
+                keyid = authenticationPublicKeyInfo.keyId
+                pubkeyIdentifier = authenticationPublicKeyInfo.objectIdentifier
+                protIdentifier = authenticationPublicKeyInfo.protocolOIDString
+            }
+
             try {
                 Log.i("EMRTD", "Chip Authentication starting")
-                val doEACCA = ps.doEACCA(chipAuthenticationInfo!!.keyId, chipAuthenticationInfo.objectIdentifier, chipAuthenticationInfo.protocolOIDString, authenticationPublicKeyInfo.subjectPublicKey)
+                val doEACCA = ps.doEACCA(keyid, pubkeyIdentifier, protIdentifier, authenticationPublicKeyInfo.subjectPublicKey)
                 eaccaResults.add(doEACCA)
                 Log.i("EMRTD", "Chip Authentication succeeded")
             } catch (cse: CardServiceException) {
                 cse.printStackTrace()
                 /* NOTE: Failed? Too bad, try next public key. */
+                Log.w(TAG, "try next public key")
             }
 
         }
 
+        Log.i(TAG, "doEACCA exit")
         return eaccaResults
     }
 
