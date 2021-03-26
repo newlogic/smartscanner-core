@@ -85,7 +85,8 @@ class  NFCFragment : androidx.fragment.app.Fragment() {
         val tag = intent.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG) ?: return
 
         val folder = context?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
-        val keyStore = KeyStoreUtils().readKeystoreFromFile(folder)
+        val cscaInputStream = context!!.assets.open("csca.ks")
+        val keyStore = KeyStoreUtils().readKeystoreFromFile(cscaInputStream)
 
         val mrtdTrustStore = MRTDTrustStore()
         if(keyStore!=null){

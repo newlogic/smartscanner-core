@@ -77,6 +77,16 @@ class KeyStoreUtils {
         return Uri.fromFile(outFile)
     }
 
+    fun readKeystoreFromFile(cscaInputStream: InputStream, password:String=""):KeyStore?{
+        try{
+            val keyStore: KeyStore = KeyStore.getInstance("PKCS12")
+            keyStore.load(cscaInputStream, password.toCharArray())
+            return keyStore
+        }catch (e:java.lang.Exception) {
+            return null
+        }
+    }
+
     fun readKeystoreFromFile(folder:File, fileName:String="csca.ks", password:String=""):KeyStore?{
         try{
             val file = File(folder, fileName)
