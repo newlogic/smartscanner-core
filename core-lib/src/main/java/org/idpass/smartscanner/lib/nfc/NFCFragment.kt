@@ -62,7 +62,6 @@ class  NFCFragment : androidx.fragment.app.Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-
         return inflater.inflate(R.layout.fragment_nfc, container, false)
     }
 
@@ -94,7 +93,6 @@ class  NFCFragment : androidx.fragment.app.Fragment() {
             mrtdTrustStore.addAsCSCACertStore(certStore)
         }
 
-
         val subscribe = NFCDocumentTag().handleTag(requireContext(), tag, mrzInfo!!, mrtdTrustStore, object : NFCDocumentTag.PassportCallback {
 
             override fun onPassportReadStart() {
@@ -107,14 +105,12 @@ class  NFCFragment : androidx.fragment.app.Fragment() {
 
             override fun onPassportRead(passport: Passport?) {
                 this@NFCFragment.onPassportRead(passport)
-
             }
 
             override fun onAccessDeniedException(exception: AccessDeniedException) {
                 Toast.makeText(context, getString(R.string.warning_authentication_failed), Toast.LENGTH_SHORT).show()
                 exception.printStackTrace()
                 this@NFCFragment.onCardException(exception)
-
             }
 
             override fun onBACDeniedException(exception: BACDeniedException) {

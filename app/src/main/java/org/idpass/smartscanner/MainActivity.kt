@@ -50,6 +50,7 @@ import org.idpass.smartscanner.lib.platform.utils.FileUtils
 import org.idpass.smartscanner.lib.scanner.config.*
 import org.idpass.smartscanner.result.IDPassResultActivity
 import org.idpass.smartscanner.result.ResultActivity
+import org.idpass.smartscanner.settings.SettingsActivity
 
 
 class MainActivity : AppCompatActivity() {
@@ -95,6 +96,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
+        // Choose scan type
         binding.itemBarcode.item.setOnClickListener { scanBarcode(BarcodeOptions.default) }
         binding.itemIdpassLite.item.setOnClickListener { scanIDPassLite() }
         binding.itemMrz.item.setOnClickListener { scanMRZ() }
@@ -110,6 +112,10 @@ class MainActivity : AppCompatActivity() {
                     startActivity(resultIntent)
                 }
             } else Snackbar.make(binding.main, required_nfc_not_supported, Snackbar.LENGTH_LONG).show()
+        }
+        // Change language
+        binding.languageSettings.setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
         }
     }
 
