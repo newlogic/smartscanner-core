@@ -183,7 +183,14 @@ class MainActivity : AppCompatActivity() {
         intent.putExtra(NFCActivity.FOR_SMARTSCANNER_APP, true)
         intent.putExtra(
             SmartScannerActivity.SCANNER_OPTIONS,
-            ScannerOptions.defaultForNFCScan
+            ScannerOptions(
+                mode = Modes.NFC_SCAN.value,
+                config = Config(
+                       label = "Please scan MRZ to verify ID", // Please add translated string here
+                       isManualCapture = false,
+                       branding = true
+                )
+            )
         )
         startActivityForResult(intent, OP_SCANNER)
     }
