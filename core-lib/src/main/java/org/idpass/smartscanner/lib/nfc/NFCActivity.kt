@@ -45,13 +45,9 @@ import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.nfc.passport.Passport
 import org.idpass.smartscanner.lib.nfc.passport.PassportDetailsFragment
 import org.idpass.smartscanner.lib.nfc.passport.PassportPhotoFragment
-import org.idpass.smartscanner.lib.platform.extension.arrayToString
-import org.idpass.smartscanner.lib.platform.utils.DateUtils
-import org.idpass.smartscanner.lib.platform.utils.DateUtils.formatStandardDate
 import org.idpass.smartscanner.lib.platform.utils.LoggerUtils
 import org.idpass.smartscanner.lib.scanner.config.Modes
 import org.jmrtd.lds.icao.MRZInfo
-import java.util.*
 
 
 class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, PassportDetailsFragment.PassportDetailsFragmentListener, PassportPhotoFragment.PassportPhotoFragmentListener {
@@ -151,108 +147,61 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
     }
 
     override fun onPassportRead(passport: Passport?) {
-        passport?.let {
-            val action = intent.getStringExtra(ScannerConstants.NFC_ACTION)
-            val personDetails = it.personDetails
-            val additionalPersonDetails = it.additionalPersonDetails
-            val additionalDocumentDetails = it.additionalDocumentDetails
-            val currentLanguage = Locale.getDefault().displayLanguage
-            // Get proper names
-            var givenNames : String? = ""
-            var surname : String? = ""
-            if (currentLanguage.toLowerCase(Locale.ROOT).contains("en")) {
-                givenNames = personDetails?.secondaryIdentifier?.replace("<<", " ")?.replace("<", "")
-                surname = personDetails?.primaryIdentifier?.replace("<<", " ")?.replace("<", "")
-            } else {
-                val full = additionalPersonDetails?.nameOfHolder?.replace("<<", " ")?.replace("<", " ")
-                val parts  = full?.split(" ")?.toMutableList()
-                val firstName = parts!!.firstOrNull()
-                parts.removeAt(0)
-                givenNames = firstName+" "+parts[0]+" "+parts[1]
-                surname = parts[3]
-            }
-            // Get proper date of birth
-            val dateOfBirth = if (additionalPersonDetails?.fullDateOfBirth.isNullOrEmpty()) {
-                DateUtils.toAdjustedDate (
-                    formatStandardDate(personDetails?.dateOfBirth)
-                )
-            } else formatStandardDate(additionalPersonDetails?.fullDateOfBirth,"yyyyMMdd")
+        val action = intent.getStringExtra(ScannerConstants.NFC_ACTION)
+        val nfcResult = NFCResult.formatResult(passport, mrzInfo)
 
-            // Send NFC Results
-            if (action == ScannerConstants.IDPASS_SMARTSCANNER_NFC_INTENT ||
+        if (action == ScannerConstants.IDPASS_SMARTSCANNER_NFC_INTENT ||
                 action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_NFC_INTENT ) {
-                val bundle = Bundle()
-                Log.d(TAG, "Success from NFC -- BUNDLE")
-                Log.d(TAG, "value: $passport")
-                if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_NFC_INTENT) {
-                    bundle.putString(ScannerConstants.IDPASS_ODK_INTENT_DATA, personDetails?.documentNumber)
-                }
-                bundle.putString(ScannerConstants.NFC_GIVEN_NAMES, givenNames)
-                bundle.putString(ScannerConstants.NFC_SURNAME, surname)
-                bundle.putString(ScannerConstants.NFC_NAME_OF_HOLDER, additionalPersonDetails?.nameOfHolder)
-                bundle.putString(ScannerConstants.NFC_GENDER, personDetails?.gender?.name)
-                bundle.putString(ScannerConstants.NFC_DOCUMENT_NUMBER, personDetails?.documentNumber)
-                bundle.putString(ScannerConstants.NFC_EXPIRY_DATE, DateUtils.toReadableDate(formatStandardDate(personDetails?.dateOfExpiry)))
-                bundle.putString(ScannerConstants.NFC_ISSUING_STATE, personDetails?.issuingState)
-                bundle.putString(ScannerConstants.NFC_NATIONALITY, personDetails?.nationality)
-                bundle.putString(ScannerConstants.NFC_OTHER_NAMES, additionalPersonDetails?.otherNames?.arrayToString())
-                bundle.putString(ScannerConstants.NFC_DATE_OF_BIRTH, dateOfBirth)
-                bundle.putString(ScannerConstants.NFC_CUSTODY_INFO, additionalPersonDetails?.custodyInformation)
-                bundle.putString(ScannerConstants.NFC_PROFESSION, additionalPersonDetails?.profession)
-                bundle.putString(ScannerConstants.NFC_TELEPHONE, additionalPersonDetails?.telephone)
-                bundle.putString(ScannerConstants.NFC_TITLE, additionalPersonDetails?.title)
-                bundle.putString(ScannerConstants.NFC_DATE_TIME_PERSONALIZATION, additionalDocumentDetails?.dateAndTimeOfPersonalization)
-                bundle.putString(ScannerConstants.NFC_DATE_OF_ISSUE, formatStandardDate(additionalDocumentDetails?.dateOfIssue, "yyyyMMdd"))
-                bundle.putString(ScannerConstants.NFC_ENDORSEMENTS_AND_OBSERVATIONS, additionalDocumentDetails?.endorsementsAndObservations)
-                bundle.putString(ScannerConstants.NFC_ISSUING_AUTHORITY, additionalDocumentDetails?.issuingAuthority)
-                bundle.putString(ScannerConstants.NFC_PERSONAL_SYSTEM_SERIAL_NUMBER, additionalDocumentDetails?.personalizationSystemSerialNumber)
-                bundle.putString(ScannerConstants.NFC_TAX_EXIT_REQUIREMENTS, additionalDocumentDetails?.taxOrExitRequirements)
-                bundle.putString(ScannerConstants.MODE, Modes.NFC_SCAN.value)
-                val result = Intent()
-                val prefix = if (intent.hasExtra(ScannerConstants.IDPASS_ODK_PREFIX_EXTRA)) {
-                    intent.getStringExtra(ScannerConstants.IDPASS_ODK_PREFIX_EXTRA)
-                } else { "" }
-                result.putExtra(ScannerConstants.RESULT, bundle)
-                // Copy all the values in the intent result to be compatible with other implementations than commcare
-                for (key in bundle.keySet()) {
-                    result.putExtra(prefix + key, bundle.getString(key))
-                }
-                setResult(Activity.RESULT_OK, result)
+            // Send NFC Results via Bundle
+            val bundle = Bundle()
+            Log.d(TAG, "Success from NFC -- BUNDLE")
+            Log.d(TAG, "value: $passport")
+            if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_NFC_INTENT) {
+                bundle.putString(ScannerConstants.IDPASS_ODK_INTENT_DATA, nfcResult.documentNumber)
+            }
+            bundle.putString(ScannerConstants.NFC_GIVEN_NAMES, nfcResult.givenNames)
+            bundle.putString(ScannerConstants.NFC_SURNAME, nfcResult.surname)
+            bundle.putString(ScannerConstants.NFC_NAME_OF_HOLDER, nfcResult.nameOfHolder)
+            bundle.putString(ScannerConstants.NFC_GENDER, nfcResult.gender)
+            bundle.putString(ScannerConstants.NFC_DOCUMENT_NUMBER, nfcResult.documentNumber)
+            bundle.putString(ScannerConstants.NFC_EXPIRY_DATE, nfcResult.dateOfExpiry)
+            bundle.putString(ScannerConstants.NFC_ISSUING_STATE, nfcResult.issuingState)
+            bundle.putString(ScannerConstants.NFC_NATIONALITY, nfcResult.nationality)
+            bundle.putString(ScannerConstants.NFC_OTHER_NAMES, nfcResult.otherNames)
+            bundle.putString(ScannerConstants.NFC_DATE_OF_BIRTH, nfcResult.dateOfBirth)
+            bundle.putString(ScannerConstants.NFC_CUSTODY_INFO, nfcResult.custodyInformation)
+            bundle.putString(ScannerConstants.NFC_PROFESSION, nfcResult.profession)
+            bundle.putString(ScannerConstants.NFC_TELEPHONE, nfcResult.telephone)
+            bundle.putString(ScannerConstants.NFC_TITLE, nfcResult.title)
+            bundle.putString(ScannerConstants.NFC_DATE_TIME_PERSONALIZATION, nfcResult.dateAndTimeOfPersonalization)
+            bundle.putString(ScannerConstants.NFC_DATE_OF_ISSUE, nfcResult.dateOfIssue)
+            bundle.putString(ScannerConstants.NFC_ENDORSEMENTS_AND_OBSERVATIONS, nfcResult.endorsementsAndObservations)
+            bundle.putString(ScannerConstants.NFC_ISSUING_AUTHORITY, nfcResult.issuingAuthority)
+            bundle.putString(ScannerConstants.NFC_PERSONAL_SYSTEM_SERIAL_NUMBER, nfcResult.personalizationSystemSerialNumber)
+            bundle.putString(ScannerConstants.NFC_TAX_EXIT_REQUIREMENTS, nfcResult.taxOrExitRequirements)
+            bundle.putString(ScannerConstants.MODE, Modes.NFC_SCAN.value)
+            val result = Intent()
+            val prefix = if (intent.hasExtra(ScannerConstants.IDPASS_ODK_PREFIX_EXTRA)) {
+                intent.getStringExtra(ScannerConstants.IDPASS_ODK_PREFIX_EXTRA)
+            } else { "" }
+            result.putExtra(ScannerConstants.RESULT, bundle)
+            // Copy all the values in the intent result to be compatible with other implementations than commcare
+            for (key in bundle.keySet()) {
+                result.putExtra(prefix + key, bundle.getString(key))
+            }
+            setResult(Activity.RESULT_OK, result)
+            finish()
+        } else {
+            // Send NFC Results via App
+            if (intent.hasExtra(FOR_SMARTSCANNER_APP)) showFragmentDetails(passport)
+            else {
+                // Send NFC Results via Plugin
+                val data = Intent()
+                Log.d(TAG, "Success from NFC -- RESULT")
+                Log.d(TAG, "value: $nfcResult")
+                data.putExtra(SmartScannerActivity.SCANNER_RESULT, Gson().toJson(nfcResult))
+                setResult(Activity.RESULT_OK, data)
                 finish()
-            } else {
-                if (intent.hasExtra(FOR_SMARTSCANNER_APP)) showFragmentDetails(passport)
-                else {
-                    val result = NFCResult(
-                        givenNames = givenNames,
-                        surname = surname,
-                        nameOfHolder = additionalPersonDetails?.nameOfHolder,
-                        gender = personDetails?.gender?.name,
-                        documentNumber = personDetails?.documentNumber,
-                        dateOfExpiry = DateUtils.toReadableDate(formatStandardDate(personDetails?.dateOfExpiry)),
-                        issuingState = personDetails?.issuingState,
-                        nationality = personDetails?.nationality,
-                        otherNames = additionalPersonDetails?.otherNames?.arrayToString(),
-                        dateOfBirth = dateOfBirth,
-                        custodyInformation = additionalPersonDetails?.custodyInformation,
-                        profession = additionalPersonDetails?.profession,
-                        telephone = additionalPersonDetails?.telephone,
-                        title = additionalPersonDetails?.title,
-                        dateAndTimeOfPersonalization = additionalDocumentDetails?.dateAndTimeOfPersonalization,
-                        dateOfIssue = formatStandardDate(additionalDocumentDetails?.dateOfIssue, "yyyyMMdd"),
-                        endorsementsAndObservations = additionalDocumentDetails?.endorsementsAndObservations,
-                        issuingAuthority = additionalDocumentDetails?.issuingAuthority,
-                        personalizationSystemSerialNumber = additionalDocumentDetails?.personalizationSystemSerialNumber,
-                        taxOrExitRequirements = additionalDocumentDetails?.taxOrExitRequirements,
-                        mrzOptional = mrzInfo?.optionalData1,
-                        mrzOptional2 = mrzInfo?.optionalData2
-                    )
-                    val data = Intent()
-                    Log.d(TAG, "Success from NFC -- RESULT")
-                    Log.d(TAG, "value: $result")
-                    data.putExtra(SmartScannerActivity.SCANNER_RESULT, Gson().toJson(result))
-                    setResult(Activity.RESULT_OK, data)
-                    finish()
-                }
             }
         }
     }

@@ -28,6 +28,7 @@ import android.widget.ImageView
 import androidx.core.content.ContextCompat
 import org.idpass.smartscanner.lib.R
 import org.idpass.smartscanner.lib.databinding.FragmentPassportDetailsBinding
+import org.idpass.smartscanner.lib.nfc.NFCResult
 import org.idpass.smartscanner.lib.nfc.details.IntentData
 import org.idpass.smartscanner.lib.platform.extension.arrayToString
 import org.idpass.smartscanner.lib.platform.extension.bytesToHex
@@ -91,29 +92,17 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
             binding.iconPhoto.setImageBitmap(passport.portrait)
         }
 
-        val personDetails = passport.personDetails
-        val additionalPersonDetails = passport.additionalPersonDetails
-        if (personDetails != null) {
-            val currentLanguage = Locale.getDefault().displayLanguage
-            if (currentLanguage.toLowerCase(Locale.ROOT).contains("en")) {
-                binding.valueName.text = personDetails.secondaryIdentifier?.replace("<<", " ")?.replace("<", "") ?: "NA"
-                binding.lname.text = personDetails.primaryIdentifier?.replace("<<", " ")?.replace("<", "") ?: "NA"
-            } else {
-                val full = additionalPersonDetails?.nameOfHolder?.replace("<<", " ")?.replace("<", " ")
-                val parts  = full?.split(" ")?.toMutableList()
-                val firstName = parts!!.firstOrNull()
-                parts.removeAt(0)
-                binding.valueName.text = firstName+" "+parts[0]+" "+parts[1]
-                binding.lname.text = parts[3]
-            }
-            binding.valueDOB.text = DateUtils.toAdjustedDate(formatStandardDate(personDetails.dateOfBirth))
-            binding.valueGender.text = personDetails.gender?.name
-            binding.valuePassportNumber.text = personDetails.documentNumber
-            binding.valueExpirationDate.text = DateUtils.toReadableDate(formatStandardDate(personDetails.dateOfExpiry))
-            binding.valueIssuingState.text = personDetails.issuingState
-            binding.valueNationality.text = personDetails.nationality
-        }
+        val resultDetails = NFCResult.formatResult(passport)
+        binding.valueName.text = resultDetails.givenNames
+        binding.lname.text = resultDetails.surname
+        binding.valueDOB.text = resultDetails.dateOfBirth
+        binding.valueGender.text = resultDetails.gender
+        binding.valuePassportNumber.text = resultDetails.documentNumber
+        binding.valueExpirationDate.text = resultDetails.dateOfExpiry
+        binding.valueIssuingState.text = resultDetails.issuingState
+        binding.valueNationality.text = resultDetails.nationality
 
+        val additionalPersonDetails = passport.additionalPersonDetails
         if (additionalPersonDetails != null) {
             //This object it's not available in the majority of passports
             binding.cardViewAdditionalPersonInformation.visibility = View.VISIBLE
