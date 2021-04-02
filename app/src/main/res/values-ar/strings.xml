@@ -35,5 +35,6 @@
     <string name="developed_by_newlogic">طور بواسطة Newlogic</string>
     <string name="languages">اللغات</string>
     <string name="language_and_region">اللغه والمنطقة</string>
+    <string name="label_scan_nfc_via_mrz">يرجى مسح MRZ للتحقق من الهوية</string>
 
 </resources>

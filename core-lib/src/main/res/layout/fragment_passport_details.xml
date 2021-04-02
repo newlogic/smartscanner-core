@@ -397,12 +397,11 @@
                                         android:layout_width="match_parent"
                                         android:layout_height="match_parent"
                                         android:padding="@dimen/margin_tiny"
-                                        android:text="First Name"
+                                        android:text="Given Names"
                                         tools:ignore="RtlHardcoded" />
 
                                     <TextView
                                         android:id="@+id/value_name"
-                                        android:textAlignment="center"
                                         android:layout_width="0dp"
                                         android:layout_height="match_parent"
                                         android:padding="@dimen/margin_tiny"

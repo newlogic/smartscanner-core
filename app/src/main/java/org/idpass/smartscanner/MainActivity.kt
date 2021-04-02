@@ -186,7 +186,7 @@ class MainActivity : AppCompatActivity() {
             ScannerOptions(
                 mode = Modes.NFC_SCAN.value,
                 config = Config(
-                       label = "Please scan MRZ to verify ID", // Please add translated string here
+                       label = getString(R.string.label_scan_nfc_via_mrz),
                        isManualCapture = false,
                        branding = true
                 )
