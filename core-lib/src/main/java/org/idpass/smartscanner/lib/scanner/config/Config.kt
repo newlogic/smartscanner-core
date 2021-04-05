@@ -24,20 +24,20 @@ import org.idpass.smartscanner.lib.platform.extension.empty
 @Parcelize
 data class Config(
     val background: String? = null,
+    val branding: Boolean? = null,
     val font: String? = null,
     val imageResultType: String? = null,
-    val label: String? = null,
     val isManualCapture: Boolean? = null,
-    val branding: Boolean? = null,
+    val label: String? = null
 ) : Parcelable {
     companion object {
         val default = Config(
             background = String.empty(),
+            branding = true,
             font = String.empty(),
             imageResultType = ImageResultType.PATH.value,
-            label = String.empty(),
             isManualCapture = false,
-            branding = true
+            label = String.empty()
         )
     }
 }

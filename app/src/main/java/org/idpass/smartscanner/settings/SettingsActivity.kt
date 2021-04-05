@@ -17,23 +17,23 @@
  */
 package org.idpass.smartscanner.settings
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import org.idpass.smartscanner.MainActivity
 import org.idpass.smartscanner.R
+import org.idpass.smartscanner.lib.scanner.config.Language
 import java.util.*
 
 
 class SettingsActivity : AppCompatActivity() {
-    @SuppressLint("CommitPrefEdits")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings_languages)
@@ -57,35 +57,35 @@ class SettingsActivity : AppCompatActivity() {
 
         // Arabic language
         arabicLayout.setOnClickListener {
-            val locale = Locale("ar")
-            Locale.setDefault(locale)
-            val config = Configuration()
-            config.locale = locale
-            baseContext.resources.updateConfiguration(config, baseContext.resources.displayMetrics)
-            Toast.makeText(applicationContext, Locale.getDefault().language, Toast.LENGTH_SHORT).show()
-
             arabicpic.visibility = View.VISIBLE
             englishpic.visibility = View.INVISIBLE
-            editor.putString("name", "ar")
-            editor.apply()
+            changeLanguage( context = this, editor = editor, language = Language.AR)
             startActivity(Intent(this, MainActivity::class.java))
         }
-
         // English language
         englishLayout.setOnClickListener {
-            val locale = Locale("en")
-            Locale.setDefault(locale)
-            val config = Configuration()
-            config.locale = locale
-            baseContext.resources.updateConfiguration(config, baseContext.resources.displayMetrics)
             arabicpic.visibility = View.INVISIBLE
             englishpic.visibility = View.VISIBLE
-            editor.putString("name", "en")
-            editor.apply()
+            changeLanguage( context = this, editor = editor, language = Language.EN)
             startActivity(Intent(this, MainActivity::class.java))
         }
 
         // Go Back
         backspace.setOnClickListener { onBackPressed() }
+    }
+
+    private fun changeLanguage(context: Context, editor: SharedPreferences.Editor, language : String) {
+        // Remove previous set language
+        editor.remove(Language.NAME).apply()
+        val locale = Locale(language)
+        val config = Configuration()
+        val resources = context.resources
+        // Set new language
+        Locale.setDefault(locale)
+        config.locale = locale
+        resources.updateConfiguration(config, resources.displayMetrics)
+        // Save new language to sharedPrefs
+        editor.putString(Language.NAME, language)
+        editor.apply()
     }
 }
