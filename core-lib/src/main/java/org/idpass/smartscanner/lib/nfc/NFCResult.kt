@@ -21,6 +21,7 @@ import org.idpass.smartscanner.lib.nfc.passport.Passport
 import org.idpass.smartscanner.lib.platform.extension.arrayToString
 import org.idpass.smartscanner.lib.platform.utils.DateUtils
 import org.idpass.smartscanner.lib.platform.utils.DateUtils.formatStandardDate
+import org.idpass.smartscanner.lib.scanner.config.Language.Locale
 import org.jmrtd.lds.icao.MRZInfo
 
 
@@ -51,19 +52,39 @@ data class NFCResult(
 ) {
     companion object {
 
-        fun formatResult(passport: Passport?, mrzInfo: MRZInfo? = null): NFCResult {
+        fun formatResult(passport: Passport?, locale: String?, mrzInfo: MRZInfo? = null): NFCResult {
             val personDetails = passport?.personDetails
             val additionalPersonDetails = passport?.additionalPersonDetails
             val additionalDocumentDetails = passport?.additionalDocumentDetails
-            // Note: Get proper names
-            // NFCResult.nameOfHolder --> LAST_NAME<<GIVEN_NAMES (RTL for Arabic)
+            var surname : String? = ""
+            var givenNames : String? = ""
+            // Note: In getting proper names
             // we split nameOfHolder to two parts separated by '<<' (double chevron)
-            val nameParts  = additionalPersonDetails?.nameOfHolder?.split("<<")?.toMutableList()
-            // then first part of nameOfHolder should contain LAST_NAME
-            val surname = nameParts?.get(0)?.replace("<", " ")
-            // other parts remaining of nameOfHolder should contain GIVEN_NAMES
-            val givenNames = nameParts?.get(1)?.replace("<", " ")
+            // one part of nameOfHolder should contain last names/surname
+            // other part remaining of nameOfHolder should contain given names
             // in which multiple names are separated by '<' (single chevron)
+            val parts  = additionalPersonDetails?.nameOfHolder?.split("<<")?.toMutableList()
+            if (locale == Locale.RTL) {
+                // For RTL languages, last names/surname are on the last part of nameOfHolder and first part for given names
+                // NFCResult.nameOfHolder --> GIVEN_NAME1<GIVEN_NAME2<<LAST_NAME1<LAST_NAME2 (RTL for Arabic)
+                surname = parts?.lastOrNull()?.replace("<", " ")
+                parts?.apply {
+                    removeAt(parts.size - 1)
+                    forEach { name ->
+                        givenNames = name.replace("<", " ")
+                    }
+                }
+            } else {
+                // For LTR languages (opposite to RTL),  given names are on the last part of nameOfHolder and first part for last names/surname
+                // NFCResult.nameOfHolder --> LAST_NAME1<LAST_NAME2<<GIVEN_NAME_1<GIVEN_NAME_2 (LTR for English)
+                givenNames = parts?.lastOrNull()?.replace("<", " ")
+                parts?.apply {
+                    removeAt(parts.size - 1)
+                    forEach { name ->
+                        surname = name.replace("<", " ")
+                    }
+                }
+            }
             // Get proper date of birth
             val dateOfBirth = if (additionalPersonDetails?.fullDateOfBirth.isNullOrEmpty()) {
                 DateUtils.toAdjustedDate (formatStandardDate(personDetails?.dateOfBirth))
