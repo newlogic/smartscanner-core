@@ -1228,7 +1228,6 @@ private constructor() {
         return ps.doBAC(bacKey)
     }
 
-
     private fun doEACCA(ps: PassportService, mrzInfo: MRZInfo, dg14File: DG14File?, sodFile: SODFile?): List<EACCAResult> {
         Log.i(TAG, "doEACCA entry")
         if (dg14File == null) {
@@ -1259,34 +1258,86 @@ private constructor() {
         }
 
         var keyid = BigInteger.ZERO
-        var pubkeyIdentifier = ""
-        var protIdentifier:String?
+        var oidasn1 = ""
+        var oidhumanreadable = ""
 
         val publicKeyInfoIterator = chipAuthenticationPublicKeyInfos.iterator()
+        outer@
         while (publicKeyInfoIterator.hasNext()) {
             val authenticationPublicKeyInfo = publicKeyInfoIterator.next()
 
             if (chipAuthenticationInfo != null) {
                 keyid = chipAuthenticationInfo.keyId
-                pubkeyIdentifier = chipAuthenticationInfo.objectIdentifier
-                protIdentifier = chipAuthenticationInfo.protocolOIDString
+                oidasn1 = chipAuthenticationInfo.objectIdentifier
+                oidhumanreadable = chipAuthenticationInfo.protocolOIDString
+
+                try {
+                    Log.i("EMRTD", "Chip Authentication starting")
+                    val doEACCA = ps.doEACCA(keyid, oidasn1, oidhumanreadable, authenticationPublicKeyInfo.subjectPublicKey)
+                    eaccaResults.add(doEACCA)
+                    Log.i("EMRTD", "Chip Authentication succeeded")
+                } catch (cse: CardServiceException) {
+                    //cse.printStackTrace()
+                    /* NOTE: Failed? Too bad, try next public key. */
+                    Log.w(TAG, "try next public key")
+                }
             } else {
+
                 keyid = authenticationPublicKeyInfo.keyId
-                pubkeyIdentifier = authenticationPublicKeyInfo.objectIdentifier
-                protIdentifier = inferChipAuthenticationOIDfromPublicKeyOID(pubkeyIdentifier)
-            }
+                oidasn1 = authenticationPublicKeyInfo.objectIdentifier
 
-            try {
-                Log.i("EMRTD", "Chip Authentication starting")
-                val doEACCA = ps.doEACCA(keyid, pubkeyIdentifier, protIdentifier, authenticationPublicKeyInfo.subjectPublicKey)
-                eaccaResults.add(doEACCA)
-                Log.i("EMRTD", "Chip Authentication succeeded")
-            } catch (cse: CardServiceException) {
-                //cse.printStackTrace()
-                /* NOTE: Failed? Too bad, try next public key. */
-                Log.w(TAG, "try next public key")
-            }
+                if (SecurityInfo.ID_PK_ECDH.equals(oidasn1)) {
 
+                    val oidmapECDH = mapOf<String, String>(
+                            SecurityInfo.ID_CA_ECDH_3DES_CBC_CBC to "id-CA-ECDH-3DES-CBC-CBC",
+                            SecurityInfo.ID_CA_ECDH_AES_CBC_CMAC_128 to "id-CA-ECDH-AES-CBC-CMAC-128",
+                            SecurityInfo.ID_CA_ECDH_AES_CBC_CMAC_192 to "id-CA-ECDH-AES-CBC-CMAC-192",
+                            SecurityInfo.ID_CA_ECDH_AES_CBC_CMAC_256 to "id-CA-ECDH-AES-CBC-CMAC-256")
+
+                    for ((asn1,humanreadable) in oidmapECDH) {
+                        try {
+                            Log.i(TAG, "Trying $humanreadable")
+                            val doEACCA = ps.doEACCA(keyid, asn1, humanreadable, authenticationPublicKeyInfo.subjectPublicKey)
+                            eaccaResults.add(doEACCA)
+                            Log.i(TAG, "Success $humanreadable")
+                            break@outer
+                        } catch (cse: CardServiceException) {
+                            Log.e(TAG,"FAIL $humanreadable : ${cse.message}")
+                        } catch (e: Exception) {
+                            Log.e(TAG,"FAiL $humanreadable : ${e.message}")
+                        }
+                    }
+
+                    Log.e(TAG,"all ECDH choices failed")
+
+                } else if(SecurityInfo.ID_PK_DH.equals(oidasn1)) {
+
+                    val oidmapDH = mapOf<String, String>(
+                            SecurityInfo.ID_CA_DH_3DES_CBC_CBC to "id-CA-DH-3DES-CBC-CBC",
+                            SecurityInfo.ID_CA_DH_AES_CBC_CMAC_128 to "id-CA-DH-AES-CBC-CMAC-128",
+                            SecurityInfo.ID_CA_DH_AES_CBC_CMAC_192 to "id-CA-DH-AES-CBC-CMAC-192",
+                            SecurityInfo.ID_CA_DH_AES_CBC_CMAC_256 to "id-CA-DH-AES-CBC-CMAC-256")
+
+                    for ((asn1, humanreadable) in oidmapDH) {
+                        try {
+                            Log.i(TAG, "Trying $humanreadable")
+                            val doEACCA = ps.doEACCA(keyid, asn1, humanreadable, authenticationPublicKeyInfo.subjectPublicKey)
+                            eaccaResults.add(doEACCA)
+                            Log.i(TAG, "Success $humanreadable")
+                            break@outer
+                        } catch (cse: CardServiceException) {
+                            Log.e(TAG,"FAIL $humanreadable : ${cse.message}")
+                        } catch (e: Exception) {
+                            Log.e(TAG,"FAiL $humanreadable : ${e.message}")
+                        }
+                    }
+
+                    Log.e(TAG,"all DH choices failed")
+
+                } else {
+                    Log.e(TAG,"UNKNOWN $oidasn1")
+                }
+            }
         }
 
         Log.i(TAG, "doEACCA exit")
