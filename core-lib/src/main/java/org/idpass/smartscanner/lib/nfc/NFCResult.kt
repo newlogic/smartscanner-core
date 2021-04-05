@@ -60,10 +60,10 @@ data class NFCResult(
             // we split nameOfHolder to two parts separated by '<<' (double chevron)
             val nameParts  = additionalPersonDetails?.nameOfHolder?.split("<<")?.toMutableList()
             // then first part of nameOfHolder should contain LAST_NAME
-            val surname = nameParts?.get(0)
+            val surname = nameParts?.get(0)?.replace("<", " ")
             // other parts remaining of nameOfHolder should contain GIVEN_NAMES
-            // in which multiple names are separated by '<' (single chevron)
             val givenNames = nameParts?.get(1)?.replace("<", " ")
+            // in which multiple names are separated by '<' (single chevron)
             // Get proper date of birth
             val dateOfBirth = if (additionalPersonDetails?.fullDateOfBirth.isNullOrEmpty()) {
                 DateUtils.toAdjustedDate (formatStandardDate(personDetails?.dateOfBirth))
