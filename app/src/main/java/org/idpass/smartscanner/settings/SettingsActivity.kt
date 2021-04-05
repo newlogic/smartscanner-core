@@ -38,9 +38,10 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings_languages)
 
-        val engilshpic = findViewById<ImageView>(R.id.engilshpic)
         val arabicpic = findViewById<ImageView>(R.id.arabicpic)
+        val englishpic = findViewById<ImageView>(R.id.englishpic)
         val arabicLayout = findViewById<LinearLayout>(R.id.arabiclayout)
+        val englishLayout = findViewById<LinearLayout>(R.id.englishLayout)
         val backspace = findViewById<ImageView>(R.id.backspace)
         val preference = getSharedPreferences(resources.getString(R.string.app_name), Context.MODE_PRIVATE)
         val editor = preference.edit()
@@ -48,10 +49,10 @@ class SettingsActivity : AppCompatActivity() {
 
         if (currentLanguage == "English") {
             arabicpic.visibility = View.INVISIBLE
-            engilshpic.visibility = View.VISIBLE
+            englishpic.visibility = View.VISIBLE
         } else {
             arabicpic.visibility = View.VISIBLE
-            engilshpic.visibility = View.INVISIBLE
+            englishpic.visibility = View.INVISIBLE
         }
 
         // Arabic language
@@ -64,14 +65,13 @@ class SettingsActivity : AppCompatActivity() {
             Toast.makeText(applicationContext, Locale.getDefault().language, Toast.LENGTH_SHORT).show()
 
             arabicpic.visibility = View.VISIBLE
-            engilshpic.visibility = View.INVISIBLE
+            englishpic.visibility = View.INVISIBLE
             editor.putString("name", "ar")
             editor.apply()
             startActivity(Intent(this, MainActivity::class.java))
         }
 
         // English language
-        val englishLayout = findViewById<LinearLayout>(R.id.engilshlayout)
         englishLayout.setOnClickListener {
             val locale = Locale("en")
             Locale.setDefault(locale)
@@ -79,7 +79,7 @@ class SettingsActivity : AppCompatActivity() {
             config.locale = locale
             baseContext.resources.updateConfiguration(config, baseContext.resources.displayMetrics)
             arabicpic.visibility = View.INVISIBLE
-            engilshpic.visibility = View.VISIBLE
+            englishpic.visibility = View.VISIBLE
             editor.putString("name", "en")
             editor.apply()
             startActivity(Intent(this, MainActivity::class.java))
