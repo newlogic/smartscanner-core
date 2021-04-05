@@ -49,6 +49,7 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
     internal var simpleDateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
 
     private var passport: Passport? = null
+    private var locale: String? = null
     private lateinit var binding : FragmentPassportDetailsBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -62,6 +63,9 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
         val arguments = arguments
         if (arguments?.containsKey(IntentData.KEY_PASSPORT) == true) {
             passport = arguments.getParcelable<Passport>(IntentData.KEY_PASSPORT)
+        }
+        if (arguments?.containsKey(IntentData.KEY_LOCALE) == true) {
+            locale = arguments.getString(IntentData.KEY_LOCALE)
         }
 
         binding.iconPhoto.setOnClickListener {
@@ -92,7 +96,7 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
             binding.iconPhoto.setImageBitmap(passport.portrait)
         }
 
-        val resultDetails = NFCResult.formatResult(passport)
+        val resultDetails = NFCResult.formatResult(passport, locale)
         binding.valueName.text = resultDetails.givenNames
         binding.lname.text = resultDetails.surname
         binding.valueDOB.text = resultDetails.dateOfBirth
@@ -382,9 +386,10 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
     }
 
     companion object {
-        fun newInstance(passport: Passport?): PassportDetailsFragment {
+        fun newInstance(passport: Passport?, locale: String?): PassportDetailsFragment {
             val myFragment = PassportDetailsFragment()
             val args = Bundle()
+            args.putString(IntentData.KEY_LOCALE, locale)
             args.putParcelable(IntentData.KEY_PASSPORT, passport)
             myFragment.arguments = args
             return myFragment

@@ -19,7 +19,7 @@ package org.idpass.smartscanner
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -124,24 +124,6 @@ class MainActivity : AppCompatActivity() {
         return adapter != null
     }
 
-    @SuppressLint("LogNotTimber")
-    private fun startIntentCallOut() {
-        try {
-            // Note: Scanner via intent can either be for barcode, idpass-lite, mrz, nfc, qrcode
-            // Please see ScannerIntent class for more details
-            // barcode -> val intent = ScannerIntent.intentBarcode()
-            // idpass-lite -> val intent = ScannerIntent.intentIDPassLite()
-            // mrz -> val intent = ScannerIntent.intentMrz()
-            // nfc -> val intent = ScannerIntent.intentNFCScan()
-            // qrcode -> val intent = ScannerIntent.intentQRCode()
-            val intent = ScannerIntent.intentNFCScan()
-            startActivityForResult(intent, OP_SCANNER)
-        } catch (ex: ActivityNotFoundException) {
-            ex.printStackTrace()
-            Log.e(SmartScannerActivity.TAG, "ID PASS SmartScanner is not installed!")
-        }
-    }
-
     private fun scanBarcode(barcodeOptions: BarcodeOptions? = null) {
         val intent = Intent(this, SmartScannerActivity::class.java)
         intent.putExtra(
@@ -180,15 +162,18 @@ class MainActivity : AppCompatActivity() {
 
     private fun scanNFC() {
         val intent = Intent(this, SmartScannerActivity::class.java)
+        val preference = getSharedPreferences(SmartScannerApplication.SHARED, Context.MODE_PRIVATE)
+        val locale = if (preference?.getString(Language.NAME, "") == Language.AR) Language.Locale.RTL else Language.Locale.LTR
         intent.putExtra(NFCActivity.FOR_SMARTSCANNER_APP, true)
         intent.putExtra(
             SmartScannerActivity.SCANNER_OPTIONS,
             ScannerOptions(
                 mode = Modes.NFC_SCAN.value,
+                nfcLocale = locale,
                 config = Config(
-                       label = getString(R.string.label_scan_nfc_via_mrz),
-                       isManualCapture = false,
-                       branding = true
+                    label = getString(R.string.label_scan_nfc_via_mrz),
+                    isManualCapture = false,
+                    branding = true
                 )
             )
         )
@@ -198,12 +183,12 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("InflateParams")
     private fun scanQRCode()  {
         val bottomSheetDialog = BottomSheetDialog(this)
-        val sheetViewBarcode = layoutInflater.inflate(R.layout.sheet_qrcode, null)
-        bottomSheetDialog.setContentView(sheetViewBarcode)
+        val sheetViewQR = layoutInflater.inflate(R.layout.sheet_qrcode, null)
+        bottomSheetDialog.setContentView(sheetViewQR)
         // bottom sheet ids
-        val btnGzipped = sheetViewBarcode.findViewById<LinearLayout>(R.id.btnGzipped)
-        val btnRegular = sheetViewBarcode.findViewById<LinearLayout>(R.id.btnRegular)
-        val btnCancel = sheetViewBarcode.findViewById<LinearLayout>(R.id.btnCancel)
+        val btnGzipped = sheetViewQR.findViewById<LinearLayout>(R.id.btnGzipped)
+        val btnRegular = sheetViewQR.findViewById<LinearLayout>(R.id.btnRegular)
+        val btnCancel = sheetViewQR.findViewById<LinearLayout>(R.id.btnCancel)
         // bottom sheet listeners
         btnGzipped.setOnClickListener {
             val intent = ScannerIntent.intentQRCode(

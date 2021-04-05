@@ -148,7 +148,8 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
 
     override fun onPassportRead(passport: Passport?) {
         val action = intent.getStringExtra(ScannerConstants.NFC_ACTION)
-        val nfcResult = NFCResult.formatResult(passport, mrzInfo)
+        val locale = intent.getStringExtra(ScannerConstants.NFC_LOCALE)
+        val nfcResult = NFCResult.formatResult(passport, locale, mrzInfo)
 
         if (action == ScannerConstants.IDPASS_SMARTSCANNER_NFC_INTENT ||
                 action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_NFC_INTENT ) {
@@ -193,7 +194,7 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
             finish()
         } else {
             // Send NFC Results via App
-            if (intent.hasExtra(FOR_SMARTSCANNER_APP)) showFragmentDetails(passport)
+            if (intent.hasExtra(FOR_SMARTSCANNER_APP)) showFragmentDetails(passport, locale)
             else {
                 // Send NFC Results via Plugin
                 val data = Intent()
@@ -217,9 +218,9 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
     }
 
 
-    private fun showFragmentDetails(passport: Passport?) {
+    private fun showFragmentDetails(passport: Passport?, locale: String?) {
         supportFragmentManager.beginTransaction()
-                .replace(R.id.container, PassportDetailsFragment.newInstance(passport))
+                .replace(R.id.container, PassportDetailsFragment.newInstance(passport, locale))
                 .addToBackStack(TAG_PASSPORT_DETAILS)
                 .commit()
     }
