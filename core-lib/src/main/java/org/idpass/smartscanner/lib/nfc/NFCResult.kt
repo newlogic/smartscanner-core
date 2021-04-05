@@ -20,8 +20,8 @@ package org.idpass.smartscanner.lib.nfc
 import org.idpass.smartscanner.lib.nfc.passport.Passport
 import org.idpass.smartscanner.lib.platform.extension.arrayToString
 import org.idpass.smartscanner.lib.platform.utils.DateUtils
+import org.idpass.smartscanner.lib.platform.utils.DateUtils.formatStandardDate
 import org.jmrtd.lds.icao.MRZInfo
-import java.util.*
 
 
 data class NFCResult(
@@ -55,32 +55,26 @@ data class NFCResult(
             val personDetails = passport?.personDetails
             val additionalPersonDetails = passport?.additionalPersonDetails
             val additionalDocumentDetails = passport?.additionalDocumentDetails
-            val currentLanguage = Locale.getDefault().displayLanguage
-            // Get proper names
-            var givenNames : String? = ""
-            var surname : String? = ""
-            if (currentLanguage.toLowerCase(Locale.ROOT).contains("en")) {
-                givenNames = personDetails?.secondaryIdentifier?.replace("<<", " ")?.replace("<", "")
-                surname = personDetails?.primaryIdentifier?.replace("<<", " ")?.replace("<", "")
-            } else {
-                val full = additionalPersonDetails?.nameOfHolder?.replace("<<", " ")?.replace("<", " ")
-                val parts  = full?.split(" ")?.toMutableList()
-                givenNames = "${parts?.get(0)} ${parts?.get(1)} ${parts?.get(2)}"
-                surname = parts?.get(3)
-            }
+            // Note: Get proper names
+            // NFCResult.nameOfHolder --> LAST_NAME<<GIVEN_NAMES (RTL for Arabic)
+            // we split nameOfHolder to two parts separated by '<<' (double chevron)
+            val nameParts  = additionalPersonDetails?.nameOfHolder?.split("<<")?.toMutableList()
+            // then first part of nameOfHolder should contain LAST_NAME
+            val surname = nameParts?.get(0)
+            // other parts remaining of nameOfHolder should contain GIVEN_NAMES
+            // in which multiple names are separated by '<' (single chevron)
+            val givenNames = nameParts?.get(1)?.replace("<", " ")
             // Get proper date of birth
             val dateOfBirth = if (additionalPersonDetails?.fullDateOfBirth.isNullOrEmpty()) {
-                DateUtils.toAdjustedDate (
-                        DateUtils.formatStandardDate(personDetails?.dateOfBirth)
-                )
-            } else DateUtils.formatStandardDate(additionalPersonDetails?.fullDateOfBirth, "yyyyMMdd")
+                DateUtils.toAdjustedDate (formatStandardDate(personDetails?.dateOfBirth))
+            } else formatStandardDate(additionalPersonDetails?.fullDateOfBirth, "yyyyMMdd")
             return NFCResult(
                     givenNames = givenNames,
                     surname = surname,
                     nameOfHolder = additionalPersonDetails?.nameOfHolder,
                     gender = personDetails?.gender?.name,
                     documentNumber = personDetails?.documentNumber,
-                    dateOfExpiry = DateUtils.toReadableDate(DateUtils.formatStandardDate(personDetails?.dateOfExpiry)),
+                    dateOfExpiry = DateUtils.toReadableDate(formatStandardDate(personDetails?.dateOfExpiry)),
                     issuingState = personDetails?.issuingState,
                     nationality = personDetails?.nationality,
                     otherNames = additionalPersonDetails?.otherNames?.arrayToString(),
@@ -90,7 +84,7 @@ data class NFCResult(
                     telephone = additionalPersonDetails?.telephone,
                     title = additionalPersonDetails?.title,
                     dateAndTimeOfPersonalization = additionalDocumentDetails?.dateAndTimeOfPersonalization,
-                    dateOfIssue = DateUtils.formatStandardDate(additionalDocumentDetails?.dateOfIssue, "yyyyMMdd"),
+                    dateOfIssue = formatStandardDate(additionalDocumentDetails?.dateOfIssue, "yyyyMMdd"),
                     endorsementsAndObservations = additionalDocumentDetails?.endorsementsAndObservations,
                     issuingAuthority = additionalDocumentDetails?.issuingAuthority,
                     personalizationSystemSerialNumber = additionalDocumentDetails?.personalizationSystemSerialNumber,
