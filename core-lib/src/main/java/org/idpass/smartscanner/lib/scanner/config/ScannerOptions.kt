@@ -19,12 +19,14 @@ package org.idpass.smartscanner.lib.scanner.config
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import org.idpass.smartscanner.lib.scanner.config.Language.Locale
 import org.idpass.smartscanner.lib.scanner.config.Modes.*
 
 @Parcelize
 data class ScannerOptions(
     val mode: String? = MRZ.value,
     val config: Config? = null,
+    val nfcLocale: String? = null,
     val mrzFormat: String? = null,
     val scannerSize: String? = null,
     val barcodeOptions: BarcodeOptions? = null,
@@ -50,8 +52,8 @@ data class ScannerOptions(
 
         val defaultForNFCScan = ScannerOptions(
             mode = NFC_SCAN.value,
+            nfcLocale = Locale.LTR,
             config = Config(
-                label = "Please scan MRZ to verify ID",
                 isManualCapture = false,
                 branding = true
             )

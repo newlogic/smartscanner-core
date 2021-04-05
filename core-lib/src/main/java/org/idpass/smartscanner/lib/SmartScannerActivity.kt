@@ -230,7 +230,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                         intent = intent,
                         isMLKit = isMLKit,
                         imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
-                        format = scannerOptions?.mrzFormat ?: intent.getStringExtra(ScannerConstants.MRZ_FORMAT_EXTRA),
+                        locale = scannerOptions?.nfcLocale ?: intent.getStringExtra(ScannerConstants.NFC_LOCALE),
                         analyzeStart = System.currentTimeMillis(),
                         onConnectSuccess = {
                             modelTextLoading?.visibility = INVISIBLE
