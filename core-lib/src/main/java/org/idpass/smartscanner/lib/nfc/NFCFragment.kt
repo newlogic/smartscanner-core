@@ -22,7 +22,6 @@ import android.content.Intent
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.os.Bundle
-import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -32,6 +31,7 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import io.reactivex.disposables.CompositeDisposable
 import net.sf.scuba.smartcards.CardServiceException
 import net.sf.scuba.smartcards.ISO7816
@@ -42,23 +42,28 @@ import org.idpass.smartscanner.lib.nfc.passport.Passport
 import org.idpass.smartscanner.lib.platform.utils.DateUtils
 import org.idpass.smartscanner.lib.platform.utils.DateUtils.formatStandardDate
 import org.idpass.smartscanner.lib.platform.utils.KeyStoreUtils
+import org.idpass.smartscanner.lib.platform.utils.LanguageUtils.changeLanguage
+import org.idpass.smartscanner.lib.scanner.config.Language
 import org.jmrtd.*
 import org.jmrtd.lds.icao.MRZInfo
 import org.spongycastle.jce.provider.BouncyCastleProvider
 import java.security.Security
+import java.util.*
 
 
-class  NFCFragment : androidx.fragment.app.Fragment() {
+class  NFCFragment : Fragment() {
 
     private var mrzInfo: MRZInfo? = null
     private var nfcFragmentListener: NfcFragmentListener? = null
     private var textViewPassportNumber: TextView? = null
+    private var textViewNfcTitle: TextView? = null
     private var textViewDateOfBirth: TextView? = null
     private var textViewDateOfExpiry: TextView? = null
     private var progressBar: ProgressBar? = null
+    private var locale: String? = null
 
-    internal var mHandler = Handler(Looper.getMainLooper())
-    var disposable = CompositeDisposable()
+    private var mHandler = Handler(Looper.getMainLooper())
+    private var disposable = CompositeDisposable()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -67,14 +72,23 @@ class  NFCFragment : androidx.fragment.app.Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val arguments = arguments
         if (arguments?.containsKey(IntentData.KEY_MRZ_INFO) == true) {
-            mrzInfo = arguments?.getSerializable(IntentData.KEY_MRZ_INFO) as MRZInfo
+            mrzInfo = arguments.getSerializable(IntentData.KEY_MRZ_INFO) as MRZInfo
         }
-
+        if (arguments?.containsKey(IntentData.KEY_LOCALE) == true) {
+            locale = arguments.getString(IntentData.KEY_LOCALE)
+        }
+        if (arguments?.containsKey(IntentData.KEY_LANGUAGE) == true) {
+            val language = arguments.getString(IntentData.KEY_LANGUAGE) ?: Language.EN
+            changeLanguage(requireContext(), language)
+        }
+        textViewNfcTitle = view.findViewById(R.id.textViewNfcTitle)
         textViewPassportNumber = view.findViewById(R.id.value_passport_number)
         textViewDateOfBirth = view.findViewById(R.id.value_DOB)
         textViewDateOfExpiry = view.findViewById(R.id.value_expiration_date)
         progressBar = view.findViewById(R.id.progressBar)
+
     }
 
     fun handleNfcTag(intent: Intent?) {
@@ -82,13 +96,11 @@ class  NFCFragment : androidx.fragment.app.Fragment() {
             return
         }
         val tag = intent.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG) ?: return
-
-        val folder = context?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
         val cscaInputStream = context!!.assets.open("csca.ks")
         val keyStore = KeyStoreUtils().readKeystoreFromFile(cscaInputStream)
 
         val mrtdTrustStore = MRTDTrustStore()
-        if(keyStore!=null){
+        if (keyStore!=null) {
             val certStore = KeyStoreUtils().toCertStore(keyStore = keyStore)
             mrtdTrustStore.addAsCSCACertStore(certStore)
         }
@@ -159,9 +171,9 @@ class  NFCFragment : androidx.fragment.app.Fragment() {
         super.onDetach()
     }
 
-
     override fun onResume() {
         super.onResume()
+        textViewNfcTitle?.text = getString(R.string.nfc_title)
         textViewPassportNumber?.text = getString(R.string.doc_number, mrzInfo?.documentNumber)
         textViewDateOfBirth?.text = getString(R.string.doc_dob, DateUtils.toAdjustedDate(formatStandardDate(mrzInfo?.dateOfBirth)))
         textViewDateOfExpiry?.text = getString(R.string.doc_expiry, DateUtils.toReadableDate(formatStandardDate(mrzInfo?.dateOfExpiry)))
@@ -225,10 +237,12 @@ class  NFCFragment : androidx.fragment.app.Fragment() {
         init {
             Security.insertProviderAt(BouncyCastleProvider(), 1)
         }
-        fun newInstance(mrzInfo: MRZInfo): NFCFragment {
+        fun newInstance(mrzInfo: MRZInfo, language: String?, locale : String?): NFCFragment {
             val myFragment = NFCFragment()
             val args = Bundle()
             args.putSerializable(IntentData.KEY_MRZ_INFO, mrzInfo)
+            args.putString(IntentData.KEY_LANGUAGE, language)
+            args.putString(IntentData.KEY_LOCALE, locale)
             myFragment.arguments = args
             return myFragment
         }

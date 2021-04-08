@@ -13,6 +13,7 @@
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layoutDirection="ltr"
             android:orientation="vertical">
 
             <androidx.cardview.widget.CardView
@@ -33,6 +34,7 @@
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layoutDirection="ltr"
                     android:padding="@dimen/margin_small">
 
                     <ImageView
@@ -48,11 +50,12 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_alignParentTop="true"
-                        android:layout_marginLeft="@dimen/margin_small"
-                        android:layout_marginRight="@dimen/margin_small"
+                        android:layout_marginStart="@dimen/margin_small"
+                        android:layout_marginEnd="@dimen/margin_small"
                         android:layout_marginBottom="@dimen/margin_small"
-                        android:layout_toRightOf="@+id/iconWarning"
+                        android:layout_toEndOf="@+id/iconWarning"
                         android:text="@string/document_valid_passport"
+                        android:layoutDirection="ltr"
                         android:textColor="@color/white" />
 
                     <TextView
@@ -61,10 +64,11 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/textWarningTitle"
-                        android:layout_marginLeft="@dimen/margin_small"
-                        android:layout_marginRight="@dimen/margin_small"
-                        android:layout_toRightOf="@+id/iconWarning"
+                        android:layout_marginStart="@dimen/margin_small"
+                        android:layout_marginEnd="@dimen/margin_small"
+                        android:layout_toEndOf="@+id/iconWarning"
                         android:text="@string/document_chip_content_success"
+                        android:layoutDirection="ltr"
                         android:textColor="@color/white" />
 
                 </RelativeLayout>
@@ -90,6 +94,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layoutDirection="ltr"
                     android:padding="@dimen/margin_small"
                     android:paddingBottom="@dimen/margin_small"
                     android:stretchColumns="1">
@@ -347,6 +352,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:padding="@dimen/margin_small"
+                    android:layoutDirection="ltr"
                     android:paddingBottom="@dimen/margin_medium"
                     android:stretchColumns="*">
 
@@ -358,15 +364,32 @@
                         <androidx.appcompat.widget.LinearLayoutCompat
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_marginTop="8dp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="end"
+                                android:padding="4dp"
+                                android:textAlignment="textStart"
+                                android:layout_gravity="start"
+                                android:text="Personal Information"
+                                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                                android:layout_marginEnd="@dimen/margin_small"
+                                tools:ignore="RtlCompat" />
+
+                        <androidx.appcompat.widget.LinearLayoutCompat
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
                             android:orientation="horizontal">
 
                             <androidx.appcompat.widget.AppCompatImageView
                                 android:id="@+id/iconPhoto"
                                 android:layout_width="@dimen/item_photo_width"
                                 android:layout_height="@dimen/item_photo_height"
-                                android:layout_gravity="center"
+                                android:layout_gravity="start"
                                 android:layout_marginEnd="@dimen/margin_medium_small"
-                                android:contentDescription="Vehicle Owner Details"
                                 android:src="@drawable/ic_person" />
 
                             <TableLayout
@@ -375,18 +398,6 @@
                                 android:shrinkColumns="1"
                                 android:layout_weight="1">
 
-                                <TextView
-                                    android:layout_marginTop="8dp"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:gravity="start"
-                                    android:padding="4dp"
-                                    android:textAlignment="textStart"
-                                    android:layout_gravity="start"
-                                    android:text="Personal Information"
-                                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-                                    android:layout_marginEnd="@dimen/margin_small"
-                                    tools:ignore="RtlCompat" />
 
                                 <TableRow
                                     android:layout_width="match_parent"
@@ -402,6 +413,7 @@
 
                                     <TextView
                                         android:id="@+id/value_name"
+                                        android:textAlignment="center"
                                         android:layout_width="0dp"
                                         android:layout_height="match_parent"
                                         android:padding="@dimen/margin_tiny"
@@ -472,6 +484,7 @@
                                         android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
                                 </TableRow>
                             </TableLayout>
+                        </androidx.appcompat.widget.LinearLayoutCompat>
 
                         </androidx.appcompat.widget.LinearLayoutCompat>
                     </TableRow>
@@ -497,6 +510,7 @@
                 <TableLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layoutDirection="ltr"
                     android:layout_gravity="center"
                     android:padding="@dimen/margin_small"
                     android:paddingBottom="@dimen/margin_small"
@@ -652,6 +666,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layoutDirection="ltr"
                     android:padding="@dimen/margin_small"
                     android:paddingBottom="@dimen/margin_small"
                     android:stretchColumns="1">
@@ -998,6 +1013,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layoutDirection="ltr"
                     android:padding="@dimen/margin_small"
                     android:paddingBottom="@dimen/margin_small"
                     android:stretchColumns="1">
@@ -1234,6 +1250,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layoutDirection="ltr"
                     android:padding="@dimen/margin_small"
                     android:paddingBottom="@dimen/margin_small"
                     android:stretchColumns="1">

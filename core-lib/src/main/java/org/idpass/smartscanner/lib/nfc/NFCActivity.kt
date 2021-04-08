@@ -69,6 +69,8 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
     private var mrzInfo: MRZInfo? = null
     private var nfcAdapter: NfcAdapter? = null
     private var pendingIntent: PendingIntent? = null
+    private var locale: String? = null
+    private var language: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,12 +81,14 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
         val mrz = intent.getStringExtra(ScannerConstants.NFC_MRZ_STRING) ?: run {
             intent.getStringExtra(FOR_MRZ_LOG)
         }
+        language = intent.getStringExtra(ScannerConstants.LANGUAGE)
+        locale = intent.getStringExtra(ScannerConstants.NFC_LOCALE)
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         try {
             mrzInfo = MRZInfo(mrz)
             mrzInfo?.let {
                 supportFragmentManager.beginTransaction()
-                    .replace(R.id.container, NFCFragment.newInstance(it), TAG_NFC)
+                    .replace(R.id.container, NFCFragment.newInstance(it, language, locale), TAG_NFC)
                     .commit()
             }
         } catch (e: Exception) {
@@ -148,7 +152,6 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
 
     override fun onPassportRead(passport: Passport?) {
         val action = intent.getStringExtra(ScannerConstants.NFC_ACTION)
-        val locale = intent.getStringExtra(ScannerConstants.NFC_LOCALE)
         val nfcResult = NFCResult.formatResult(passport, locale, mrzInfo)
 
         if (action == ScannerConstants.IDPASS_SMARTSCANNER_NFC_INTENT ||
@@ -194,7 +197,7 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
             finish()
         } else {
             // Send NFC Results via App
-            if (intent.hasExtra(FOR_SMARTSCANNER_APP)) showFragmentDetails(passport, locale)
+            if (intent.hasExtra(FOR_SMARTSCANNER_APP)) showFragmentDetails(passport, language, locale)
             else {
                 // Send NFC Results via Plugin
                 val data = Intent()
@@ -218,9 +221,9 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
     }
 
 
-    private fun showFragmentDetails(passport: Passport?, locale: String?) {
+    private fun showFragmentDetails(passport: Passport?, language: String?, locale: String?) {
         supportFragmentManager.beginTransaction()
-                .replace(R.id.container, PassportDetailsFragment.newInstance(passport, locale))
+                .replace(R.id.container, PassportDetailsFragment.newInstance(passport, language, locale))
                 .addToBackStack(TAG_PASSPORT_DETAILS)
                 .commit()
     }

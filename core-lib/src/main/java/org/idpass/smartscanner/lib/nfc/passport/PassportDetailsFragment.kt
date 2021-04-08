@@ -49,6 +49,7 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
     internal var simpleDateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
 
     private var passport: Passport? = null
+    private var language: String? = null
     private var locale: String? = null
     private lateinit var binding : FragmentPassportDetailsBinding
 
@@ -63,6 +64,9 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
         val arguments = arguments
         if (arguments?.containsKey(IntentData.KEY_PASSPORT) == true) {
             passport = arguments.getParcelable<Passport>(IntentData.KEY_PASSPORT)
+        }
+        if (arguments?.containsKey(IntentData.KEY_LANGUAGE) == true) {
+            language = arguments.getString(IntentData.KEY_LANGUAGE)
         }
         if (arguments?.containsKey(IntentData.KEY_LOCALE) == true) {
             locale = arguments.getString(IntentData.KEY_LOCALE)
@@ -386,9 +390,10 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
     }
 
     companion object {
-        fun newInstance(passport: Passport?, locale: String?): PassportDetailsFragment {
+        fun newInstance(passport: Passport?, language: String?, locale: String?): PassportDetailsFragment {
             val myFragment = PassportDetailsFragment()
             val args = Bundle()
+            args.putString(IntentData.KEY_LANGUAGE, language)
             args.putString(IntentData.KEY_LOCALE, locale)
             args.putParcelable(IntentData.KEY_PASSPORT, passport)
             myFragment.arguments = args

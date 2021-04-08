@@ -73,7 +73,7 @@ class MainActivity : AppCompatActivity() {
         Manifest.permission.READ_EXTERNAL_STORAGE,
         Manifest.permission.WRITE_EXTERNAL_STORAGE
     )
-
+    private var language : String? = null
     private lateinit var binding : ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -84,6 +84,8 @@ class MainActivity : AppCompatActivity() {
         if (BuildConfig.DEBUG) {
             setupAppDirectory()
         }
+        val preference = getSharedPreferences(SmartScannerApplication.SHARED, Context.MODE_PRIVATE)
+        language = preference?.getString(Language.NAME, "")
     }
 
     private fun setupAppDirectory() {
@@ -130,6 +132,7 @@ class MainActivity : AppCompatActivity() {
             SmartScannerActivity.SCANNER_OPTIONS,
             ScannerOptions(
                 mode = Modes.BARCODE.value,
+                language = language,
                 scannerSize = ScannerSize.LARGE.value,
                 config = sampleConfig(false),
                 barcodeOptions = barcodeOptions
@@ -144,6 +147,7 @@ class MainActivity : AppCompatActivity() {
             SmartScannerActivity.SCANNER_OPTIONS,
             ScannerOptions(
                 mode = Modes.IDPASS_LITE.value,
+                language = language,
                 scannerSize = ScannerSize.LARGE.value,
                 config = sampleConfig(false)
             )
@@ -155,20 +159,24 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, SmartScannerActivity::class.java)
         intent.putExtra(
             SmartScannerActivity.SCANNER_OPTIONS,
-            ScannerOptions(mode = Modes.MRZ.value, config = sampleConfig(true))
+            ScannerOptions(
+                mode = Modes.MRZ.value,
+                language = language,
+                config = sampleConfig(true)
+            )
         )
         startActivityForResult(intent, OP_SCANNER)
     }
 
     private fun scanNFC() {
         val intent = Intent(this, SmartScannerActivity::class.java)
-        val preference = getSharedPreferences(SmartScannerApplication.SHARED, Context.MODE_PRIVATE)
-        val locale = if (preference?.getString(Language.NAME, "") == Language.AR) Language.Locale.RTL else Language.Locale.LTR
+        val locale = if (language == Language.AR) Language.Locale.RTL else Language.Locale.LTR
         intent.putExtra(NFCActivity.FOR_SMARTSCANNER_APP, true)
         intent.putExtra(
             SmartScannerActivity.SCANNER_OPTIONS,
             ScannerOptions(
                 mode = Modes.NFC_SCAN.value,
+                language = language,
                 nfcLocale = locale,
                 config = Config(
                     label = getString(R.string.label_scan_nfc_via_mrz),

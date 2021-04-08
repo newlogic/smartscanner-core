@@ -26,6 +26,7 @@ import org.idpass.smartscanner.lib.scanner.config.Modes.*
 data class ScannerOptions(
     val mode: String? = MRZ.value,
     val config: Config? = null,
+    val language: String? = null,
     val nfcLocale: String? = null,
     val mrzFormat: String? = null,
     val scannerSize: String? = null,

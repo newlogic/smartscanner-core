@@ -65,7 +65,7 @@ data class NFCResult(
             // in which multiple names are separated by '<' (single chevron)
             val parts  = additionalPersonDetails?.nameOfHolder?.split("<<")?.toMutableList()
             if (locale == Locale.RTL) {
-                // For RTL languages, last names/surname are on the last part of nameOfHolder and first part for given names
+                // For RTL languages, surname are on the last part of nameOfHolder and first part for given names
                 // NFCResult.nameOfHolder --> GIVEN_NAME1<GIVEN_NAME2<<LAST_NAME1<LAST_NAME2 (RTL for Arabic)
                 surname = parts?.lastOrNull()?.replace("<", " ")
                 parts?.apply {
@@ -75,15 +75,10 @@ data class NFCResult(
                     }
                 }
             } else {
-                // For LTR languages (opposite to RTL),  given names are on the last part of nameOfHolder and first part for last names/surname
-                // NFCResult.nameOfHolder --> LAST_NAME1<LAST_NAME2<<GIVEN_NAME_1<GIVEN_NAME_2 (LTR for English)
-                givenNames = parts?.lastOrNull()?.replace("<", " ")
-                parts?.apply {
-                    removeAt(parts.size - 1)
-                    forEach { name ->
-                        surname = name.replace("<", " ")
-                    }
-                }
+                // For LTR languages, surname are on person details primaryIdentifier
+                // and given names on person details secondaryIdentifier
+                surname = personDetails?.primaryIdentifier?.replace("<", " ")?.trim()
+                givenNames = personDetails?.secondaryIdentifier?.replace("<", " ")?.trim()
             }
             // Get proper date of birth
             val dateOfBirth = if (additionalPersonDetails?.fullDateOfBirth.isNullOrEmpty()) {
