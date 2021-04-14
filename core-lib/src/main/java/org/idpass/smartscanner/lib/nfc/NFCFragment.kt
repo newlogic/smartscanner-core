@@ -42,7 +42,6 @@ import org.idpass.smartscanner.lib.nfc.passport.Passport
 import org.idpass.smartscanner.lib.platform.utils.DateUtils
 import org.idpass.smartscanner.lib.platform.utils.DateUtils.formatStandardDate
 import org.idpass.smartscanner.lib.platform.utils.KeyStoreUtils
-import org.idpass.smartscanner.lib.platform.utils.LanguageUtils.changeLanguage
 import org.idpass.smartscanner.lib.scanner.config.Language
 import org.jmrtd.*
 import org.jmrtd.lds.icao.MRZInfo
@@ -60,6 +59,7 @@ class  NFCFragment : Fragment() {
     private var textViewDateOfBirth: TextView? = null
     private var textViewDateOfExpiry: TextView? = null
     private var progressBar: ProgressBar? = null
+    private var language: String? = null
     private var locale: String? = null
 
     private var mHandler = Handler(Looper.getMainLooper())
@@ -80,8 +80,7 @@ class  NFCFragment : Fragment() {
             locale = arguments.getString(IntentData.KEY_LOCALE)
         }
         if (arguments?.containsKey(IntentData.KEY_LANGUAGE) == true) {
-            val language = arguments.getString(IntentData.KEY_LANGUAGE) ?: Language.EN
-            changeLanguage(requireContext(), language)
+            language = arguments.getString(IntentData.KEY_LANGUAGE) ?: Language.EN
         }
         textViewNfcTitle = view.findViewById(R.id.textViewNfcTitle)
         textViewPassportNumber = view.findViewById(R.id.value_passport_number)
@@ -173,10 +172,17 @@ class  NFCFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        textViewNfcTitle?.text = getString(R.string.nfc_title)
-        textViewPassportNumber?.text = getString(R.string.doc_number, mrzInfo?.documentNumber)
-        textViewDateOfBirth?.text = getString(R.string.doc_dob, DateUtils.toAdjustedDate(formatStandardDate(mrzInfo?.dateOfBirth)))
-        textViewDateOfExpiry?.text = getString(R.string.doc_expiry, DateUtils.toReadableDate(formatStandardDate(mrzInfo?.dateOfExpiry)))
+        if (language == Language.EN) {
+            textViewNfcTitle?.text = getString(R.string.nfc_title)
+            textViewPassportNumber?.text = getString(R.string.doc_number, mrzInfo?.documentNumber)
+            textViewDateOfBirth?.text = getString(R.string.doc_dob, DateUtils.toAdjustedDate(formatStandardDate(mrzInfo?.dateOfBirth)))
+            textViewDateOfExpiry?.text = getString(R.string.doc_expiry, DateUtils.toReadableDate(formatStandardDate(mrzInfo?.dateOfExpiry)))
+        } else {
+            textViewNfcTitle?.text="ضع هاتفك فوق جواز سفرك ولا تحركه"
+            textViewPassportNumber?.text =  "      رقم البطاقة : "+ mrzInfo?.documentNumber
+            textViewDateOfBirth?.text = "       تاريخ الميلاد : "+ DateUtils.toAdjustedDate(formatStandardDate(mrzInfo?.dateOfBirth))
+            textViewDateOfExpiry?.text = "       تاريخ النفاذ : " + DateUtils.toReadableDate(formatStandardDate(mrzInfo?.dateOfExpiry))
+        }
 
         if (nfcFragmentListener != null) {
             nfcFragmentListener?.onEnableNfc()
