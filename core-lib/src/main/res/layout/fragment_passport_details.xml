@@ -13,14 +13,13 @@
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layoutDirection="ltr"
             android:orientation="vertical">
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/card_view_warning"
                 style="@style/CardViewStyle"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:layout_marginLeft="@dimen/margin_medium"
                 android:layout_marginTop="@dimen/margin_tiny"
                 android:layout_marginRight="@dimen/margin_medium"
@@ -34,7 +33,6 @@
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layoutDirection="ltr"
                     android:padding="@dimen/margin_small">
 
                     <ImageView
@@ -55,7 +53,6 @@
                         android:layout_marginBottom="@dimen/margin_small"
                         android:layout_toEndOf="@+id/iconWarning"
                         android:text="@string/document_valid_passport"
-                        android:layoutDirection="ltr"
                         android:textColor="@color/white" />
 
                     <TextView
@@ -68,7 +65,6 @@
                         android:layout_marginEnd="@dimen/margin_small"
                         android:layout_toEndOf="@+id/iconWarning"
                         android:text="@string/document_chip_content_success"
-                        android:layoutDirection="ltr"
                         android:textColor="@color/white" />
 
                 </RelativeLayout>
@@ -94,7 +90,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layoutDirection="ltr"
                     android:padding="@dimen/margin_small"
                     android:paddingBottom="@dimen/margin_small"
                     android:stretchColumns="1">
@@ -352,7 +347,6 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:padding="@dimen/margin_small"
-                    android:layoutDirection="ltr"
                     android:paddingBottom="@dimen/margin_medium"
                     android:stretchColumns="*">
 
@@ -374,11 +368,10 @@
                                 android:padding="4dp"
                                 android:textAlignment="textStart"
                                 android:layout_gravity="start"
-                                android:text="Personal Information"
+                                android:text="@string/personal_information"
                                 android:textAppearance="@style/TextAppearance.AppCompat.Body2"
                                 android:layout_marginEnd="@dimen/margin_small"
-                                tools:ignore="RtlCompat" />
-
+                                />
                         <androidx.appcompat.widget.LinearLayoutCompat
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -510,7 +503,6 @@
                 <TableLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layoutDirection="ltr"
                     android:layout_gravity="center"
                     android:padding="@dimen/margin_small"
                     android:paddingBottom="@dimen/margin_small"
@@ -666,7 +658,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layoutDirection="ltr"
                     android:padding="@dimen/margin_small"
                     android:paddingBottom="@dimen/margin_small"
                     android:stretchColumns="1">
@@ -1013,7 +1004,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layoutDirection="ltr"
                     android:padding="@dimen/margin_small"
                     android:paddingBottom="@dimen/margin_small"
                     android:stretchColumns="1">
@@ -1250,7 +1240,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layoutDirection="ltr"
                     android:padding="@dimen/margin_small"
                     android:paddingBottom="@dimen/margin_small"
                     android:stretchColumns="1">

@@ -42,6 +42,7 @@ import org.idpass.smartscanner.lib.nfc.passport.Passport
 import org.idpass.smartscanner.lib.platform.utils.DateUtils
 import org.idpass.smartscanner.lib.platform.utils.DateUtils.formatStandardDate
 import org.idpass.smartscanner.lib.platform.utils.KeyStoreUtils
+import org.idpass.smartscanner.lib.platform.utils.LanguageUtils
 import org.idpass.smartscanner.lib.scanner.config.Language
 import org.jmrtd.*
 import org.jmrtd.lds.icao.MRZInfo
@@ -172,17 +173,13 @@ class  NFCFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        if (language == Language.EN) {
-            textViewNfcTitle?.text = getString(R.string.nfc_title)
-            textViewPassportNumber?.text = getString(R.string.doc_number, mrzInfo?.documentNumber)
-            textViewDateOfBirth?.text = getString(R.string.doc_dob, DateUtils.toAdjustedDate(formatStandardDate(mrzInfo?.dateOfBirth)))
-            textViewDateOfExpiry?.text = getString(R.string.doc_expiry, DateUtils.toReadableDate(formatStandardDate(mrzInfo?.dateOfExpiry)))
-        } else {
-            textViewNfcTitle?.text="ضع هاتفك فوق جواز سفرك ولا تحركه"
-            textViewPassportNumber?.text =  "      رقم البطاقة : "+ mrzInfo?.documentNumber
-            textViewDateOfBirth?.text = "       تاريخ الميلاد : "+ DateUtils.toAdjustedDate(formatStandardDate(mrzInfo?.dateOfBirth))
-            textViewDateOfExpiry?.text = "       تاريخ النفاذ : " + DateUtils.toReadableDate(formatStandardDate(mrzInfo?.dateOfExpiry))
-        }
+        // Display proper language
+        LanguageUtils.changeLanguage(requireContext(), if (language == Language.EN) Language.EN else Language.AR)
+        // Display MRZ details
+        textViewNfcTitle?.text = getString(R.string.nfc_title)
+        textViewPassportNumber?.text = getString(R.string.doc_number, mrzInfo?.documentNumber)
+        textViewDateOfBirth?.text = getString(R.string.doc_dob, DateUtils.toAdjustedDate(formatStandardDate(mrzInfo?.dateOfBirth)))
+        textViewDateOfExpiry?.text = getString(R.string.doc_expiry, DateUtils.toReadableDate(formatStandardDate(mrzInfo?.dateOfExpiry)))
 
         if (nfcFragmentListener != null) {
             nfcFragmentListener?.onEnableNfc()

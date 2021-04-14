@@ -150,4 +150,5 @@
 
     <string name="keystore_not_empty_title">Keystore</string>
     <string name="keystore_not_empty_message">Do you want to replace the current keystore?</string>
+    <string name="personal_information">Personal Information</string>
 </resources>
