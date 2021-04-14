@@ -20,7 +20,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="GZIP/JSON"
+            android:text="@string/label_gzip_json"
             android:fontFamily="@font/sourcesanspro_medium"
             android:textColor="@color/idpass_black"
             android:textSize="14sp" />
@@ -46,7 +46,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/sourcesanspro_medium"
-            android:text="REGULAR"
+            android:text="@string/label_regular"
             android:textColor="@color/idpass_black"
             android:textSize="14sp" />
     </LinearLayout>
@@ -71,7 +71,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/sourcesanspro_regular"
-            android:text="CANCEL"
+            android:text="@string/label_cancel"
             android:textColor="@color/idpass_black"
             android:textSize="14sp" />
     </LinearLayout>
