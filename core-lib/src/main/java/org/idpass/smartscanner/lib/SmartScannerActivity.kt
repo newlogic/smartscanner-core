@@ -102,6 +102,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
     private var manualCapture: View? = null
     private var brandingImage: ImageView? = null
     private var captureLabelText: TextView? = null
+    private var captureHeaderText: TextView? = null
+    private var captureSubHeaderText: TextView? = null
     private var modelText: TextView? = null
     private var modelTextLoading: ProgressBar? = null
 
@@ -126,6 +128,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         brandingImage = findViewById(R.id.brandingImage)
         manualCapture = findViewById(R.id.manualCapture)
         captureLabelText = findViewById(R.id.captureLabelText)
+        captureHeaderText = findViewById(R.id.captureHeaderText)
+        captureSubHeaderText = findViewById(R.id.captureSubHeaderText)
         // Scanner setup from intent
         hideActionBar()
         if (intent.action != null) {
@@ -338,12 +342,19 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         flashButton?.visibility = if (isLedFlashAvailable(this)) VISIBLE else GONE
         // capture text label
         captureLabelText?.text = config?.label ?: String.empty()
+        // capture text header
+        captureHeaderText?.text = config?.header ?: String.empty()
+        // capture text sub-header
+        captureSubHeaderText?.text = config?.subHeader ?: String.empty()
         // font to use
-        captureLabelText?.typeface = when (config?.font) {
+        val defaultFont = when (config?.font) {
             Fonts.NOTO_SANS_ARABIC.value -> ResourcesCompat.getFont(this, R.font.notosansarabic_bold)
             Fonts.ROBOTO.value -> ResourcesCompat.getFont(this, R.font.roboto_regular)
-            else -> ResourcesCompat.getFont(this, R.font.sourcesanspro_medium)
+            else -> ResourcesCompat.getFont(this, R.font.sourcesanspro_regular)
         }
+        captureLabelText?.typeface = defaultFont
+        captureHeaderText?.typeface = defaultFont
+        captureSubHeaderText?.typeface = defaultFont
         // Background reader
         try {
             config?.background?.let {

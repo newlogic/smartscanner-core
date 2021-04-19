@@ -28,6 +28,8 @@ data class Config(
     val font: String? = null,
     val imageResultType: String? = null,
     val isManualCapture: Boolean? = null,
+    val header: String? = null,
+    val subHeader: String? = null,
     val label: String? = null
 ) : Parcelable {
     companion object {
@@ -37,6 +39,8 @@ data class Config(
             font = String.empty(),
             imageResultType = ImageResultType.PATH.value,
             isManualCapture = false,
+            header = String.empty(),
+            subHeader = String.empty(),
             label = String.empty()
         )
     }

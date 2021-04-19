@@ -179,7 +179,8 @@ class MainActivity : AppCompatActivity() {
                 language = language,
                 nfcLocale = locale,
                 config = Config(
-                    label = getString(R.string.label_scan_nfc_via_mrz),
+                    header = getString(R.string.label_scan_nfc_capture),
+                    subHeader = getString(R.string.label_scan_nfc_via_mrz),
                     isManualCapture = false,
                     branding = true
                 )
