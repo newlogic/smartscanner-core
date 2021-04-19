@@ -50,4 +50,8 @@ class SmartScannerApplication : Application() {
             }
         }
     }
+
+    companion object {
+        const val SHARED = "SHARED"
+    }
 }

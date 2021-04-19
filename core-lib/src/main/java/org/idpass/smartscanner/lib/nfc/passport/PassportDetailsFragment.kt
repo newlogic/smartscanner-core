@@ -28,6 +28,7 @@ import android.widget.ImageView
 import androidx.core.content.ContextCompat
 import org.idpass.smartscanner.lib.R
 import org.idpass.smartscanner.lib.databinding.FragmentPassportDetailsBinding
+import org.idpass.smartscanner.lib.nfc.NFCResult
 import org.idpass.smartscanner.lib.nfc.details.IntentData
 import org.idpass.smartscanner.lib.platform.extension.arrayToString
 import org.idpass.smartscanner.lib.platform.extension.bytesToHex
@@ -48,6 +49,8 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
     internal var simpleDateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
 
     private var passport: Passport? = null
+    private var language: String? = null
+    private var locale: String? = null
     private lateinit var binding : FragmentPassportDetailsBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -61,6 +64,12 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
         val arguments = arguments
         if (arguments?.containsKey(IntentData.KEY_PASSPORT) == true) {
             passport = arguments.getParcelable<Passport>(IntentData.KEY_PASSPORT)
+        }
+        if (arguments?.containsKey(IntentData.KEY_LANGUAGE) == true) {
+            language = arguments.getString(IntentData.KEY_LANGUAGE)
+        }
+        if (arguments?.containsKey(IntentData.KEY_LOCALE) == true) {
+            locale = arguments.getString(IntentData.KEY_LOCALE)
         }
 
         binding.iconPhoto.setOnClickListener {
@@ -91,29 +100,17 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
             binding.iconPhoto.setImageBitmap(passport.portrait)
         }
 
-        val personDetails = passport.personDetails
-        val additionalPersonDetails = passport.additionalPersonDetails
-        if (personDetails != null) {
-            val currentLanguage = Locale.getDefault().displayLanguage
-            if (currentLanguage.toLowerCase(Locale.ROOT).contains("en")) {
-                binding.valueName.text = personDetails.secondaryIdentifier?.replace("<<", " ")?.replace("<", "") ?: "NA"
-                binding.lname.text = personDetails.primaryIdentifier?.replace("<<", " ")?.replace("<", "") ?: "NA"
-            } else {
-                val full = additionalPersonDetails?.nameOfHolder?.replace("<<", " ")?.replace("<", " ")
-                val parts  = full?.split(" ")?.toMutableList()
-                val firstName = parts!!.firstOrNull()
-                parts.removeAt(0)
-                binding.valueName.text = firstName+" "+parts[0]+" "+parts[1]
-                binding.lname.text = parts[3]
-            }
-            binding.valueDOB.text = DateUtils.toAdjustedDate(formatStandardDate(personDetails.dateOfBirth))
-            binding.valueGender.text = personDetails.gender?.name
-            binding.valuePassportNumber.text = personDetails.documentNumber
-            binding.valueExpirationDate.text = DateUtils.toReadableDate(formatStandardDate(personDetails.dateOfExpiry))
-            binding.valueIssuingState.text = personDetails.issuingState
-            binding.valueNationality.text = personDetails.nationality
-        }
+        val resultDetails = NFCResult.formatResult(passport, locale)
+        binding.valueName.text = resultDetails.givenNames
+        binding.lname.text = resultDetails.surname
+        binding.valueDOB.text = resultDetails.dateOfBirth
+        binding.valueGender.text = resultDetails.gender
+        binding.valuePassportNumber.text = resultDetails.documentNumber
+        binding.valueExpirationDate.text = resultDetails.dateOfExpiry
+        binding.valueIssuingState.text = resultDetails.issuingState
+        binding.valueNationality.text = resultDetails.nationality
 
+        val additionalPersonDetails = passport.additionalPersonDetails
         if (additionalPersonDetails != null) {
             //This object it's not available in the majority of passports
             binding.cardViewAdditionalPersonInformation.visibility = View.VISIBLE
@@ -393,9 +390,11 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
     }
 
     companion object {
-        fun newInstance(passport: Passport?): PassportDetailsFragment {
+        fun newInstance(passport: Passport?, language: String?, locale: String?): PassportDetailsFragment {
             val myFragment = PassportDetailsFragment()
             val args = Bundle()
+            args.putString(IntentData.KEY_LANGUAGE, language)
+            args.putString(IntentData.KEY_LOCALE, locale)
             args.putParcelable(IntentData.KEY_PASSPORT, passport)
             myFragment.arguments = args
             return myFragment

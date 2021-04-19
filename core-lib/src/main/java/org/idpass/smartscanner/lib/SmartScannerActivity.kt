@@ -64,6 +64,7 @@ import org.idpass.smartscanner.lib.nfc.NFCScanAnalyzer
 import org.idpass.smartscanner.lib.platform.BaseActivity
 import org.idpass.smartscanner.lib.platform.extension.*
 import org.idpass.smartscanner.lib.platform.utils.CameraUtils.isLedFlashAvailable
+import org.idpass.smartscanner.lib.platform.utils.LanguageUtils
 import org.idpass.smartscanner.lib.platform.utils.transform.CropTransformation
 import org.idpass.smartscanner.lib.scanner.SmartScannerException
 import org.idpass.smartscanner.lib.scanner.config.*
@@ -230,7 +231,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                         intent = intent,
                         isMLKit = isMLKit,
                         imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
-                        format = scannerOptions?.mrzFormat ?: intent.getStringExtra(ScannerConstants.MRZ_FORMAT_EXTRA),
+                        language = scannerOptions?.language ?: intent.getStringExtra(ScannerConstants.LANGUAGE),
+                        locale = scannerOptions?.nfcLocale ?: intent.getStringExtra(ScannerConstants.NFC_LOCALE),
                         analyzeStart = System.currentTimeMillis(),
                         onConnectSuccess = {
                             modelTextLoading?.visibility = INVISIBLE
@@ -363,6 +365,10 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             if (it) VISIBLE else GONE
         } ?: run {
             if (intent.getBooleanExtra(ScannerConstants.MRZ_MANUAL_CAPTURE_EXTRA, false)) VISIBLE else GONE
+        }
+        // language locale
+        scannerOptions?.language?.let { language ->
+            LanguageUtils.changeLanguage(this, language)
         }
     }
 

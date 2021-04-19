@@ -17,6 +17,13 @@
  */
 package org.idpass.smartscanner.lib.nfc
 
+import org.idpass.smartscanner.lib.nfc.passport.Passport
+import org.idpass.smartscanner.lib.platform.extension.arrayToString
+import org.idpass.smartscanner.lib.platform.utils.DateUtils
+import org.idpass.smartscanner.lib.platform.utils.DateUtils.formatStandardDate
+import org.idpass.smartscanner.lib.scanner.config.Language.Locale
+import org.jmrtd.lds.icao.MRZInfo
+
 
 data class NFCResult(
         val image: String? = null,
@@ -42,4 +49,65 @@ data class NFCResult(
         var taxOrExitRequirements: String? = null,
         var mrzOptional: String? = null,
         var mrzOptional2: String? = null
-)
+) {
+    companion object {
+
+        fun formatResult(passport: Passport?, locale: String?, mrzInfo: MRZInfo? = null): NFCResult {
+            val personDetails = passport?.personDetails
+            val additionalPersonDetails = passport?.additionalPersonDetails
+            val additionalDocumentDetails = passport?.additionalDocumentDetails
+            var surname : String? = ""
+            var givenNames : String? = ""
+            // Note: In getting proper names
+            // we split nameOfHolder to two parts separated by '<<' (double chevron)
+            // one part of nameOfHolder should contain last names/surname
+            // other part remaining of nameOfHolder should contain given names
+            // in which multiple names are separated by '<' (single chevron)
+            val parts  = additionalPersonDetails?.nameOfHolder?.split("<<")?.toMutableList()
+            if (locale == Locale.RTL) {
+                // For RTL languages, surname are on the last part of nameOfHolder and first part for given names
+                // NFCResult.nameOfHolder --> GIVEN_NAME1<GIVEN_NAME2<<LAST_NAME1<LAST_NAME2 (RTL for Arabic)
+                surname = parts?.lastOrNull()?.replace("<", " ")
+                parts?.apply {
+                    removeAt(parts.size - 1)
+                    forEach { name ->
+                        givenNames = name.replace("<", " ")
+                    }
+                }
+            } else {
+                // For LTR languages, surname are on person details primaryIdentifier
+                // and given names on person details secondaryIdentifier
+                surname = personDetails?.primaryIdentifier?.replace("<", " ")?.trim()
+                givenNames = personDetails?.secondaryIdentifier?.replace("<", " ")?.trim()
+            }
+            // Get proper date of birth
+            val dateOfBirth = if (additionalPersonDetails?.fullDateOfBirth.isNullOrEmpty()) {
+                DateUtils.toAdjustedDate (formatStandardDate(personDetails?.dateOfBirth))
+            } else formatStandardDate(additionalPersonDetails?.fullDateOfBirth, "yyyyMMdd")
+            return NFCResult(
+                    givenNames = givenNames,
+                    surname = surname,
+                    nameOfHolder = additionalPersonDetails?.nameOfHolder,
+                    gender = personDetails?.gender?.name,
+                    documentNumber = personDetails?.documentNumber,
+                    dateOfExpiry = DateUtils.toReadableDate(formatStandardDate(personDetails?.dateOfExpiry)),
+                    issuingState = personDetails?.issuingState,
+                    nationality = personDetails?.nationality,
+                    otherNames = additionalPersonDetails?.otherNames?.arrayToString(),
+                    dateOfBirth = dateOfBirth,
+                    custodyInformation = additionalPersonDetails?.custodyInformation,
+                    profession = additionalPersonDetails?.profession,
+                    telephone = additionalPersonDetails?.telephone,
+                    title = additionalPersonDetails?.title,
+                    dateAndTimeOfPersonalization = additionalDocumentDetails?.dateAndTimeOfPersonalization,
+                    dateOfIssue = formatStandardDate(additionalDocumentDetails?.dateOfIssue, "yyyyMMdd"),
+                    endorsementsAndObservations = additionalDocumentDetails?.endorsementsAndObservations,
+                    issuingAuthority = additionalDocumentDetails?.issuingAuthority,
+                    personalizationSystemSerialNumber = additionalDocumentDetails?.personalizationSystemSerialNumber,
+                    taxOrExitRequirements = additionalDocumentDetails?.taxOrExitRequirements,
+                    mrzOptional = mrzInfo?.optionalData1,
+                    mrzOptional2 = mrzInfo?.optionalData2
+            )
+        }
+    }
+}

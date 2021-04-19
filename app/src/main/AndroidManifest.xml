@@ -34,6 +34,7 @@
         </activity>
         <activity android:name=".result.ResultActivity" />
         <activity android:name=".result.IDPassResultActivity" />
+        <activity android:name=".settings.SettingsActivity" />
         <meta-data
             android:name="com.google.mlkit.vision.DEPENDENCIES"
             android:value="ocr" />

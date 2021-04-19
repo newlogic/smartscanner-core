@@ -27,13 +27,14 @@
     <string name="label_result_none">لم يتم العثور على نتيجة</string>
     <string name="label_result_raw">نتيجة أولية</string>
     <string name="label_surname">اسم العائلة: %1$s</string>
-    <string name="regular">منتظم</string>
-    <string name="cancel">الفاء</string>
-    <string name="gzip_json">GZIP/JSON</string>
+    <string name="label_regular">منتظم</string>
+    <string name="label_cancel">الفاء</string>
+    <string name="label_gzip_json">GZIP/JSON</string>
     <string name="please">يرجى مسح MRZ للتحقق من الهوية</string>
     <string name="english">اللغه الانجليزيه</string>
     <string name="developed_by_newlogic">طور بواسطة Newlogic</string>
     <string name="languages">اللغات</string>
     <string name="language_and_region">اللغه والمنطقة</string>
+    <string name="label_scan_nfc_via_mrz">يرجى مسح MRZ للتحقق من الهوية</string>
 
 </resources>

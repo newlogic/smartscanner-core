@@ -15,12 +15,21 @@
  *
  *
  */
-package org.idpass.smartscanner.lib.nfc.details
+package org.idpass.smartscanner.lib.platform.utils
 
-object IntentData {
-    val KEY_IMAGE = "KEY_IMAGE"
-    val KEY_LANGUAGE = "KEY_LANGUAGE"
-    val KEY_LOCALE = "KEY_LOCALE"
-    val KEY_MRZ_INFO = "KEY_MRZ_INFO"
-    val KEY_PASSPORT = "KEY_PASSPORT"
+import android.content.Context
+import android.content.res.Configuration
+import java.util.*
+
+object LanguageUtils {
+    private val TAG = LanguageUtils::class.java.simpleName
+
+    fun changeLanguage(context: Context, language: String) {
+        val locale = Locale(language)
+        val config = Configuration()
+        val resources = context.resources
+        Locale.setDefault(locale)
+        config.locale = locale
+        resources.updateConfiguration(config, resources.displayMetrics)
+    }
 }

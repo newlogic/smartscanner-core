@@ -19,7 +19,7 @@ package org.idpass.smartscanner
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -50,6 +50,7 @@ import org.idpass.smartscanner.lib.platform.utils.FileUtils
 import org.idpass.smartscanner.lib.scanner.config.*
 import org.idpass.smartscanner.result.IDPassResultActivity
 import org.idpass.smartscanner.result.ResultActivity
+import org.idpass.smartscanner.settings.SettingsActivity
 
 
 class MainActivity : AppCompatActivity() {
@@ -72,7 +73,7 @@ class MainActivity : AppCompatActivity() {
         Manifest.permission.READ_EXTERNAL_STORAGE,
         Manifest.permission.WRITE_EXTERNAL_STORAGE
     )
-
+    private var language : String? = null
     private lateinit var binding : ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,6 +84,8 @@ class MainActivity : AppCompatActivity() {
         if (BuildConfig.DEBUG) {
             setupAppDirectory()
         }
+        val preference = getSharedPreferences(SmartScannerApplication.SHARED, Context.MODE_PRIVATE)
+        language = preference?.getString(Language.NAME, "")
     }
 
     private fun setupAppDirectory() {
@@ -95,6 +98,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
+        // Choose scan type
         binding.itemBarcode.item.setOnClickListener { scanBarcode(BarcodeOptions.default) }
         binding.itemIdpassLite.item.setOnClickListener { scanIDPassLite() }
         binding.itemMrz.item.setOnClickListener { scanMRZ() }
@@ -111,29 +115,15 @@ class MainActivity : AppCompatActivity() {
                 }
             } else Snackbar.make(binding.main, required_nfc_not_supported, Snackbar.LENGTH_LONG).show()
         }
+        // Change language
+        binding.languageSettings.setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
     }
 
     private fun isNFCSupported() : Boolean {
         val adapter = NfcAdapter.getDefaultAdapter(this)
         return adapter != null
-    }
-
-    @SuppressLint("LogNotTimber")
-    private fun startIntentCallOut() {
-        try {
-            // Note: Scanner via intent can either be for barcode, idpass-lite, mrz, nfc, qrcode
-            // Please see ScannerIntent class for more details
-            // barcode -> val intent = ScannerIntent.intentBarcode()
-            // idpass-lite -> val intent = ScannerIntent.intentIDPassLite()
-            // mrz -> val intent = ScannerIntent.intentMrz()
-            // nfc -> val intent = ScannerIntent.intentNFCScan()
-            // qrcode -> val intent = ScannerIntent.intentQRCode()
-            val intent = ScannerIntent.intentNFCScan()
-            startActivityForResult(intent, OP_SCANNER)
-        } catch (ex: ActivityNotFoundException) {
-            ex.printStackTrace()
-            Log.e(SmartScannerActivity.TAG, "ID PASS SmartScanner is not installed!")
-        }
     }
 
     private fun scanBarcode(barcodeOptions: BarcodeOptions? = null) {
@@ -142,6 +132,7 @@ class MainActivity : AppCompatActivity() {
             SmartScannerActivity.SCANNER_OPTIONS,
             ScannerOptions(
                 mode = Modes.BARCODE.value,
+                language = language,
                 scannerSize = ScannerSize.LARGE.value,
                 config = sampleConfig(false),
                 barcodeOptions = barcodeOptions
@@ -156,6 +147,7 @@ class MainActivity : AppCompatActivity() {
             SmartScannerActivity.SCANNER_OPTIONS,
             ScannerOptions(
                 mode = Modes.IDPASS_LITE.value,
+                language = language,
                 scannerSize = ScannerSize.LARGE.value,
                 config = sampleConfig(false)
             )
@@ -167,17 +159,31 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, SmartScannerActivity::class.java)
         intent.putExtra(
             SmartScannerActivity.SCANNER_OPTIONS,
-            ScannerOptions(mode = Modes.MRZ.value, config = sampleConfig(true))
+            ScannerOptions(
+                mode = Modes.MRZ.value,
+                language = language,
+                config = sampleConfig(true)
+            )
         )
         startActivityForResult(intent, OP_SCANNER)
     }
 
     private fun scanNFC() {
         val intent = Intent(this, SmartScannerActivity::class.java)
+        val locale = if (language == Language.AR) Language.Locale.RTL else Language.Locale.LTR
         intent.putExtra(NFCActivity.FOR_SMARTSCANNER_APP, true)
         intent.putExtra(
             SmartScannerActivity.SCANNER_OPTIONS,
-            ScannerOptions.defaultForNFCScan
+            ScannerOptions(
+                mode = Modes.NFC_SCAN.value,
+                language = language,
+                nfcLocale = locale,
+                config = Config(
+                    label = getString(R.string.label_scan_nfc_via_mrz),
+                    isManualCapture = false,
+                    branding = true
+                )
+            )
         )
         startActivityForResult(intent, OP_SCANNER)
     }
@@ -185,12 +191,12 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("InflateParams")
     private fun scanQRCode()  {
         val bottomSheetDialog = BottomSheetDialog(this)
-        val sheetViewBarcode = layoutInflater.inflate(R.layout.sheet_qrcode, null)
-        bottomSheetDialog.setContentView(sheetViewBarcode)
+        val sheetViewQR = layoutInflater.inflate(R.layout.sheet_qrcode, null)
+        bottomSheetDialog.setContentView(sheetViewQR)
         // bottom sheet ids
-        val btnGzipped = sheetViewBarcode.findViewById<LinearLayout>(R.id.btnGzipped)
-        val btnRegular = sheetViewBarcode.findViewById<LinearLayout>(R.id.btnRegular)
-        val btnCancel = sheetViewBarcode.findViewById<LinearLayout>(R.id.btnCancel)
+        val btnGzipped = sheetViewQR.findViewById<LinearLayout>(R.id.btnGzipped)
+        val btnRegular = sheetViewQR.findViewById<LinearLayout>(R.id.btnRegular)
+        val btnCancel = sheetViewQR.findViewById<LinearLayout>(R.id.btnCancel)
         // bottom sheet listeners
         btnGzipped.setOnClickListener {
             val intent = ScannerIntent.intentQRCode(

@@ -29,11 +29,12 @@
     <string name="label_surname">Surname: %1$s</string>
     <string name="please">Please scan MRZ to verify ID</string>
 
-    <string name="gzip_json">GZIP/JSON</string>
-    <string name="regular">REGULAR</string>
-    <string name="cancel">CANCEL</string>
+    <string name="label_gzip_json">GZIP/JSON</string>
+    <string name="label_regular">REGULAR</string>
+    <string name="label_cancel">CANCEL</string>
     <string name="english">English</string>
     <string name="developed_by_newlogic">Developed by newlogic</string>
     <string name="languages">LANGUAGES</string>
     <string name="language_and_region">Language and region</string>
+    <string name="label_scan_nfc_via_mrz">Please scan MRZ to verify ID</string>
 </resources>

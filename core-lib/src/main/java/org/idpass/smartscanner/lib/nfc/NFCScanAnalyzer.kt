@@ -33,13 +33,15 @@ open class NFCScanAnalyzer(
     override val activity: Activity,
     override val intent: Intent,
     override val mode: String = Modes.NFC_SCAN.value,
+    private val language: String?,
+    private val locale: String?,
     isMLKit: Boolean,
     imageResultType: String,
-    format: String?,
+    format: String? = null,
     analyzeStart: Long,
     onConnectSuccess: (String) -> Unit,
     onConnectFail: (String) -> Unit
-) : MRZAnalyzer(activity, intent, mode, isMLKit, imageResultType, format, analyzeStart, onConnectSuccess, onConnectFail) {
+) : MRZAnalyzer(activity, intent, mode, language, locale, isMLKit, imageResultType, format, analyzeStart, onConnectSuccess, onConnectFail) {
 
     override fun processResult(result: String, bitmap: Bitmap, rotation: Int) {
         val mrzResult =  MRZResult.formatMrzResult(MRZCleaner.parseAndClean(result))
@@ -52,6 +54,8 @@ open class NFCScanAnalyzer(
                 intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_NFC_INTENT -> nfcIntent.putExtra(ScannerConstants.NFC_ACTION, intent.action)
             }
             nfcIntent.putExtra(ScannerConstants.NFC_MRZ_STRING, mrzString)
+            nfcIntent.putExtra(ScannerConstants.NFC_LOCALE, locale)
+            nfcIntent.putExtra(ScannerConstants.LANGUAGE, language)
             nfcIntent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT)
             activity.startActivity(nfcIntent)
             activity.finish()
