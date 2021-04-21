@@ -28,6 +28,21 @@ android {
         viewBinding = true
     }
 
+    signingConfigs{
+        release {
+            def props = new Properties()
+
+            def fileInputStream = new FileInputStream(file('../signing.properties'))
+            props.load(fileInputStream)
+            fileInputStream.close()
+
+            storeFile = file(props['storeFilePath'])
+            storePassword = props['storePassword']
+            keyAlias = props['keyAlias']
+            keyPassword = props['keyPassword']
+        }
+    }
+
     buildTypes {
         debug {
             ndk {
@@ -38,6 +53,7 @@ android {
         }
         release {
             minifyEnabled false
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         android.applicationVariants.all { variant ->
