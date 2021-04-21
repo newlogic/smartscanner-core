@@ -21,6 +21,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.nfc.NfcAdapter
@@ -73,7 +74,7 @@ class MainActivity : AppCompatActivity() {
         Manifest.permission.READ_EXTERNAL_STORAGE,
         Manifest.permission.WRITE_EXTERNAL_STORAGE
     )
-    private var language : String? = null
+    private var preference : SharedPreferences? = null
     private lateinit var binding : ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -84,8 +85,7 @@ class MainActivity : AppCompatActivity() {
         if (BuildConfig.DEBUG) {
             setupAppDirectory()
         }
-        val preference = getSharedPreferences(SmartScannerApplication.SHARED, Context.MODE_PRIVATE)
-        language = preference?.getString(Language.NAME, "")
+        preference = getSharedPreferences(SmartScannerApplication.SHARED, Context.MODE_PRIVATE)
     }
 
     private fun setupAppDirectory() {
@@ -132,7 +132,7 @@ class MainActivity : AppCompatActivity() {
             SmartScannerActivity.SCANNER_OPTIONS,
             ScannerOptions(
                 mode = Modes.BARCODE.value,
-                language = language,
+                language = getLanguage(preference),
                 scannerSize = ScannerSize.LARGE.value,
                 config = sampleConfig(false),
                 barcodeOptions = barcodeOptions
@@ -147,7 +147,7 @@ class MainActivity : AppCompatActivity() {
             SmartScannerActivity.SCANNER_OPTIONS,
             ScannerOptions(
                 mode = Modes.IDPASS_LITE.value,
-                language = language,
+                language = getLanguage(preference),
                 scannerSize = ScannerSize.LARGE.value,
                 config = sampleConfig(false)
             )
@@ -161,7 +161,7 @@ class MainActivity : AppCompatActivity() {
             SmartScannerActivity.SCANNER_OPTIONS,
             ScannerOptions(
                 mode = Modes.MRZ.value,
-                language = language,
+                language = getLanguage(preference),
                 config = sampleConfig(true)
             )
         )
@@ -170,6 +170,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun scanNFC() {
         val intent = Intent(this, SmartScannerActivity::class.java)
+        val language = getLanguage(preference)
         val locale = if (language == Language.AR) Language.Locale.RTL else Language.Locale.LTR
         intent.putExtra(NFCActivity.FOR_SMARTSCANNER_APP, true)
         intent.putExtra(
@@ -216,6 +217,8 @@ class MainActivity : AppCompatActivity() {
         btnCancel.setOnClickListener { bottomSheetDialog.dismiss() }
         bottomSheetDialog.show()
     }
+
+    private fun getLanguage(pref : SharedPreferences?) = pref?.getString(Language.NAME, Language.EN)
 
     @SuppressLint("LogNotTimber")
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
