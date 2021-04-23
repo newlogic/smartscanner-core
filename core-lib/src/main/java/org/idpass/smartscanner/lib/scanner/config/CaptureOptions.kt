@@ -17,11 +17,19 @@
  */
 package org.idpass.smartscanner.lib.scanner.config
 
-enum class Modes (val value : String) {
-    BARCODE("barcode"),
-    CAPTURE_ONLY("capture-only"),
-    IDPASS_LITE("idpass-lite"),
-    MRZ("mrz"),
-    NFC_SCAN("nfc-scan"),
-    QRCODE("qrcode")
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
+data class CaptureOptions(
+    val height: Int?,
+    val width: Int?,
+    val ratio: String? = null
+) : Parcelable {
+    companion object {
+        val default = CaptureOptions(
+            height = 180,
+            width = 285
+        )
+    }
 }
