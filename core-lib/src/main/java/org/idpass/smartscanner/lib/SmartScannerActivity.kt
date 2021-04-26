@@ -338,7 +338,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 modelLayoutView.layoutParams = layoutParams
             }
             ScannerSize.LARGE.value -> {
-                bottomGuideline.setGuidelinePercent(0.75F)
+                bottomGuideline.setGuidelinePercent(0.8F)
                 topGuideline.setGuidelinePercent(0.1F)
                 layoutParams.dimensionRatio = "3:4"
                 modelLayoutView.layoutParams = layoutParams
@@ -350,6 +350,18 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             else -> {
                 layoutParams.dimensionRatio = "3:4"
                 modelLayoutView.layoutParams = layoutParams
+            }
+        }
+        captureOptions?.type?.let { type ->
+            if (type == CaptureType.ID.value) {
+                layoutParams.dimensionRatio = "3:4"
+                modelLayoutView.layoutParams = layoutParams
+            } else {
+                bottomGuideline.setGuidelinePercent(0.9F)
+                topGuideline.setGuidelinePercent(0.0F)
+                layoutParams.dimensionRatio = "3:4"
+                modelLayoutView.layoutParams = layoutParams
+
             }
         }
         // flash
@@ -454,8 +466,20 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     object : ImageCapture.OnImageSavedCallback {
                         override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                             val data = Intent()
-                            val width = captureOptions?.width?.px ?: 285.px // default width for MRZ
-                            val height = captureOptions?.height?.px ?: 180.px // default height for MRZ
+                            val width : Int = captureOptions?.width?.px ?: run {
+                                when (captureOptions?.type) {
+                                    CaptureType.ID.value -> 285.px
+                                    CaptureType.DOCUMENT.value -> 180.px
+                                    else -> 285.px // default width for MRZ
+                                }
+                            }
+                            val height : Int = captureOptions?.height?.px ?: run {
+                                when (captureOptions?.type) {
+                                    CaptureType.ID.value -> 180.px
+                                    CaptureType.DOCUMENT.value -> 285.px
+                                    else -> 180.px // default height for MRZ
+                                }
+                            }
                             val transform = bitmapTransform(CropTransformation(width , height, CropTransformation.CropType.CENTER)) // Initial MRZ Card Size
                             val bf = Glide.with(this@SmartScannerActivity)
                                             .asBitmap()
