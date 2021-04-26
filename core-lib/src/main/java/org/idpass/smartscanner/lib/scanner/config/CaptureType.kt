@@ -17,20 +17,7 @@
  */
 package org.idpass.smartscanner.lib.scanner.config
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
-
-@Parcelize
-data class CaptureOptions(
-    val type: String?,
-    val height: Int? = null,
-    val width: Int? = null
-) : Parcelable {
-    companion object {
-        val default = CaptureOptions(
-            type = CaptureType.ID.value,
-            height = 180,
-            width = 285
-        )
-    }
+enum class CaptureType (val value : String) {
+    DOCUMENT("document"),
+    ID("id")
 }
