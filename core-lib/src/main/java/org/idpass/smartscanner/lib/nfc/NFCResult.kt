@@ -63,16 +63,24 @@ data class NFCResult(
             // one part of nameOfHolder should contain last names/surname
             // other part remaining of nameOfHolder should contain given names
             // in which multiple names are separated by '<' (single chevron)
-            val parts  = additionalPersonDetails?.nameOfHolder?.split("<<")?.toMutableList()
             if (locale == Locale.RTL) {
                 // For RTL languages, surname are on the last part of nameOfHolder and first part for given names
                 // NFCResult.nameOfHolder --> GIVEN_NAME1<GIVEN_NAME2<<LAST_NAME1<LAST_NAME2 (RTL for Arabic)
-                surname = parts?.lastOrNull()?.replace("<", " ")
-                parts?.apply {
-                    removeAt(parts.size - 1)
-                    forEach { name ->
-                        givenNames = name.replace("<", " ")
+                val nameOfHolder = additionalPersonDetails?.nameOfHolder
+                if (nameOfHolder?.contains("<<") == true) {
+                    val parts  = nameOfHolder.split("<<").toMutableList()
+                    surname = parts.lastOrNull()?.replace("<", " ")
+                    parts.apply {
+                        removeAt(parts.size - 1)
+                        forEach { name ->
+                            givenNames = name.replace("<", " ")
+                        }
                     }
+                } else {
+                    // When surname is not available, set to null
+                    // NFCResult.nameOfHolder --> GIVEN_NAME1<GIVEN_NAME2 (RTL for Arabic)
+                    surname = null
+                    givenNames = nameOfHolder?.replace("<", " ")?.trim()
                 }
             } else {
                 // For LTR languages, surname are on person details primaryIdentifier
