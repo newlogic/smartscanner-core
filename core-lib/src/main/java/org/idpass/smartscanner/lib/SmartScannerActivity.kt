@@ -24,6 +24,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.graphics.Typeface
 import android.hardware.camera2.CameraManager
 import android.net.Uri
 import android.os.Bundle
@@ -374,12 +375,12 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         captureSubHeaderText?.text = config?.subHeader ?: String.empty()
         // font to use
         val defaultFont = when (config?.font) {
-            Fonts.NOTO_SANS_ARABIC.value -> ResourcesCompat.getFont(this, R.font.notosansarabic_bold)
+            Fonts.NOTO_SANS_ARABIC.value -> ResourcesCompat.getFont(this, R.font.notosansarabic_regular)
             Fonts.ROBOTO.value -> ResourcesCompat.getFont(this, R.font.roboto_regular)
             else -> ResourcesCompat.getFont(this, R.font.sourcesanspro_regular)
         }
-        captureLabelText?.typeface = defaultFont
-        captureHeaderText?.typeface = defaultFont
+        captureLabelText?.setTypeface(defaultFont, Typeface.BOLD)
+        captureHeaderText?.setTypeface(defaultFont, Typeface.BOLD)
         captureSubHeaderText?.typeface = defaultFont
         // Background reader
         try {
