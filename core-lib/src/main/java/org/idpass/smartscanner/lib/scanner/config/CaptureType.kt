@@ -17,11 +17,7 @@
  */
 package org.idpass.smartscanner.lib.scanner.config
 
-enum class Modes (val value : String) {
-    BARCODE("barcode"),
-    CAPTURE_ONLY("capture-only"),
-    IDPASS_LITE("idpass-lite"),
-    MRZ("mrz"),
-    NFC_SCAN("nfc-scan"),
-    QRCODE("qrcode")
+enum class CaptureType (val value : String) {
+    DOCUMENT("document"),
+    ID("id")
 }

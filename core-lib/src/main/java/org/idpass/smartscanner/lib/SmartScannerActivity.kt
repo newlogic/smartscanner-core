@@ -24,6 +24,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.graphics.Typeface
 import android.hardware.camera2.CameraManager
 import android.net.Uri
 import android.os.Bundle
@@ -66,6 +67,7 @@ import org.idpass.smartscanner.lib.platform.extension.*
 import org.idpass.smartscanner.lib.platform.utils.CameraUtils.isLedFlashAvailable
 import org.idpass.smartscanner.lib.platform.utils.LanguageUtils
 import org.idpass.smartscanner.lib.platform.utils.transform.CropTransformation
+import org.idpass.smartscanner.lib.scanner.ImageResult
 import org.idpass.smartscanner.lib.scanner.SmartScannerException
 import org.idpass.smartscanner.lib.scanner.config.*
 import java.io.File
@@ -93,6 +95,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
     private var imageCapture: ImageCapture? = null
     private var camera: Camera? = null
     private var scannerOptions: ScannerOptions? = null
+    private var captureOptions: CaptureOptions? = null
     private var mode: String? = null
     private var cameraProvider: ProcessCameraProvider? = null
 
@@ -255,13 +258,16 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             analyzer?.let {
                 startCamera(analyzer)
             } ?: run {
-                throw SmartScannerException("Image Analysis Scanner is null. Please check the scanner options sent to SmartScanner.")
+                if (mode == Modes.CAPTURE_ONLY.value) {
+                    startCamera()
+                    captureOptions = scannerOptions?.captureOptions ?: CaptureOptions.default
+                } else throw SmartScannerException("Image Analysis Scanner is null. Please check the scanner options sent to SmartScanner.")
             }
         }
         setupViews()
     }
 
-    private fun startCamera(analyzer: ImageAnalysis.Analyzer) {
+    private fun startCamera(analyzer: ImageAnalysis.Analyzer? = null) {
         this.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         cameraProviderFuture.addListener({
@@ -275,7 +281,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
                 .also {
-                    it.setAnalyzer(cameraExecutor, analyzer)
+                    analyzer?.let { analysis -> it.setAnalyzer(cameraExecutor, analysis) }
                 }
             // Create configuration object for the image capture use case
             imageCapture = ImageCapture.Builder()
@@ -289,13 +295,22 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 // Unbind use cases before rebinding
                 cameraProvider?.unbindAll()
                 // Bind use cases to camera
-                camera = cameraProvider?.bindToLifecycle(
-                    this,
-                    cameraSelector,
-                    preview,
-                    imageAnalyzer,
-                    imageCapture
-                )
+                camera = if(analyzer != null ) {
+                    cameraProvider?.bindToLifecycle(
+                        this,
+                        cameraSelector,
+                        preview,
+                        imageAnalyzer,
+                        imageCapture
+                    )
+                } else {
+                    cameraProvider?.bindToLifecycle(
+                        this,
+                        cameraSelector,
+                        preview,
+                        imageCapture
+                    )
+                }
                 preview?.setSurfaceProvider(viewFinder.createSurfaceProvider())
                 Log.d(
                     TAG,
@@ -324,7 +339,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 modelLayoutView.layoutParams = layoutParams
             }
             ScannerSize.LARGE.value -> {
-                bottomGuideline.setGuidelinePercent(0.75F)
+                bottomGuideline.setGuidelinePercent(0.8F)
                 topGuideline.setGuidelinePercent(0.1F)
                 layoutParams.dimensionRatio = "3:4"
                 modelLayoutView.layoutParams = layoutParams
@@ -338,6 +353,18 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 modelLayoutView.layoutParams = layoutParams
             }
         }
+        captureOptions?.type?.let { type ->
+            if (type == CaptureType.ID.value) {
+                layoutParams.dimensionRatio = "3:4"
+                modelLayoutView.layoutParams = layoutParams
+            } else {
+                bottomGuideline.setGuidelinePercent(0.9F)
+                topGuideline.setGuidelinePercent(0.0F)
+                layoutParams.dimensionRatio = "3:4"
+                modelLayoutView.layoutParams = layoutParams
+
+            }
+        }
         // flash
         flashButton?.visibility = if (isLedFlashAvailable(this)) VISIBLE else GONE
         // capture text label
@@ -348,12 +375,12 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         captureSubHeaderText?.text = config?.subHeader ?: String.empty()
         // font to use
         val defaultFont = when (config?.font) {
-            Fonts.NOTO_SANS_ARABIC.value -> ResourcesCompat.getFont(this, R.font.notosansarabic_bold)
+            Fonts.NOTO_SANS_ARABIC.value -> ResourcesCompat.getFont(this, R.font.notosansarabic_regular)
             Fonts.ROBOTO.value -> ResourcesCompat.getFont(this, R.font.roboto_regular)
             else -> ResourcesCompat.getFont(this, R.font.sourcesanspro_regular)
         }
-        captureLabelText?.typeface = defaultFont
-        captureHeaderText?.typeface = defaultFont
+        captureLabelText?.setTypeface(defaultFont, Typeface.BOLD)
+        captureHeaderText?.setTypeface(defaultFont, Typeface.BOLD)
         captureSubHeaderText?.typeface = defaultFont
         // Background reader
         try {
@@ -440,7 +467,21 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     object : ImageCapture.OnImageSavedCallback {
                         override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                             val data = Intent()
-                            val transform = bitmapTransform(CropTransformation(285.px, 180.px, CropTransformation.CropType.CENTER)) // Initial MRZ Card Size
+                            val width : Int = captureOptions?.width?.px ?: run {
+                                when (captureOptions?.type) {
+                                    CaptureType.ID.value -> 285.px
+                                    CaptureType.DOCUMENT.value -> 180.px
+                                    else -> 285.px // default width for MRZ
+                                }
+                            }
+                            val height : Int = captureOptions?.height?.px ?: run {
+                                when (captureOptions?.type) {
+                                    CaptureType.ID.value -> 180.px
+                                    CaptureType.DOCUMENT.value -> 285.px
+                                    else -> 180.px // default height for MRZ
+                                }
+                            }
+                            val transform = bitmapTransform(CropTransformation(width , height, CropTransformation.CropType.CENTER)) // Initial MRZ Card Size
                             val bf = Glide.with(this@SmartScannerActivity)
                                             .asBitmap()
                                             .load(imageFile.path)
@@ -449,8 +490,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                                             .get()
                             bf.cacheImageToLocal(imageFile.path)
                             val imageString = if (config?.imageResultType == ImageResultType.BASE_64.value) bf.encodeBase64() else imageFile.path
-                            val result = if(mode == Modes.MRZ.value) Gson().toJson(MrzUtils.getImageOnly(imageString)) else imageString
-                            data.putExtra(SCANNER_RESULT, result)
+                            val result : Any = if(mode == Modes.MRZ.value) MrzUtils.getImageOnly(imageString) else ImageResult(imageString)
+                            data.putExtra(SCANNER_RESULT, Gson().toJson(result))
                             setResult(Activity.RESULT_OK, data)
                             finish()
                         }

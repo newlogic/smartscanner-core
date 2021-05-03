@@ -31,12 +31,19 @@ data class ScannerOptions(
     val mrzFormat: String? = null,
     val scannerSize: String? = null,
     val barcodeOptions: BarcodeOptions? = null,
+    val captureOptions: CaptureOptions? = null,
 ) : Parcelable {
     companion object {
         val defaultForBarcode = ScannerOptions(
             mode = BARCODE.value,
             scannerSize = ScannerSize.LARGE.value,
             config = Config.default
+        )
+
+        val defaultForCaptureOnly = ScannerOptions(
+            mode = CAPTURE_ONLY.value,
+            config = Config.default,
+            captureOptions = CaptureOptions.default
         )
 
         val defaultForIdPassLite = ScannerOptions(
