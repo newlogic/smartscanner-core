@@ -32,4 +32,25 @@ object LanguageUtils {
         config.locale = locale
         resources.updateConfiguration(config, resources.displayMetrics)
     }
+
+    /**
+     * Determine if String s is right-to-left or RTL.
+     * Example of RTL languages: Arabic, Hebrew, etc
+     */
+    fun isRTL(language: String?): Boolean {
+        if (language != null) {
+            for (element in language) {
+                val d = Character.getDirectionality(element)
+                if (d == Character.DIRECTIONALITY_RIGHT_TO_LEFT
+                        || d == Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC
+                        || d == Character.DIRECTIONALITY_RIGHT_TO_LEFT_EMBEDDING
+                        || d == Character.DIRECTIONALITY_RIGHT_TO_LEFT_OVERRIDE) {
+                    return true
+                }
+            }
+            return false
+        } else {
+            return false
+        }
+    }
 }

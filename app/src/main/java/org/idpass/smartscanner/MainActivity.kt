@@ -170,15 +170,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun scanNFC() {
         val intent = Intent(this, SmartScannerActivity::class.java)
-        val language = getLanguage(preference)
-        val locale = if (language == Language.AR) Language.Locale.RTL else Language.Locale.LTR
         intent.putExtra(NFCActivity.FOR_SMARTSCANNER_APP, true)
         intent.putExtra(
             SmartScannerActivity.SCANNER_OPTIONS,
             ScannerOptions(
                 mode = Modes.NFC_SCAN.value,
-                language = language,
-                nfcLocale = locale,
+                language = getLanguage(preference),
                 config = Config(
                     header = getString(R.string.label_scan_nfc_capture),
                     subHeader = getString(R.string.label_scan_nfc_via_mrz),

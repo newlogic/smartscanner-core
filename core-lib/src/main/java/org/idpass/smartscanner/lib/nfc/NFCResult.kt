@@ -21,6 +21,7 @@ import org.idpass.smartscanner.lib.nfc.passport.Passport
 import org.idpass.smartscanner.lib.platform.extension.arrayToString
 import org.idpass.smartscanner.lib.platform.utils.DateUtils
 import org.idpass.smartscanner.lib.platform.utils.DateUtils.formatStandardDate
+import org.idpass.smartscanner.lib.platform.utils.LanguageUtils.isRTL
 import org.idpass.smartscanner.lib.scanner.config.Language.Locale
 import org.jmrtd.lds.icao.MRZInfo
 
@@ -63,10 +64,10 @@ data class NFCResult(
             // one part of nameOfHolder should contain last names/surname
             // other part remaining of nameOfHolder should contain given names
             // in which multiple names are separated by '<' (single chevron)
-            if (locale == Locale.RTL) {
+            val nameOfHolder = additionalPersonDetails?.nameOfHolder
+            if (isRTL(nameOfHolder) || locale == Locale.RTL) {
                 // For RTL languages, surname are on the last part of nameOfHolder and first part for given names
                 // NFCResult.nameOfHolder --> GIVEN_NAME1<GIVEN_NAME2<<LAST_NAME1<LAST_NAME2 (RTL for Arabic)
-                val nameOfHolder = additionalPersonDetails?.nameOfHolder
                 if (nameOfHolder?.contains("<<") == true) {
                     val parts  = nameOfHolder.split("<<").toMutableList()
                     surname = parts.lastOrNull()?.replace("<", " ")
@@ -78,15 +79,26 @@ data class NFCResult(
                     }
                 } else {
                     // When surname is not available, set to null
-                    // NFCResult.nameOfHolder --> GIVEN_NAME1<GIVEN_NAME2 (RTL for Arabic)
                     surname = null
                     givenNames = nameOfHolder?.replace("<", " ")?.trim()
                 }
             } else {
-                // For LTR languages, surname are on person details primaryIdentifier
-                // and given names on person details secondaryIdentifier
-                surname = personDetails?.primaryIdentifier?.replace("<", " ")?.trim()
-                givenNames = personDetails?.secondaryIdentifier?.replace("<", " ")?.trim()
+                // For LTR languages, surname are on the first part of nameOfHolder and last part for given names
+                // NFCResult.nameOfHolder --> LAST_NAME1<LAST_NAME2<<GIVEN_NAME1<GIVEN_NAME2
+                if (nameOfHolder?.contains("<<") == true) {
+                    val parts  = nameOfHolder.split("<<").toMutableList()
+                    surname = parts.firstOrNull()?.replace("<", " ")
+                    parts.apply {
+                        removeAt(0) // remove first item
+                        forEach { name ->
+                            givenNames = name.replace("<", " ")
+                        }
+                    }
+                } else {
+                    // When surname is not available, set to null
+                    surname = null
+                    givenNames = nameOfHolder?.replace("<", " ")?.trim()
+                }
             }
             // Get proper date of birth
             val dateOfBirth = if (additionalPersonDetails?.fullDateOfBirth.isNullOrEmpty()) {
