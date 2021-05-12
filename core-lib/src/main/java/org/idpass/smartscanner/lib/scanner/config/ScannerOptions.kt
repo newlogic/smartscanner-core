@@ -19,7 +19,6 @@ package org.idpass.smartscanner.lib.scanner.config
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
-import org.idpass.smartscanner.lib.scanner.config.Language.Locale
 import org.idpass.smartscanner.lib.scanner.config.Modes.*
 
 @Parcelize
@@ -32,6 +31,7 @@ data class ScannerOptions(
     val scannerSize: String? = null,
     val barcodeOptions: BarcodeOptions? = null,
     val captureOptions: CaptureOptions? = null,
+    val nfcOptions: NFCOptions? = null,
 ) : Parcelable {
     companion object {
         val defaultForBarcode = ScannerOptions(
@@ -60,7 +60,7 @@ data class ScannerOptions(
 
         val defaultForNFCScan = ScannerOptions(
             mode = NFC_SCAN.value,
-            nfcLocale = Locale.LTR,
+            nfcOptions = NFCOptions.default,
             config = Config(
                 isManualCapture = false,
                 branding = true
