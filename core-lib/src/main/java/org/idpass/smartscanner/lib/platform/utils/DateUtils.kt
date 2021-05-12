@@ -18,6 +18,7 @@
 package org.idpass.smartscanner.lib.platform.utils
 
 import android.annotation.SuppressLint
+import org.idpass.smartscanner.lib.scanner.config.Language
 import java.text.DateFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -39,9 +40,9 @@ object DateUtils {
     fun formatDate(date: Date) : String = dateFormat.format(date)
 
     @SuppressLint("SimpleDateFormat")
-    fun formatStandardDate(dateString: String?, pattern : String = "yyMMdd"): String? {
-        val date = stringToDate(dateString, SimpleDateFormat(pattern)) ?: return null
-        return dateToString(date, SimpleDateFormat("MM/dd/yyyy"))
+    fun formatStandardDate(dateString: String?, fromPattern: String = "yyMMdd", toPattern: String = "MM/dd/yyyy", locale: Locale? = Locale(Language.EN)): String? {
+        val date = stringToDate(dateString, SimpleDateFormat(fromPattern)) ?: return null
+        return dateToString(date, SimpleDateFormat(toPattern, locale))
     }
 
     private fun stringToDate(dateStr: String?, dateFormat: DateFormat): Date? {
