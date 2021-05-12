@@ -38,7 +38,7 @@ import org.jmrtd.lds.icao.MRZInfo
 import java.security.Security
 
 
-class NFCDocumentTag {
+class NFCDocumentTag(val readDG2: Boolean = true) {
 
     fun handleTag(context: Context, tag: Tag, mrzInfo: MRZInfo, mrtdTrustStore: MRTDTrustStore, passportCallback: PassportCallback):Disposable{
         return  Single.fromCallable {
@@ -61,7 +61,7 @@ class NFCDocumentTag {
                 })
                 ps.open()
 
-                val passportNFC = PassportNFC(ps, mrtdTrustStore, mrzInfo)
+                val passportNFC = PassportNFC(ps, mrtdTrustStore, mrzInfo, readDG2)
                 val verifySecurity = passportNFC.verifySecurity()
                 val features = passportNFC.features
 
@@ -89,7 +89,7 @@ class NFCDocumentTag {
                 }
 
                 //Picture
-                if (passportNFC.dg2File != null) {
+                if (passportNFC.dg2File != null && passportNFC.readDG2) {
                     //Get the picture
                     try {
                         val faceImage = PassportNfcUtils.retrieveFaceImage(context, passportNFC.dg2File!!)
