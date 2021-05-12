@@ -52,6 +52,8 @@ import javax.security.auth.x500.X500Principal
 class PassportNFC @Throws(GeneralSecurityException::class)
 private constructor() {
 
+    var readDG2 = true
+
     /** The hash function for DG hashes.  */
     private var digest: MessageDigest? = null
 
@@ -212,7 +214,8 @@ private constructor() {
      * @throws GeneralSecurityException if certain security primitives are not supported
      */
     @Throws(CardServiceException::class, GeneralSecurityException::class)
-    constructor(ps: PassportService?, trustManager: MRTDTrustStore, mrzInfo: MRZInfo) : this() {
+    constructor(ps: PassportService?, trustManager: MRTDTrustStore, mrzInfo: MRZInfo, readDG2: Boolean = true) : this() {
+        this.readDG2 = readDG2
         if (ps == null) {
             throw IllegalArgumentException("Service cannot be null")
         }
@@ -1047,7 +1050,7 @@ private constructor() {
                 return dg1File
             }
             2 -> {
-                return dg2File
+                return if (readDG2) dg2File else null
             }
             3 -> {
                 return dg3File
