@@ -176,6 +176,7 @@ class MainActivity : AppCompatActivity() {
             ScannerOptions(
                 mode = Modes.NFC_SCAN.value,
                 language = getLanguage(preference),
+                nfcOptions = NFCOptions(withPhoto = true),
                 config = Config(
                     header = getString(R.string.label_scan_nfc_capture),
                     subHeader = getString(R.string.label_scan_nfc_via_mrz),
