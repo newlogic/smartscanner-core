@@ -72,7 +72,7 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
     private var pendingIntent: PendingIntent? = null
     private var locale: String? = null
     private var language: String? = null
-    private var withPhoto: Boolean? = null
+    private var withPhoto: Boolean = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,7 +91,7 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
             mrzInfo = MRZInfo(mrz)
             mrzInfo?.let {
                 supportFragmentManager.beginTransaction()
-                    .replace(R.id.container, NFCFragment.newInstance(it, language, locale, withPhoto ?: true), TAG_NFC)
+                    .replace(R.id.container, NFCFragment.newInstance(it, language, locale, withPhoto), TAG_NFC)
                     .commit()
             }
         } catch (e: Exception) {

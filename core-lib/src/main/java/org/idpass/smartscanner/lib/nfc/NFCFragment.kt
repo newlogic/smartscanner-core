@@ -62,7 +62,7 @@ class  NFCFragment : Fragment() {
     private var progressBar: ProgressBar? = null
     private var language: String? = null
     private var locale: String? = null
-    private var withPhoto: Boolean? = null
+    private var withPhoto: Boolean = true
 
     private var mHandler = Handler(Looper.getMainLooper())
     private var disposable = CompositeDisposable()
@@ -108,8 +108,8 @@ class  NFCFragment : Fragment() {
             val certStore = KeyStoreUtils().toCertStore(keyStore = keyStore)
             mrtdTrustStore.addAsCSCACertStore(certStore)
         }
-        val readDG2 = withPhoto ?: true // if withPhoto is enabled read DG2 is true and vice versa, default if not set is true
-        val subscribe = NFCDocumentTag(readDG2).handleTag(requireContext(), tag, mrzInfo!!, mrtdTrustStore, object : NFCDocumentTag.PassportCallback {
+        // if withPhoto is true, readDG2 is enabled and photo is added to NFC result
+        val subscribe = NFCDocumentTag(withPhoto).handleTag(requireContext(), tag, mrzInfo!!, mrtdTrustStore, object : NFCDocumentTag.PassportCallback {
 
             override fun onPassportReadStart() {
                 onNFCSReadStart()

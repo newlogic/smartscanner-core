@@ -36,7 +36,7 @@ open class NFCScanAnalyzer(
     override val mode: String = Modes.NFC_SCAN.value,
     private val language: String?,
     private val locale: String?,
-    private val withPhoto: Boolean?,
+    private val withPhoto: Boolean,
     isMLKit: Boolean,
     imageResultType: String,
     format: String? = null,
