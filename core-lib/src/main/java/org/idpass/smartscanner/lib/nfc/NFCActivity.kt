@@ -42,6 +42,7 @@ import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.BuildConfig
 import org.idpass.smartscanner.lib.R
 import org.idpass.smartscanner.lib.SmartScannerActivity
+import org.idpass.smartscanner.lib.nfc.details.IntentData
 import org.idpass.smartscanner.lib.nfc.passport.Passport
 import org.idpass.smartscanner.lib.nfc.passport.PassportDetailsFragment
 import org.idpass.smartscanner.lib.nfc.passport.PassportPhotoFragment
@@ -71,6 +72,7 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
     private var pendingIntent: PendingIntent? = null
     private var locale: String? = null
     private var language: String? = null
+    private var withPhoto: Boolean? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,12 +85,13 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
         }
         language = intent.getStringExtra(ScannerConstants.LANGUAGE)
         locale = intent.getStringExtra(ScannerConstants.NFC_LOCALE)
+        withPhoto = intent.getBooleanExtra(IntentData.KEY_WITH_PHOTO, true)
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         try {
             mrzInfo = MRZInfo(mrz)
             mrzInfo?.let {
                 supportFragmentManager.beginTransaction()
-                    .replace(R.id.container, NFCFragment.newInstance(it, language, locale), TAG_NFC)
+                    .replace(R.id.container, NFCFragment.newInstance(it, language, locale, withPhoto ?: true), TAG_NFC)
                     .commit()
             }
         } catch (e: Exception) {
