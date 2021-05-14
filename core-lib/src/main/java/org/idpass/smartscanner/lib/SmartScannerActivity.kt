@@ -233,13 +233,15 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 }
             }
             if (mode == Modes.NFC_SCAN.value) {
+                val nfcOptions = scannerOptions?.nfcOptions
                 analyzer = NFCScanAnalyzer(
                         activity = this,
                         intent = intent,
                         isMLKit = isMLKit,
                         imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
                         language = scannerOptions?.language ?: intent.getStringExtra(ScannerConstants.LANGUAGE),
-                        locale = scannerOptions?.nfcLocale ?: intent.getStringExtra(ScannerConstants.NFC_LOCALE),
+                        locale = nfcOptions?.locale ?: intent.getStringExtra(ScannerConstants.NFC_LOCALE),
+                        withPhoto = nfcOptions?.withPhoto ?: true,
                         analyzeStart = System.currentTimeMillis(),
                         onConnectSuccess = {
                             modelTextLoading?.visibility = INVISIBLE

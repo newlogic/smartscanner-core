@@ -15,13 +15,19 @@
  *
  *
  */
-package org.idpass.smartscanner.lib.nfc.details
+package org.idpass.smartscanner.lib.scanner.config
 
-object IntentData {
-    val KEY_IMAGE = "KEY_IMAGE"
-    val KEY_LANGUAGE = "KEY_LANGUAGE"
-    val KEY_LOCALE = "KEY_LOCALE"
-    val KEY_MRZ_INFO = "KEY_MRZ_INFO"
-    val KEY_PASSPORT = "KEY_PASSPORT"
-    val KEY_WITH_PHOTO = "KEY_WITH_PHOTO"
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
+data class NFCOptions(
+    val locale: String? = null,
+    val withPhoto: Boolean? = null,
+) : Parcelable {
+    companion object {
+        val default = NFCOptions(
+            withPhoto = true
+        )
+    }
 }
