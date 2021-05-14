@@ -27,7 +27,7 @@ data class NFCOptions(
 ) : Parcelable {
     companion object {
         val default = NFCOptions(
-            withPhoto = false
+            withPhoto = true
         )
     }
 }
