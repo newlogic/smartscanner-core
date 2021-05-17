@@ -24,10 +24,12 @@ import kotlinx.parcelize.Parcelize
 data class NFCOptions(
     val locale: String? = null,
     val withPhoto: Boolean? = null,
+    val enableLogging: Boolean? = null,
 ) : Parcelable {
     companion object {
         val default = NFCOptions(
-            withPhoto = true
+            withPhoto = true,
+            enableLogging = false
         )
     }
 }
