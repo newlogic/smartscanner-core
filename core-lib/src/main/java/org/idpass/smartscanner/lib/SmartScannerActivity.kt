@@ -241,7 +241,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                         imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
                         language = scannerOptions?.language ?: intent.getStringExtra(ScannerConstants.LANGUAGE),
                         locale = nfcOptions?.locale ?: intent.getStringExtra(ScannerConstants.NFC_LOCALE),
-                        withPhoto = nfcOptions?.withPhoto ?: true,
+                        withPhoto = nfcOptions?.withPhoto ?: true, // default is true, NFC results with photo
+                        enableLogging = nfcOptions?.enableLogging ?: false, // default is false, logging is disabled
                         analyzeStart = System.currentTimeMillis(),
                         onConnectSuccess = {
                             modelTextLoading?.visibility = INVISIBLE
