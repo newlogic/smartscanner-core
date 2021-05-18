@@ -39,7 +39,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".nfc.NFCActivity"
+        <activity
+            android:name=".nfc.NFCActivity"
             android:screenOrientation="nosensor"
             android:launchMode="singleInstance"
             android:keepScreenOn="true"/>

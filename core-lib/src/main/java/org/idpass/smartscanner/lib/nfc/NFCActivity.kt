@@ -73,25 +73,31 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
     private var locale: String? = null
     private var language: String? = null
     private var withPhoto: Boolean = true
+    private var enableLogging: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_nfc)
-        if (BuildConfig.DEBUG) {
-            setupLogs()
-        }
+        // Fetch MRZ from log intent
         val mrz = intent.getStringExtra(ScannerConstants.NFC_MRZ_STRING) ?: run {
             intent.getStringExtra(FOR_MRZ_LOG)
         }
+        // fetch data from intent
         language = intent.getStringExtra(ScannerConstants.LANGUAGE)
         locale = intent.getStringExtra(ScannerConstants.NFC_LOCALE)
         withPhoto = intent.getBooleanExtra(IntentData.KEY_WITH_PHOTO, true)
+        enableLogging = intent.getBooleanExtra(IntentData.KEY_ENABLE_LOGGGING, true)
+        // setup logs
+        if (BuildConfig.DEBUG && enableLogging) {
+            setupLogs()
+        }
+        // setup nfc adapter
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         try {
             mrzInfo = MRZInfo(mrz)
             mrzInfo?.let {
                 supportFragmentManager.beginTransaction()
-                    .replace(R.id.container, NFCFragment.newInstance(it, language, locale, withPhoto), TAG_NFC)
+                    .replace(R.id.container, NFCFragment.newInstance(mrzInfo = it, language = language, locale = locale, withPhoto = withPhoto), TAG_NFC)
                     .commit()
             }
         } catch (e: Exception) {

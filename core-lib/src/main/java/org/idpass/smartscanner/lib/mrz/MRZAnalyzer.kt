@@ -50,6 +50,7 @@ open class MRZAnalyzer(
         private val language: String? = null,
         private val locale: String? = null,
         private val withPhoto: Boolean? = null,
+        private val enableLogging: Boolean? = null,
         private val isMLKit: Boolean,
         private val imageResultType: String,
         private val format: String?,
