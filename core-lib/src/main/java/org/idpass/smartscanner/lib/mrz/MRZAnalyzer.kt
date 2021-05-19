@@ -48,6 +48,7 @@ open class MRZAnalyzer(
         override val intent: Intent,
         override val mode: String = Modes.MRZ.value,
         private val language: String? = null,
+        private val label: String? = null,
         private val locale: String? = null,
         private val withPhoto: Boolean? = null,
         private val enableLogging: Boolean? = null,

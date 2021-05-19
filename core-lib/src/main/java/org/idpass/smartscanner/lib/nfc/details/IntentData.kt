@@ -20,6 +20,7 @@ package org.idpass.smartscanner.lib.nfc.details
 object IntentData {
     val KEY_IMAGE = "KEY_IMAGE"
     val KEY_LANGUAGE = "KEY_LANGUAGE"
+    val KEY_LABEL = "KEY_LABEL"
     val KEY_LOCALE = "KEY_LOCALE"
     val KEY_MRZ_INFO = "KEY_MRZ_INFO"
     val KEY_PASSPORT = "KEY_PASSPORT"
