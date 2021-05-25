@@ -76,7 +76,7 @@ class  NFCFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val arguments = arguments
         if (arguments?.containsKey(IntentData.KEY_MRZ_INFO) == true) {
-            mrzInfo = arguments.getSerializable(IntentData.KEY_MRZ_INFO) as MRZInfo
+            mrzInfo = arguments.getSerializable(IntentData.KEY_MRZ_INFO) as MRZInfo?
         }
         if (arguments?.containsKey(IntentData.KEY_LOCALE) == true) {
             locale = arguments.getString(IntentData.KEY_LOCALE)
@@ -244,7 +244,7 @@ class  NFCFragment : Fragment() {
         init {
             Security.insertProviderAt(BouncyCastleProvider(), 1)
         }
-        fun newInstance(mrzInfo: MRZInfo, language: String?, locale : String?, withPhoto: Boolean): NFCFragment {
+        fun newInstance(mrzInfo: MRZInfo?, language: String?, locale : String?, withPhoto: Boolean): NFCFragment {
             val myFragment = NFCFragment()
             val args = Bundle()
             args.putSerializable(IntentData.KEY_MRZ_INFO, mrzInfo)

@@ -63,6 +63,7 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
         const val FOR_MRZ_LOG = "FOR_MRZ_LOG"
         const val FOR_SMARTSCANNER_APP = "FOR_SMARTSCANNER_APP"
     }
+
     private val REQUEST_CODE_PERMISSIONS = 11
     private val REQUEST_CODE_PERMISSIONS_VERSION_R = 2296
     private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -79,9 +80,9 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_nfc)
         // Fetch MRZ from log intent
-        val mrz = intent.getStringExtra(ScannerConstants.NFC_MRZ_STRING) ?: run {
+        val mrz : String = intent.getStringExtra(ScannerConstants.NFC_MRZ_STRING) ?: run {
             intent.getStringExtra(FOR_MRZ_LOG)
-        }
+        } as String
         // fetch data from intent
         language = intent.getStringExtra(ScannerConstants.LANGUAGE)
         locale = intent.getStringExtra(ScannerConstants.NFC_LOCALE)
@@ -95,21 +96,22 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         try {
             mrzInfo = MRZInfo(mrz)
-            mrzInfo?.let {
-                supportFragmentManager.beginTransaction()
-                    .replace(R.id.container, NFCFragment.newInstance(mrzInfo = it, language = language, locale = locale, withPhoto = withPhoto), TAG_NFC)
-                    .commit()
-            }
         } catch (e: Exception) {
             e.printStackTrace()
+        } finally {
+            // when an exception occurs and mrzInfo is still null execute initialization of MrzInfo
+            if (mrzInfo == null) {
+                mrzInfo = MRZInfo(mrz)
+            }
         }
+        showNFCFragment()
     }
 
     public override fun onResume() {
         super.onResume()
         if (nfcAdapter != null && nfcAdapter?.isEnabled == true) {
             pendingIntent = PendingIntent.getActivity(this, 0,
-                Intent(this, this.javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0)
+                    Intent(this, this.javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0)
         } else checkNFC()
     }
 
@@ -121,8 +123,20 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
         if (NfcAdapter.ACTION_TAG_DISCOVERED == intent.action || NfcAdapter.ACTION_TECH_DISCOVERED == intent.action) {
             // drop NFC events
             handleIntent(intent)
-        }else{
+        } else {
             super.onNewIntent(intent)
+        }
+    }
+
+    /////////////////////////////////////////////////////
+    //  NFC Fragment events
+    /////////////////////////////////////////////////////
+    private fun showNFCFragment() {
+        if (mrzInfo != null) {
+            supportFragmentManager.beginTransaction()
+                    .replace(R.id.container,
+                            NFCFragment.newInstance(mrzInfo = mrzInfo, language = language, locale = locale, withPhoto = withPhoto), TAG_NFC)
+                    .commit()
         }
     }
 
@@ -144,9 +158,6 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
         }
     }
 
-    /////////////////////////////////////////////////////
-    //  NFC Fragment events
-    /////////////////////////////////////////////////////
     override fun onEnableNfc() {
         nfcAdapter?.let {
             if (!it.isEnabled) showWirelessSettings()
@@ -164,7 +175,7 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
         val nfcResult = NFCResult.formatResult(passport, locale, mrzInfo)
 
         if (action == ScannerConstants.IDPASS_SMARTSCANNER_NFC_INTENT ||
-                action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_NFC_INTENT ) {
+                action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_NFC_INTENT) {
             // Send NFC Results via Bundle
             val bundle = Bundle()
             Log.d(TAG, "Success from NFC -- BUNDLE")
@@ -298,7 +309,7 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
         }
     }
 
-    private fun allPermissionsGranted() : Boolean {
+    private fun allPermissionsGranted(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             Environment.isExternalStorageManager()
         } else {
