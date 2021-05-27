@@ -26,7 +26,6 @@ import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import net.sf.scuba.smartcards.APDUListener
 import net.sf.scuba.smartcards.CardService
 import net.sf.scuba.smartcards.CardServiceException
 import org.idpass.smartscanner.lib.nfc.passport.Passport
@@ -51,6 +50,7 @@ class NFCDocumentTag(val readDG2: Boolean = true) {
                 nfc.timeout = 5 * 1000 //5 seconds timeout
                 val cs = CardService.getInstance(nfc)
                 ps = PassportService(cs, 256, 224, false, true)
+                /* Note commented out logs of full APDU command/response tracing for future use
                 ps.addAPDUListener(APDUListener { e ->
                     val cmdBuf = e.commandAPDU.bytes
                     val respBuf = e.responseAPDU.bytes
@@ -58,7 +58,7 @@ class NFCDocumentTag(val readDG2: Boolean = true) {
                     val respBufStr: String = printLine(respBuf, "PACKET <== ")
                     Log.w(TAG, cmdBufStr)
                     Log.w(TAG, respBufStr)
-                })
+                })*/
                 ps.open()
 
                 val passportNFC = PassportNFC(ps, mrtdTrustStore, mrzInfo, readDG2)
