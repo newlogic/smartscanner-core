@@ -51,7 +51,7 @@ import java.security.Security
 import java.util.*
 
 
-class  NFCFragment : Fragment() {
+class NFCFragment : Fragment() {
 
     private var mrzInfo: MRZInfo? = null
     private var nfcFragmentListener: NfcFragmentListener? = null
@@ -60,6 +60,7 @@ class  NFCFragment : Fragment() {
     private var textViewDateOfBirth: TextView? = null
     private var textViewDateOfExpiry: TextView? = null
     private var progressBar: ProgressBar? = null
+    private var label: String? = null
     private var language: String? = null
     private var locale: String? = null
     private var withPhoto: Boolean = true
@@ -77,6 +78,9 @@ class  NFCFragment : Fragment() {
         val arguments = arguments
         if (arguments?.containsKey(IntentData.KEY_MRZ_INFO) == true) {
             mrzInfo = arguments.getSerializable(IntentData.KEY_MRZ_INFO) as MRZInfo?
+        }
+        if (arguments?.containsKey(IntentData.KEY_LABEL) == true) {
+            label = arguments.getString(IntentData.KEY_LABEL)
         }
         if (arguments?.containsKey(IntentData.KEY_LOCALE) == true) {
             locale = arguments.getString(IntentData.KEY_LOCALE)
@@ -104,7 +108,7 @@ class  NFCFragment : Fragment() {
         val keyStore = KeyStoreUtils().readKeystoreFromFile(cscaInputStream)
 
         val mrtdTrustStore = MRTDTrustStore()
-        if (keyStore!=null) {
+        if (keyStore != null) {
             val certStore = KeyStoreUtils().toCertStore(keyStore = keyStore)
             mrtdTrustStore.addAsCSCACertStore(certStore)
         }
@@ -180,7 +184,7 @@ class  NFCFragment : Fragment() {
         // Display proper language
         LanguageUtils.changeLanguage(requireContext(), if (language == Language.EN) Language.EN else Language.AR)
         // Display MRZ details
-        textViewNfcTitle?.text = getString(R.string.nfc_title)
+        textViewNfcTitle?.text = if (label != null) label else getString(R.string.nfc_title)
         textViewPassportNumber?.text = getString(R.string.doc_number, mrzInfo?.documentNumber)
         textViewDateOfBirth?.text = getString(R.string.doc_dob, DateUtils.toAdjustedDate(formatStandardDate(mrzInfo?.dateOfBirth)))
         textViewDateOfExpiry?.text = getString(R.string.doc_expiry, DateUtils.toReadableDate(formatStandardDate(mrzInfo?.dateOfExpiry)))
@@ -244,10 +248,12 @@ class  NFCFragment : Fragment() {
         init {
             Security.insertProviderAt(BouncyCastleProvider(), 1)
         }
-        fun newInstance(mrzInfo: MRZInfo?, language: String?, locale : String?, withPhoto: Boolean): NFCFragment {
+
+        fun newInstance(mrzInfo: MRZInfo?, label: String?, language: String?, locale: String?, withPhoto: Boolean): NFCFragment {
             val myFragment = NFCFragment()
             val args = Bundle()
             args.putSerializable(IntentData.KEY_MRZ_INFO, mrzInfo)
+            args.putString(IntentData.KEY_LABEL, label)
             args.putString(IntentData.KEY_LANGUAGE, language)
             args.putString(IntentData.KEY_LOCALE, locale)
             args.putBoolean(IntentData.KEY_WITH_PHOTO, withPhoto)
