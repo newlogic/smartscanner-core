@@ -71,8 +71,9 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
     private var mrzInfo: MRZInfo? = null
     private var nfcAdapter: NfcAdapter? = null
     private var pendingIntent: PendingIntent? = null
-    private var locale: String? = null
+    private var label: String? = null
     private var language: String? = null
+    private var locale: String? = null
     private var withPhoto: Boolean = true
     private var enableLogging: Boolean = false
 
@@ -86,9 +87,10 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
         // fetch data from intent
         language = intent.getStringExtra(ScannerConstants.LANGUAGE)
         locale = intent.getStringExtra(ScannerConstants.NFC_LOCALE)
+        label = intent.getStringExtra(IntentData.KEY_LABEL)
         withPhoto = intent.getBooleanExtra(IntentData.KEY_WITH_PHOTO, true)
-        enableLogging = intent.getBooleanExtra(IntentData.KEY_ENABLE_LOGGGING, true)
-        // setup logs
+        enableLogging = intent.getBooleanExtra(IntentData.KEY_ENABLE_LOGGGING, false)
+        // setup logs, only available for debug builds
         if (BuildConfig.DEBUG && enableLogging) {
             setupLogs()
         }
@@ -111,7 +113,7 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
         super.onResume()
         if (nfcAdapter != null && nfcAdapter?.isEnabled == true) {
             pendingIntent = PendingIntent.getActivity(this, 0,
-                    Intent(this, this.javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0)
+                Intent(this, this.javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0)
         } else checkNFC()
     }
 
@@ -135,7 +137,7 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
         if (mrzInfo != null) {
             supportFragmentManager.beginTransaction()
                     .replace(R.id.container,
-                            NFCFragment.newInstance(mrzInfo = mrzInfo, language = language, locale = locale, withPhoto = withPhoto), TAG_NFC)
+                            NFCFragment.newInstance(mrzInfo = mrzInfo, label = label, language = language, locale = locale, withPhoto = withPhoto), TAG_NFC)
                     .commit()
         }
     }

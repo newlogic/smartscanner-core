@@ -239,6 +239,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                         intent = intent,
                         isMLKit = isMLKit,
                         imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
+                        label = nfcOptions?.label,
                         language = scannerOptions?.language ?: intent.getStringExtra(ScannerConstants.LANGUAGE),
                         locale = nfcOptions?.locale ?: intent.getStringExtra(ScannerConstants.NFC_LOCALE),
                         withPhoto = nfcOptions?.withPhoto ?: true, // default is true, NFC results with photo
