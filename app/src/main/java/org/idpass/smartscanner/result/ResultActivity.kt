@@ -20,12 +20,16 @@ package org.idpass.smartscanner.result
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.Typeface
+import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
 import com.bumptech.glide.Glide
 import com.google.gson.JsonParser
 import org.idpass.smartscanner.MainActivity.Companion.imageType
@@ -33,6 +37,7 @@ import org.idpass.smartscanner.R
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.databinding.ActivityResultBinding
 import org.idpass.smartscanner.lib.platform.extension.decodeBase64
+import org.idpass.smartscanner.lib.platform.extension.isValidUrl
 import org.idpass.smartscanner.lib.scanner.config.ImageResultType
 import org.idpass.smartscanner.lib.scanner.config.Modes
 
@@ -77,7 +82,7 @@ class ResultActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupResult(result: String? = null,  imageType: String) {
+    private fun setupResult(result: String? = null, imageType: String) {
         val dump: StringBuilder = getResult(result)
         // Text Data Result
         if (dump.isNotEmpty()) {
@@ -100,7 +105,7 @@ class ResultActivity : AppCompatActivity() {
         displayRaw(result)
     }
 
-    private fun displayRaw(result : String?) {
+    private fun displayRaw(result: String?) {
         // Raw Data Result
         if (result?.isNotEmpty() != null) {
             binding.editTextRaw.setText(result)
@@ -110,6 +115,19 @@ class ResultActivity : AppCompatActivity() {
         } else {
             binding.textRawLabel.visibility = GONE
             binding.editTextRaw.visibility = GONE
+        }
+
+        // When raw result is valid url route to browser
+        if (result?.isValidUrl() == true) {
+            val color = resources.getColor(R.color.blue)
+            val defaultFont = ResourcesCompat.getFont(this, R.font.sourcesanspro_regular)
+            binding.editTextRaw.setTextColor(color)
+            binding.editTextRaw.setTypeface(defaultFont, Typeface.BOLD)
+            binding.editTextRaw.maxLines = 1 // One line for url only
+            binding.editTextRaw.background.setColorFilter(color, PorterDuff.Mode.SRC_IN)
+            binding.editTextRaw.setOnClickListener {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(result)))
+            }
         }
     }
 
@@ -138,7 +156,7 @@ class ResultActivity : AppCompatActivity() {
         return dump.toString()
     }
 
-    private fun getResult(result: String? = null, ): StringBuilder {
+    private fun getResult(result: String? = null): StringBuilder {
         val dump = StringBuilder()
         val givenNames: String?
         val surname: String?
