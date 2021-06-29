@@ -396,36 +396,36 @@ class VerificationStatus : Parcelable {
     }
 
     override fun writeToParcel(dest: Parcel, flags: Int) {
-        dest.writeInt(if(this.aa!=null) 1 else 0)
-        if(aa!=null) {
+        dest.writeInt(if (this.aa!=null) 1 else 0)
+        if (aa!=null) {
             dest.writeString(aa?.name)
         }
-        dest.writeInt(if(this.bac!=null) 1 else 0)
-        if(bac!=null) {
+        dest.writeInt(if (this.bac!=null) 1 else 0)
+        if (bac!=null) {
             dest.writeString(bac?.name)
         }
-        dest.writeInt(if(this.sac!=null) 1 else 0)
-        if(sac!=null) {
+        dest.writeInt(if (this.sac!=null) 1 else 0)
+        if (sac!=null) {
             dest.writeString(sac?.name)
         }
-        dest.writeInt(if(this.cs!=null) 1 else 0)
-        if(cs!=null) {
+        dest.writeInt(if (this.cs!=null) 1 else 0)
+        if (cs!=null) {
             dest.writeString(cs?.name)
         }
-        dest.writeInt(if(this.ht!=null) 1 else 0)
-        if(ht!=null) {
+        dest.writeInt(if (this.ht!=null) 1 else 0)
+        if (ht!=null) {
             dest.writeString(ht?.name)
         }
-        dest.writeInt(if(this.ds!=null) 1 else 0)
-        if(ds!=null) {
+        dest.writeInt(if (this.ds!=null) 1 else 0)
+        if (ds!=null) {
             dest.writeString(ds?.name)
         }
-        dest.writeInt(if(this.eac!=null) 1 else 0)
-        if(eac!=null) {
+        dest.writeInt(if (this.eac!=null) 1 else 0)
+        if (eac!=null) {
             dest.writeString(eac?.name)
         }
-        dest.writeInt(if(this.ca!=null) 1 else 0)
-        if(ca!=null) {
+        dest.writeInt(if (this.ca!=null) 1 else 0)
+        if (ca!=null) {
             dest.writeString(ca?.name)
         }
 
