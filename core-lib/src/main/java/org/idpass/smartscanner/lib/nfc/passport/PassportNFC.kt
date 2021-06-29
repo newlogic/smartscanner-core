@@ -1313,7 +1313,7 @@ private constructor() {
 
                     Log.e(TAG,"all ECDH choices failed")
 
-                } else if(SecurityInfo.ID_PK_DH.equals(oidasn1)) {
+                } else if (SecurityInfo.ID_PK_DH.equals(oidasn1)) {
 
                     val oidmapDH = mapOf<String, String>(
                             SecurityInfo.ID_CA_DH_3DES_CBC_CBC to "id-CA-DH-3DES-CBC-CBC",
