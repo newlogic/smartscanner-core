@@ -120,7 +120,7 @@ class MainActivity : AppCompatActivity() {
             ScannerOptions(
                 mode = Modes.BARCODE.value,
                 language = getLanguage(preference),
-                scannerSize = ScannerSize.LARGE.value,
+                scannerSize = ScannerSize.SMALL.value,
                 config = sampleConfig(false),
                 barcodeOptions = barcodeOptions
             )
