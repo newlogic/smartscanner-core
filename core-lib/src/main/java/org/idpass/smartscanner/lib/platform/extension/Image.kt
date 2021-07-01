@@ -60,7 +60,6 @@ fun Image.toBitmap(rotation: Int = 0, mode: String?): Bitmap {
     // and mrz uses previous default value of 4
     val scaleIdentifier = when (mode) {
         Modes.QRCODE.value, Modes.IDPASS_LITE.value  -> 6
-        Modes.BARCODE.value -> 3
         else -> 4
     }
     if (rotation == 90 || rotation == 270) {
