@@ -180,9 +180,11 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         runOnUiThread {
             val isMLKit = isPlayServicesAvailable()
             var analyzer : ImageAnalysis.Analyzer? = null
+            var isPdf417 = false
             if (mode == Modes.BARCODE.value) {
                 val barcodeStrings = scannerOptions?.barcodeOptions?.barcodeFormats ?: BarcodeFormat.default
                 val barcodeFormats = barcodeStrings.map { BarcodeFormat.valueOf(it).value }
+                isPdf417 = barcodeStrings.find { it == "PDF_417" }?.isNotEmpty() == true
                 analyzer = BarcodeAnalyzer(
                     activity = this,
                     intent = intent,
@@ -260,7 +262,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             }
             // set Analyzer and start camera
             analyzer?.let {
-                startCamera(analyzer)
+                startCamera(analyzer, isPdf417)
             } ?: run {
                 if (mode == Modes.CAPTURE_ONLY.value) {
                     startCamera()
@@ -271,7 +273,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         setupViews()
     }
 
-    private fun startCamera(analyzer: ImageAnalysis.Analyzer? = null) {
+    private fun startCamera(analyzer: ImageAnalysis.Analyzer? = null, isPdf417 : Boolean = false) {
         this.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         cameraProviderFuture.addListener({
@@ -279,7 +281,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             cameraProvider = cameraProviderFuture.get()
             // Preview
             preview = Preview.Builder().build()
-            val size = Size(480, 640)
+            var size = Size(480, 640)
+            if (isPdf417) size = Size(1080, 1920)
             imageAnalyzer = ImageAnalysis.Builder()
                 .setTargetResolution(size)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
@@ -299,7 +302,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 // Unbind use cases before rebinding
                 cameraProvider?.unbindAll()
                 // Bind use cases to camera
-                camera = if(analyzer != null ) {
+                camera = if (analyzer != null ) {
                     cameraProvider?.bindToLifecycle(
                         this,
                         cameraSelector,
@@ -314,6 +317,10 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                         preview,
                         imageCapture
                     )
+                }
+                if (isPdf417) {
+                    // Reduce initial zoom ratio of camera to aid high resolution capture of PDF 417
+                    camera?.cameraControl?.setZoomRatio(0.8F)
                 }
                 preview?.setSurfaceProvider(viewFinder.createSurfaceProvider())
                 Log.d(
@@ -336,12 +343,6 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         val topGuideline = findViewById<Guideline>(R.id.top)
         val bottomGuideline = findViewById<Guideline>(R.id.bottom)
         when (scannerOptions?.scannerSize) {
-            ScannerSize.CUSTOM_QR.value -> {
-                layoutParams.dimensionRatio = "4:6"
-                layoutParams.marginStart = 96 // Approx. 48dp
-                layoutParams.marginEnd = 96 // Approx. 48dp
-                modelLayoutView.layoutParams = layoutParams
-            }
             ScannerSize.LARGE.value -> {
                 bottomGuideline.setGuidelinePercent(0.8F)
                 topGuideline.setGuidelinePercent(0.1F)
@@ -494,7 +495,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                                             .get()
                             bf.cacheImageToLocal(imageFile.path)
                             val imageString = if (config?.imageResultType == ImageResultType.BASE_64.value) bf.encodeBase64() else imageFile.path
-                            val result : Any = if(mode == Modes.MRZ.value) MrzUtils.getImageOnly(imageString) else ImageResult(imageString)
+                            val result : Any = if (mode == Modes.MRZ.value) MrzUtils.getImageOnly(imageString) else ImageResult(imageString)
                             data.putExtra(SCANNER_RESULT, Gson().toJson(result))
                             setResult(Activity.RESULT_OK, data)
                             finish()
