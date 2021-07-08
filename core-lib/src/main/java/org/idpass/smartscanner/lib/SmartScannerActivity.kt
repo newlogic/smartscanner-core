@@ -74,6 +74,7 @@ import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
+
 class SmartScannerActivity : BaseActivity(), OnClickListener {
 
     companion object {
@@ -188,6 +189,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 analyzer = BarcodeAnalyzer(
                     activity = this,
                     intent = intent,
+                    imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
                     barcodeFormats = barcodeFormats
                 )
             }
