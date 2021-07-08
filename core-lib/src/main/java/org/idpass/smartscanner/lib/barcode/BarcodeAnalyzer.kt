@@ -31,9 +31,8 @@ import com.google.mlkit.vision.common.InputImage
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.platform.BaseImageAnalyzer
-import org.idpass.smartscanner.lib.platform.extension.cacheImagePath
-import org.idpass.smartscanner.lib.platform.extension.cacheImageToLocal
-import org.idpass.smartscanner.lib.platform.extension.toBitmap
+import org.idpass.smartscanner.lib.platform.extension.*
+import org.idpass.smartscanner.lib.scanner.config.ImageResultType
 import org.idpass.smartscanner.lib.scanner.config.Modes
 
 
@@ -41,6 +40,8 @@ class BarcodeAnalyzer(
     override val activity: Activity,
     override val intent: Intent,
     override val mode: String = Modes.BARCODE.value,
+    private val isPDF417: Boolean,
+    private val imageResultType: String,
     private val barcodeFormats: List<Int>
 ) : BaseImageAnalyzer() {
 
@@ -84,7 +85,9 @@ class BarcodeAnalyzer(
                         )
                         cornersString = builder.toString()
                         rawValue = barcodes[0].rawValue!!
-                        val result = BarcodeResult(filePath, cornersString, rawValue)
+                        val bitmap = if (isPDF417) bf.getResizedBitmap(480, 640) else bf
+                        val imageResult = if (imageResultType == ImageResultType.BASE_64.value) bitmap?.encodeBase64(rot) else filePath
+                        val result = BarcodeResult(imagePath = filePath, image = imageResult, corners= cornersString, value = rawValue)
                         when (intent.action) {
                             ScannerConstants.IDPASS_SMARTSCANNER_BARCODE_INTENT,
                             ScannerConstants.IDPASS_SMARTSCANNER_ODK_BARCODE_INTENT -> {

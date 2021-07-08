@@ -86,7 +86,8 @@ class ResultActivity : AppCompatActivity() {
         }
         // Image & Raw Data Result
         result?.let {
-            val image = JsonParser.parseString(it).asJsonObject["image"]
+            // image object from MRZ or Barcode
+            var image = JsonParser.parseString(it).asJsonObject["image"]
             if (image != null) {
                 displayImage(image.asString, imageType)
             }
@@ -115,12 +116,10 @@ class ResultActivity : AppCompatActivity() {
     private fun displayImage(image: String, imageType: String) {
         if (image.isNotEmpty()) {
             val imageBitmap = if (imageType == ImageResultType.PATH.value) BitmapFactory.decodeFile(image) else image.decodeBase64()
-            Glide
-                .with(this)
+            Glide.with(this)
                 .load(imageBitmap)
                 .into(binding.imageResult)
-            binding.imageLabel.paintFlags =
-                binding.imageLabel.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+            binding.imageLabel.paintFlags = binding.imageLabel.paintFlags or Paint.UNDERLINE_TEXT_FLAG
             binding.imageLabel.visibility = VISIBLE
             binding.imageResult.visibility = VISIBLE
         } else {
