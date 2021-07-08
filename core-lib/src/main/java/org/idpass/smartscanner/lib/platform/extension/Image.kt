@@ -59,7 +59,7 @@ fun Image.toBitmap(rotation: Int = 0, mode: String?): Bitmap {
     // and barcode uses default value of 3 to address PDF417 scaling issues
     // and mrz uses previous default value of 4
     val scaleIdentifier = when (mode) {
-        Modes.QRCODE.value, Modes.IDPASS_LITE.value  -> 6
+        Modes.QRCODE.value, Modes.IDPASS_LITE.value -> 6
         else -> 4
     }
     if (rotation == 90 || rotation == 270) {
@@ -91,14 +91,27 @@ fun Bitmap.cacheImageToLocal(localPath: String, rotation: Int = 0, quality: Int 
     file.createNewFile()
     val ostream = FileOutputStream(file)
     try {
-        val isCompressionDone = b.compress(Bitmap.CompressFormat.JPEG, quality, ostream)
-        if (isCompressionDone) ostream.close()
+        b.compress(Bitmap.CompressFormat.JPEG, quality, ostream)
+        ostream.close()
     } catch (e : Exception) {
         e.printStackTrace()
     } finally {
         ostream.flush()
         ostream.close()
     }
+}
+
+fun Bitmap.getResizedBitmap(newWidth: Int, newHeight: Int): Bitmap? {
+    val width = this.width
+    val height = this.height
+    val scaleWidth = newWidth.toFloat() / width
+    val scaleHeight = newHeight.toFloat() / height
+    // CREATE A MATRIX FOR THE MANIPULATION
+    val matrix = Matrix()
+    // RESIZE THE BIT MAP
+    matrix.postScale(scaleWidth, scaleHeight)
+    // "RECREATE" THE NEW BITMAP
+    return Bitmap.createBitmap(this, 0, 0, width, height, matrix, false)
 }
 
 fun String.decodeBase64(): Bitmap? {
@@ -121,7 +134,7 @@ fun Bitmap.rotate(rotation: Int = 0): Bitmap {
 
 fun String.toBitmap() : Bitmap =  BitmapFactory.decodeFile(this)
 
-fun Context.cacheImagePath(identifier : String = "Scanner") : String {
+fun Context.cacheImagePath(identifier: String = "Scanner") : String {
     val date = Calendar.getInstance().time
     val formatter = SimpleDateFormat("yyyyMMddHHmmss", Locale.ROOT)
     val currentDateTime = formatter.format(date)

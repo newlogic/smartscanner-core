@@ -190,6 +190,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     activity = this,
                     intent = intent,
                     imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
+                    isPDF417 = isPdf417,
                     barcodeFormats = barcodeFormats
                 )
             }
