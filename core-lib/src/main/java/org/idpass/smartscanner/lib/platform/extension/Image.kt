@@ -84,14 +84,18 @@ fun Image.toBitmap(rotation: Int = 0, mode: String?): Bitmap {
     return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
 }
 
-fun Bitmap.cacheImageToLocal(localPath: String, rotation: Int = 0, quality: Int = 100) {
+fun Bitmap.cacheImageToLocal(localPath: String, rotation: Int = 0, quality: Int = 80) {
     val matrix = Matrix().apply { postRotate(rotation.toFloat()) }
     val b = Bitmap.createBitmap(this, 0, 0, this.width, this.height, matrix, true)
     val file = File(localPath)
     file.createNewFile()
-    if (file.exists()) {
-        val ostream = FileOutputStream(file)
-        b.compress(Bitmap.CompressFormat.JPEG, quality, ostream)
+    val ostream = FileOutputStream(file)
+    try {
+        val isCompressionDone = b.compress(Bitmap.CompressFormat.JPEG, quality, ostream)
+        if (isCompressionDone) ostream.close()
+    } catch (e : Exception) {
+        e.printStackTrace()
+    } finally {
         ostream.flush()
         ostream.close()
     }
