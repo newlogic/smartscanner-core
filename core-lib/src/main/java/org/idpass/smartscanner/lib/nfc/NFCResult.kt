@@ -28,6 +28,7 @@ import org.jmrtd.lds.icao.MRZInfo
 
 data class NFCResult(
         val image: String? = null,
+        val mrzImage: String? = null,
         var givenNames: String? = null,
         var surname: String? = null,
         var nameOfHolder: String? = null,
