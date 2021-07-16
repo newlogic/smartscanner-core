@@ -25,6 +25,7 @@ data class NFCOptions(
     val label: String? = null,
     val locale: String? = null,
     val withPhoto: Boolean? = null,
+    val withMrzPhoto: Boolean? = null,
     val captureLog: Boolean? = null,
     val enableLogging: Boolean? = null
 ) : Parcelable {
