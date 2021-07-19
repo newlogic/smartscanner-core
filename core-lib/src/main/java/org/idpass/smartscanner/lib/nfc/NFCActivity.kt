@@ -74,6 +74,7 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
     private var pendingIntent: PendingIntent? = null
     private var label: String? = null
     private var language: String? = null
+    private var mrzImage: String? = null
     private var locale: String? = null
     private var withPhoto: Boolean = true
     private var captureLog: Boolean = false
@@ -90,6 +91,7 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
         language = intent.getStringExtra(ScannerConstants.LANGUAGE)
         locale = intent.getStringExtra(ScannerConstants.NFC_LOCALE)
         label = intent.getStringExtra(IntentData.KEY_LABEL)
+        mrzImage = intent.getStringExtra(IntentData.KEY_MRZ_PHOTO)
         withPhoto = intent.getBooleanExtra(IntentData.KEY_WITH_PHOTO, true)
         captureLog = intent.getBooleanExtra(IntentData.KEY_CAPTURE_LOG, false)
         enableLogging = intent.getBooleanExtra(IntentData.KEY_ENABLE_LOGGGING, false)
@@ -168,9 +170,13 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
     }
 
     override fun onEnableNfc() {
-        nfcAdapter?.let {
-            if (!it.isEnabled) showWirelessSettings()
-            it.enableForegroundDispatch(this, pendingIntent, null, null)
+        if (nfcAdapter != null) {
+            if (nfcAdapter?.isEnabled == false) {
+                showWirelessSettings()
+            }
+            nfcAdapter?.enableForegroundDispatch(this@NFCActivity, pendingIntent, null, null)
+        } else {
+            Toast.makeText(this, R.string.required_nfc_not_supported, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -181,7 +187,7 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
 
     override fun onPassportRead(passport: Passport?) {
         val action = intent.getStringExtra(ScannerConstants.NFC_ACTION)
-        val nfcResult = NFCResult.formatResult(passport, locale, mrzInfo)
+        val nfcResult = NFCResult.formatResult(passport = passport, locale = locale, mrzInfo = mrzInfo, mrzImage = mrzImage)
 
         if (action == ScannerConstants.IDPASS_SMARTSCANNER_NFC_INTENT ||
                 action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_NFC_INTENT) {

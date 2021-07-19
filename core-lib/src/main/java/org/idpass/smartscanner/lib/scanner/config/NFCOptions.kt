@@ -33,6 +33,7 @@ data class NFCOptions(
         val default = NFCOptions(
             withPhoto = true,
             captureLog = false,
+            withMrzPhoto = false,
             enableLogging = false
         )
     }

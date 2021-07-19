@@ -247,7 +247,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                         label = nfcOptions?.label,
                         language = scannerOptions?.language ?: intent.getStringExtra(ScannerConstants.LANGUAGE),
                         locale = nfcOptions?.locale ?: intent.getStringExtra(ScannerConstants.NFC_LOCALE),
-                        withPhoto = nfcOptions?.withPhoto ?: true, // default is true, NFC results with photo
+                        withPhoto = nfcOptions?.withPhoto ?: true, // default is true, NFC results with photo from NFC
+                        withMrzPhoto = nfcOptions?.withMrzPhoto ?: false, // default is false, NFC results with photo from MRZ
                         captureLog = nfcOptions?.captureLog ?: false, // default is false, capture log and send to Sentry
                         enableLogging = nfcOptions?.enableLogging ?: false, // default is false, logging is disabled
                         analyzeStart = System.currentTimeMillis(),
