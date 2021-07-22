@@ -141,15 +141,15 @@ class NFCDocumentTag(val readDG2: Boolean = true, val captureLog: Boolean = fals
                     // Hash Checking
                     val hashCheckNotSucceeded = "hash-check not SUCCEEDED"
                     if (verifySecurity.ht != VerificationStatus.Verdict.SUCCEEDED) {
-                        Log.e(TAG, hashCheckNotSucceeded)
+                        if (captureLog) {
+                            Sentry.captureMessage(hashCheckNotSucceeded)
+                        } else {
+                            Log.e(TAG, hashCheckNotSucceeded)
+                        }
                     }
 
-                    // when enabled, send logs to Sentry
+                    // DG11 NameOfHolder
                     if (captureLog) {
-                        // Send to Sentry hashCheckNotSucceeded
-                        Sentry.captureMessage(hashCheckNotSucceeded)
-
-                        // DG11 NameOfHolder
                         val dg11NameOfHolder : String? = dg11.nameOfHolder ?: null
                         if (dg11NameOfHolder == null) {
                             // Send to sentry null nameOfHolder
