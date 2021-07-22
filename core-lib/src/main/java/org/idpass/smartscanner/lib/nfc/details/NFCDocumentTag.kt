@@ -26,6 +26,7 @@ import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import io.sentry.Sentry
 import net.sf.scuba.smartcards.CardService
 import net.sf.scuba.smartcards.CardServiceException
 import org.idpass.smartscanner.lib.nfc.passport.Passport
@@ -37,7 +38,7 @@ import org.jmrtd.lds.icao.MRZInfo
 import java.security.Security
 
 
-class NFCDocumentTag(val readDG2: Boolean = true) {
+class NFCDocumentTag(val readDG2: Boolean = true, val captureLog: Boolean = false) {
 
     fun handleTag(context: Context, tag: Tag, mrzInfo: MRZInfo, mrtdTrustStore: MRTDTrustStore, passportCallback: PassportCallback):Disposable{
         return  Single.fromCallable {
@@ -106,8 +107,7 @@ class NFCDocumentTag(val readDG2: Boolean = true) {
                 if (passportNFC.dg5File != null) {
                     //Get the picture
                     try {
-                        val faceImage =
-                            PassportNfcUtils.retrievePortraitImage(context, passportNFC.dg5File!!)
+                        val faceImage = PassportNfcUtils.retrievePortraitImage(context, passportNFC.dg5File!!)
                         passport.portrait = faceImage
                     } catch (e: Exception) {
                         //Don't do anything
@@ -137,6 +137,36 @@ class NFCDocumentTag(val readDG2: Boolean = true) {
                     additionalPersonDetails.title = dg11.title
 
                     passport.additionalPersonDetails = additionalPersonDetails
+
+                    // Hash Checking
+                    val hashCheckNotSucceeded = "hash-check not SUCCEEDED"
+                    if (verifySecurity.ht != VerificationStatus.Verdict.SUCCEEDED) {
+                        Log.e(TAG, hashCheckNotSucceeded)
+                    }
+
+                    // when enabled, send logs to Sentry
+                    if (captureLog) {
+                        // Send to Sentry hashCheckNotSucceeded
+                        Sentry.captureMessage(hashCheckNotSucceeded)
+
+                        // DG11 NameOfHolder
+                        val dg11NameOfHolder : String? = dg11.nameOfHolder ?: null
+                        if (dg11NameOfHolder == null) {
+                            // Send to sentry null nameOfHolder
+                            Sentry.captureMessage( "nameOfHolder = $dg11NameOfHolder, len = ${dg11NameOfHolder?.length}")
+                        } else {
+                            // Log nameOfHolder in app
+                            Log.i(TAG, dg11NameOfHolder)
+                        }
+                    }
+
+                } else {
+                    val dg11Null = "DG11 is null"
+                    if (captureLog) {
+                        Sentry.captureMessage(dg11Null)
+                    } else {
+                        Log.e(TAG, dg11Null)
+                    }
                 }
 
                 //Finger prints
@@ -229,6 +259,10 @@ class NFCDocumentTag(val readDG2: Boolean = true) {
                         passportCallback.onCardException(cardServiceException)
                     } else {
                         passportCallback.onGeneralException(cardServiceException)
+                    }
+                    // Capture card exceptions and Send to Sentry
+                    if (captureLog) {
+                        Sentry.captureException(cardServiceException)
                     }
                 } else {
                     passportCallback.onPassportRead(passportDTO.passport)
