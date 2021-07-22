@@ -65,11 +65,21 @@ class NFCDocumentTag(val readDG2: Boolean = true, val captureLog: Boolean = fals
                 val passportNFC = PassportNFC(ps, mrtdTrustStore, mrzInfo, readDG2)
                 val verifySecurity = passportNFC.verifySecurity()
                 val features = passportNFC.features
+                val verificationStatus = passportNFC.verificationStatus
 
                 passport = Passport()
-                passport.featureStatus = passportNFC.features
-                passport.verificationStatus = passportNFC.verificationStatus
+                passport.featureStatus = features
+                passport.verificationStatus = verificationStatus
                 passport.sodFile = passportNFC.sodFile
+
+                //Passport features and verification
+                if (captureLog) {
+                    Sentry.captureMessage(features.summary(mrzInfo.documentNumber))
+                    Sentry.captureMessage(verificationStatus.summary(mrzInfo.documentNumber))
+                } else {
+                    Log.i(TAG, features.summary(mrzInfo.documentNumber))
+                    Log.i(TAG, verificationStatus.summary(mrzInfo.documentNumber))
+                }
 
                 //Basic Information
                 if (passportNFC.dg1File != null) {

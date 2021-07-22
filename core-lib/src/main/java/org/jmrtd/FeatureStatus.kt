@@ -136,6 +136,10 @@ class FeatureStatus : Parcelable {
         }
     }
 
+    fun summary(ident:String): String {
+        return "$ident features: hasSAC = $hasSAC, hasBAC = $hasBAC, hasAA = $hasAA, hasEAC = $hasEAC, hasCA = $hasCA"
+    }
+    
     companion object {
         @JvmField
         val CREATOR: Parcelable.Creator<*> = object : Parcelable.Creator<FeatureStatus> {
