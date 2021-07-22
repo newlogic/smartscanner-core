@@ -25,11 +25,13 @@ data class NFCOptions(
     val label: String? = null,
     val locale: String? = null,
     val withPhoto: Boolean? = null,
+    val captureLog: Boolean? = null,
     val enableLogging: Boolean? = null
 ) : Parcelable {
     companion object {
         val default = NFCOptions(
             withPhoto = true,
+            captureLog = false,
             enableLogging = false
         )
     }

@@ -64,6 +64,7 @@ class NFCFragment : Fragment() {
     private var language: String? = null
     private var locale: String? = null
     private var withPhoto: Boolean = true
+    private var captureLog: Boolean = false
 
     private var mHandler = Handler(Looper.getMainLooper())
     private var disposable = CompositeDisposable()
@@ -91,6 +92,9 @@ class NFCFragment : Fragment() {
         if (arguments?.containsKey(IntentData.KEY_WITH_PHOTO) == true) {
             withPhoto = arguments.getBoolean(IntentData.KEY_WITH_PHOTO)
         }
+        if (arguments?.containsKey(IntentData.KEY_CAPTURE_LOG) == true) {
+            captureLog = arguments.getBoolean(IntentData.KEY_CAPTURE_LOG)
+        }
         textViewNfcTitle = view.findViewById(R.id.textViewNfcTitle)
         textViewPassportNumber = view.findViewById(R.id.value_passport_number)
         textViewDateOfBirth = view.findViewById(R.id.value_DOB)
@@ -113,7 +117,7 @@ class NFCFragment : Fragment() {
             mrtdTrustStore.addAsCSCACertStore(certStore)
         }
         // if withPhoto is true, readDG2 is enabled and photo is added to NFC result
-        val subscribe = NFCDocumentTag(withPhoto).handleTag(requireContext(), tag, mrzInfo!!, mrtdTrustStore, object : NFCDocumentTag.PassportCallback {
+        val subscribe = NFCDocumentTag(withPhoto, captureLog).handleTag(requireContext(), tag, mrzInfo!!, mrtdTrustStore, object : NFCDocumentTag.PassportCallback {
 
             override fun onPassportReadStart() {
                 onNFCSReadStart()
@@ -249,7 +253,7 @@ class NFCFragment : Fragment() {
             Security.insertProviderAt(BouncyCastleProvider(), 1)
         }
 
-        fun newInstance(mrzInfo: MRZInfo?, label: String?, language: String?, locale: String?, withPhoto: Boolean): NFCFragment {
+        fun newInstance(mrzInfo: MRZInfo?, label: String?, language: String?, locale: String?, withPhoto: Boolean, captureLog: Boolean): NFCFragment {
             val myFragment = NFCFragment()
             val args = Bundle()
             args.putSerializable(IntentData.KEY_MRZ_INFO, mrzInfo)
@@ -257,6 +261,7 @@ class NFCFragment : Fragment() {
             args.putString(IntentData.KEY_LANGUAGE, language)
             args.putString(IntentData.KEY_LOCALE, locale)
             args.putBoolean(IntentData.KEY_WITH_PHOTO, withPhoto)
+            args.putBoolean(IntentData.KEY_CAPTURE_LOG, captureLog)
             myFragment.arguments = args
             return myFragment
         }
