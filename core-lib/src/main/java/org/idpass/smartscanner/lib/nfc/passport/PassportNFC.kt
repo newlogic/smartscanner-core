@@ -19,6 +19,7 @@ package org.idpass.smartscanner.lib.nfc.passport
 
 import android.util.Log
 import com.google.android.gms.common.util.IOUtils
+import io.sentry.Sentry
 import net.sf.scuba.smartcards.CardFileInputStream
 import net.sf.scuba.smartcards.CardServiceException
 import org.bouncycastle.asn1.ASN1Encodable
@@ -214,7 +215,7 @@ private constructor() {
      * @throws GeneralSecurityException if certain security primitives are not supported
      */
     @Throws(CardServiceException::class, GeneralSecurityException::class)
-    constructor(ps: PassportService?, trustManager: MRTDTrustStore, mrzInfo: MRZInfo, readDG2: Boolean = true) : this() {
+    constructor(ps: PassportService?, trustManager: MRTDTrustStore, mrzInfo: MRZInfo, readDG2: Boolean = true, captureLog: Boolean = false) : this() {
         this.readDG2 = readDG2
         if (ps == null) {
             throw IllegalArgumentException("Service cannot be null")
@@ -340,7 +341,12 @@ private constructor() {
         }
         Collections.sort(dgNumbers) /* NOTE: need to sort it, since we get keys as a set. */
 
-        Log.i(TAG, "Found DGs: $dgNumbers")
+        val foundDGs = "Found DGs: $dgNumbers"
+        if (captureLog) {
+            Sentry.captureMessage(foundDGs)
+        } else {
+            Log.i(TAG, foundDGs)
+        }
 
         var hashResults: MutableMap<Int, VerificationStatus.HashMatchResult>? = verificationStatus.hashResults
         if (hashResults == null) {
@@ -452,6 +458,13 @@ private constructor() {
         try {
             dg11File = getDG11File(ps)
         } catch (e: Exception) {
+            val dg11Failmsg = "DG11 fail read"
+            if (captureLog) {
+                Sentry.captureException(e)
+                Sentry.captureMessage(dg11Failmsg)
+            } else {
+                Log.e(TAG, dg11Failmsg)
+            }
             e.printStackTrace()
         }
 

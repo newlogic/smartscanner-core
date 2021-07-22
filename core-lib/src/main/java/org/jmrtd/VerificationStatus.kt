@@ -612,6 +612,10 @@ class VerificationStatus : Parcelable {
         }
     }
 
+    fun summary(ident:String): String {
+        return "$ident verificationStatus: aa = $aa ($aaReason), bac = $bac, sac = $sac ($sacReason), cs = $cs ($csReason), ht = $ht ($htReason), ds = $ds ($dsReason), eac = $eac ($eacReason), ca = $ca ($caReason)"
+    }
+
     companion object {
         @JvmField
         val CREATOR: Parcelable.Creator<*> = object : Parcelable.Creator<VerificationStatus> {

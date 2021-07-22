@@ -113,4 +113,6 @@ dependencies {
     //Annotations
     kapt "org.androidannotations:androidannotations:4.4.0"
     implementation "org.androidannotations:androidannotations-api:4.4.0"
+    //Sentry
+    implementation 'io.sentry:sentry-android:5.0.1'
 }
