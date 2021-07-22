@@ -153,8 +153,10 @@ class NFCDocumentTag(val readDG2: Boolean = true, val captureLog: Boolean = fals
                         val dg11NameOfHolder : String? = dg11.nameOfHolder ?: null
                         if (dg11NameOfHolder == null) {
                             // Send to sentry null nameOfHolder
-                            Sentry.captureMessage( "nameOfHolder = $dg11NameOfHolder, len = ${dg11NameOfHolder?.length}")
+                            Sentry.captureMessage( "nameOfHolder = $dg11NameOfHolder")
                         } else {
+                            // Send to sentry nameOfHolder length
+                            Sentry.captureMessage( "nameOfHolder.length = ${dg11NameOfHolder.length}")
                             // Log nameOfHolder in app
                             Log.i(TAG, dg11NameOfHolder)
                         }
