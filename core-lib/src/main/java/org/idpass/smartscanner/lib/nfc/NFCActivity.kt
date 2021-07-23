@@ -38,6 +38,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
+import io.sentry.Sentry
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.BuildConfig
 import org.idpass.smartscanner.lib.R
@@ -109,6 +110,10 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
             }
         }
         showNFCFragment()
+        if (captureLog) {
+            val documentNumber = "MRZ documentNumber: ${mrzInfo?.documentNumber}"
+            Sentry.captureMessage(documentNumber)
+        }
     }
 
     public override fun onResume() {
