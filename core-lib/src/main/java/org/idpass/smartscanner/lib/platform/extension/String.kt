@@ -17,6 +17,8 @@
  */
 package org.idpass.smartscanner.lib.platform.extension
 
+import android.util.Patterns
+import android.webkit.URLUtil
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -48,4 +50,8 @@ fun List<String>.arrayToString(): String {
         temp = temp.substring(0, temp.length - "\n".length)
     }
     return temp
+}
+
+fun String.isValidUrl() : Boolean {
+    return URLUtil.isValidUrl(this) && Patterns.WEB_URL.matcher(this).matches()
 }
