@@ -28,6 +28,7 @@ import org.jmrtd.lds.icao.MRZInfo
 
 data class NFCResult(
         val image: String? = null,
+        val mrzImage: String? = null,
         var givenNames: String? = null,
         var surname: String? = null,
         var nameOfHolder: String? = null,
@@ -53,7 +54,7 @@ data class NFCResult(
 ) {
     companion object {
 
-        fun formatResult(passport: Passport?, locale: String?, mrzInfo: MRZInfo? = null): NFCResult {
+        fun formatResult(passport: Passport?, locale: String?, mrzInfo: MRZInfo? = null, image: String? = null, mrzImage: String? = null): NFCResult {
             val personDetails = passport?.personDetails
             val additionalPersonDetails = passport?.additionalPersonDetails
             val additionalDocumentDetails = passport?.additionalDocumentDetails
@@ -105,6 +106,8 @@ data class NFCResult(
                 DateUtils.toAdjustedDate (formatStandardDate(personDetails?.dateOfBirth))
             } else formatStandardDate(additionalPersonDetails?.fullDateOfBirth, "yyyyMMdd")
             return NFCResult(
+                    image = image,
+                    mrzImage = mrzImage,
                     givenNames = givenNames,
                     surname = surname,
                     nameOfHolder = additionalPersonDetails?.nameOfHolder,
