@@ -28,7 +28,7 @@ data class SentryLogger(
 ) : Parcelable {
     companion object {
         val default = SentryLogger(
-            dsn = "http://99eec5d93dff4a08a4b9d16c4c7f04e7@188.166.182.254:9000/3"  // TODO Update to SmartScanner Sentry
+            dsn = "http://90ebf03b06534e01a21f82c1b2e86ae2@188.166.182.254:9000/4"
         )
     }
 }
