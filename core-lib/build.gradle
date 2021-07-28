@@ -22,6 +22,7 @@ android {
         vectorDrawables.useSupportLibrary = true
 
         // Sentry Default DSN
+        // TODO update to SmartScanner Sentry
         manifestPlaceholders = [dsn: 'http://99eec5d93dff4a08a4b9d16c4c7f04e7@188.166.182.254:9000/3']
     }
 
