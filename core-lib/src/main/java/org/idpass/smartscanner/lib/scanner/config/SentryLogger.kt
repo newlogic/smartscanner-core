@@ -21,18 +21,14 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class NFCOptions(
-    val label: String? = null,
-    val locale: String? = null,
-    val withPhoto: Boolean? = null,
-    val withMrzPhoto: Boolean? = null,
-    val enableLogging: Boolean? = null
+data class SentryLogger(
+    val captureLog: Boolean? = true,
+    val dsn: String?,
+    val testMsg: String? = null
 ) : Parcelable {
     companion object {
-        val default = NFCOptions(
-            withPhoto = true,
-            withMrzPhoto = false,
-            enableLogging = false
+        val default = SentryLogger(
+            dsn = "http://90ebf03b06534e01a21f82c1b2e86ae2@188.166.182.254:9000/4"
         )
     }
 }

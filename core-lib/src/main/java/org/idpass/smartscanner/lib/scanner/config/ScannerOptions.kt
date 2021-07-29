@@ -32,6 +32,7 @@ data class ScannerOptions(
     val barcodeOptions: BarcodeOptions? = null,
     val captureOptions: CaptureOptions? = null,
     val nfcOptions: NFCOptions? = null,
+    val sentryLogger: SentryLogger? = null,
 ) : Parcelable {
     companion object {
         val defaultForBarcode = ScannerOptions(

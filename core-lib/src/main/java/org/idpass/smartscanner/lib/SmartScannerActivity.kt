@@ -53,6 +53,8 @@ import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
+import io.sentry.Sentry
+import io.sentry.SentryOptions
 import org.idpass.lite.android.IDPassLite
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.barcode.BarcodeAnalyzer
@@ -175,6 +177,25 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             requestPermissions()
         }
         cameraExecutor = Executors.newSingleThreadExecutor()
+        // Setup Sentry
+        val captureLog = scannerOptions?.sentryLogger?.captureLog
+        val dsn = scannerOptions?.sentryLogger?.dsn
+        if (captureLog == true) {
+            if (dsn != null && dsn.isNotEmpty() && dsn.isNotBlank() && dsn.isValidUrl() ) {
+                // Sentry DSN init
+                Sentry.init { options: SentryOptions ->
+                    options.dsn = dsn
+                }
+                Log.i(TAG, "Sentry DSN: $dsn")
+            } else {
+                throw SmartScannerException("Please set proper dsn value for Sentry to use")
+            }
+            // Sentry test message
+            val testMsg = scannerOptions?.sentryLogger?.testMsg
+            if (testMsg != null && testMsg.isNotEmpty() && dsn.isNotBlank()) {
+                Sentry.captureMessage(testMsg)
+            }
+        }
     }
 
     private fun setupConfiguration() {
@@ -208,31 +229,32 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     intent = intent,
                     onVerify = { raw ->
                         raw?.let {
-                            showIDPassLiteVerification (it)
+                            showIDPassLiteVerification(it)
                         }
                     }
                 )
             }
             if (mode == Modes.MRZ.value) {
                 analyzer = MRZAnalyzer(
-                        activity = this,
-                        intent = intent,
-                        isMLKit = isMLKit,
-                        imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
-                        format = scannerOptions?.mrzFormat ?: intent.getStringExtra(ScannerConstants.MRZ_FORMAT_EXTRA),
-                        analyzeStart = System.currentTimeMillis(),
-                        onConnectSuccess = {
-                            if (modelText?.visibility == VISIBLE) {
-                                modelText?.text = it
-                            }
-                            modelTextLoading?.visibility = INVISIBLE
-                            modelText?.visibility = INVISIBLE
-                        },
-                        onConnectFail = {
-                            modelTextLoading?.visibility = VISIBLE
-                            modelText?.visibility = VISIBLE
+                    activity = this,
+                    intent = intent,
+                    isMLKit = isMLKit,
+                    imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
+                    format = scannerOptions?.mrzFormat
+                        ?: intent.getStringExtra(ScannerConstants.MRZ_FORMAT_EXTRA),
+                    analyzeStart = System.currentTimeMillis(),
+                    onConnectSuccess = {
+                        if (modelText?.visibility == VISIBLE) {
                             modelText?.text = it
                         }
+                        modelTextLoading?.visibility = INVISIBLE
+                        modelText?.visibility = INVISIBLE
+                    },
+                    onConnectFail = {
+                        modelTextLoading?.visibility = VISIBLE
+                        modelText?.visibility = VISIBLE
+                        modelText?.text = it
+                    }
                 ).also {
                     if (!isMLKit) it.initializeTesseract(this)
                 }
@@ -240,27 +262,32 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             if (mode == Modes.NFC_SCAN.value) {
                 val nfcOptions = scannerOptions?.nfcOptions
                 analyzer = NFCScanAnalyzer(
-                        activity = this,
-                        intent = intent,
-                        isMLKit = isMLKit,
-                        imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
-                        label = nfcOptions?.label,
-                        language = scannerOptions?.language ?: intent.getStringExtra(ScannerConstants.LANGUAGE),
-                        locale = nfcOptions?.locale ?: intent.getStringExtra(ScannerConstants.NFC_LOCALE),
-                        withPhoto = nfcOptions?.withPhoto ?: true, // default is true, NFC results with photo from NFC
-                        withMrzPhoto = nfcOptions?.withMrzPhoto ?: false, // default is false, NFC results with photo from MRZ
-                        captureLog = nfcOptions?.captureLog ?: false, // default is false, capture log and send to Sentry
-                        enableLogging = nfcOptions?.enableLogging ?: false, // default is false, logging is disabled
-                        analyzeStart = System.currentTimeMillis(),
-                        onConnectSuccess = {
-                            modelTextLoading?.visibility = INVISIBLE
-                            modelText?.visibility = INVISIBLE
-                        },
-                        onConnectFail = {
-                            modelTextLoading?.visibility = VISIBLE
-                            modelText?.visibility = VISIBLE
-                            modelText?.text = it
-                        }
+                    activity = this,
+                    intent = intent,
+                    isMLKit = isMLKit,
+                    imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
+                    label = nfcOptions?.label,
+                    language = scannerOptions?.language ?: intent.getStringExtra(ScannerConstants.LANGUAGE),
+                    locale = nfcOptions?.locale
+                        ?: intent.getStringExtra(ScannerConstants.NFC_LOCALE),
+                    withPhoto = nfcOptions?.withPhoto
+                        ?: true, // default is true, NFC results with photo from NFC
+                    withMrzPhoto = nfcOptions?.withMrzPhoto
+                        ?: false, // default is false, NFC results with photo from MRZ
+                    captureLog = scannerOptions?.sentryLogger?.captureLog
+                        ?: false, // default is false, capture log and send to Sentry
+                    enableLogging = nfcOptions?.enableLogging
+                        ?: false, // default is false, logging is disabled
+                    analyzeStart = System.currentTimeMillis(),
+                    onConnectSuccess = {
+                        modelTextLoading?.visibility = INVISIBLE
+                        modelText?.visibility = INVISIBLE
+                    },
+                    onConnectFail = {
+                        modelTextLoading?.visibility = VISIBLE
+                        modelText?.visibility = VISIBLE
+                        modelText?.text = it
+                    }
                 ).also {
                     if (!isMLKit) it.initializeTesseract(this)
                 }
@@ -278,7 +305,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         setupViews()
     }
 
-    private fun startCamera(analyzer: ImageAnalysis.Analyzer? = null, isPdf417 : Boolean = false) {
+    private fun startCamera(analyzer: ImageAnalysis.Analyzer? = null, isPdf417: Boolean = false) {
         this.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         cameraProviderFuture.addListener({
@@ -307,7 +334,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 // Unbind use cases before rebinding
                 cameraProvider?.unbindAll()
                 // Bind use cases to camera
-                camera = if (analyzer != null ) {
+                camera = if (analyzer != null) {
                     cameraProvider?.bindToLifecycle(
                         this,
                         cameraSelector,
@@ -404,7 +431,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             }
         } catch (iae: IllegalArgumentException) {
             // This color string is not valid
-            throw SmartScannerException("Please set proper color string in setting background. Example: '#ffc234' " )
+            throw SmartScannerException("Please set proper color string in setting background. Example: '#ffc234' ")
         }
         // branding
         brandingImage?.visibility = config?.branding?.let { if (it) VISIBLE else INVISIBLE } ?: run { INVISIBLE }
@@ -426,7 +453,11 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         return resultCode == ConnectionResult.SUCCESS
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
         when (requestCode) {
             REQUEST_CODE_PERMISSIONS_VERSION_R,
             REQUEST_CODE_PERMISSIONS -> {
@@ -477,34 +508,42 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     object : ImageCapture.OnImageSavedCallback {
                         override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                             val data = Intent()
-                            val width : Int = captureOptions?.width?.px ?: run {
+                            val width: Int = captureOptions?.width?.px ?: run {
                                 when (captureOptions?.type) {
                                     CaptureType.ID.value -> 285.px
                                     CaptureType.DOCUMENT.value -> 180.px
                                     else -> 285.px // default width for MRZ
                                 }
                             }
-                            val height : Int = captureOptions?.height?.px ?: run {
+                            val height: Int = captureOptions?.height?.px ?: run {
                                 when (captureOptions?.type) {
                                     CaptureType.ID.value -> 180.px
                                     CaptureType.DOCUMENT.value -> 285.px
                                     else -> 180.px // default height for MRZ
                                 }
                             }
-                            val transform = bitmapTransform(CropTransformation(width , height, CropTransformation.CropType.CENTER)) // Initial MRZ Card Size
+                            // Initial MRZ Card Size
+                            val transform = bitmapTransform(
+                                CropTransformation(
+                                    width,
+                                    height,
+                                    CropTransformation.CropType.CENTER
+                                )
+                            )
                             val bf = Glide.with(this@SmartScannerActivity)
-                                            .asBitmap()
-                                            .load(imageFile.path)
-                                            .apply(transform)
-                                            .submit()
-                                            .get()
+                                .asBitmap()
+                                .load(imageFile.path)
+                                .apply(transform)
+                                .submit()
+                                .get()
                             bf.cacheImageToLocal(imageFile.path)
                             val imageString = if (config?.imageResultType == ImageResultType.BASE_64.value) bf.encodeBase64() else imageFile.path
-                            val result : Any = if (mode == Modes.MRZ.value) MrzUtils.getImageOnly(imageString) else ImageResult(imageString)
+                            val result: Any = if (mode == Modes.MRZ.value) MrzUtils.getImageOnly(imageString) else ImageResult(imageString)
                             data.putExtra(SCANNER_RESULT, Gson().toJson(result))
                             setResult(Activity.RESULT_OK, data)
                             finish()
                         }
+
                         override fun onError(exception: ImageCaptureException) {
                             exception.printStackTrace()
                             manualCapture?.isEnabled = true
@@ -516,7 +555,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
     }
 
     @SuppressLint("InflateParams")
-    private fun showIDPassLiteVerification(qrBytes : ByteArray)  {
+    private fun showIDPassLiteVerification(qrBytes: ByteArray)  {
         val bottomSheetDialog = BottomSheetDialog(this)
         val sheetView = layoutInflater.inflate(R.layout.dialog_idpass_verify, null)
         bottomSheetDialog.setContentView(sheetView)
@@ -539,21 +578,21 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         verifyBtn.setOnClickListener {
             val pinCode = pinCodeInpt.text.trim().toString()
             IDPassManager.verifyCard(
-                    activity = this,
-                    idPassReader = reader,
-                    intent = intent,
-                    raw = qrBytes,
-                    pinCode = pinCode,
-                    onResult = { bottomSheetDialog.dismiss() }
+                activity = this,
+                idPassReader = reader,
+                intent = intent,
+                raw = qrBytes,
+                pinCode = pinCode,
+                onResult = { bottomSheetDialog.dismiss() }
             )
         }
         skipBtn.setOnClickListener {
             IDPassManager.verifyCard(
-                    activity = this,
-                    idPassReader = reader,
-                    intent = intent,
-                    raw = qrBytes,
-                    onResult = { bottomSheetDialog.dismiss() }
+                activity = this,
+                idPassReader = reader,
+                intent = intent,
+                raw = qrBytes,
+                onResult = { bottomSheetDialog.dismiss() }
             )
         }
         bottomSheetDialog.setOnDismissListener {
