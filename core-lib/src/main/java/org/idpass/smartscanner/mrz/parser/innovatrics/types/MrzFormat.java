@@ -29,7 +29,9 @@ import org.idpass.smartscanner.mrz.parser.innovatrics.records.MrtdTd1;
 import org.idpass.smartscanner.mrz.parser.innovatrics.records.MrtdTd2;
 import org.idpass.smartscanner.mrz.parser.innovatrics.records.MrvA;
 import org.idpass.smartscanner.mrz.parser.innovatrics.records.MrvB;
+import org.idpass.smartscanner.mrz.parser.innovatrics.records.countries.El_Salvador_ID;
 import org.idpass.smartscanner.mrz.parser.innovatrics.records.countries.French_ID;
+import org.idpass.smartscanner.mrz.parser.innovatrics.records.countries.Guatemala_ID;
 import org.idpass.smartscanner.mrz.parser.innovatrics.records.countries.Iraq_ID;
 import org.idpass.smartscanner.mrz.parser.innovatrics.records.countries.Senegal_ID;
 import org.idpass.smartscanner.mrz.parser.innovatrics.records.countries.Slovak_ID_2_34;
@@ -56,9 +58,29 @@ public enum MrzFormat {
         }
     },
     /**
-     * MRTD td1 format: A three line long, 30 characters per line format.
+     * El Salvador ID: A three line long, 30 characters per line format.
      */
-    MRTD_TD1(3, 30, MrtdTd1.class),
+    SLV_ID(3, 30, El_Salvador_ID.class){
+
+        public boolean isFormatOf(String[] mrzRows) {
+            if (!super.isFormatOf(mrzRows)) {
+                return false;
+            }
+            return mrzRows[0].startsWith("IDSLV");
+        }
+    },
+    /**
+     * Guatemala ID: A three line long, 30 characters per line format.
+     */
+    GTM_ID(3, 30, Guatemala_ID.class){
+
+        public boolean isFormatOf(String[] mrzRows) {
+            if (!super.isFormatOf(mrzRows)) {
+                return false;
+            }
+            return mrzRows[0].startsWith("IDGTM");
+        }
+    },
     /**
      * IRAQ ID: A three line long, 30 characters per line format.
      */
@@ -124,7 +146,11 @@ public enum MrzFormat {
     /**
      * Unknown 2 line/34 characters per line format, used with old Slovak ID cards.
      */
-    SLOVAK_ID_234(2, 34, Slovak_ID_2_34.class);
+    SLOVAK_ID_234(2, 34, Slovak_ID_2_34.class),
+    /**
+     * MRTD td1 format: A three line long, 30 characters per line format.
+     */
+    MRTD_TD1(3, 30, MrtdTd1.class);
     public final int rows;
     public final int columns;
     private final Class<? extends MrzRecord> recordClass;
