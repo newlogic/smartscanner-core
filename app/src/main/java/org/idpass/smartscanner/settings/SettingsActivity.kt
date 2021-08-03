@@ -24,6 +24,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import org.idpass.smartscanner.MainActivity
 import org.idpass.smartscanner.R
@@ -43,6 +44,8 @@ class SettingsActivity : AppCompatActivity() {
         val arabicLayout = findViewById<LinearLayout>(R.id.arabiclayout)
         val englishLayout = findViewById<LinearLayout>(R.id.englishLayout)
         val backspace = findViewById<ImageView>(R.id.backspace)
+        val versionText = findViewById<TextView>(R.id.version_text)
+
         val preference = getSharedPreferences(SmartScannerApplication.SHARED, Context.MODE_PRIVATE)
         val editor = preference.edit()
         val currentLanguage = resources.configuration.locale.displayLanguage
@@ -76,6 +79,9 @@ class SettingsActivity : AppCompatActivity() {
             this.finish()
         }
 
+        // Display version
+        val version = org.idpass.smartscanner.BuildConfig.VERSION_NAME
+        versionText.text = getString(R.string.label_version, version.split("-").first())
     }
 
     private fun saveLanguage(context: Context, editor: SharedPreferences.Editor, language : String) {

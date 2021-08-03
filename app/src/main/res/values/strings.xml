@@ -38,4 +38,6 @@
     <string name="language_and_region">Language and region</string>
     <string name="label_scan_nfc_capture">Capture NFC</string>
     <string name="label_scan_nfc_via_mrz">Please scan MRZ to verify ID</string>
+    <string name="label_version">Version: %1$s</string>
+
 </resources>
