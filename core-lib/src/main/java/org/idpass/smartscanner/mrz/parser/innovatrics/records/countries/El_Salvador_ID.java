@@ -53,9 +53,9 @@ public class El_Salvador_ID extends MrzRecord {
         Logger log = LoggerFactory.getLogger(MrzParser.class);
         super.fromMrz(mrz);
         final MrzParser p = new MrzParser(mrz);
-        documentNumber = p.parseString(new MrzRange(5, 16, 0));
+        documentNumber = p.parseDocuString(new MrzRange(5, 16, 0));
         validDocumentNumber = p.checkDigit(16, 0, new MrzRange(5, 16, 0), "document number");
-        optional = p.parseString(new MrzRange(15, 30, 0));
+        optional = p.parseString(new MrzRange(17, 30, 0));
         dateOfBirth = p.parseDate(new MrzRange(0, 6, 1));
         validDateOfBirth = p.checkDigit(6, 1, new MrzRange(0, 6, 1), "date of birth") && dateOfBirth.isDateValid();
         sex = p.parseSex(7, 1);

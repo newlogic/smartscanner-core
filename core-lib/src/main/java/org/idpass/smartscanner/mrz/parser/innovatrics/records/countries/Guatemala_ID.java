@@ -53,7 +53,6 @@ public class Guatemala_ID extends MrzRecord {
         Logger log = LoggerFactory.getLogger(MrzParser.class);
         super.fromMrz(mrz);
         final MrzParser p = new MrzParser(mrz);
-        // TODO add proper validation checkDigit
         documentNumber = p.parseString(new MrzRange(5, 14, 0));
         validDocumentNumber = p.checkDigit(14, 0, new MrzRange(5, 14, 0), "document number");
         optional = p.parseString(new MrzRange(15, 30, 0));

@@ -130,6 +130,22 @@ public class MrzParser {
     }
 
     /**
+     * Parses a document number string in given range, &lt;&lt; are replaced with "-",
+     * &lt; is replaced by space.
+     *
+     * @param range the range
+     * @return parsed string.
+     */
+    public String parseDocuString(MrzRange range) {
+        checkValidCharacters(range);
+        String str = rawValue(range);
+        while (str.endsWith("<")) {
+            str = str.substring(0, str.length() - 1);
+        }
+        return str.replace("" + FILLER + FILLER, "-").replace(FILLER, ' ');
+    }
+
+    /**
      * Verifies the check digit.
      * @param col the 0-based column of the check digit.
      * @param row the 0-based column of the check digit.
