@@ -29,6 +29,7 @@ import org.idpass.smartscanner.mrz.parser.innovatrics.records.MrtdTd1;
 import org.idpass.smartscanner.mrz.parser.innovatrics.records.MrtdTd2;
 import org.idpass.smartscanner.mrz.parser.innovatrics.records.MrvA;
 import org.idpass.smartscanner.mrz.parser.innovatrics.records.MrvB;
+import org.idpass.smartscanner.mrz.parser.innovatrics.records.countries.Cameroon_ID;
 import org.idpass.smartscanner.mrz.parser.innovatrics.records.countries.El_Salvador_ID;
 import org.idpass.smartscanner.mrz.parser.innovatrics.records.countries.French_ID;
 import org.idpass.smartscanner.mrz.parser.innovatrics.records.countries.Guatemala_ID;
@@ -55,6 +56,18 @@ public enum MrzFormat {
                 return false;
             }
             return mrzRows[0].startsWith("I<SEN");
+        }
+    },
+    /**
+     * Cameroon ID: A three line long, 30 characters per line format.
+     */
+    CAMEROON_ID(3, 30, Cameroon_ID.class) {
+
+        public boolean isFormatOf(String[] mrzRows) {
+            if (!super.isFormatOf(mrzRows)) {
+                return false;
+            }
+            return mrzRows[0].startsWith("IDCMR");
         }
     },
     /**
