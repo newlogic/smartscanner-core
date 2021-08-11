@@ -26,6 +26,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import org.idpass.smartscanner.BuildConfig
 import org.idpass.smartscanner.MainActivity
 import org.idpass.smartscanner.R
 import org.idpass.smartscanner.SmartScannerApplication
@@ -80,8 +81,9 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         // Display version
-        val version = org.idpass.smartscanner.BuildConfig.VERSION_NAME
-        versionText.text = getString(R.string.label_version, version.split("-").first())
+        val version = BuildConfig.VERSION_NAME
+        val versionLabel = if (BuildConfig.DEBUG) version else version.split("-").first()
+        versionText.text = getString(R.string.label_version, versionLabel)
     }
 
     private fun saveLanguage(context: Context, editor: SharedPreferences.Editor, language : String) {
