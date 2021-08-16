@@ -109,7 +109,7 @@
         app:layout_constraintTop_toBottomOf="@+id/itemNfc" />
 
     <TextView
-        android:id="@+id/bottomText"
+        android:id="@+id/branding_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
@@ -119,4 +119,5 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
