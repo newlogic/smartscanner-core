@@ -70,11 +70,22 @@ public class MrzParser {
     public String[] parseName(MrzRange range) {
         checkValidCharacters(range);
         String str = rawValue(range);
-        while (str.endsWith("<")) {
+        // Workaround: MLKIT sometimes reads *character `<` as either `S, C, E or K`
+        // To make sure that it is not part of the name string checks begin with `<<(*)`
+        // assuming that a person's name cannot have multiple different surnames
+        while (str.endsWith("<") ||
+                str.endsWith("<<S") || // Sometimes MLKit perceives `<` as `S`
+                str.endsWith("<<E") || // Sometimes MLKit perceives `<` as `E`
+                str.endsWith("<<C") || // Sometimes MLKit perceives `<` as `C`
+                str.endsWith("<<K") ) // Sometimes MLKit  perceives `<` as `K`
+        {
             str = str.substring(0, str.length() - 1);
         }
-        final String[] names = str.split("<<");
-        String surname;
+        String[] names = null;
+        if (str.contains("<<")) {
+            names = str.split("<<");
+        }
+        String surname = "";
         String givenNames = "";
         surname = parseString(new MrzRange(range.column, range.column + names[0].length(), range.row));
         if(names.length==1){
