@@ -38,6 +38,8 @@ object MRZCleaner {
             .replace("<e<", "<<<")
             .replace("<E<", "<<<") // Good idea? Maybe not.
             .replace("<K<", "<<<") // Good idea? Maybe not.
+            .replace("<S<", "<<<") // Good idea? Maybe not.
+            .replace("<C<", "<<<") // Good idea? Maybe not.
             .replace("<¢<", "<<<")
             .replace("<(<", "<<<")
             .replace("<{<", "<<<")
@@ -81,6 +83,7 @@ object MRZCleaner {
             .replace("8", "B")
             .replace("5", "S")
             .replace("2", "Z")
+            .replace("3", "J")
     }
 
     fun parseAndClean(mrz: String): MrzRecord {
