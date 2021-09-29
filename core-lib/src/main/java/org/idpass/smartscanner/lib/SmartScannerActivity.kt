@@ -350,8 +350,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                         imageCapture
                     )
                 }
-                if (isPdf417) {
-                    // Reduce initial zoom ratio of camera to aid high resolution capture of PDF 417
+                if (isPdf417 || mode == Modes.MRZ.value) {
+                    // Reduce initial zoom ratio of camera to aid high resolution capture of Pdf417 or MRZ
                     camera?.cameraControl?.setZoomRatio(0.8F)
                 }
                 preview?.setSurfaceProvider(viewFinder.createSurfaceProvider())
