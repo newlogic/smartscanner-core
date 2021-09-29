@@ -105,11 +105,19 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
             mrzInfo = MRZInfo(mrz)
         } catch (e: Exception) {
             e.printStackTrace()
-        } finally {
+        }
+        finally {
             // when an exception occurs and mrzInfo is still null execute initialization of MrzInfo
-            if (mrzInfo == null) {
-                mrzInfo = MRZInfo(mrz)
+            try {
+                if (mrzInfo == null) {
+                    mrzInfo = MRZInfo(mrz)
+                }
+            } catch (ioe: IllegalArgumentException) {
+                ioe.printStackTrace()
+                this.finish()
+                Toast.makeText(applicationContext, "Invalid MRZ scanned", Toast.LENGTH_SHORT).show()
             }
+
         }
         showNFCFragment()
         if (captureLog) {

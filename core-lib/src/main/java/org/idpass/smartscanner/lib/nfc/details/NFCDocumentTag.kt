@@ -258,7 +258,9 @@ class NFCDocumentTag(val readDG2: Boolean = true, val captureLog: Boolean = fals
         }.doOnSubscribe{
             passportCallback.onPassportReadStart()
         }
-        .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe { passportDTO ->
+        .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { passportDTO ->
                 if (passportDTO.cardServiceException != null) {
                     val cardServiceException = passportDTO.cardServiceException
                     if (cardServiceException is AccessDeniedException) {
