@@ -38,7 +38,8 @@ data class MRZResult(
         val surname: String?,
         var mrz: String?,
         val optional: String? = null,
-        val optional2: String? = null
+        val optional2: String? = null,
+        val validComposite: Boolean? = null
 ) {
     companion object {
         fun formatMrzResult(record: MrzRecord, image: String? = "") : MRZResult {
@@ -58,7 +59,8 @@ data class MRZResult(
                     nationality = record.nationality,
                     sex = record.sex.toString(),
                     surname = record.surname,
-                    mrz = record.toMrz()
+                    mrz = record.toMrz(),
+                    validComposite = record.validComposite
             )
         }
 
@@ -81,7 +83,8 @@ data class MRZResult(
                     surname = record.surname,
                     mrz = record.toMrz(),
                     optional = record.optional,
-                    optional2 = record.optional2
+                    optional2 = record.optional2,
+                    validComposite = record.validComposite
             )
         }
     }

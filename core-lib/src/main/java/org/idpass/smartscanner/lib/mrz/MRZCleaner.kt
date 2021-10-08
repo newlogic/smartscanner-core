@@ -89,7 +89,8 @@ object MRZCleaner {
     fun parseAndClean(mrz: String): MrzRecord {
         val record = MrzParser.parse(mrz)
 
-        if (record.validComposite && record.validDateOfBirth && record.validDocumentNumber && record.validExpirationDate) {
+        Log.d(SmartScannerActivity.TAG, "Previous Scan: $previousMRZString")
+        if (record.validDateOfBirth && record.validDocumentNumber && record.validExpirationDate || record.validComposite) {
             record.givenNames = record.givenNames.replaceNumbertoChar()
             record.surname = record.surname.replaceNumbertoChar()
             record.issuingCountry = record.issuingCountry.replaceNumbertoChar()
@@ -109,7 +110,7 @@ object MRZCleaner {
         val record = MrzParser.parseToMrtdTd1(mrz)
 
         Log.d(SmartScannerActivity.TAG, "Previous Scan: $previousMRZString")
-        if (record.validComposite && record.validDateOfBirth && record.validDocumentNumber && record.validExpirationDate) {
+        if (record.validDateOfBirth && record.validDocumentNumber && record.validExpirationDate || record.validComposite) {
             record.givenNames = record.givenNames.replaceNumbertoChar()
             record.surname = record.surname.replaceNumbertoChar()
             record.issuingCountry = record.issuingCountry.replaceNumbertoChar()
