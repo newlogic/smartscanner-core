@@ -314,7 +314,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             // Preview
             preview = Preview.Builder().build()
             var size = Size(480, 640)
-            if (isPdf417) size = Size(1080, 1920)
+            if (isPdf417 || mode == Modes.MRZ.value) size = Size(1080, 1920)
             imageAnalyzer = ImageAnalysis.Builder()
                 .setTargetResolution(size)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)

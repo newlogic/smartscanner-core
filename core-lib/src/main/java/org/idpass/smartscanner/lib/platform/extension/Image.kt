@@ -56,8 +56,7 @@ fun Image.toBitmap(rotation: Int = 0, mode: String?): Bitmap {
 
     val rect = Rect()
     // Use higher value of 6 for qrcode/idpass-lite which fixes bounding box issues upon scanning,
-    // and barcode uses default value of 3 to address PDF417 scaling issues
-    // and mrz uses previous default value of 4
+    // others use previous default value of 4
     val scaleIdentifier = when (mode) {
         Modes.QRCODE.value, Modes.IDPASS_LITE.value -> 6
         else -> 4
