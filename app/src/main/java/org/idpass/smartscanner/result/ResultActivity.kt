@@ -26,7 +26,9 @@ import android.view.MenuItem
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
+import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonParser
 import org.idpass.smartscanner.MainActivity.Companion.imageType
 import org.idpass.smartscanner.R
@@ -87,7 +89,7 @@ class ResultActivity : AppCompatActivity() {
         // Image & Raw Data Result
         result?.let {
             // image object from MRZ or Barcode
-            var image = JsonParser.parseString(it).asJsonObject["image"]
+            val image = JsonParser.parseString(it).asJsonObject["image"]
             if (image != null) {
                 displayImage(image.asString, imageType)
             }
@@ -96,6 +98,15 @@ class ResultActivity : AppCompatActivity() {
             //  if (bundle != null) {
             //  showResultImage(bundle.getString(ScannerConstants.MRZ_IMAGE) ?: "", imageType)
             //  }
+        }
+        // Check composite validity
+        val resultObj = JsonParser.parseString(result).asJsonObject
+        val validComposite = if (resultObj["validComposite"]!= null) resultObj["validComposite"].asBoolean else true
+        if (!validComposite) {
+            val snackBar = Snackbar.make(binding.root, "This MRZ contains an invalid composite check digit.", Snackbar.LENGTH_INDEFINITE)
+            snackBar.setAction("Dismiss") { _ -> snackBar.dismiss() }
+            snackBar.setActionTextColor(ContextCompat.getColor(this, R.color.idpass_orange))
+            snackBar.show()
         }
         displayRaw(result)
     }

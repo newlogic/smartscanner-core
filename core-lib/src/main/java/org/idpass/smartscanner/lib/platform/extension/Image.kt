@@ -54,10 +54,9 @@ fun Image.toBitmap(rotation: Int = 0, mode: String?): Bitmap {
     val yuvImage = YuvImage(nv21, ImageFormat.NV21, this.width, this.height, null)
     val out = ByteArrayOutputStream()
 
-    val rect =  Rect()
+    val rect = Rect()
     // Use higher value of 6 for qrcode/idpass-lite which fixes bounding box issues upon scanning,
-    // and barcode uses default value of 3 to address PDF417 scaling issues
-    // and mrz uses previous default value of 4
+    // others use previous default value of 4
     val scaleIdentifier = when (mode) {
         Modes.QRCODE.value, Modes.IDPASS_LITE.value -> 6
         else -> 4
@@ -71,7 +70,7 @@ fun Image.toBitmap(rotation: Int = 0, mode: String?): Bitmap {
         rect.left = 0
         rect.top = this.height / scaleIdentifier
         rect.right = this.width
-        rect.bottom =  this.height - rect.top
+        rect.bottom = this.height - rect.top
     }
 
     Log.d(
@@ -84,6 +83,58 @@ fun Image.toBitmap(rotation: Int = 0, mode: String?): Bitmap {
     return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
 }
 
+// extension function to change bitmap brightness and contrast
+fun Bitmap.setContrast(
+    contrast: Float = 1.0F
+): Bitmap? {
+    val bitmap = copy(Bitmap.Config.ARGB_8888, true)
+    val paint = Paint()
+
+    // brightness -200..200, 0 is default
+    // contrast 0..2, 1 is default
+    // you may tweak the range
+    val matrix = ColorMatrix(
+        floatArrayOf(
+            contrast, 0f, 0f, 0f, 0f,
+            0f, contrast, 0f, 0f, 0f,
+            0f, 0f, contrast, 0f, 0f,
+            0f, 0f, 0f, 1f, 0f
+        )
+    )
+
+    val filter = ColorMatrixColorFilter(matrix)
+    paint.colorFilter = filter
+
+    Canvas(bitmap).drawBitmap(this, 0f, 0f, paint)
+    return bitmap
+}
+
+// extension function to change bitmap brightness and contrast
+fun Bitmap.setBrightness(
+    brightness: Float = 0.0F
+): Bitmap? {
+    val bitmap = copy(Bitmap.Config.ARGB_8888, true)
+    val paint = Paint()
+
+    // brightness -200..200, 0 is default
+    // contrast 0..2, 1 is default
+    // you may tweak the range
+    val matrix = ColorMatrix(
+        floatArrayOf(
+            1.0F, 0f, 0f, 0f, brightness,
+            0f, 1.0F, 0f, 0f, brightness,
+            0f, 0f, 1.0F, 0f, brightness,
+            0f, 0f, 0f, 1f, 0f
+        )
+    )
+
+    val filter = ColorMatrixColorFilter(matrix)
+    paint.colorFilter = filter
+
+    Canvas(bitmap).drawBitmap(this, 0f, 0f, paint)
+    return bitmap
+}
+
 fun Bitmap.cacheImageToLocal(localPath: String, rotation: Int = 0, quality: Int = 80) {
     val matrix = Matrix().apply { postRotate(rotation.toFloat()) }
     val b = Bitmap.createBitmap(this, 0, 0, this.width, this.height, matrix, true)
@@ -93,7 +144,7 @@ fun Bitmap.cacheImageToLocal(localPath: String, rotation: Int = 0, quality: Int 
     try {
         b.compress(Bitmap.CompressFormat.JPEG, quality, ostream)
         ostream.close()
-    } catch (e : Exception) {
+    } catch (e: Exception) {
         e.printStackTrace()
     } finally {
         ostream.flush()
@@ -132,9 +183,9 @@ fun Bitmap.rotate(rotation: Int = 0): Bitmap {
     return Bitmap.createBitmap(this, 0, 0, this.width, this.height, matrix, true)
 }
 
-fun String.toBitmap() : Bitmap =  BitmapFactory.decodeFile(this)
+fun String.toBitmap(): Bitmap = BitmapFactory.decodeFile(this)
 
-fun Context.cacheImagePath(identifier: String = "Scanner") : String {
+fun Context.cacheImagePath(identifier: String = "Scanner"): String {
     val date = Calendar.getInstance().time
     val formatter = SimpleDateFormat("yyyyMMddHHmmss", Locale.ROOT)
     val currentDateTime = formatter.format(date)

@@ -38,6 +38,8 @@ object MRZCleaner {
             .replace("<e<", "<<<")
             .replace("<E<", "<<<") // Good idea? Maybe not.
             .replace("<K<", "<<<") // Good idea? Maybe not.
+            .replace("<S<", "<<<") // Good idea? Maybe not.
+            .replace("<C<", "<<<") // Good idea? Maybe not.
             .replace("<¢<", "<<<")
             .replace("<(<", "<<<")
             .replace("<{<", "<<<")
@@ -81,12 +83,14 @@ object MRZCleaner {
             .replace("8", "B")
             .replace("5", "S")
             .replace("2", "Z")
+            .replace("3", "J")
     }
 
     fun parseAndClean(mrz: String): MrzRecord {
         val record = MrzParser.parse(mrz)
 
-        if (record.validComposite && record.validDateOfBirth && record.validDocumentNumber && record.validExpirationDate) {
+        Log.d(SmartScannerActivity.TAG, "Previous Scan: $previousMRZString")
+        if (record.validDateOfBirth && record.validDocumentNumber && record.validExpirationDate || record.validComposite) {
             record.givenNames = record.givenNames.replaceNumbertoChar()
             record.surname = record.surname.replaceNumbertoChar()
             record.issuingCountry = record.issuingCountry.replaceNumbertoChar()
@@ -106,7 +110,7 @@ object MRZCleaner {
         val record = MrzParser.parseToMrtdTd1(mrz)
 
         Log.d(SmartScannerActivity.TAG, "Previous Scan: $previousMRZString")
-        if (record.validComposite && record.validDateOfBirth && record.validDocumentNumber && record.validExpirationDate) {
+        if (record.validDateOfBirth && record.validDocumentNumber && record.validExpirationDate || record.validComposite) {
             record.givenNames = record.givenNames.replaceNumbertoChar()
             record.surname = record.surname.replaceNumbertoChar()
             record.issuingCountry = record.issuingCountry.replaceNumbertoChar()
