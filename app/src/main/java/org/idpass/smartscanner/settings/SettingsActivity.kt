@@ -63,14 +63,14 @@ class SettingsActivity : AppCompatActivity() {
         arabicLayout.setOnClickListener {
             arabicpic.visibility = View.VISIBLE
             englishpic.visibility = View.INVISIBLE
-            saveLanguage( context = this, editor = editor, language = Language.AR)
+            saveLanguage(editor = editor, language = Language.AR)
             startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
         }
         // English language
         englishLayout.setOnClickListener {
             arabicpic.visibility = View.INVISIBLE
             englishpic.visibility = View.VISIBLE
-            saveLanguage( context = this, editor = editor, language = Language.EN)
+            saveLanguage(editor = editor, language = Language.EN)
             startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
         }
 
@@ -86,7 +86,7 @@ class SettingsActivity : AppCompatActivity() {
         versionText.text = getString(R.string.label_version, versionLabel)
     }
 
-    private fun saveLanguage(context: Context, editor: SharedPreferences.Editor, language : String) {
+    private fun saveLanguage(editor: SharedPreferences.Editor, language : String) {
         // Remove previous set language
         editor.remove(Language.NAME).apply()
         // Set new language

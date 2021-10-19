@@ -17,14 +17,14 @@
  */
 package org.idpass.smartscanner
 
-import android.app.Application
 import android.util.Log
+import androidx.multidex.MultiDexApplication
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import timber.log.Timber
 
 
-class SmartScannerApplication : Application() {
+class SmartScannerApplication : MultiDexApplication() {
     private lateinit var firebaseAnalytics: FirebaseAnalytics
 
     override fun onCreate() {
