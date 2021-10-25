@@ -29,7 +29,6 @@ import androidx.camera.core.ImageProxy
 import com.google.gson.Gson
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.googlecode.tesseract.android.TessBaseAPI
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.R
@@ -102,7 +101,7 @@ open class MRZAnalyzer(
                 val start = System.currentTimeMillis()
                 val rotation = imageProxy.imageInfo.rotationDegrees
                 val image = InputImage.fromBitmap(cropped, rotation)
-                val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+                val recognizer = TextRecognition.getClient()
                 Log.d("${SmartScannerActivity.TAG}/SmartScanner", "MRZ MLKit TextRecognition: process")
                 recognizer.process(image)
                         .addOnSuccessListener { visionText ->
