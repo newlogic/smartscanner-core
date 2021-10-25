@@ -38,5 +38,6 @@
     <string name="label_scan_nfc_capture">التقاط NFC</string>
     <string name="label_scan_nfc_via_mrz">يرجى مسح MRZ للتحقق من الهوية</string>
     <string name="label_version">إصدار: %1$s</string>
+    <string name="label_warning_invalid_composite_digit">تحذير: يحتوي MRZ هذا على رقم تحقق مركب غير صالح.</string>
 
 </resources>

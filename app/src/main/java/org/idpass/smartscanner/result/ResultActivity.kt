@@ -103,7 +103,7 @@ class ResultActivity : AppCompatActivity() {
         val resultObj = JsonParser.parseString(result).asJsonObject
         val validComposite = if (resultObj["validComposite"]!= null) resultObj["validComposite"].asBoolean else true
         if (!validComposite) {
-            val snackBar = Snackbar.make(binding.root, "This MRZ contains an invalid composite check digit.", Snackbar.LENGTH_INDEFINITE)
+            val snackBar = Snackbar.make(binding.root, getString(R.string.label_warning_invalid_composite_digit), Snackbar.LENGTH_INDEFINITE)
             snackBar.setAction("Dismiss") { _ -> snackBar.dismiss() }
             snackBar.setActionTextColor(ContextCompat.getColor(this, R.color.idpass_orange))
             snackBar.show()
