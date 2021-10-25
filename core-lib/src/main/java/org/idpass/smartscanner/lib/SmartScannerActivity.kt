@@ -313,8 +313,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             cameraProvider = cameraProviderFuture.get()
             // Preview
             preview = Preview.Builder().build()
-            var size = Size(480, 640)
-            if (isPdf417 || mode == Modes.MRZ.value) size = Size(1080, 1920)
+            val size =  if (isPdf417 || mode == Modes.MRZ.value) Size(1080, 1920) else Size(480, 640)
             imageAnalyzer = ImageAnalysis.Builder()
                 .setTargetResolution(size)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
