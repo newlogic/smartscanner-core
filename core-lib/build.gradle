@@ -94,7 +94,7 @@ dependencies {
     implementation 'com.google.protobuf:protobuf-lite:3.0.1'
     implementation 'org.idpass:idpass-lite-java-android:0.1@aar'
     // SmartScanner MRZ Parser
-    implementation project(path: ':smartscanner-mrz-parser')
+    //implementation project(path: ':smartscanner-mrz-parser')
     // SmartScanner API Intent Call Out
     implementation project(path: ':smartscanner-android-api')
     // Gzip JSON
