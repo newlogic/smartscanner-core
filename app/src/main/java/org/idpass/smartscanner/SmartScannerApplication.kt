@@ -30,7 +30,7 @@ class SmartScannerApplication : MultiDexApplication() {
     override fun onCreate() {
         super.onCreate()
         firebaseAnalytics = FirebaseAnalytics.getInstance(this)
-        Timber.plant(CrashReportingTree())
+        if (BuildConfig.BUILD_TYPE == "release") Timber.plant(CrashReportingTree())
     }
 
     /**
