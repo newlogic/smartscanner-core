@@ -28,6 +28,7 @@ import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonParser
 import org.idpass.smartscanner.MainActivity.Companion.imageType
@@ -129,6 +130,8 @@ class ResultActivity : AppCompatActivity() {
             val imageBitmap = if (imageType == ImageResultType.PATH.value) BitmapFactory.decodeFile(image) else image.decodeBase64()
             Glide.with(this)
                 .load(imageBitmap)
+                .optionalFitCenter()
+                .apply(RequestOptions().override(800, 600))
                 .into(binding.imageResult)
             binding.imageLabel.paintFlags = binding.imageLabel.paintFlags or Paint.UNDERLINE_TEXT_FLAG
             binding.imageLabel.visibility = VISIBLE
