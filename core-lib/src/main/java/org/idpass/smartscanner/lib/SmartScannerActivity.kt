@@ -313,9 +313,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             cameraProvider = cameraProviderFuture.get()
             // Preview
             preview = Preview.Builder().build()
-            val size =  if (isPdf417 || mode == Modes.MRZ.value) Size(1080, 1920) else Size(480, 640)
             imageAnalyzer = ImageAnalysis.Builder()
-                .setTargetResolution(size)
+                .setTargetResolution(if (isPdf417) Size(1080, 1920) else Size(480, 640))
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
                 .also {
@@ -323,7 +322,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 }
             // Create configuration object for the image capture use case
             imageCapture = ImageCapture.Builder()
-                .setTargetResolution(size)
+                .setTargetResolution(Size(1080, 1920))
                 .setTargetRotation(Surface.ROTATION_0)
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
                 .build()
