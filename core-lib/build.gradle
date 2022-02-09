@@ -69,7 +69,7 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
     // ML Kit dependencies
-    implementation 'com.google.android.gms:play-services-mlkit-text-recognition:16.1.0'
+    implementation 'com.google.mlkit:text-recognition:16.0.0-beta3'
     implementation 'com.google.mlkit:barcode-scanning:16.0.2'
     // CameraX
     def camerax_version = "1.0.0-beta06"
