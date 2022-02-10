@@ -22,7 +22,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.Matrix
 import android.os.Bundle
 import android.util.Log
 import androidx.camera.core.ImageProxy
@@ -37,12 +36,10 @@ import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.platform.BaseImageAnalyzer
 import org.idpass.smartscanner.lib.platform.extension.*
 import org.idpass.smartscanner.lib.platform.utils.FileUtils
-import org.idpass.smartscanner.lib.scanner.SmartScannerException
 import org.idpass.smartscanner.lib.scanner.config.ImageResultType
 import org.idpass.smartscanner.lib.scanner.config.Modes
 import org.idpass.smartscanner.lib.scanner.config.MrzFormat
 import java.net.URLEncoder
-import kotlin.concurrent.thread
 
 open class MRZAnalyzer(
         override val activity: Activity,
@@ -96,7 +93,7 @@ open class MRZAnalyzer(
                     SmartScannerActivity.TAG,
                     "Bitmap: (${mediaImage.width}, ${mediaImage.height} Cropped: (${cropped.width}, ${cropped.height}), Rotation: $rot"
             )
-            if (isMLKit) {
+            //if (isMLKit) {
                 // Pass image to an ML Kit Vision API
                 Log.d("${SmartScannerActivity.TAG}/SmartScanner", "MRZ MLKit: start")
                 val start = System.currentTimeMillis()
@@ -166,7 +163,7 @@ open class MRZAnalyzer(
                             onConnectFail.invoke(activity.getString(connectionId))
                             imageProxy.close()
                         }
-            } else {
+            /*} else {
                 if (::tessBaseAPI.isInitialized) {
                     Log.d("${SmartScannerActivity.TAG}/SmartScanner", "MRZ Tesseract: start")
                     val start = System.currentTimeMillis()
@@ -218,7 +215,7 @@ open class MRZAnalyzer(
                     imageProxy.close()
                     throw SmartScannerException("Please initialize Tesseract properly using initializeTesseract() method.")
                 }
-            }
+            }*/
         }
     }
 

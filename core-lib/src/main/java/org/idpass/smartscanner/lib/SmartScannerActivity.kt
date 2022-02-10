@@ -255,7 +255,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                         modelText?.text = it
                     }
                 ).also {
-                    //if (!isMLKit) it.initializeTesseract(this)
+                    if (!isMLKit) it.initializeTesseract(this)
                 }
             }
             if (mode == Modes.NFC_SCAN.value) {
@@ -288,7 +288,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                         modelText?.text = it
                     }
                 ).also {
-                    //if (!isMLKit) it.initializeTesseract(this)
+                    if (!isMLKit) it.initializeTesseract(this)
                 }
             }
             // set Analyzer and start camera
