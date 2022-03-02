@@ -21,7 +21,7 @@ android {
         vectorDrawables.useSupportLibrary = true
 
         // Sentry Default DSN
-        manifestPlaceholders = [dsn: 'http://90ebf03b06534e01a21f82c1b2e86ae2@188.166.182.254:9000/4']
+        manifestPlaceholders = [dsn: 'https://90ebf03b06534e01a21f82c1b2e86ae2@sentry.newlogic.dev/4']
     }
 
     buildFeatures {
