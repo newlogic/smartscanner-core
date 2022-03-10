@@ -35,6 +35,7 @@ import org.idpass.smartscanner.lib.R
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.platform.BaseImageAnalyzer
 import org.idpass.smartscanner.lib.platform.extension.*
+import org.idpass.smartscanner.lib.platform.utils.BitmapUtils
 import org.idpass.smartscanner.lib.platform.utils.FileUtils
 import org.idpass.smartscanner.lib.scanner.config.ImageResultType
 import org.idpass.smartscanner.lib.scanner.config.Modes
@@ -73,25 +74,31 @@ open class MRZAnalyzer(
 
     @SuppressLint("UnsafeExperimentalUsageError")
     override fun analyze(imageProxy: ImageProxy) {
-        val mediaImage = imageProxy.image
-        if (mediaImage != null) {
+        val bitmap = BitmapUtils.getBitmap(imageProxy)
+        bitmap?.let { bf ->
             val rot = imageProxy.imageInfo.rotationDegrees
-            val bf = mediaImage.toBitmap(rot, mode).apply {
+            bf.apply {
                 // Increase brightness and contrast for clearer image to be processed
                 setContrast(1.5F)
                 setBrightness(5F)
             }
-            val cropped = if (rot == 90 || rot == 270) Bitmap.createBitmap(
-                    bf,
-                    bf.width / 2,
-                    0,
-                    bf.width / 2,
-                    bf.height
-            )
-            else Bitmap.createBitmap(bf, 0, bf.height / 2, bf.width, bf.height / 2)
+            val cropped = when (rot) {
+                90, 270 -> {
+                    Bitmap.createBitmap(
+                        bf,
+                        bf.width / 2,
+                        0,
+                        bf.width / 2,
+                        bf.height
+                    )
+                }
+                180 -> Bitmap.createBitmap(bf, 0 , bf.height / 4, bf.width, bf.height / 4)
+                else -> Bitmap.createBitmap(bf, 0 , bf.height / 3, bf.width, bf.height / 3)
+
+            }
             Log.d(
                     SmartScannerActivity.TAG,
-                    "Bitmap: (${mediaImage.width}, ${mediaImage.height} Cropped: (${cropped.width}, ${cropped.height}), Rotation: $rot"
+                    "Bitmap: (${bf.width}, ${bf.height} Cropped: (${cropped.width}, ${cropped.height}), Rotation: $rot"
             )
             //if (isMLKit) {
                 // Pass image to an ML Kit Vision API

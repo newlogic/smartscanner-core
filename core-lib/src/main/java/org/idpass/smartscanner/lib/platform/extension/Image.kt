@@ -61,6 +61,7 @@ fun Image.toBitmap(rotation: Int = 0, mode: String?): Bitmap {
         Modes.QRCODE.value, Modes.IDPASS_LITE.value -> 6
         else -> 4
     }
+
     if (rotation == 90 || rotation == 270) {
         rect.left = this.width / scaleIdentifier
         rect.top = 0
@@ -83,14 +84,13 @@ fun Image.toBitmap(rotation: Int = 0, mode: String?): Bitmap {
     return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
 }
 
-// extension function to change bitmap brightness and contrast
+// extension function to change bitmap contrast
 fun Bitmap.setContrast(
     contrast: Float = 1.0F
 ): Bitmap? {
     val bitmap = copy(Bitmap.Config.ARGB_8888, true)
     val paint = Paint()
 
-    // brightness -200..200, 0 is default
     // contrast 0..2, 1 is default
     // you may tweak the range
     val matrix = ColorMatrix(
@@ -109,7 +109,7 @@ fun Bitmap.setContrast(
     return bitmap
 }
 
-// extension function to change bitmap brightness and contrast
+// extension function to change bitmap brightness
 fun Bitmap.setBrightness(
     brightness: Float = 0.0F
 ): Bitmap? {
@@ -117,7 +117,6 @@ fun Bitmap.setBrightness(
     val paint = Paint()
 
     // brightness -200..200, 0 is default
-    // contrast 0..2, 1 is default
     // you may tweak the range
     val matrix = ColorMatrix(
         floatArrayOf(
