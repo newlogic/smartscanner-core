@@ -22,6 +22,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Typeface
@@ -104,6 +105,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
     private var flashButton: View? = null
     private var closeButton: View? = null
     private var rectangle: View? = null
+    private var rectangleMRZGuide: View? = null
     private var manualCapture: View? = null
     private var brandingImage: ImageView? = null
     private var captureLabelText: TextView? = null
@@ -121,6 +123,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_smart_scanner)
+
         // assign view ids
         coordinatorLayoutView = findViewById(R.id.coordinatorLayout)
         modelLayoutView = findViewById(R.id.viewLayout)
@@ -128,6 +131,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         flashButton = findViewById(R.id.flash_button)
         closeButton = findViewById(R.id.close_button)
         rectangle = findViewById(R.id.rectimage)
+        rectangleMRZGuide = findViewById(R.id.rect_image_crop)
         modelText = findViewById(R.id.modelText)
         modelTextLoading = findViewById(R.id.modelTextLoading)
         brandingImage = findViewById(R.id.brandingImage)
@@ -169,6 +173,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         // setup modes & config for reader
         mode = scannerOptions?.mode
         config = scannerOptions?.config ?: Config.default
+
         // Request camera permissions
         if (allPermissionsGranted()) {
             setupConfiguration()
@@ -257,6 +262,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 ).also {
                     if (!isMLKit) it.initializeTesseract(this)
                 }
+                rectangleMRZGuide?.visibility = VISIBLE
             }
             if (mode == Modes.NFC_SCAN.value) {
                 val nfcOptions = scannerOptions?.nfcOptions
@@ -441,6 +447,10 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         // language locale
         scannerOptions?.language?.let { language ->
             LanguageUtils.changeLanguage(this, language)
+        }
+        // Device orientation
+        if (config?.orientation == Orientation.LANDSCAPE.value) {
+            this.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
         }
     }
 

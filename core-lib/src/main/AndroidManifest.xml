@@ -21,8 +21,7 @@
         <meta-data android:name="io.sentry.debug" android:value="true" />
         <activity
             android:name="SmartScannerActivity"
-            android:configChanges="orientation|keyboardHidden"
-            android:screenOrientation="nosensor"
+            android:configChanges="screenSize|screenLayout|smallestScreenSize|keyboardHidden"
             android:keepScreenOn="true">
             <intent-filter>
                 <!--Bundle intent-->
