@@ -1,10 +1,14 @@
 <resources>
     <string name="app_name">SmartScanner</string>
+    <string name="app_name_default">SmartScanner</string>
+    <string name="app_name_v1">SmartScanner v1</string>
+    <string name="app_name_v2">SmartScanner v2 </string>
 
     <!--Action items-->
     <string name="action_hide">HIDE</string>
     <string name="action_show">SHOW</string>
     <string name="action_show_hide">SHOW/HIDE</string>
+    <string name="action_settings">Settings</string>
 
     <!--Modes-->
     <string name="mode_barcode">Barcode</string>
@@ -40,5 +44,8 @@
     <string name="label_scan_nfc_via_mrz">Please scan MRZ to verify ID</string>
     <string name="label_version">Version: %1$s</string>
     <string name="label_warning_invalid_composite_digit">Warning: This MRZ contains an invalid composite check digit.</string>
+    <string name="label_orientation">ORIENTATION</string>
+    <string name="label_portrait">Portrait</string>
+    <string name="label_landscape">Landscape</string>
 
 </resources>

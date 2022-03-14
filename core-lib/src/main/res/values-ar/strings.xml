@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">الماسح الذكي</string>
+    <string name="app_name_default">الماسح الذكي</string>
+    <string name="app_name_v1">v1 الماسح الذكي</string>
+    <string name="app_name_v2">v2 الماسح الذكي</string>
 
     <string name="camera_error">This device doesn\'t support Camera2 API.</string>
     <string-array name="ocrenginemodes">

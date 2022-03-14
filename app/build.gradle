@@ -16,6 +16,12 @@ android {
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
 
+    ext {
+        APP_NAME_DEFAULT = "@string/app_name_default"
+        APP_NAME_V1 = "@string/app_name_v1"
+        APP_NAME_V2 = "@string/app_name_v2"
+    }
+
     defaultConfig {
         applicationId "org.newlogic.smartscanner"
         minSdkVersion 21
@@ -23,9 +29,14 @@ android {
         versionName androidGitVersion.name()
         versionCode androidGitVersion.code()
 
+        manifestPlaceholders = [
+                APP_NAME      : APP_NAME_DEFAULT
+        ]
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
         multiDexEnabled true
+        vectorDrawables.useSupportLibrary = true
     }
 
     buildFeatures {
@@ -66,6 +77,29 @@ android {
             }
         }
     }
+
+    flavorDimensions "text"
+    productFlavors {
+        v1 {
+            versionName defaultConfig.versionName + "-v1"
+            buildConfigField "boolean", "ENABLE_LOG", "true"
+            applicationIdSuffix ".v1"
+            manifestPlaceholders = [
+                    APP_NAME: APP_NAME_V1
+            ]
+            dimension "text"
+        }
+        v2 {
+            buildConfigField "boolean", "ENABLE_LOG", "false"
+            versionName defaultConfig.versionName + "-v2"
+            applicationIdSuffix ".v2"
+            manifestPlaceholders = [
+                    APP_NAME: APP_NAME_V2
+            ]
+            dimension "text"
+        }
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -95,6 +129,7 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.11.0'
     implementation 'com.jakewharton.timber:timber:4.7.1'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
+    implementation 'com.jsibbold:zoomage:1.3.1'
     // ID PASS Smart Scanner
     implementation project(path: ':core-lib')
     //ID PASS lite
