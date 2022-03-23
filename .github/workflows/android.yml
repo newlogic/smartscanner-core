@@ -1,0 +1,43 @@
+name: ID PASS - SmartScaner Build
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    tags:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cache local gradle repository
+        uses: actions/cache@v2
+        with:
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+      - uses: actions/checkout@v2
+      - name: Build App SmartScanner Release
+        run: |
+          cd android
+          [ ! -z "$FIREBASE_SECRET" ] && gpg -o app/google-services.json --batch --passphrase="$FIREBASE_SECRET" -d app/google-services.json.gpg || echo "FIREBASE_SECRET not defined"
+          ./gradlew clean, :core-lib:assembleRelease, :app:assembleRelease
+        env:
+          FIREBASE_SECRET: ${{ secrets.FIREBASE_SECRET }}
+      - name: Upload APK
+        uses: actions/upload-apk@v2
+        with:
+          name: output
+          path: app/build/outputs/apk/release/
+          retention-days: 1
+      - name: Upload AAR
+        uses: actions/upload-aar@v2
+        with:
+          name: output
+          path: core-lib/build/outputs/aar/
+          retention-days: 1
