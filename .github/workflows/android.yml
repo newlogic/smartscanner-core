@@ -32,11 +32,11 @@ jobs:
           KEY_PASSWORD: ${{ secrets.$KEY_PASSWORD }}
           KEY_ALIAS: ${{ secrets.$KEY_ALIAS }}
       - name: Build App SmartScanner Release
-        env:
-          FIREBASE_SECRET: ${{ secrets.FIREBASE_SECRET }}
         run: |
           [ ! -z "$FIREBASE_SECRET" ] && gpg -o app/google-services.json --batch --passphrase="$FIREBASE_SECRET" -d app/google-services.json.gpg || echo "FIREBASE_SECRET not defined"
           ./gradlew clean, :core-lib:assembleRelease, :assembleRelease
+        env:
+          FIREBASE_SECRET: ${{ secrets.FIREBASE_SECRET }}
       - name: Upload AAR
         uses: actions/upload-artifact@v2
         with:
