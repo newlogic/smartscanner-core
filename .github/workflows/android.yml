@@ -22,15 +22,15 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/wrapper
       - uses: actions/checkout@v2
-      - name: Access keystore and signing.properties
-        env:
-          $SIGNING_SECRET: ${{ secrets.$SIGNING_SECRET }}
-          $STORE_PASSWORD: ${{ secrets.$STORE_PASSWORD }}
-          $KEY_PASSWORD: ${{ secrets.$KEY_PASSWORD }}
-          $KEY_ALIAS: ${{ secrets.$KEY_ALIAS }}
+      - name: Access upload-keystore and signing.properties
         run: |
           [ ! -z "$SIGNING_SECRET" ] && gpg -o upload-keystore --batch --passphrase="$SIGNING_SECRET" -d upload-keystore.gpg || echo "$SIGNING_SECRET not defined"
           echo -e "STORE_PASSWORD=$STORE_PASSWORD\nKEY_PASSWORD=$KEY_PASSWORD\nKEY_ALIAS=$KEY_ALIAS" > ./signing.properties
+        env:
+          SIGNING_SECRET: ${{ secrets.$SIGNING_SECRET }}
+          STORE_PASSWORD: ${{ secrets.$STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.$KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.$KEY_ALIAS }}
       - name: Build App SmartScanner Release
         env:
           FIREBASE_SECRET: ${{ secrets.FIREBASE_SECRET }}
