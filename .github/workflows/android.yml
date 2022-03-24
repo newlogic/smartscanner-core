@@ -34,7 +34,7 @@ jobs:
       - name: Build App SmartScanner Release
         run: |
           [ ! -z "$FIREBASE_SECRET" ] && gpg -o app/google-services.json --batch --passphrase="$FIREBASE_SECRET" -d app/google-services.json.gpg || echo "FIREBASE_SECRET not defined"
-          ./gradlew clean, :core-lib:assembleRelease, :assembleRelease
+          ./gradlew :core-lib:assembleRelease, :app:assembleRelease
         env:
           FIREBASE_SECRET: ${{ secrets.FIREBASE_SECRET }}
       - name: Upload AAR
