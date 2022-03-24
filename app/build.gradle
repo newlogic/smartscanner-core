@@ -38,10 +38,10 @@ android {
             props.load(fileInputStream)
             fileInputStream.close()
 
-            storeFile = file(props['storeFilePath'])
-            storePassword = props['storePassword']
-            keyAlias = props['keyAlias']
-            keyPassword = props['keyPassword']
+            storeFile = file('upload-keystore')
+            storePassword = props['STORE_PASSWORD']
+            keyAlias = props['KEY_ALIAS']
+            keyPassword = props['KEY_PASSWORD']
         }
     }
 
