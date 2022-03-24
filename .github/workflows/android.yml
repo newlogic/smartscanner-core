@@ -24,8 +24,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: Build App SmartScanner Release
         run: |
-          [ ! -z "$SIGNING_SECRET" ] && gpg -o upload-keystore --batch --passphrase="$SIGNING_SECRET" -d upload-keystore.gpg || echo "$SIGNING_SECRET not defined"
           [ ! -z "$FIREBASE_SECRET" ] && gpg -o app/google-services.json --batch --passphrase="$FIREBASE_SECRET" -d app/google-services.json.gpg || echo "FIREBASE_SECRET not defined"
+          [ ! -z "$SIGNING_SECRET" ] && gpg -o upload-keystore --batch --passphrase="$SIGNING_SECRET" -d upload-keystore.gpg || echo "$SIGNING_SECRET not defined"
           echo -e "STORE_PASSWORD=$STORE_PASSWORD\nKEY_PASSWORD=$KEY_PASSWORD\nKEY_ALIAS=$KEY_ALIAS" > ./signing.properties
           ./gradlew clean, :core-lib:assembleRelease, :assembleRelease
         env:
