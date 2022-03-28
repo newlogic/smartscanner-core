@@ -1,0 +1,49 @@
+name: ID PASS - SmartScaner Build
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    tags:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cache local gradle repository
+        uses: actions/cache@v2
+        with:
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+      - uses: actions/checkout@v2
+      - name: Access signing.properties
+        run: |
+          echo -e "STORE_PASSWORD=$STORE_PASSWORD\nKEY_PASSWORD=$KEY_PASSWORD\nKEY_ALIAS=$KEY_ALIAS" > ./signing.properties
+        env:
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      - name: Build App SmartScanner Release
+        run: |
+          [ ! -z "$FIREBASE_SECRET" ] && gpg -o app/google-services.json --batch --passphrase="$FIREBASE_SECRET" -d app/google-services.json.gpg || echo "FIREBASE_SECRET not defined"
+          ./gradlew assembleRelease
+        env:
+          FIREBASE_SECRET: ${{ secrets.FIREBASE_SECRET }}
+      - name: Upload AAR
+        uses: actions/upload-artifact@v2
+        with:
+          name: output
+          path: core-lib/build/outputs/aar/
+          retention-days: 1
+      - name: Upload APK
+        uses: actions/upload-artifact@v2
+        with:
+          name: output
+          path: app/build/outputs/apk/release/
+          retention-days: 1
