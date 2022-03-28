@@ -8,6 +8,9 @@ apply plugin: 'kotlin-parcelize'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 
+androidGitVersion {
+    baseCode 1
+}
 
 android {
     compileSdkVersion 30
