@@ -31,11 +31,9 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
       - name: Build App SmartScanner Release
         run: |
-          [ ! -z "$SIGNING_SECRET" ] && gpg -o upload-keystore --batch --passphrase="$SIGNING_SECRET" -d upload-keystore.gpg || echo "$SIGNING_SECRET not defined"
           [ ! -z "$FIREBASE_SECRET" ] && gpg -o app/google-services.json --batch --passphrase="$FIREBASE_SECRET" -d app/google-services.json.gpg || echo "FIREBASE_SECRET not defined"
           ./gradlew assembleRelease
         env:
-          SIGNING_SECRET: ${{ secrets.SIGNING_SECRET }}
           FIREBASE_SECRET: ${{ secrets.FIREBASE_SECRET }}
       - name: Upload AAR
         uses: actions/upload-artifact@v2
