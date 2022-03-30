@@ -89,8 +89,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
     private val REQUEST_CODE_PERMISSIONS = 10
     private val REQUEST_CODE_PERMISSIONS_VERSION_R = 2296
     private val REQUIRED_PERMISSIONS = arrayOf(
-        Manifest.permission.CAMERA,
-        Manifest.permission.WRITE_EXTERNAL_STORAGE
+        Manifest.permission.CAMERA
     )
     private var config: Config? = null
     private var preview: Preview? = null

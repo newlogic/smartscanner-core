@@ -17,35 +17,23 @@
  */
 package org.idpass.smartscanner
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
-import android.net.Uri
 import android.nfc.NfcAdapter
-import android.os.Build
-import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
-import android.os.Environment
-import android.provider.Settings
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.api.ScannerIntent
 import org.idpass.smartscanner.databinding.ActivityMainBinding
-import org.idpass.smartscanner.lib.BuildConfig
 import org.idpass.smartscanner.lib.R.string.required_nfc_not_supported
-import org.idpass.smartscanner.lib.R.string.required_perms_not_given
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT_BYTES
 import org.idpass.smartscanner.lib.nfc.NFCActivity
-import org.idpass.smartscanner.lib.platform.utils.FileUtils
 import org.idpass.smartscanner.lib.scanner.config.*
 import org.idpass.smartscanner.result.IDPassResultActivity
 import org.idpass.smartscanner.result.ResultActivity
@@ -66,12 +54,6 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    private val REQUEST_CODE_PERMISSIONS = 11
-    private val REQUEST_CODE_PERMISSIONS_VERSION_R = 2296
-    private val REQUIRED_PERMISSIONS = arrayOf(
-        Manifest.permission.READ_EXTERNAL_STORAGE,
-        Manifest.permission.WRITE_EXTERNAL_STORAGE
-    )
     private var preference : SharedPreferences? = null
     private lateinit var binding : ActivityMainBinding
 
@@ -80,18 +62,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
-        if (BuildConfig.DEBUG) {
-            setupAppDirectory()
-        }
         preference = getSharedPreferences(SmartScannerApplication.SHARED, Context.MODE_PRIVATE)
-    }
-
-    private fun setupAppDirectory() {
-        if (allPermissionsGranted()) {
-            FileUtils.createSmartScannerDirs()
-        } else {
-            requestStoragePermissions()
-        }
     }
 
     override fun onStart() {
@@ -157,31 +128,24 @@ class MainActivity : AppCompatActivity() {
 
     private fun scanNFC() {
         if (isNFCSupported()) {
-            val mrzFromTxt = FileUtils.getMRZFromTxtFile()
-            if (mrzFromTxt.isNullOrEmpty()) {
-                val intent = Intent(this, SmartScannerActivity::class.java)
-                intent.putExtra(NFCActivity.FOR_SMARTSCANNER_APP, true)
-                intent.putExtra(
-                    SmartScannerActivity.SCANNER_OPTIONS,
-                    ScannerOptions(
-                        mode = Modes.NFC_SCAN.value,
-                        language = getLanguage(preference),
-                        nfcOptions = NFCOptions.default,
-                        sentryLogger = SentryLogger.default,
-                        config = Config(
-                            header = getString(R.string.label_scan_nfc_capture),
-                            subHeader = getString(R.string.label_scan_nfc_via_mrz),
-                            isManualCapture = false,
-                            branding = true
-                        )
+            val intent = Intent(this, SmartScannerActivity::class.java)
+            intent.putExtra(NFCActivity.FOR_SMARTSCANNER_APP, true)
+            intent.putExtra(
+                SmartScannerActivity.SCANNER_OPTIONS,
+                ScannerOptions(
+                    mode = Modes.NFC_SCAN.value,
+                    language = getLanguage(preference),
+                    nfcOptions = NFCOptions.default,
+                    sentryLogger = SentryLogger.default,
+                    config = Config(
+                        header = getString(R.string.label_scan_nfc_capture),
+                        subHeader = getString(R.string.label_scan_nfc_via_mrz),
+                        isManualCapture = false,
+                        branding = true
                     )
                 )
-                startActivityForResult(intent, OP_SCANNER)
-            } else {
-                val resultIntent = Intent(this, NFCActivity::class.java)
-                resultIntent.putExtra(NFCActivity.FOR_MRZ_LOG, mrzFromTxt)
-                startActivity(resultIntent)
-            }
+            )
+            startActivityForResult(intent, OP_SCANNER)
         } else Snackbar.make(binding.main, required_nfc_not_supported, Snackbar.LENGTH_LONG).show()
 
     }
@@ -236,57 +200,6 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        when (requestCode) {
-            REQUEST_CODE_PERMISSIONS_VERSION_R,
-            REQUEST_CODE_PERMISSIONS -> {
-                if (allPermissionsGranted()) {
-                    FileUtils.createSmartScannerDirs()
-                } else {
-                    val snackBar: Snackbar = Snackbar.make(binding.main, required_perms_not_given, Snackbar.LENGTH_INDEFINITE)
-                    snackBar.setAction(org.idpass.smartscanner.lib.R.string.settings) {
-                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                        val uri = Uri.fromParts("package", packageName, null)
-                        intent.data = uri
-                        startActivity(intent)
-                    }
-                    snackBar.show()
-                }
-            }
-        }
-    }
-
-    private fun requestStoragePermissions() {
-        if (SDK_INT >= Build.VERSION_CODES.R) {
-            try {
-                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
-                intent.addCategory("android.intent.category.DEFAULT")
-                intent.data = Uri.parse(String.format("package:%s", applicationContext.packageName))
-                startActivityForResult(intent, REQUEST_CODE_PERMISSIONS_VERSION_R)
-            } catch (e: Exception) {
-                val intent = Intent()
-                intent.action = Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
-                startActivityForResult(intent, REQUEST_CODE_PERMISSIONS_VERSION_R)
-            }
-        } else {
-            //below android 11
-            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
-        }
-    }
-
-    private fun allPermissionsGranted() : Boolean {
-        return if (SDK_INT >= Build.VERSION_CODES.R) {
-            Environment.isExternalStorageManager()
-        } else {
-            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
         }
     }
 }
