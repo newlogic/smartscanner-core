@@ -27,6 +27,7 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Typeface
 import android.hardware.camera2.CameraManager
+import android.hardware.camera2.CaptureRequest
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
@@ -39,6 +40,7 @@ import android.view.View
 import android.view.View.*
 import android.view.Window
 import android.widget.*
+import androidx.camera.camera2.interop.Camera2Interop
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
@@ -318,13 +320,20 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             cameraProvider = cameraProviderFuture.get()
             // Preview
             preview = Preview.Builder().build()
-            imageAnalyzer = ImageAnalysis.Builder()
+            val imageAnalysisBuilder = ImageAnalysis.Builder()
+            imageAnalyzer = imageAnalysisBuilder
                 .setTargetResolution(if (isPdf417) Size(1080, 1920) else Size(480, 640))
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
                 .also {
                     analyzer?.let { analysis -> it.setAnalyzer(cameraExecutor, analysis) }
                 }
+
+                val camera2InterOp = Camera2Interop.Extender(imageAnalysisBuilder)
+                camera2InterOp.setCaptureRequestOption(CaptureRequest.CONTROL_AF_MODE,CaptureRequest.CONTROL_AF_MODE_AUTO)
+                camera2InterOp.setCaptureRequestOption(CaptureRequest.CONTROL_AF_TRIGGER,CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
+                camera2InterOp.setCaptureRequestOption(CaptureRequest.CONTROL_AE_MODE,CaptureRequest.CONTROL_AE_MODE_ON)
+
             // Create configuration object for the image capture use case
             imageCapture = ImageCapture.Builder()
                 .setTargetResolution(Size(1080, 1920))
@@ -362,6 +371,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     TAG,
                     "Measured size: ${viewFinder.width}x${viewFinder.height}"
                 )
+
             } catch (exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
             }

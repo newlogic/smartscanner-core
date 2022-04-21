@@ -22,6 +22,7 @@
         <activity
             android:name="SmartScannerActivity"
             android:configChanges="screenSize|screenLayout|smallestScreenSize|keyboardHidden"
+            android:resizeableActivity="false"
             android:screenOrientation="nosensor"
             android:keepScreenOn="true">
             <intent-filter>
