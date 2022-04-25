@@ -25,6 +25,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name="MainActivity"
+            android:exported="true"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="nosensor">
             <intent-filter>
@@ -34,14 +35,17 @@
         </activity>
         <activity
             android:name=".result.ResultActivity"
+            android:exported="true"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="nosensor" />
         <activity
             android:name=".result.IDPassResultActivity"
+            android:exported="true"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="nosensor" />
         <activity
             android:name=".settings.SettingsActivity"
+            android:exported="true"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="nosensor" />
 
