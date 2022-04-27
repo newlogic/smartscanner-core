@@ -48,9 +48,5 @@
             android:exported="true"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="nosensor" />
-
-        <meta-data
-            android:name="com.google.mlkit.vision.DEPENDENCIES"
-            android:value="ocr" />
     </application>
 </manifest>
