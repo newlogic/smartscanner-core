@@ -321,7 +321,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             preview = Preview.Builder().build()
             val imageAnalysisBuilder = ImageAnalysis.Builder()
             imageAnalyzer = imageAnalysisBuilder
-                .setTargetResolution(if (isPdf417) Size(1080, 1920) else Size(480, 640))
+                .setTargetResolution(if (isPdf417 || mode == Modes.QRCODE.value) Size(1080, 1920) else Size(480, 640))
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
                 .also {
