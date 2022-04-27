@@ -35,10 +35,8 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.util.Size
-import android.view.Surface
-import android.view.View
+import android.view.*
 import android.view.View.*
-import android.view.Window
 import android.widget.*
 import androidx.camera.camera2.interop.Camera2Interop
 import androidx.camera.core.*
@@ -312,6 +310,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         setupViews()
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun startCamera(analyzer: ImageAnalysis.Analyzer? = null, isPdf417: Boolean = false) {
         this.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
@@ -371,6 +370,37 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     TAG,
                     "Measured size: ${viewFinder.width}x${viewFinder.height}"
                 )
+                // Tap to focus
+                viewFinder.afterMeasured {
+                    viewFinder.setOnTouchListener { _, event ->
+                        return@setOnTouchListener when (event.action) {
+                            MotionEvent.ACTION_DOWN -> {
+                                true
+                            }
+                            MotionEvent.ACTION_UP -> {
+                                val factory: MeteringPointFactory = SurfaceOrientedMeteringPointFactory(
+                                        viewFinder.width.toFloat(), viewFinder.height.toFloat()
+                                )
+                                val autoFocusPoint = factory.createPoint(event.x, event.y)
+                                try {
+                                    camera?.cameraControl?.startFocusAndMetering(
+                                            FocusMeteringAction.Builder(
+                                                    autoFocusPoint,
+                                                    FocusMeteringAction.FLAG_AF
+                                            ).apply {
+                                                //focus only when the user tap the preview
+                                                disableAutoCancel()
+                                            }.build()
+                                    )
+                                } catch (e: CameraInfoUnavailableException) {
+                                    Log.d("ERROR", "cannot access camera", e)
+                                }
+                                true
+                            }
+                            else -> false // Unhandled event.
+                        }
+                    }
+                }
 
             } catch (exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
@@ -616,5 +646,21 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             setupConfiguration()
         }
         bottomSheetDialog.show()
+    }
+
+
+    private inline fun View.afterMeasured(crossinline block: () -> Unit) {
+        if (measuredWidth > 0 && measuredHeight > 0) {
+            block()
+        } else {
+            viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    if (measuredWidth > 0 && measuredHeight > 0) {
+                        viewTreeObserver.removeOnGlobalLayoutListener(this)
+                        block()
+                    }
+                }
+            })
+        }
     }
 }
