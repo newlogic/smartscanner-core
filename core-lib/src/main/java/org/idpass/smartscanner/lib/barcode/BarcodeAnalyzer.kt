@@ -51,7 +51,11 @@ class BarcodeAnalyzer(
         if (mediaImage != null) {
             Log.d(SmartScannerActivity.TAG, "Bitmap: (${mediaImage.width}, ${mediaImage.height})")
             val rot = imageProxy.imageInfo.rotationDegrees
-            val bf = mediaImage.toBitmap(rot, mode)
+            val bf = mediaImage.toBitmap(rot, mode).apply {
+                // Increase contrast and brightness for better image processing and reduce Moiré effect
+                setContrast(1.5F)
+                setBrightness(5F)
+            }
             val start = System.currentTimeMillis()
             var barcodeFormat = Barcode.FORMAT_QR_CODE
             barcodeFormats.forEach {
