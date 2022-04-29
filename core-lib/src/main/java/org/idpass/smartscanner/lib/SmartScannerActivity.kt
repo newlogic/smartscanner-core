@@ -321,17 +321,12 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             preview = Preview.Builder().build()
             val imageAnalysisBuilder = ImageAnalysis.Builder()
             imageAnalyzer = imageAnalysisBuilder
-                .setTargetResolution(if (isPdf417 || mode == Modes.QRCODE.value) Size(1080, 1920) else Size(480, 640))
+                .setTargetResolution(if (isPdf417) Size(1080, 1920) else Size(480, 640))
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
                 .also {
                     analyzer?.let { analysis -> it.setAnalyzer(cameraExecutor, analysis) }
                 }
-
-                val camera2InterOp = Camera2Interop.Extender(imageAnalysisBuilder)
-                camera2InterOp.setCaptureRequestOption(CaptureRequest.CONTROL_AF_MODE,CaptureRequest.CONTROL_AF_MODE_AUTO)
-                camera2InterOp.setCaptureRequestOption(CaptureRequest.CONTROL_AF_TRIGGER,CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
-                camera2InterOp.setCaptureRequestOption(CaptureRequest.CONTROL_AE_MODE,CaptureRequest.CONTROL_AE_MODE_ON)
 
             // Create configuration object for the image capture use case
             imageCapture = ImageCapture.Builder()
@@ -370,7 +365,11 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     TAG,
                     "Measured size: ${viewFinder.width}x${viewFinder.height}"
                 )
-                // Tap to focus
+                // Autofocus modes and Tap to focus
+                val camera2InterOp = Camera2Interop.Extender(imageAnalysisBuilder)
+                camera2InterOp.setCaptureRequestOption(CaptureRequest.CONTROL_AF_MODE,CaptureRequest.CONTROL_AF_MODE_AUTO)
+                camera2InterOp.setCaptureRequestOption(CaptureRequest.CONTROL_AF_TRIGGER,CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
+                camera2InterOp.setCaptureRequestOption(CaptureRequest.CONTROL_AE_MODE,CaptureRequest.CONTROL_AE_MODE_ON)
                 viewFinder.afterMeasured {
                     viewFinder.setOnTouchListener { _, event ->
                         return@setOnTouchListener when (event.action) {
