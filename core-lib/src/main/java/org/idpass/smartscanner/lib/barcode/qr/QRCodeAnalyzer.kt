@@ -32,7 +32,9 @@ import com.jayway.jsonpath.JsonPath
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.platform.BaseImageAnalyzer
-import org.idpass.smartscanner.lib.platform.extension.toBitmap
+import org.idpass.smartscanner.lib.platform.extension.setBrightness
+import org.idpass.smartscanner.lib.platform.extension.setContrast
+import org.idpass.smartscanner.lib.platform.utils.BitmapUtils
 import org.idpass.smartscanner.lib.platform.utils.GzipUtils
 import org.idpass.smartscanner.lib.scanner.config.Modes
 import org.json.JSONObject
@@ -47,12 +49,15 @@ class QRCodeAnalyzer(
 
     @SuppressLint("UnsafeExperimentalUsageError")
     override fun analyze(imageProxy: ImageProxy) {
-        val mediaImage = imageProxy.image
-        if (mediaImage != null) {
-            Log.d(SmartScannerActivity.TAG, "Bitmap: (${mediaImage.width}, ${mediaImage.height})")
-            val rot = imageProxy.imageInfo.rotationDegrees
-            val bf = mediaImage.toBitmap(rot, mode)
+        val bitmap = BitmapUtils.getBitmap(imageProxy)
+        bitmap?.let { bf ->
+            Log.d(SmartScannerActivity.TAG, "Bitmap: (${bf.width}, ${bf.height})")
             val start = System.currentTimeMillis()
+            bf.apply {
+                // Increase contrast and brightness for better image processing and reduce Moiré effect
+                setContrast(1.5F)
+                setBrightness(5F)
+            }
             val barcodeFormat = Barcode.FORMAT_QR_CODE
             val options = BarcodeScannerOptions.Builder().setBarcodeFormats(barcodeFormat).build()
             val image = InputImage.fromBitmap(bf, imageProxy.imageInfo.rotationDegrees)
