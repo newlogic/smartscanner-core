@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="org.idpass.smartscanner.result.IDPassResultActivity">
+    tools:context="org.idpass.smartscanner.org.newlogic.smartscanner.result.IDPassResultActivity">
 
     <LinearLayout
         android:id="@+id/linearLayout"

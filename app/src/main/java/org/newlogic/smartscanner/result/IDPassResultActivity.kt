@@ -15,7 +15,7 @@
  *
  *
  */
-package org.idpass.smartscanner.result
+package org.newlogic.smartscanner.result
 
 import android.content.Intent
 import android.os.Bundle
@@ -33,7 +33,6 @@ import org.idpass.lite.Card
 import org.idpass.lite.exceptions.CardVerificationException
 import org.idpass.lite.exceptions.InvalidCardException
 import org.idpass.lite.exceptions.InvalidKeyException
-import org.idpass.smartscanner.R
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.idpasslite.IDPassManager
@@ -41,6 +40,7 @@ import org.idpass.smartscanner.lib.platform.extension.empty
 import org.idpass.smartscanner.lib.platform.extension.hideKeyboard
 import org.idpass.smartscanner.lib.platform.utils.DateUtils.formatDate
 import org.idpass.smartscanner.lib.platform.utils.DateUtils.isValidDate
+import org.newlogic.smartscanner.R
 
 class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
 

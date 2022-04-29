@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:gravity="center|center_vertical"
     android:orientation="vertical"
-    tools:context="org.idpass.smartscanner.MainActivity">
+    tools:context="org.newlogic.smartscanner.MainActivity">
 
     <ImageView
         android:id="@+id/language_settings"

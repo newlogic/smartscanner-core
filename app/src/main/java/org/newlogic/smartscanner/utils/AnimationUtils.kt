@@ -15,7 +15,7 @@
  *
  *
  */
-package org.idpass.smartscanner.utils
+package org.newlogic.smartscanner.utils
 
 import android.view.View
 import android.view.View.VISIBLE

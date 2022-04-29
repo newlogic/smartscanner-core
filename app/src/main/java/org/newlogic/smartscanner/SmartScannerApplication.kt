@@ -15,7 +15,7 @@
  *
  *
  */
-package org.idpass.smartscanner
+package org.newlogic.smartscanner
 
 import android.util.Log
 import androidx.multidex.MultiDexApplication

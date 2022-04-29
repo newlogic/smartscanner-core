@@ -15,7 +15,7 @@
  *
  *
  */
-package org.idpass.smartscanner
+package org.newlogic.smartscanner
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -28,16 +28,16 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.api.ScannerIntent
-import org.idpass.smartscanner.databinding.ActivityMainBinding
 import org.idpass.smartscanner.lib.R.string.required_nfc_not_supported
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT_BYTES
 import org.idpass.smartscanner.lib.nfc.NFCActivity
 import org.idpass.smartscanner.lib.scanner.config.*
-import org.idpass.smartscanner.result.IDPassResultActivity
-import org.idpass.smartscanner.result.ResultActivity
-import org.idpass.smartscanner.settings.SettingsActivity
+import org.newlogic.smartscanner.databinding.ActivityMainBinding
+import org.newlogic.smartscanner.result.IDPassResultActivity
+import org.newlogic.smartscanner.result.ResultActivity
+import org.newlogic.smartscanner.settings.SettingsActivity
 
 
 class MainActivity : AppCompatActivity() {

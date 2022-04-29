@@ -15,7 +15,7 @@
  *
  *
  */
-package org.idpass.smartscanner.settings
+package org.newlogic.smartscanner.settings
 
 import android.content.Context
 import android.content.Intent
@@ -26,12 +26,12 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import org.idpass.smartscanner.BuildConfig
-import org.idpass.smartscanner.MainActivity
-import org.idpass.smartscanner.R
-import org.idpass.smartscanner.SmartScannerApplication
 import org.idpass.smartscanner.lib.platform.utils.LanguageUtils
 import org.idpass.smartscanner.lib.scanner.config.Language
+import org.newlogic.smartscanner.BuildConfig
+import org.newlogic.smartscanner.MainActivity
+import org.newlogic.smartscanner.R
+import org.newlogic.smartscanner.SmartScannerApplication
 
 
 class SettingsActivity : AppCompatActivity() {
