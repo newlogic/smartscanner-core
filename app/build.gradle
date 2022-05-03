@@ -17,7 +17,7 @@ android {
     buildToolsVersion "30.0.3"
 
     defaultConfig {
-        applicationId "org.idpass.smartscanner"
+        applicationId "org.newlogic.smartscanner"
         minSdkVersion 21
         targetSdkVersion 30
         versionName androidGitVersion.name()
