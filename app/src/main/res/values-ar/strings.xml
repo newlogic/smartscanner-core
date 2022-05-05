@@ -1,8 +1,6 @@
 <resources>
     <string name="app_name">الماسح الذكي</string>
     <string name="app_name_default">الماسح الذكي</string>
-    <string name="app_name_v1">v1 الماسح الذكي</string>
-    <string name="app_name_v2">v2 الماسح الذكي</string>
 
     <!--Action items-->
     <string name="action_hide">إخفاء</string>
