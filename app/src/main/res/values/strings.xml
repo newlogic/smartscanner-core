@@ -1,8 +1,6 @@
 <resources>
     <string name="app_name">SmartScanner</string>
     <string name="app_name_default">SmartScanner</string>
-    <string name="app_name_v1">SmartScanner v1</string>
-    <string name="app_name_v2">SmartScanner v2 </string>
 
     <!--Action items-->
     <string name="action_hide">HIDE</string>

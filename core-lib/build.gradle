@@ -10,12 +10,6 @@ android {
     compileSdkVersion 32
     buildToolsVersion "30.0.3"
 
-    ext {
-        APP_NAME_DEFAULT = "@string/app_name_default"
-        APP_NAME_V1 = "@string/app_name_v1"
-        APP_NAME_V2 = "@string/app_name_v2"
-    }
-
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 32
@@ -27,10 +21,7 @@ android {
         vectorDrawables.useSupportLibrary = true
 
         // Sentry Default DSN
-        manifestPlaceholders = [
-                APP_NAME      : APP_NAME_DEFAULT,
-                dsn: 'https://90ebf03b06534e01a21f82c1b2e86ae2@sentry.newlogic.dev/4'
-        ]
+        manifestPlaceholders = [dsn: 'https://90ebf03b06534e01a21f82c1b2e86ae2@sentry.newlogic.dev/4']
     }
 
     buildFeatures {
@@ -49,25 +40,6 @@ android {
         }
     }
 
-    flavorDimensions "text"
-    productFlavors {
-        v1 {
-            versionName defaultConfig.versionName + "-v1"
-            buildConfigField "boolean", "ENABLE_LOG", "true"
-            manifestPlaceholders = [
-                    APP_NAME: APP_NAME_V1
-            ]
-            dimension "text"
-        }
-        v2 {
-            buildConfigField "boolean", "ENABLE_LOG", "false"
-            versionName defaultConfig.versionName + "-v2"
-            manifestPlaceholders = [
-                    APP_NAME: APP_NAME_V2
-            ]
-            dimension "text"
-        }
-    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
