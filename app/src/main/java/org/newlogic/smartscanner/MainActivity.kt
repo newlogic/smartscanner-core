@@ -33,8 +33,6 @@ import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT_BYTES
 import org.idpass.smartscanner.lib.nfc.NFCActivity
 import org.idpass.smartscanner.lib.scanner.config.*
-import org.newlogic.smartscanner.R
-import org.newlogic.smartscanner.SmartScannerApplication
 import org.newlogic.smartscanner.databinding.ActivityMainBinding
 import org.newlogic.smartscanner.result.IDPassResultActivity
 import org.newlogic.smartscanner.result.ResultActivity
@@ -162,7 +160,7 @@ class MainActivity : AppCompatActivity() {
         startActivityForResult(intent, OP_SCANNER)
     }
 
-    private fun getOrientation(pref : SharedPreferences?) = pref?.getString(ORIENTATION, Orientation.LANDSCAPE.value)
+    private fun getOrientation(pref : SharedPreferences?) = pref?.getString(ORIENTATION, Orientation.PORTRAIT.value)
     private fun getLanguage(pref : SharedPreferences?) = pref?.getString(Language.NAME, Language.EN)
 
     @SuppressLint("LogNotTimber")
