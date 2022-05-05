@@ -15,7 +15,7 @@
  *
  *
  */
-package org.idpass.smartscanner.result
+package org.newlogic.smartscanner.result
 
 import android.content.Intent
 import android.graphics.BitmapFactory
@@ -31,13 +31,13 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonParser
-import org.idpass.smartscanner.MainActivity.Companion.imageType
-import org.idpass.smartscanner.R
 import org.idpass.smartscanner.api.ScannerConstants
-import org.idpass.smartscanner.databinding.ActivityResultBinding
 import org.idpass.smartscanner.lib.platform.extension.decodeBase64
 import org.idpass.smartscanner.lib.scanner.config.ImageResultType
 import org.idpass.smartscanner.lib.scanner.config.Modes
+import org.newlogic.smartscanner.MainActivity.Companion.imageType
+import org.newlogic.smartscanner.R
+import org.newlogic.smartscanner.databinding.ActivityResultBinding
 
 class ResultActivity : AppCompatActivity() {
 
