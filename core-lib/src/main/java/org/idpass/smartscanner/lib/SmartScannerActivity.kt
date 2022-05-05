@@ -418,9 +418,9 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         val bottomGuideline = findViewById<Guideline>(R.id.bottom)
         when (scannerOptions?.scannerSize) {
             ScannerSize.LARGE.value -> {
-                bottomGuideline.setGuidelinePercent(0.8F)
-                topGuideline.setGuidelinePercent(0.1F)
-                layoutParams.dimensionRatio = "3:4"
+                bottomGuideline.setGuidelinePercent(0.925F)
+                topGuideline.setGuidelinePercent(0.0F)
+                layoutParams.dimensionRatio = "4:4"
                 modelLayoutView.layoutParams = layoutParams
             }
             ScannerSize.SMALL.value -> {
