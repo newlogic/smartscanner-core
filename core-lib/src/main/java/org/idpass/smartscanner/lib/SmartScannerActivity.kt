@@ -259,10 +259,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                         modelText?.visibility = VISIBLE
                         modelText?.text = it
                     }
-                ).also {
-                    if (!isMLKit) it.initializeTesseract(this)
-                }
-                rectangleMRZGuide?.visibility = VISIBLE
+                )
             }
             if (mode == Modes.NFC_SCAN.value) {
                 val nfcOptions = scannerOptions?.nfcOptions
@@ -293,9 +290,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                         modelText?.visibility = VISIBLE
                         modelText?.text = it
                     }
-                ).also {
-                    if (!isMLKit) it.initializeTesseract(this)
-                }
+                )
             }
             // set Analyzer and start camera
             analyzer?.let {
@@ -321,7 +316,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             preview = Preview.Builder().build()
             val imageAnalysisBuilder = ImageAnalysis.Builder()
             imageAnalyzer = imageAnalysisBuilder
-                .setTargetResolution(if (isPdf417) Size(1080, 1920) else Size(480, 640))
+                .setTargetResolution(if (isPdf417 || mode == Modes.QRCODE.value) Size(1080, 1920) else Size(480, 640))
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
                 .also {
@@ -356,8 +351,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                         imageCapture
                     )
                 }
-                if (isPdf417 || mode == Modes.MRZ.value) {
-                    // Reduce initial zoom ratio of camera to aid high resolution capture of Pdf417 or MRZ
+                if (isPdf417 || mode == Modes.QRCODE.value || mode == Modes.MRZ.value) {
+                    // Reduce initial zoom ratio of camera to aid high resolution capture of Pdf417 or QRCode or MRZ
                     camera?.cameraControl?.setZoomRatio(0.8F)
                 }
                 preview?.setSurfaceProvider(viewFinder.createSurfaceProvider())
@@ -368,35 +363,30 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 // Autofocus modes and Tap to focus
                 val camera2InterOp = Camera2Interop.Extender(imageAnalysisBuilder)
                 camera2InterOp.setCaptureRequestOption(CaptureRequest.CONTROL_AF_MODE,CaptureRequest.CONTROL_AF_MODE_AUTO)
-                camera2InterOp.setCaptureRequestOption(CaptureRequest.CONTROL_AF_TRIGGER,CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
-                camera2InterOp.setCaptureRequestOption(CaptureRequest.CONTROL_AE_MODE,CaptureRequest.CONTROL_AE_MODE_ON)
                 viewFinder.afterMeasured {
-                    viewFinder.setOnTouchListener { _, event ->
-                        return@setOnTouchListener when (event.action) {
-                            MotionEvent.ACTION_DOWN -> {
-                                true
-                            }
+                    // Listen to tap events on the viewfinder and set them as focus regions
+                    viewFinder.setOnTouchListener { view: View, motionEvent: MotionEvent ->
+                        when (motionEvent.action) {
+                            MotionEvent.ACTION_DOWN -> return@setOnTouchListener true
                             MotionEvent.ACTION_UP -> {
-                                val factory: MeteringPointFactory = SurfaceOrientedMeteringPointFactory(
-                                        viewFinder.width.toFloat(), viewFinder.height.toFloat()
+                                // Get the MeteringPointFactory from viewfinder
+                                val factory =  SurfaceOrientedMeteringPointFactory(
+                                    viewFinder.width.toFloat(), viewFinder.height.toFloat()
                                 )
-                                val autoFocusPoint = factory.createPoint(event.x, event.y)
-                                try {
-                                    camera?.cameraControl?.startFocusAndMetering(
-                                            FocusMeteringAction.Builder(
-                                                    autoFocusPoint,
-                                                    FocusMeteringAction.FLAG_AF
-                                            ).apply {
-                                                //focus only when the user tap the preview
-                                                disableAutoCancel()
-                                            }.build()
-                                    )
-                                } catch (e: CameraInfoUnavailableException) {
-                                    Log.d("ERROR", "cannot access camera", e)
-                                }
-                                true
+
+                                // Create a MeteringPoint from the tap coordinates
+                                val point = factory.createPoint(motionEvent.x, motionEvent.y)
+
+                                // Create a MeteringAction from the MeteringPoint, you can configure it to specify the metering mode
+                                val action = FocusMeteringAction.Builder(point).build()
+
+                                // Trigger the focus and metering. The method returns a ListenableFuture since the operation
+                                // is asynchronous. You can use it get notified when the focus is successful or if it fails.
+                                camera?.cameraControl?.startFocusAndMetering(action)
+
+                                return@setOnTouchListener true
                             }
-                            else -> false // Unhandled event.
+                            else -> return@setOnTouchListener false
                         }
                     }
                 }
@@ -416,34 +406,31 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         val layoutParams = modelLayoutView.layoutParams as ConstraintLayout.LayoutParams
         val topGuideline = findViewById<Guideline>(R.id.top)
         val bottomGuideline = findViewById<Guideline>(R.id.bottom)
+        val defaultRatio = if (config?.orientation == Orientation.LANDSCAPE.value) "" else "3:4"
         when (scannerOptions?.scannerSize) {
             ScannerSize.LARGE.value -> {
                 bottomGuideline.setGuidelinePercent(0.925F)
                 topGuideline.setGuidelinePercent(0.0F)
                 layoutParams.dimensionRatio = "4:4"
-                modelLayoutView.layoutParams = layoutParams
             }
             ScannerSize.SMALL.value -> {
                 layoutParams.dimensionRatio = "4:4"
-                modelLayoutView.layoutParams = layoutParams
             }
             else -> {
-                layoutParams.dimensionRatio = "3:4"
-                modelLayoutView.layoutParams = layoutParams
+                layoutParams.dimensionRatio = defaultRatio
             }
         }
         captureOptions?.type?.let { type ->
             if (type == CaptureType.ID.value) {
-                layoutParams.dimensionRatio = "3:4"
-                modelLayoutView.layoutParams = layoutParams
+                layoutParams.dimensionRatio = defaultRatio
             } else {
                 bottomGuideline.setGuidelinePercent(0.9F)
                 topGuideline.setGuidelinePercent(0.0F)
-                layoutParams.dimensionRatio = "3:4"
-                modelLayoutView.layoutParams = layoutParams
-
+                layoutParams.dimensionRatio = defaultRatio
             }
         }
+        // Apply to scanner layout view
+        modelLayoutView.layoutParams = layoutParams
         // flash
         flashButton?.visibility = if (isLedFlashAvailable(this)) VISIBLE else GONE
         // capture text label
@@ -491,6 +478,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         if (config?.orientation == Orientation.LANDSCAPE.value) {
             this.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
         }
+        rectangleMRZGuide?.visibility = VISIBLE
     }
 
     private fun isPlayServicesAvailable(): Boolean {
@@ -504,6 +492,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         permissions: Array<String>,
         grantResults: IntArray
     ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
             REQUEST_CODE_PERMISSIONS_VERSION_R,
             REQUEST_CODE_PERMISSIONS -> {

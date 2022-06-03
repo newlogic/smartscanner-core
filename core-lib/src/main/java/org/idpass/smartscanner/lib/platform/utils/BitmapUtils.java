@@ -81,8 +81,7 @@ public class BitmapUtils {
             .setRotation(image.getImageInfo().getRotationDegrees())
             .build();
 
-    ByteBuffer nv21Buffer =
-        yuv420ThreePlanesToNV21(image.getImage().getPlanes(), image.getWidth(), image.getHeight());
+    ByteBuffer nv21Buffer = yuv420ThreePlanesToNV21(image.getImage().getPlanes(), image.getWidth(), image.getHeight());
     return getBitmap(nv21Buffer, frameMetadata);
   }
 

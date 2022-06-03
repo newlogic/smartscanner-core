@@ -1,28 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/coordinatorLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/transparent_grey"
     android:elevation="3dp"
-    android:textAlignment="gravity"
-    tools:context="org.idpass.smartscanner.lib.SmartScannerActivity">
+    android:textAlignment="gravity">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="4dp"
+        app:layout_constraintGuide_percent="0.175" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_end="4dp"
+        app:layout_constraintGuide_percent="0.825" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/viewLayout"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
         android:elevation="1dp"
         android:visibility="visible"
-        android:layout_marginTop="36dp"
+        android:layout_marginTop="40dp"
         android:layout_marginBottom="16dp"
-        android:paddingStart="100dp"
-        android:paddingEnd="100dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/right"
+        app:layout_constraintStart_toStartOf="@+id/left"
         app:layout_constraintTop_toBottomOf="@+id/action_bar_menu">
 
         <TextView
@@ -53,11 +65,11 @@
 
         <androidx.camera.view.PreviewView
             android:id="@+id/viewFinder"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginBottom="42dp"
-            android:layout_marginTop="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_marginHorizontal="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="42dp"
             android:elevation="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -66,8 +78,8 @@
 
         <ImageView
             android:id="@+id/rectimage"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_marginBottom="36dp"
             android:adjustViewBounds="false"
             android:contentDescription="@string/rectangle"
@@ -128,9 +140,8 @@
         android:id="@+id/modelText"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginBottom="48dp"
-        android:layout_marginHorizontal="96dp"
         android:layout_marginTop="48dp"
+        android:layout_marginBottom="48dp"
         android:background="@color/transparent_grey"
         android:elevation="2dp"
         android:fontFamily="@font/sourcesanspro_medium"
@@ -140,22 +151,21 @@
         android:textSize="18sp"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/right"
+        app:layout_constraintStart_toStartOf="@+id/left"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ProgressBar
         android:id="@+id/modelTextLoading"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="96dp"
-        android:elevation="2dp"
         android:layout_marginTop="60dp"
-        android:visibility="invisible"
+        android:elevation="2dp"
         android:indeterminateTint="@color/white_30"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/right"
+        app:layout_constraintStart_toStartOf="@+id/left"
         app:layout_constraintTop_toTopOf="parent" />
 
 
@@ -166,9 +176,9 @@
         android:layout_height="48dp"
         android:layout_marginEnd="16dp"
         android:src="@drawable/circle_photo_camera"
-        app:layout_constraintTop_toBottomOf="@+id/action_bar_menu"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@+id/action_bar_menu" />
 
     <include
         android:id="@+id/action_bar_menu"

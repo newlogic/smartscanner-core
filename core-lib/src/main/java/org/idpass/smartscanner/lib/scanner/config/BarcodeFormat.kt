@@ -41,7 +41,6 @@ enum class BarcodeFormat(val label: String, val value: Int) {
             arrayListOf(
                 AZTEC.label,
                 CODABAR.label,
-                CODABAR.label,
                 CODE_39.label,
                 CODE_93.label,
                 CODE_128.label,

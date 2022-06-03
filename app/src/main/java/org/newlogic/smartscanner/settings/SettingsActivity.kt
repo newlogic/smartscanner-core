@@ -77,7 +77,7 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         // Orientation (Portrait/Landscape)
-        val orientation = preference.getString(ORIENTATION, Orientation.LANDSCAPE.value)
+        val orientation = preference.getString(ORIENTATION, Orientation.PORTRAIT.value)
         if (orientation == Orientation.LANDSCAPE.value) {
             binding.portraitCheck.visibility = View.INVISIBLE
             binding.landscapeCheck.visibility = View.VISIBLE
