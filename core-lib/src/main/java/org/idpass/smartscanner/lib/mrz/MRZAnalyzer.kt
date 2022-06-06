@@ -31,10 +31,12 @@ import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.googlecode.tesseract.android.TessBaseAPI
 import org.idpass.smartscanner.api.ScannerConstants
-import org.idpass.smartscanner.lib.R
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.platform.BaseImageAnalyzer
-import org.idpass.smartscanner.lib.platform.extension.*
+import org.idpass.smartscanner.lib.platform.extension.cacheImagePath
+import org.idpass.smartscanner.lib.platform.extension.cacheImageToLocal
+import org.idpass.smartscanner.lib.platform.extension.encodeBase64
+import org.idpass.smartscanner.lib.platform.extension.setContrast
 import org.idpass.smartscanner.lib.platform.utils.BitmapUtils
 import org.idpass.smartscanner.lib.platform.utils.FileUtils
 import org.idpass.smartscanner.lib.scanner.config.ImageResultType
@@ -56,9 +58,7 @@ open class MRZAnalyzer(
         private val isMLKit: Boolean,
         private val imageResultType: String,
         private val format: String?,
-        private val analyzeStart: Long,
-        private val onConnectSuccess: (String) -> Unit,
-        private val onConnectFail: (String) -> Unit
+        private val analyzeStart: Long = System.currentTimeMillis()
 ) : BaseImageAnalyzer() {
 
     private lateinit var tessBaseAPI: TessBaseAPI
@@ -72,7 +72,7 @@ open class MRZAnalyzer(
         tessBaseAPI.pageSegMode = TessBaseAPI.PageSegMode.PSM_SINGLE_BLOCK
     }
 
-    @SuppressLint("UnsafeExperimentalUsageError")
+    @SuppressLint("UnsafeExperimentalUsageError", "UnsafeOptInUsageError")
     override fun analyze(imageProxy: ImageProxy) {
         val bitmap = BitmapUtils.getBitmap(imageProxy)
         bitmap?.let { bf ->
@@ -80,7 +80,6 @@ open class MRZAnalyzer(
             bf.apply {
                 // Increase brightness and contrast for clearer image to be processed
                 setContrast(1.5F)
-                setBrightness(5F)
             }
             val cropped = when (rot) {
                 90, 270 -> {
@@ -92,13 +91,12 @@ open class MRZAnalyzer(
                         bf.height
                     )
                 }
-                180 -> Bitmap.createBitmap(bf, 0 , bf.height / 4, bf.width, bf.height / 4)
-                else -> Bitmap.createBitmap(bf, 0 , bf.height / 3, bf.width, bf.height / 3)
-
+                180 -> Bitmap.createBitmap(bf, 0, bf.height / 4, bf.width, bf.height / 4)
+                else -> Bitmap.createBitmap(bf, 0, bf.height / 3, bf.width, bf.height / 3)
             }
             Log.d(
-                    SmartScannerActivity.TAG,
-                    "Bitmap: (${bf.width}, ${bf.height} Cropped: (${cropped.width}, ${cropped.height}), Rotation: $rot"
+                SmartScannerActivity.TAG,
+                "Bitmap: (${bf.width}, ${bf.height} Cropped: (${cropped.width}, ${cropped.height}), Rotation: $rot"
             )
             //if (isMLKit) {
                 // Pass image to an ML Kit Vision API
@@ -110,7 +108,6 @@ open class MRZAnalyzer(
                 Log.d("${SmartScannerActivity.TAG}/SmartScanner", "MRZ MLKit TextRecognition: process")
                 recognizer.process(image)
                         .addOnSuccessListener { visionText ->
-                            onConnectSuccess.invoke(activity.getString(R.string.model_text_loaded))
                             val timeRequired = System.currentTimeMillis() - start
                             Log.d(
                                     "${SmartScannerActivity.TAG}/SmartScanner",
@@ -150,24 +147,6 @@ open class MRZAnalyzer(
                         }
                         .addOnFailureListener { e ->
                             e.printStackTrace()
-                            val timeElapsed = (System.currentTimeMillis() - analyzeStart).toDouble() / 1000
-                            Log.d(
-                                    "${SmartScannerActivity.TAG}/SmartScanner",
-                                    "MRZ MLKit TextRecognition: failure: ${e.message}"
-                            )
-                            val connectionId = if (activity.getConnectionType() == 0) {
-                                R.string.connection_text
-                            }
-                            else {
-                                when (timeElapsed) {
-                                    in 0.0..10.0 -> R.string.model_text_waiting // 0-10 secs msg
-                                    in 10.0..60.0 -> R.string.model_text // 10-60 secs msg
-                                    in 60.0..180.0-> R.string.model_text_download // 60-180 secs msg
-                                    in 180.0..300.0-> R.string.model_text_process // 180-300 secs msg
-                                    else -> R.string.model_text_process_wait
-                                }
-                            }
-                            onConnectFail.invoke(activity.getString(connectionId))
                             imageProxy.close()
                         }
             /*} else {

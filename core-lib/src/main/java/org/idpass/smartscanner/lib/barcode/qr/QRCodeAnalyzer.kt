@@ -69,17 +69,26 @@ class QRCodeAnalyzer(
                         "${SmartScannerActivity.TAG}/SmartScanner",
                         "qrcode: success: $timeRequired ms"
                     )
-                    if (barcodes.isNotEmpty()) {
-                        rawValue = barcodes[0].rawValue
+                    if (barcodes != null && barcodes.isNotEmpty()) {
+                        val resultValue = barcodes[0].rawValue
                         when (intent.action) {
                             ScannerConstants.IDPASS_SMARTSCANNER_QRCODE_INTENT,
                             ScannerConstants.IDPASS_SMARTSCANNER_ODK_QRCODE_INTENT, -> {
                                 sendResult(
-                                        rawValue = rawValue,
-                                        rawBytes = barcodes[0].rawBytes
+                                    rawValue = resultValue,
+                                    rawBytes = barcodes[0].rawBytes
                                 )
                             }
+                            else -> {
+                                val data = Intent()
+                                Log.d(SmartScannerActivity.TAG, "Success from QR code")
+                                Log.d(SmartScannerActivity.TAG, "value: $resultValue")
+                                data.putExtra(SmartScannerActivity.SCANNER_RESULT, resultValue)
+                                activity.setResult(Activity.RESULT_OK, data)
+                                activity.finish()
+                            }
                         }
+
                     } else {
                         Log.d(
                             "${SmartScannerActivity.TAG}/SmartScanner",
@@ -107,11 +116,8 @@ class QRCodeAnalyzer(
         val isJson = if (isOdk) intent.getStringExtra(ScannerConstants.JSON_ENABLED) == "1" else intent.getBooleanExtra(ScannerConstants.JSON_ENABLED, false)
         val jsonPath = intent.getStringExtra(ScannerConstants.JSON_PATH)
         // check gzipped parameters for bundle return result
-        var data : String? = if (isGzipped) {
-            getGzippedData(rawBytes)
-        } else {
-            rawValue
-        }
+        var data : String? = if (isGzipped) getGzippedData(rawBytes) else rawValue
+
         // check json parameters for bundle return result
         if (isJson) {
             if (data != null) {

@@ -46,7 +46,7 @@ class BarcodeAnalyzer(
     private val barcodeFormats: List<Int>
 ) : BaseImageAnalyzer() {
 
-    @SuppressLint("UnsafeExperimentalUsageError")
+    @SuppressLint("UnsafeExperimentalUsageError", "UnsafeOptInUsageError")
     override fun analyze(imageProxy: ImageProxy) {
         val bitmap = BitmapUtils.getBitmap(imageProxy)
         bitmap?.let { bf ->
@@ -56,7 +56,6 @@ class BarcodeAnalyzer(
             bf.apply {
                 // Increase contrast and brightness for better image processing and reduce Moiré effect
                 setContrast(1.5F)
-                setBrightness(5F)
             }
             var barcodeFormat = Barcode.FORMAT_QR_CODE
             barcodeFormats.forEach {
