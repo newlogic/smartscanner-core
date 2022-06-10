@@ -27,7 +27,6 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Typeface
 import android.hardware.camera2.CameraManager
-import android.hardware.camera2.CaptureRequest
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
@@ -38,7 +37,6 @@ import android.util.Size
 import android.view.*
 import android.view.View.*
 import android.widget.*
-import androidx.camera.camera2.interop.Camera2Interop
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
@@ -76,7 +74,7 @@ import org.idpass.smartscanner.lib.scanner.config.*
 import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-
+import java.util.concurrent.TimeUnit
 
 class SmartScannerActivity : BaseActivity(), OnClickListener {
 
@@ -123,7 +121,6 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_smart_scanner)
-
         // assign view ids
         coordinatorLayoutView = findViewById(R.id.coordinatorLayout)
         modelLayoutView = findViewById(R.id.viewLayout)
@@ -142,27 +139,12 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         // Scanner setup from intent
         hideActionBar()
         if (intent.action != null) {
-            scannerOptions = when (intent.action) {
-                // barcode
-                ScannerConstants.IDPASS_SMARTSCANNER_BARCODE_INTENT,
-                ScannerConstants.IDPASS_SMARTSCANNER_ODK_BARCODE_INTENT -> ScannerOptions.defaultForBarcode
-                // idpass lite
-                ScannerConstants.IDPASS_SMARTSCANNER_IDPASS_LITE_INTENT,
-                ScannerConstants.IDPASS_SMARTSCANNER_ODK_IDPASS_LITE_INTENT -> ScannerOptions.defaultForIdPassLite
-                // mrz
-                ScannerConstants.IDPASS_SMARTSCANNER_MRZ_INTENT,
-                ScannerConstants.IDPASS_SMARTSCANNER_ODK_MRZ_INTENT -> ScannerOptions.defaultForMRZ
-                // nfc
-                ScannerConstants.IDPASS_SMARTSCANNER_NFC_INTENT,
-                ScannerConstants.IDPASS_SMARTSCANNER_ODK_NFC_INTENT -> ScannerOptions.defaultForNFCScan
-                // qrcode
-                ScannerConstants.IDPASS_SMARTSCANNER_QRCODE_INTENT,
-                ScannerConstants.IDPASS_SMARTSCANNER_ODK_QRCODE_INTENT -> ScannerOptions.defaultForQRCode
-                else -> throw SmartScannerException("Error: Wrong intent action. Please see ScannerConstants.kt for proper intent action strings.")
+            scannerOptions = ScannerOptions.defaultForODK(intent.action).also { options ->
+                if (options == null) throw SmartScannerException("Error: Wrong intent action. Please see smartscanner-android-api for proper intent action strings.")
             }
         } else {
             // Use scanner options directly if no scanner type is called
-            val options : ScannerOptions? = intent.getParcelableExtra(SCANNER_OPTIONS)
+            val options: ScannerOptions? = intent.getParcelableExtra(SCANNER_OPTIONS)
             options?.let {
                 Log.d(TAG, "scannerOptions: $it")
                 scannerOptions = options
@@ -173,7 +155,6 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         // setup modes & config for reader
         mode = scannerOptions?.mode
         config = scannerOptions?.config ?: Config.default
-
         // Request camera permissions
         if (allPermissionsGranted()) {
             setupConfiguration()
@@ -185,7 +166,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         val captureLog = scannerOptions?.sentryLogger?.captureLog
         val dsn = scannerOptions?.sentryLogger?.dsn
         if (captureLog == true) {
-            if (dsn != null && dsn.isNotEmpty() && dsn.isNotBlank() && dsn.isValidUrl() ) {
+            if (dsn != null && dsn.isNotEmpty() && dsn.isNotBlank() && dsn.isValidUrl()) {
                 // Sentry DSN init
                 Sentry.init { options: SentryOptions ->
                     options.dsn = dsn
@@ -204,204 +185,20 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
 
     private fun setupConfiguration() {
         runOnUiThread {
-            val isMLKit = isPlayServicesAvailable()
-            var analyzer : ImageAnalysis.Analyzer? = null
-            var isPdf417 = false
-            if (mode == Modes.BARCODE.value) {
-                val barcodeStrings = scannerOptions?.barcodeOptions?.barcodeFormats ?: BarcodeFormat.default
-                val barcodeFormats = barcodeStrings.map { BarcodeFormat.valueOf(it).value }
-                isPdf417 = barcodeStrings.find { it == "PDF_417" }?.isNotEmpty() == true
-                analyzer = BarcodeAnalyzer(
-                    activity = this,
-                    intent = intent,
-                    imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
-                    isPDF417 = isPdf417,
-                    barcodeFormats = barcodeFormats
-                )
-            }
-            if (mode == Modes.QRCODE.value) {
-                analyzer = QRCodeAnalyzer(
-                    activity = this,
-                    intent = intent
-                )
-            }
-            if (mode == Modes.IDPASS_LITE.value) {
-                val loaded = IDPassLite.initialize(cacheDir, assets)
-                if (!loaded) Log.d("${TAG}/SmartScanner", "ID PASS Lite: Load models Failure")
-                analyzer = IDPassLiteAnalyzer(
-                    activity = this,
-                    intent = intent,
-                    onVerify = { raw ->
-                        raw?.let {
-                            showIDPassLiteVerification(it)
-                        }
-                    }
-                )
-            }
-            if (mode == Modes.MRZ.value) {
-                analyzer = MRZAnalyzer(
-                    activity = this,
-                    intent = intent,
-                    isMLKit = isMLKit,
-                    imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
-                    format = scannerOptions?.mrzFormat
-                        ?: intent.getStringExtra(ScannerConstants.MRZ_FORMAT_EXTRA),
-                    analyzeStart = System.currentTimeMillis(),
-                    onConnectSuccess = {
-                        if (modelText?.visibility == VISIBLE) {
-                            modelText?.text = it
-                        }
-                        modelTextLoading?.visibility = INVISIBLE
-                        modelText?.visibility = INVISIBLE
-                    },
-                    onConnectFail = {
-                        modelTextLoading?.visibility = VISIBLE
-                        modelText?.visibility = VISIBLE
-                        modelText?.text = it
-                    }
-                )
-            }
-            if (mode == Modes.NFC_SCAN.value) {
-                val nfcOptions = scannerOptions?.nfcOptions
-                analyzer = NFCScanAnalyzer(
-                    activity = this,
-                    intent = intent,
-                    isMLKit = isMLKit,
-                    imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
-                    label = nfcOptions?.label,
-                    language = scannerOptions?.language ?: intent.getStringExtra(ScannerConstants.LANGUAGE),
-                    locale = nfcOptions?.locale
-                        ?: intent.getStringExtra(ScannerConstants.NFC_LOCALE),
-                    withPhoto = nfcOptions?.withPhoto
-                        ?: true, // default is true, NFC results with photo from NFC
-                    withMrzPhoto = nfcOptions?.withMrzPhoto
-                        ?: false, // default is false, NFC results with photo from MRZ
-                    captureLog = scannerOptions?.sentryLogger?.captureLog
-                        ?: false, // default is false, capture log and send to Sentry
-                    enableLogging = nfcOptions?.enableLogging
-                        ?: false, // default is false, logging is disabled
-                    analyzeStart = System.currentTimeMillis(),
-                    onConnectSuccess = {
-                        modelTextLoading?.visibility = INVISIBLE
-                        modelText?.visibility = INVISIBLE
-                    },
-                    onConnectFail = {
-                        modelTextLoading?.visibility = VISIBLE
-                        modelText?.visibility = VISIBLE
-                        modelText?.text = it
-                    }
-                )
-            }
-            // set Analyzer and start camera
-            analyzer?.let {
-                startCamera(analyzer, isPdf417)
+            val isPdf417 = scannerOptions?.barcodeOptions?.barcodeFormats?.find { it == "PDF_417" }?.isNotEmpty() == true
+            getAnalyzer()?.let { analyzer ->
+                startCamera(analyzer = analyzer, isPdf417 = isPdf417)
             } ?: run {
                 if (mode == Modes.CAPTURE_ONLY.value) {
                     startCamera()
                     captureOptions = scannerOptions?.captureOptions ?: CaptureOptions.default
                 } else throw SmartScannerException("Image Analysis Scanner is null. Please check the scanner options sent to SmartScanner.")
             }
+            setupViews(isPdf417 = isPdf417)
         }
-        setupViews()
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    private fun startCamera(analyzer: ImageAnalysis.Analyzer? = null, isPdf417: Boolean = false) {
-        this.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
-        cameraProviderFuture.addListener({
-            // Used to bind the lifecycle of cameras to the lifecycle owner
-            cameraProvider = cameraProviderFuture.get()
-            // Preview
-            preview = Preview.Builder().build()
-            val imageAnalysisBuilder = ImageAnalysis.Builder()
-            imageAnalyzer = imageAnalysisBuilder
-                .setTargetResolution(if (isPdf417 || mode == Modes.QRCODE.value) Size(1080, 1920) else Size(480, 640))
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .build()
-                .also {
-                    analyzer?.let { analysis -> it.setAnalyzer(cameraExecutor, analysis) }
-                }
-
-            // Create configuration object for the image capture use case
-            imageCapture = ImageCapture.Builder()
-                .setTargetResolution(Size(1080, 1920))
-                .setTargetRotation(Surface.ROTATION_0)
-                .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
-                .build()
-            // Select back camera
-            val cameraSelector = CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build()
-            try {
-                // Unbind use cases before rebinding
-                cameraProvider?.unbindAll()
-                // Bind use cases to camera
-                camera = if (analyzer != null) {
-                    cameraProvider?.bindToLifecycle(
-                        this,
-                        cameraSelector,
-                        preview,
-                        imageAnalyzer,
-                        imageCapture
-                    )
-                } else {
-                    cameraProvider?.bindToLifecycle(
-                        this,
-                        cameraSelector,
-                        preview,
-                        imageCapture
-                    )
-                }
-                if (isPdf417 || mode == Modes.QRCODE.value || mode == Modes.MRZ.value) {
-                    // Reduce initial zoom ratio of camera to aid high resolution capture of Pdf417 or QRCode or MRZ
-                    camera?.cameraControl?.setZoomRatio(0.8F)
-                }
-                preview?.setSurfaceProvider(viewFinder.createSurfaceProvider())
-                Log.d(
-                    TAG,
-                    "Measured size: ${viewFinder.width}x${viewFinder.height}"
-                )
-                // Autofocus modes and Tap to focus
-                val camera2InterOp = Camera2Interop.Extender(imageAnalysisBuilder)
-                camera2InterOp.setCaptureRequestOption(CaptureRequest.CONTROL_AF_MODE,CaptureRequest.CONTROL_AF_MODE_AUTO)
-                viewFinder.afterMeasured {
-                    // Listen to tap events on the viewfinder and set them as focus regions
-                    viewFinder.setOnTouchListener { view: View, motionEvent: MotionEvent ->
-                        when (motionEvent.action) {
-                            MotionEvent.ACTION_DOWN -> return@setOnTouchListener true
-                            MotionEvent.ACTION_UP -> {
-                                // Get the MeteringPointFactory from viewfinder
-                                val factory =  SurfaceOrientedMeteringPointFactory(
-                                    viewFinder.width.toFloat(), viewFinder.height.toFloat()
-                                )
-
-                                // Create a MeteringPoint from the tap coordinates
-                                val point = factory.createPoint(motionEvent.x, motionEvent.y)
-
-                                // Create a MeteringAction from the MeteringPoint, you can configure it to specify the metering mode
-                                val action = FocusMeteringAction.Builder(point).build()
-
-                                // Trigger the focus and metering. The method returns a ListenableFuture since the operation
-                                // is asynchronous. You can use it get notified when the focus is successful or if it fails.
-                                camera?.cameraControl?.startFocusAndMetering(action)
-
-                                return@setOnTouchListener true
-                            }
-                            else -> return@setOnTouchListener false
-                        }
-                    }
-                }
-
-            } catch (exc: Exception) {
-                Log.e(TAG, "Use case binding failed", exc)
-            }
-        }, ContextCompat.getMainExecutor(this))
-        // assign camera click listeners
-        closeButton?.setOnClickListener(this)
-        flashButton?.setOnClickListener(this)
-        manualCapture?.setOnClickListener(this)
-    }
-
-    private fun setupViews() {
+    private fun setupViews(isPdf417: Boolean = false) {
         // scanner layout size
         val layoutParams = modelLayoutView.layoutParams as ConstraintLayout.LayoutParams
         val topGuideline = findViewById<Guideline>(R.id.top)
@@ -409,9 +206,12 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         val defaultRatio = if (config?.orientation == Orientation.LANDSCAPE.value) "" else "3:4"
         when (scannerOptions?.scannerSize) {
             ScannerSize.LARGE.value -> {
-                bottomGuideline.setGuidelinePercent(0.925F)
-                topGuideline.setGuidelinePercent(0.0F)
-                layoutParams.dimensionRatio = "4:4"
+                bottomGuideline.setGuidelinePercent(0.75F)
+                topGuideline.setGuidelinePercent(0.1F)
+                layoutParams.dimensionRatio =  when {
+                    isPdf417 || mode == Modes.QRCODE.value || mode == Modes.IDPASS_LITE.value -> "9:16"
+                    else -> defaultRatio
+                }
             }
             ScannerSize.SMALL.value -> {
                 layoutParams.dimensionRatio = "4:4"
@@ -481,6 +281,170 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         rectangleMRZGuide?.visibility = VISIBLE
     }
 
+    @SuppressLint("ClickableViewAccessibility")
+    private fun startCamera(analyzer: ImageAnalysis.Analyzer? = null, isPdf417: Boolean = false) {
+        this.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
+        cameraProviderFuture.addListener({
+            // Used to bind the lifecycle of cameras to the lifecycle owner
+            cameraProvider = cameraProviderFuture.get()
+            // Preview
+            preview = Preview.Builder().build()
+            val imageAnalysisBuilder = ImageAnalysis.Builder()
+            val resolution = when {
+                isPdf417 -> Size(1080, 1920)
+                mode == Modes.QRCODE.value || mode == Modes.IDPASS_LITE.value -> Size(720, 1280)
+                else -> Size(480, 640)
+            }
+            imageAnalyzer = imageAnalysisBuilder
+                .setTargetResolution(resolution)
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .build()
+                .also {
+                    analyzer?.let { analysis -> it.setAnalyzer(cameraExecutor, analysis) }
+                }
+            // Select back camera
+            val cameraSelector = CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build()
+            try {
+                // Unbind use cases before rebinding
+                cameraProvider?.unbindAll()
+                // Create configuration object for the image capture use case
+                imageCapture = ImageCapture.Builder()
+                    .setTargetResolution(Size(1080, 1920))
+                    .setTargetRotation(Surface.ROTATION_0)
+                    .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
+                    .build()
+                // Bind use cases to camera
+                camera = if (analyzer != null) {
+                    cameraProvider?.bindToLifecycle(
+                        this,
+                        cameraSelector,
+                        preview,
+                        imageAnalyzer,
+                        imageCapture
+                    )
+                } else {
+                    cameraProvider?.bindToLifecycle(
+                        this,
+                        cameraSelector,
+                        preview,
+                        imageCapture
+                    )
+                }
+                // Reduce initial zoom ratio of camera to aid high resolution capture of Pdf417 or QRCode or MRZ
+                camera?.cameraControl?.setZoomRatio(1.2F)
+                // Autofocus and Tap to focus
+                viewFinder.afterMeasured {
+                    var autoFocusPoint = SurfaceOrientedMeteringPointFactory(1f, 1f)
+                        .createPoint(.5f, .5f)
+                    try {
+                        val autoFocusAction = FocusMeteringAction.Builder(
+                            autoFocusPoint,
+                            FocusMeteringAction.FLAG_AF
+                        ).apply {
+                            //start auto-focusing after .5 seconds
+                            setAutoCancelDuration(500, TimeUnit.MILLISECONDS)
+                        }.build()
+                        camera?.cameraControl?.startFocusAndMetering(autoFocusAction)
+                    } catch (e: CameraInfoUnavailableException) {
+                        e.printStackTrace()
+                    }
+                    // Listen to tap events on the viewfinder and set them as focus regions
+                    viewFinder.setOnTouchListener { _, event ->
+                        return@setOnTouchListener when (event.action) {
+                            MotionEvent.ACTION_DOWN -> true
+                            MotionEvent.ACTION_UP -> {
+                                val factory: MeteringPointFactory =
+                                    SurfaceOrientedMeteringPointFactory(
+                                        viewFinder.width.toFloat(), viewFinder.height.toFloat()
+                                    )
+                                autoFocusPoint = factory.createPoint(event.x, event.y)
+                                try {
+                                    camera?.cameraControl?.startFocusAndMetering(
+                                        FocusMeteringAction.Builder(
+                                            autoFocusPoint,
+                                            FocusMeteringAction.FLAG_AF
+                                        ).apply {
+                                            //focus only when the user tap the preview
+                                            disableAutoCancel()
+                                        }.build()
+                                    )
+                                } catch (e: CameraInfoUnavailableException) {
+                                    Log.d("ERROR", "cannot access camera", e)
+                                }
+                                true
+                            }
+                            else -> false // Unhandled event.
+                        }
+                    }
+                }
+                preview?.setSurfaceProvider(viewFinder.createSurfaceProvider())
+                Log.d(TAG, "Measured size: ${viewFinder.width}x${viewFinder.height}")
+            } catch (exc: Exception) {
+                Log.e(TAG, "Use case binding failed", exc)
+            }
+        }, ContextCompat.getMainExecutor(this))
+        // assign camera click listeners
+        closeButton?.setOnClickListener(this)
+        flashButton?.setOnClickListener(this)
+        manualCapture?.setOnClickListener(this)
+    }
+
+    private fun getAnalyzer(): ImageAnalysis.Analyzer? {
+        return when (mode) {
+            Modes.BARCODE.value -> {
+                val barcodeStrings = scannerOptions?.barcodeOptions?.barcodeFormats ?: BarcodeFormat.default
+                BarcodeAnalyzer(
+                    activity = this,
+                    intent = intent,
+                    imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
+                    isPDF417 = barcodeStrings.find { it == "PDF_417" }?.isNotEmpty() == true,
+                    barcodeFormats = barcodeStrings.map { BarcodeFormat.valueOf(it).value }
+                )
+            }
+            Modes.IDPASS_LITE.value -> {
+                val loaded = IDPassLite.initialize(cacheDir, assets)
+                if (!loaded) Log.d("${TAG}/SmartScanner", "ID PASS Lite: Load models Failure")
+                IDPassLiteAnalyzer(
+                    activity = this,
+                    intent = intent,
+                    onVerify = { raw ->
+                        raw?.let {
+                            showIDPassLiteVerification(it)
+                        }
+                    }
+                )
+            }
+            Modes.MRZ.value -> {
+                MRZAnalyzer(
+                    activity = this,
+                    intent = intent,
+                    isMLKit = isPlayServicesAvailable(),
+                    imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
+                    format = scannerOptions?.mrzFormat ?: intent.getStringExtra(ScannerConstants.MRZ_FORMAT_EXTRA)
+                )
+            }
+            Modes.NFC_SCAN.value -> {
+                val nfcOptions = scannerOptions?.nfcOptions
+                NFCScanAnalyzer(
+                    activity = this,
+                    intent = intent,
+                    isMLKit = isPlayServicesAvailable(),
+                    imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
+                    label = nfcOptions?.label,
+                    language = scannerOptions?.language ?: intent.getStringExtra(ScannerConstants.LANGUAGE),
+                    locale = nfcOptions?.locale ?: intent.getStringExtra(ScannerConstants.NFC_LOCALE),
+                    withPhoto = nfcOptions?.withPhoto ?: true, // default is true, NFC results with photo from NFC
+                    withMrzPhoto = nfcOptions?.withMrzPhoto ?: false, // default is false, NFC results with photo from MRZ
+                    captureLog = scannerOptions?.sentryLogger?.captureLog ?: false, // default is false, capture log and send to Sentry
+                    enableLogging = nfcOptions?.enableLogging ?: false, // default is false, logging is disabled
+                )
+            }
+            Modes.QRCODE.value -> QRCodeAnalyzer( activity = this, intent = intent)
+            else -> null
+        }
+    }
+
     private fun isPlayServicesAvailable(): Boolean {
         val availability = GoogleApiAvailability.getInstance()
         val resultCode = availability.isGooglePlayServicesAvailable(this)
@@ -512,9 +476,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         }
     }
 
-    private fun requestPermissions() {
-        ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
-    }
+    private fun requestPermissions() = ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
@@ -578,7 +540,6 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                             setResult(Activity.RESULT_OK, data)
                             finish()
                         }
-
                         override fun onError(exception: ImageCaptureException) {
                             exception.printStackTrace()
                             manualCapture?.isEnabled = true
@@ -590,7 +551,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
     }
 
     @SuppressLint("InflateParams")
-    private fun showIDPassLiteVerification(qrBytes: ByteArray)  {
+    private fun showIDPassLiteVerification(qrBytes: ByteArray) {
         val bottomSheetDialog = BottomSheetDialog(this)
         val sheetView = layoutInflater.inflate(R.layout.dialog_idpass_verify, null)
         bottomSheetDialog.setContentView(sheetView)
@@ -634,21 +595,5 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             setupConfiguration()
         }
         bottomSheetDialog.show()
-    }
-
-
-    private inline fun View.afterMeasured(crossinline block: () -> Unit) {
-        if (measuredWidth > 0 && measuredHeight > 0) {
-            block()
-        } else {
-            viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-                override fun onGlobalLayout() {
-                    if (measuredWidth > 0 && measuredHeight > 0) {
-                        viewTreeObserver.removeOnGlobalLayoutListener(this)
-                        block()
-                    }
-                }
-            })
-        }
     }
 }
