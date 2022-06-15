@@ -19,6 +19,7 @@ package org.idpass.smartscanner.lib.scanner.config
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.scanner.config.Modes.*
 
 @Parcelize
@@ -73,5 +74,26 @@ data class ScannerOptions(
             scannerSize = ScannerSize.LARGE.value,
             config = Config.default
         )
+
+        fun defaultForODK(action : String?) : ScannerOptions? {
+            return when (action) {
+                // barcode
+                ScannerConstants.IDPASS_SMARTSCANNER_BARCODE_INTENT,
+                ScannerConstants.IDPASS_SMARTSCANNER_ODK_BARCODE_INTENT -> defaultForBarcode
+                // idpass lite
+                ScannerConstants.IDPASS_SMARTSCANNER_IDPASS_LITE_INTENT,
+                ScannerConstants.IDPASS_SMARTSCANNER_ODK_IDPASS_LITE_INTENT -> defaultForIdPassLite
+                // mrz
+                ScannerConstants.IDPASS_SMARTSCANNER_MRZ_INTENT,
+                ScannerConstants.IDPASS_SMARTSCANNER_ODK_MRZ_INTENT -> defaultForMRZ
+                // nfc
+                ScannerConstants.IDPASS_SMARTSCANNER_NFC_INTENT,
+                ScannerConstants.IDPASS_SMARTSCANNER_ODK_NFC_INTENT -> defaultForNFCScan
+                // qrcode
+                ScannerConstants.IDPASS_SMARTSCANNER_QRCODE_INTENT,
+                ScannerConstants.IDPASS_SMARTSCANNER_ODK_QRCODE_INTENT -> defaultForQRCode
+                else -> null
+            }
+        }
     }
 }

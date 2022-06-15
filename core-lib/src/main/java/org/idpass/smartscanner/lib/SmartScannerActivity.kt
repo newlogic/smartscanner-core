@@ -141,24 +141,9 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         captureSubHeaderText = findViewById(R.id.captureSubHeaderText)
         // Scanner setup from intent
         hideActionBar()
-        if (intent.action != null) {
-            scannerOptions = when (intent.action) {
-                // barcode
-                ScannerConstants.IDPASS_SMARTSCANNER_BARCODE_INTENT,
-                ScannerConstants.IDPASS_SMARTSCANNER_ODK_BARCODE_INTENT -> ScannerOptions.defaultForBarcode
-                // idpass lite
-                ScannerConstants.IDPASS_SMARTSCANNER_IDPASS_LITE_INTENT,
-                ScannerConstants.IDPASS_SMARTSCANNER_ODK_IDPASS_LITE_INTENT -> ScannerOptions.defaultForIdPassLite
-                // mrz
-                ScannerConstants.IDPASS_SMARTSCANNER_MRZ_INTENT,
-                ScannerConstants.IDPASS_SMARTSCANNER_ODK_MRZ_INTENT -> ScannerOptions.defaultForMRZ
-                // nfc
-                ScannerConstants.IDPASS_SMARTSCANNER_NFC_INTENT,
-                ScannerConstants.IDPASS_SMARTSCANNER_ODK_NFC_INTENT -> ScannerOptions.defaultForNFCScan
-                // qrcode
-                ScannerConstants.IDPASS_SMARTSCANNER_QRCODE_INTENT,
-                ScannerConstants.IDPASS_SMARTSCANNER_ODK_QRCODE_INTENT -> ScannerOptions.defaultForQRCode
-                else -> throw SmartScannerException("Error: Wrong intent action. Please see ScannerConstants.kt for proper intent action strings.")
+        if (intent.action != null)  {
+            scannerOptions = ScannerOptions.defaultForODK(intent.action).also { options ->
+                if (options == null) throw SmartScannerException("Error: Wrong intent action. Please see smartscanner-android-api for proper intent action strings.")
             }
         } else {
             // Use scanner options directly if no scanner type is called
@@ -320,8 +305,13 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             // Preview
             preview = Preview.Builder().build()
             val imageAnalysisBuilder = ImageAnalysis.Builder()
+            val resolution = when {
+                isPdf417 -> Size(1080, 1920)
+                mode == Modes.QRCODE.value || mode == Modes.IDPASS_LITE.value -> Size(720, 1280)
+                else -> Size(480, 640)
+            }
             imageAnalyzer = imageAnalysisBuilder
-                .setTargetResolution(if (isPdf417) Size(1080, 1920) else Size(480, 640))
+                .setTargetResolution(resolution)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
                 .also {
@@ -356,9 +346,9 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                         imageCapture
                     )
                 }
-                if (isPdf417 || mode == Modes.MRZ.value) {
-                    // Reduce initial zoom ratio of camera to aid high resolution capture of Pdf417 or MRZ
-                    camera?.cameraControl?.setZoomRatio(0.8F)
+                if (isPdf417 || mode == Modes.QRCODE.value || mode == Modes.IDPASS_LITE.value) {
+                    // Reduce initial zoom ratio of camera to aid high resolution capture of Pdf417 or QR Code or ID PASS Lite
+                    camera?.cameraControl?.setZoomRatio(1.2F)
                 }
                 preview?.setSurfaceProvider(viewFinder.createSurfaceProvider())
                 Log.d(
@@ -368,7 +358,6 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 // Autofocus modes and Tap to focus
                 val camera2InterOp = Camera2Interop.Extender(imageAnalysisBuilder)
                 camera2InterOp.setCaptureRequestOption(CaptureRequest.CONTROL_AF_MODE,CaptureRequest.CONTROL_AF_MODE_AUTO)
-                camera2InterOp.setCaptureRequestOption(CaptureRequest.CONTROL_AF_TRIGGER,CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
                 camera2InterOp.setCaptureRequestOption(CaptureRequest.CONTROL_AE_MODE,CaptureRequest.CONTROL_AE_MODE_ON)
                 viewFinder.afterMeasured {
                     viewFinder.setOnTouchListener { _, event ->
