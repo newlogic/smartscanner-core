@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">SmartScanner</string>
+    <string name="app_name_default">SmartScanner</string>
+
     <string name="model_text" translatable="false">Downloading OCR models…</string>
     <string name="model_text_download" translatable="false">Downloading OCR models. Please wait…</string>
     <string name="model_text_loaded" translatable="false">OCR models are loaded…</string>

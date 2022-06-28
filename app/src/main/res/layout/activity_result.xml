@@ -68,13 +68,14 @@
             android:textSize="16sp"
             android:visibility="gone" />
 
-        <ImageView
+        <com.jsibbold.zoomage.ZoomageView
             android:id="@+id/imageResult"
             android:layout_width="match_parent"
             android:layout_height="220dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
+            android:adjustViewBounds="true"
             android:contentDescription="@string/label_content_description"
             tools:srcCompat="@tools:sample/avatars"
             android:visibility="gone" />

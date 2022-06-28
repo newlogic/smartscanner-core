@@ -17,7 +17,8 @@
  */
 package org.idpass.smartscanner.lib.scanner.config
 
-import com.google.mlkit.vision.barcode.Barcode.*
+import com.google.mlkit.vision.barcode.common.Barcode.*
+
 
 enum class BarcodeFormat(val label: String, val value: Int) {
     ALL("ALL", FORMAT_ALL_FORMATS),

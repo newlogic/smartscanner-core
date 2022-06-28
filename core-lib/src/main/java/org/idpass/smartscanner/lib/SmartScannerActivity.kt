@@ -22,10 +22,12 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Typeface
 import android.hardware.camera2.CameraManager
+import android.hardware.camera2.CaptureRequest
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
@@ -33,11 +35,10 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.util.Size
-import android.view.Surface
-import android.view.View
+import android.view.*
 import android.view.View.*
-import android.view.Window
 import android.widget.*
+import androidx.camera.camera2.interop.Camera2Interop
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
@@ -104,6 +105,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
     private var flashButton: View? = null
     private var closeButton: View? = null
     private var rectangle: View? = null
+    private var rectangleMRZGuide: View? = null
     private var manualCapture: View? = null
     private var brandingImage: ImageView? = null
     private var captureLabelText: TextView? = null
@@ -121,6 +123,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_smart_scanner)
+
         // assign view ids
         coordinatorLayoutView = findViewById(R.id.coordinatorLayout)
         modelLayoutView = findViewById(R.id.viewLayout)
@@ -128,6 +131,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         flashButton = findViewById(R.id.flash_button)
         closeButton = findViewById(R.id.close_button)
         rectangle = findViewById(R.id.rectimage)
+        rectangleMRZGuide = findViewById(R.id.rect_image_crop)
         modelText = findViewById(R.id.modelText)
         modelTextLoading = findViewById(R.id.modelTextLoading)
         brandingImage = findViewById(R.id.brandingImage)
@@ -137,24 +141,9 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         captureSubHeaderText = findViewById(R.id.captureSubHeaderText)
         // Scanner setup from intent
         hideActionBar()
-        if (intent.action != null) {
-            scannerOptions = when (intent.action) {
-                // barcode
-                ScannerConstants.IDPASS_SMARTSCANNER_BARCODE_INTENT,
-                ScannerConstants.IDPASS_SMARTSCANNER_ODK_BARCODE_INTENT -> ScannerOptions.defaultForBarcode
-                // idpass lite
-                ScannerConstants.IDPASS_SMARTSCANNER_IDPASS_LITE_INTENT,
-                ScannerConstants.IDPASS_SMARTSCANNER_ODK_IDPASS_LITE_INTENT -> ScannerOptions.defaultForIdPassLite
-                // mrz
-                ScannerConstants.IDPASS_SMARTSCANNER_MRZ_INTENT,
-                ScannerConstants.IDPASS_SMARTSCANNER_ODK_MRZ_INTENT -> ScannerOptions.defaultForMRZ
-                // nfc
-                ScannerConstants.IDPASS_SMARTSCANNER_NFC_INTENT,
-                ScannerConstants.IDPASS_SMARTSCANNER_ODK_NFC_INTENT -> ScannerOptions.defaultForNFCScan
-                // qrcode
-                ScannerConstants.IDPASS_SMARTSCANNER_QRCODE_INTENT,
-                ScannerConstants.IDPASS_SMARTSCANNER_ODK_QRCODE_INTENT -> ScannerOptions.defaultForQRCode
-                else -> throw SmartScannerException("Error: Wrong intent action. Please see ScannerConstants.kt for proper intent action strings.")
+        if (intent.action != null)  {
+            scannerOptions = ScannerOptions.defaultForODK(intent.action).also { options ->
+                if (options == null) throw SmartScannerException("Error: Wrong intent action. Please see smartscanner-android-api for proper intent action strings.")
             }
         } else {
             // Use scanner options directly if no scanner type is called
@@ -169,6 +158,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         // setup modes & config for reader
         mode = scannerOptions?.mode
         config = scannerOptions?.config ?: Config.default
+
         // Request camera permissions
         if (allPermissionsGranted()) {
             setupConfiguration()
@@ -257,6 +247,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 ).also {
                     if (!isMLKit) it.initializeTesseract(this)
                 }
+                rectangleMRZGuide?.visibility = VISIBLE
             }
             if (mode == Modes.NFC_SCAN.value) {
                 val nfcOptions = scannerOptions?.nfcOptions
@@ -304,6 +295,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         setupViews()
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun startCamera(analyzer: ImageAnalysis.Analyzer? = null, isPdf417: Boolean = false) {
         this.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
@@ -312,13 +304,20 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             cameraProvider = cameraProviderFuture.get()
             // Preview
             preview = Preview.Builder().build()
-            imageAnalyzer = ImageAnalysis.Builder()
-                .setTargetResolution(if (isPdf417) Size(1080, 1920) else Size(480, 640))
+            val imageAnalysisBuilder = ImageAnalysis.Builder()
+            val resolution = when {
+                isPdf417 -> Size(1080, 1920)
+                mode == Modes.QRCODE.value || mode == Modes.IDPASS_LITE.value -> Size(720, 1280)
+                else -> Size(480, 640)
+            }
+            imageAnalyzer = imageAnalysisBuilder
+                .setTargetResolution(resolution)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
                 .also {
                     analyzer?.let { analysis -> it.setAnalyzer(cameraExecutor, analysis) }
                 }
+
             // Create configuration object for the image capture use case
             imageCapture = ImageCapture.Builder()
                 .setTargetResolution(Size(1080, 1920))
@@ -347,15 +346,50 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                         imageCapture
                     )
                 }
-                if (isPdf417 || mode == Modes.MRZ.value) {
-                    // Reduce initial zoom ratio of camera to aid high resolution capture of Pdf417 or MRZ
-                    camera?.cameraControl?.setZoomRatio(0.8F)
+                if (isPdf417 || mode == Modes.QRCODE.value || mode == Modes.IDPASS_LITE.value) {
+                    // Reduce initial zoom ratio of camera to aid high resolution capture of Pdf417 or QR Code or ID PASS Lite
+                    camera?.cameraControl?.setZoomRatio(1.2F)
                 }
                 preview?.setSurfaceProvider(viewFinder.createSurfaceProvider())
                 Log.d(
                     TAG,
                     "Measured size: ${viewFinder.width}x${viewFinder.height}"
                 )
+                // Autofocus modes and Tap to focus
+                val camera2InterOp = Camera2Interop.Extender(imageAnalysisBuilder)
+                camera2InterOp.setCaptureRequestOption(CaptureRequest.CONTROL_AF_MODE,CaptureRequest.CONTROL_AF_MODE_AUTO)
+                camera2InterOp.setCaptureRequestOption(CaptureRequest.CONTROL_AE_MODE,CaptureRequest.CONTROL_AE_MODE_ON)
+                viewFinder.afterMeasured {
+                    viewFinder.setOnTouchListener { _, event ->
+                        return@setOnTouchListener when (event.action) {
+                            MotionEvent.ACTION_DOWN -> {
+                                true
+                            }
+                            MotionEvent.ACTION_UP -> {
+                                val factory: MeteringPointFactory = SurfaceOrientedMeteringPointFactory(
+                                        viewFinder.width.toFloat(), viewFinder.height.toFloat()
+                                )
+                                val autoFocusPoint = factory.createPoint(event.x, event.y)
+                                try {
+                                    camera?.cameraControl?.startFocusAndMetering(
+                                            FocusMeteringAction.Builder(
+                                                    autoFocusPoint,
+                                                    FocusMeteringAction.FLAG_AF
+                                            ).apply {
+                                                //focus only when the user tap the preview
+                                                disableAutoCancel()
+                                            }.build()
+                                    )
+                                } catch (e: CameraInfoUnavailableException) {
+                                    Log.d("ERROR", "cannot access camera", e)
+                                }
+                                true
+                            }
+                            else -> false // Unhandled event.
+                        }
+                    }
+                }
+
             } catch (exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
             }
@@ -373,9 +407,9 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         val bottomGuideline = findViewById<Guideline>(R.id.bottom)
         when (scannerOptions?.scannerSize) {
             ScannerSize.LARGE.value -> {
-                bottomGuideline.setGuidelinePercent(0.8F)
-                topGuideline.setGuidelinePercent(0.1F)
-                layoutParams.dimensionRatio = "3:4"
+                bottomGuideline.setGuidelinePercent(0.925F)
+                topGuideline.setGuidelinePercent(0.0F)
+                layoutParams.dimensionRatio = "4:4"
                 modelLayoutView.layoutParams = layoutParams
             }
             ScannerSize.SMALL.value -> {
@@ -441,6 +475,10 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         // language locale
         scannerOptions?.language?.let { language ->
             LanguageUtils.changeLanguage(this, language)
+        }
+        // Device orientation
+        if (config?.orientation == Orientation.LANDSCAPE.value) {
+            this.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
         }
     }
 
@@ -596,5 +634,21 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             setupConfiguration()
         }
         bottomSheetDialog.show()
+    }
+
+
+    private inline fun View.afterMeasured(crossinline block: () -> Unit) {
+        if (measuredWidth > 0 && measuredHeight > 0) {
+            block()
+        } else {
+            viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    if (measuredWidth > 0 && measuredHeight > 0) {
+                        viewTreeObserver.removeOnGlobalLayoutListener(this)
+                        block()
+                    }
+                }
+            })
+        }
     }
 }

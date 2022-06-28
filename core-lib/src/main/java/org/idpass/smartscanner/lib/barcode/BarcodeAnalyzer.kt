@@ -24,14 +24,15 @@ import android.os.Bundle
 import android.util.Log
 import androidx.camera.core.ImageProxy
 import com.google.gson.Gson
-import com.google.mlkit.vision.barcode.Barcode
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
+import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.platform.BaseImageAnalyzer
 import org.idpass.smartscanner.lib.platform.extension.*
+import org.idpass.smartscanner.lib.platform.utils.BitmapUtils
 import org.idpass.smartscanner.lib.scanner.config.ImageResultType
 import org.idpass.smartscanner.lib.scanner.config.Modes
 
@@ -47,12 +48,16 @@ class BarcodeAnalyzer(
 
     @SuppressLint("UnsafeExperimentalUsageError")
     override fun analyze(imageProxy: ImageProxy) {
-        val mediaImage = imageProxy.image
-        if (mediaImage != null) {
-            Log.d(SmartScannerActivity.TAG, "Bitmap: (${mediaImage.width}, ${mediaImage.height})")
-            val rot = imageProxy.imageInfo.rotationDegrees
-            val bf = mediaImage.toBitmap(rot, mode)
+        val bitmap = BitmapUtils.getBitmap(imageProxy)
+        bitmap?.let { bf ->
+            Log.d(SmartScannerActivity.TAG, "Bitmap: (${bf.width}, ${bf.height})")
             val start = System.currentTimeMillis()
+            val rot = imageProxy.imageInfo.rotationDegrees
+            bf.apply {
+                // Increase contrast and brightness for better image processing and reduce Moiré effect
+                setContrast(1.5F)
+                setBrightness(5F)
+            }
             var barcodeFormat = Barcode.FORMAT_QR_CODE
             barcodeFormats.forEach {
                 barcodeFormat = it or barcodeFormat // bitwise different barcode format options
@@ -85,8 +90,8 @@ class BarcodeAnalyzer(
                         )
                         cornersString = builder.toString()
                         rawValue = barcodes[0].rawValue!!
-                        val bitmap = if (isPDF417) bf.getResizedBitmap(480, 640) else bf
-                        val imageResult = if (imageResultType == ImageResultType.BASE_64.value) bitmap?.encodeBase64(rot) else filePath
+                        val bitmapResult = if (isPDF417) bf.getResizedBitmap(480, 640) else bf
+                        val imageResult = if (imageResultType == ImageResultType.BASE_64.value) bitmapResult?.encodeBase64(rot) else filePath
                         val result = BarcodeResult(imagePath = filePath, image = imageResult, corners= cornersString, value = rawValue)
                         when (intent.action) {
                             ScannerConstants.IDPASS_SMARTSCANNER_BARCODE_INTENT,

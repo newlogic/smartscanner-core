@@ -22,6 +22,8 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.Bitmap
 import android.nfc.NfcAdapter
+import android.os.Build.VERSION
+import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
@@ -106,9 +108,12 @@ class NFCActivity : FragmentActivity(), NFCFragment.NfcFragmentListener, Passpor
 
     public override fun onResume() {
         super.onResume()
+        val flags = if (VERSION.SDK_INT >= VERSION_CODES.S) {
+                PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        } else PendingIntent.FLAG_UPDATE_CURRENT or 0
         if (nfcAdapter != null && nfcAdapter?.isEnabled == true) {
             pendingIntent = PendingIntent.getActivity(this, 0,
-                Intent(this, this.javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0)
+                Intent(this, this.javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), flags)
         } else checkNFC()
     }
 

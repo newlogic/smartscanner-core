@@ -20,11 +20,7 @@ package org.idpass.smartscanner.lib.platform.extension
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.*
-import android.media.Image
 import android.util.Base64
-import android.util.Log
-import org.idpass.smartscanner.lib.SmartScannerActivity
-import org.idpass.smartscanner.lib.scanner.config.Modes
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -35,62 +31,13 @@ import java.util.*
 val Float.px: Float get() = (this * Resources.getSystem().displayMetrics.density)
 val Int.px: Int get() = ((this * Resources.getSystem().displayMetrics.density).toInt())
 
-fun Image.toBitmap(rotation: Int = 0, mode: String?): Bitmap {
-    val yBuffer = planes[0].buffer // Y
-    val uBuffer = planes[1].buffer // U
-    val vBuffer = planes[2].buffer // V
-
-    val ySize = yBuffer.remaining()
-    val uSize = uBuffer.remaining()
-    val vSize = vBuffer.remaining()
-
-    val nv21 = ByteArray(ySize + uSize + vSize)
-
-    // U and V are swapped
-    yBuffer.get(nv21, 0, ySize)
-    vBuffer.get(nv21, ySize, vSize)
-    uBuffer.get(nv21, ySize + vSize, uSize)
-
-    val yuvImage = YuvImage(nv21, ImageFormat.NV21, this.width, this.height, null)
-    val out = ByteArrayOutputStream()
-
-    val rect = Rect()
-    // Use higher value of 6 for qrcode/idpass-lite which fixes bounding box issues upon scanning,
-    // others use previous default value of 4
-    val scaleIdentifier = when (mode) {
-        Modes.QRCODE.value, Modes.IDPASS_LITE.value -> 6
-        else -> 4
-    }
-    if (rotation == 90 || rotation == 270) {
-        rect.left = this.width / scaleIdentifier
-        rect.top = 0
-        rect.right = this.width - rect.left
-        rect.bottom = this.height
-    } else {
-        rect.left = 0
-        rect.top = this.height / scaleIdentifier
-        rect.right = this.width
-        rect.bottom = this.height - rect.top
-    }
-
-    Log.d(
-        SmartScannerActivity.TAG,
-        "Image ${this.width}x${this.height}, crop to: ${rect.left},${rect.top},${rect.right},${rect.bottom}"
-    )
-
-    yuvImage.compressToJpeg(rect, 100, out) // Ugly but it works
-    val imageBytes = out.toByteArray()
-    return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-}
-
-// extension function to change bitmap brightness and contrast
+// extension function to change bitmap contrast
 fun Bitmap.setContrast(
     contrast: Float = 1.0F
 ): Bitmap? {
     val bitmap = copy(Bitmap.Config.ARGB_8888, true)
     val paint = Paint()
 
-    // brightness -200..200, 0 is default
     // contrast 0..2, 1 is default
     // you may tweak the range
     val matrix = ColorMatrix(
@@ -109,7 +56,7 @@ fun Bitmap.setContrast(
     return bitmap
 }
 
-// extension function to change bitmap brightness and contrast
+// extension function to change bitmap brightness
 fun Bitmap.setBrightness(
     brightness: Float = 0.0F
 ): Bitmap? {
@@ -117,7 +64,6 @@ fun Bitmap.setBrightness(
     val paint = Paint()
 
     // brightness -200..200, 0 is default
-    // contrast 0..2, 1 is default
     // you may tweak the range
     val matrix = ColorMatrix(
         floatArrayOf(

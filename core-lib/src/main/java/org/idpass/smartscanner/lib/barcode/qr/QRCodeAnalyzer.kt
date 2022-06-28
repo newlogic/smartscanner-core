@@ -24,15 +24,16 @@ import android.os.Bundle
 import android.util.Log
 import androidx.camera.core.ImageProxy
 import com.github.wnameless.json.flattener.JsonFlattener
-import com.google.mlkit.vision.barcode.Barcode
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
+import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import com.jayway.jsonpath.JsonPath
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.platform.BaseImageAnalyzer
-import org.idpass.smartscanner.lib.platform.extension.toBitmap
+import org.idpass.smartscanner.lib.platform.extension.setContrast
+import org.idpass.smartscanner.lib.platform.utils.BitmapUtils
 import org.idpass.smartscanner.lib.platform.utils.GzipUtils
 import org.idpass.smartscanner.lib.scanner.config.Modes
 import org.json.JSONObject
@@ -45,14 +46,16 @@ class QRCodeAnalyzer(
     override val mode: String = Modes.QRCODE.value
 ) : BaseImageAnalyzer() {
 
-    @SuppressLint("UnsafeExperimentalUsageError")
+    @SuppressLint("UnsafeExperimentalUsageError", "UnsafeOptInUsageError")
     override fun analyze(imageProxy: ImageProxy) {
-        val mediaImage = imageProxy.image
-        if (mediaImage != null) {
-            Log.d(SmartScannerActivity.TAG, "Bitmap: (${mediaImage.width}, ${mediaImage.height})")
-            val rot = imageProxy.imageInfo.rotationDegrees
-            val bf = mediaImage.toBitmap(rot, mode)
+        val bitmap = BitmapUtils.getBitmap(imageProxy)
+        bitmap?.let { bf ->
+            Log.d(SmartScannerActivity.TAG, "Bitmap: (${bf.width}, ${bf.height})")
             val start = System.currentTimeMillis()
+            bf.apply {
+                // Increase contrast and brightness for better image processing and reduce Moiré effect
+                setContrast(1.5F)
+            }
             val barcodeFormat = Barcode.FORMAT_QR_CODE
             val options = BarcodeScannerOptions.Builder().setBarcodeFormats(barcodeFormat).build()
             val image = InputImage.fromBitmap(bf, imageProxy.imageInfo.rotationDegrees)
@@ -61,19 +64,19 @@ class QRCodeAnalyzer(
             scanner.process(image)
                 .addOnSuccessListener { barcodes ->
                     val timeRequired = System.currentTimeMillis() - start
-                    val rawValue: String
+                    val rawValue: String?
                     Log.d(
                         "${SmartScannerActivity.TAG}/SmartScanner",
                         "qrcode: success: $timeRequired ms"
                     )
                     if (barcodes.isNotEmpty()) {
-                        rawValue = barcodes[0].rawValue!!
+                        rawValue = barcodes[0].rawValue
                         when (intent.action) {
                             ScannerConstants.IDPASS_SMARTSCANNER_QRCODE_INTENT,
                             ScannerConstants.IDPASS_SMARTSCANNER_ODK_QRCODE_INTENT, -> {
                                 sendResult(
-                                        rawValue = rawValue,
-                                        rawBytes = barcodes[0].rawBytes!!
+                                    rawValue = rawValue,
+                                    rawBytes = barcodes[0].rawBytes
                                 )
                             }
                         }
@@ -95,7 +98,7 @@ class QRCodeAnalyzer(
         }
     }
 
-    private fun sendResult(rawValue: String, rawBytes: ByteArray) {
+    private fun sendResult(rawValue: String? , rawBytes: ByteArray?) {
         // parse and read qr data and add to bundle intent
         val bundle = Bundle()
         Log.d(SmartScannerActivity.TAG, "Success from QRCODE")
@@ -144,13 +147,14 @@ class QRCodeAnalyzer(
         activity.finish()
     }
 
-    private fun getGzippedData(rawBytes: ByteArray) : String?{
-        return try {
-            GzipUtils.decompress(rawBytes)
+    private fun getGzippedData(rawBytes: ByteArray?) : String? {
+        var data: String? = null
+        try {
+            data = if (rawBytes != null)  GzipUtils.decompress(rawBytes) else null
         } catch (ez : ZipException) {
             ez.printStackTrace()
-            null
         }
+        return data
     }
 
     private fun flattenJson(json: String): HashMap<String, String> {

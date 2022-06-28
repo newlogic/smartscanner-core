@@ -28,7 +28,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.api.ScannerIntent
-import org.idpass.smartscanner.lib.R.string.required_nfc_not_supported
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT_BYTES
@@ -38,6 +37,7 @@ import org.newlogic.smartscanner.databinding.ActivityMainBinding
 import org.newlogic.smartscanner.result.IDPassResultActivity
 import org.newlogic.smartscanner.result.ResultActivity
 import org.newlogic.smartscanner.settings.SettingsActivity
+import org.newlogic.smartscanner.settings.SettingsActivity.Companion.ORIENTATION
 
 
 class MainActivity : AppCompatActivity() {
@@ -46,11 +46,12 @@ class MainActivity : AppCompatActivity() {
         const val OP_SCANNER = 1001
         var imageType = ImageResultType.PATH.value
 
-        private fun sampleConfig(isManualCapture: Boolean, label: String = "") = Config(
+        private fun sampleConfig(isManualCapture: Boolean, label: String = "", orientation : String? = Orientation.PORTRAIT.value) = Config(
             branding = true,
             imageResultType = imageType,
             label = label,
-            isManualCapture = isManualCapture
+            isManualCapture = isManualCapture,
+            orientation = orientation
         )
     }
 
@@ -120,7 +121,7 @@ class MainActivity : AppCompatActivity() {
             ScannerOptions(
                 mode = Modes.MRZ.value,
                 language = getLanguage(preference),
-                config = sampleConfig(true)
+                config = sampleConfig(isManualCapture = true, orientation = getOrientation(preference)),
             )
         )
         startActivityForResult(intent, OP_SCANNER)
@@ -146,7 +147,7 @@ class MainActivity : AppCompatActivity() {
                 )
             )
             startActivityForResult(intent, OP_SCANNER)
-        } else Snackbar.make(binding.main, required_nfc_not_supported, Snackbar.LENGTH_LONG).show()
+        } else Snackbar.make(binding.main, R.string.required_nfc_not_supported, Snackbar.LENGTH_LONG).show()
 
     }
 
@@ -159,6 +160,7 @@ class MainActivity : AppCompatActivity() {
         startActivityForResult(intent, OP_SCANNER)
     }
 
+    private fun getOrientation(pref : SharedPreferences?) = pref?.getString(ORIENTATION, Orientation.PORTRAIT.value)
     private fun getLanguage(pref : SharedPreferences?) = pref?.getString(Language.NAME, Language.EN)
 
     @SuppressLint("LogNotTimber")

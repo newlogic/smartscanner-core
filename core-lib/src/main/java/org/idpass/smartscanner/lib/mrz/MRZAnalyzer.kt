@@ -22,26 +22,25 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.Matrix
 import android.os.Bundle
 import android.util.Log
 import androidx.camera.core.ImageProxy
 import com.google.gson.Gson
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.googlecode.tesseract.android.TessBaseAPI
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.R
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.platform.BaseImageAnalyzer
 import org.idpass.smartscanner.lib.platform.extension.*
+import org.idpass.smartscanner.lib.platform.utils.BitmapUtils
 import org.idpass.smartscanner.lib.platform.utils.FileUtils
-import org.idpass.smartscanner.lib.scanner.SmartScannerException
 import org.idpass.smartscanner.lib.scanner.config.ImageResultType
 import org.idpass.smartscanner.lib.scanner.config.Modes
 import org.idpass.smartscanner.lib.scanner.config.MrzFormat
 import java.net.URLEncoder
-import kotlin.concurrent.thread
 
 open class MRZAnalyzer(
         override val activity: Activity,
@@ -75,33 +74,39 @@ open class MRZAnalyzer(
 
     @SuppressLint("UnsafeExperimentalUsageError")
     override fun analyze(imageProxy: ImageProxy) {
-        val mediaImage = imageProxy.image
-        if (mediaImage != null) {
+        val bitmap = BitmapUtils.getBitmap(imageProxy)
+        bitmap?.let { bf ->
             val rot = imageProxy.imageInfo.rotationDegrees
-            val bf = mediaImage.toBitmap(rot, mode).apply {
+            bf.apply {
                 // Increase brightness and contrast for clearer image to be processed
                 setContrast(1.5F)
                 setBrightness(5F)
             }
-            val cropped = if (rot == 90 || rot == 270) Bitmap.createBitmap(
-                    bf,
-                    bf.width / 2,
-                    0,
-                    bf.width / 2,
-                    bf.height
-            )
-            else Bitmap.createBitmap(bf, 0, bf.height / 2, bf.width, bf.height / 2)
+            val cropped = when (rot) {
+                90, 270 -> {
+                    Bitmap.createBitmap(
+                        bf,
+                        bf.width / 2,
+                        0,
+                        bf.width / 2,
+                        bf.height
+                    )
+                }
+                180 -> Bitmap.createBitmap(bf, 0 , bf.height / 4, bf.width, bf.height / 4)
+                else -> Bitmap.createBitmap(bf, 0 , bf.height / 3, bf.width, bf.height / 3)
+
+            }
             Log.d(
                     SmartScannerActivity.TAG,
-                    "Bitmap: (${mediaImage.width}, ${mediaImage.height} Cropped: (${cropped.width}, ${cropped.height}), Rotation: $rot"
+                    "Bitmap: (${bf.width}, ${bf.height} Cropped: (${cropped.width}, ${cropped.height}), Rotation: $rot"
             )
-            if (isMLKit) {
+            //if (isMLKit) {
                 // Pass image to an ML Kit Vision API
                 Log.d("${SmartScannerActivity.TAG}/SmartScanner", "MRZ MLKit: start")
                 val start = System.currentTimeMillis()
                 val rotation = imageProxy.imageInfo.rotationDegrees
                 val image = InputImage.fromBitmap(cropped, rotation)
-                val recognizer = TextRecognition.getClient()
+                val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
                 Log.d("${SmartScannerActivity.TAG}/SmartScanner", "MRZ MLKit TextRecognition: process")
                 recognizer.process(image)
                         .addOnSuccessListener { visionText ->
@@ -165,7 +170,7 @@ open class MRZAnalyzer(
                             onConnectFail.invoke(activity.getString(connectionId))
                             imageProxy.close()
                         }
-            } else {
+            /*} else {
                 if (::tessBaseAPI.isInitialized) {
                     Log.d("${SmartScannerActivity.TAG}/SmartScanner", "MRZ Tesseract: start")
                     val start = System.currentTimeMillis()
@@ -217,7 +222,7 @@ open class MRZAnalyzer(
                     imageProxy.close()
                     throw SmartScannerException("Please initialize Tesseract properly using initializeTesseract() method.")
                 }
-            }
+            }*/
         }
     }
 

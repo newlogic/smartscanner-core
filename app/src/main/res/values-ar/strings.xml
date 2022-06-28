@@ -1,10 +1,12 @@
 <resources>
     <string name="app_name">الماسح الذكي</string>
+    <string name="app_name_default">الماسح الذكي</string>
 
     <!--Action items-->
     <string name="action_hide">إخفاء</string>
     <string name="action_show">إظهار</string>
     <string name="action_show_hide">إظهار/إخفاء</string>
+    <string name="action_settings">الإعدادات</string>
 
     <!--Modes-->
     <string name="mode_barcode">الباركود</string>
@@ -39,5 +41,8 @@
     <string name="label_scan_nfc_via_mrz">يرجى مسح MRZ للتحقق من الهوية</string>
     <string name="label_version">إصدار: %1$s</string>
     <string name="label_warning_invalid_composite_digit">تحذير: يحتوي MRZ هذا على رقم تحقق مركب غير صالح.</string>
+    <string name="label_orientation">توجيه</string>
+    <string name="label_portrait">لوحة</string>
+    <string name="label_landscape">منظر جمالي</string>
 
 </resources>

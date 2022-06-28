@@ -22,77 +22,108 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import org.idpass.smartscanner.lib.platform.utils.LanguageUtils
 import org.idpass.smartscanner.lib.scanner.config.Language
+import org.idpass.smartscanner.lib.scanner.config.Orientation
 import org.newlogic.smartscanner.BuildConfig
 import org.newlogic.smartscanner.MainActivity
 import org.newlogic.smartscanner.R
 import org.newlogic.smartscanner.SmartScannerApplication
+import org.newlogic.smartscanner.databinding.ActivitySettingsBinding
 
 
 class SettingsActivity : AppCompatActivity() {
 
+    companion object {
+      val ORIENTATION = "Orientation"
+    }
+
+    private lateinit var binding : ActivitySettingsBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_settings_languages)
+        binding = ActivitySettingsBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
+        setupViews()
+    }
 
-        val arabicpic = findViewById<ImageView>(R.id.arabicpic)
-        val englishpic = findViewById<ImageView>(R.id.englishpic)
-        val arabicLayout = findViewById<LinearLayout>(R.id.arabiclayout)
-        val englishLayout = findViewById<LinearLayout>(R.id.englishLayout)
-        val backspace = findViewById<ImageView>(R.id.backspace)
-        val versionText = findViewById<TextView>(R.id.version_text)
-
+    private fun setupViews() {
         val preference = getSharedPreferences(SmartScannerApplication.SHARED, Context.MODE_PRIVATE)
         val editor = preference.edit()
         val currentLanguage = resources.configuration.locale.displayLanguage
-
         if (currentLanguage == "English") {
-            arabicpic.visibility = View.INVISIBLE
-            englishpic.visibility = View.VISIBLE
+            binding.arabicpic.visibility = View.INVISIBLE
+            binding.englishpic.visibility = View.VISIBLE
         } else {
-            arabicpic.visibility = View.VISIBLE
-            englishpic.visibility = View.INVISIBLE
+            binding.arabicpic.visibility = View.VISIBLE
+            binding.englishpic.visibility = View.INVISIBLE
         }
 
         // Arabic language
-        arabicLayout.setOnClickListener {
-            arabicpic.visibility = View.VISIBLE
-            englishpic.visibility = View.INVISIBLE
+        binding.arabiclayout.setOnClickListener {
+            binding.arabicpic.visibility = View.VISIBLE
+            binding.englishpic.visibility = View.INVISIBLE
             saveLanguage(editor = editor, language = Language.AR)
             startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
         }
         // English language
-        englishLayout.setOnClickListener {
-            arabicpic.visibility = View.INVISIBLE
-            englishpic.visibility = View.VISIBLE
+        binding.englishLayout.setOnClickListener {
+            binding.arabicpic.visibility = View.INVISIBLE
+            binding.englishpic.visibility = View.VISIBLE
             saveLanguage(editor = editor, language = Language.EN)
             startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
         }
 
-        // Go Back
-        backspace.setOnClickListener {
-            onBackPressed()
-            this.finish()
+        // Orientation (Portrait/Landscape)
+        val orientation = preference.getString(ORIENTATION, Orientation.LANDSCAPE.value)
+        if (orientation == Orientation.LANDSCAPE.value) {
+            binding.portraitCheck.visibility = View.INVISIBLE
+            binding.landscapeCheck.visibility = View.VISIBLE
+        } else {
+            binding.portraitCheck.visibility = View.VISIBLE
+            binding.landscapeCheck.visibility = View.INVISIBLE
+        }
+
+        // Landscape
+        binding.landscapeLayout.setOnClickListener {
+            binding.portraitCheck.visibility = View.INVISIBLE
+            binding.landscapeCheck.visibility = View.VISIBLE
+            saveToPreference(editor = editor, key = ORIENTATION, value = Orientation.LANDSCAPE.value)
+            startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
+        }
+        // Portrait
+        binding.portraitLayout.setOnClickListener {
+            binding.portraitCheck.visibility = View.VISIBLE
+            binding.landscapeCheck.visibility = View.INVISIBLE
+            saveToPreference(editor = editor, key = ORIENTATION, value = Orientation.PORTRAIT.value)
+            startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
         }
 
         // Display version
         val version = BuildConfig.VERSION_NAME
         val versionLabel = if (BuildConfig.DEBUG) version else version.split("-").first()
-        versionText.text = getString(R.string.label_version, versionLabel)
+        binding.versionText.text = getString(R.string.label_version, versionLabel)
+
+        // Go Back
+        binding.backspace.setOnClickListener {
+            onBackPressed()
+            this.finish()
+        }
     }
 
     private fun saveLanguage(editor: SharedPreferences.Editor, language : String) {
-        // Remove previous set language
-        editor.remove(Language.NAME).apply()
         // Set new language
         LanguageUtils.changeLanguage(this, language)
         // Save new language to sharedPrefs
-        editor.putString(Language.NAME, language)
+        saveToPreference(editor, Language.NAME, language)
+    }
+
+    private fun saveToPreference( editor: SharedPreferences.Editor, key: String, value : String) {
+        // Remove previous set language
+        editor.remove(key).apply()
+        editor.putString(key, value)
         editor.apply()
     }
 }
