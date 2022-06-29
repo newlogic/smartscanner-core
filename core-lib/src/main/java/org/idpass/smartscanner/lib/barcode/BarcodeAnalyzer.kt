@@ -70,7 +70,7 @@ class BarcodeAnalyzer(
                 .addOnSuccessListener { barcodes ->
                     val timeRequired = System.currentTimeMillis() - start
                     val cornersString: String
-                    val rawValue: String
+                    val rawValue: String?
                     Log.d(
                         "${SmartScannerActivity.TAG}/SmartScanner",
                         "barcode: success: $timeRequired ms"
@@ -89,10 +89,10 @@ class BarcodeAnalyzer(
                             imageProxy.imageInfo.rotationDegrees
                         )
                         cornersString = builder.toString()
-                        rawValue = barcodes[0].rawValue!!
+                        rawValue = barcodes[0].rawValue
                         val bitmapResult = if (isPDF417) bf.getResizedBitmap(480, 640) else bf
                         val imageResult = if (imageResultType == ImageResultType.BASE_64.value) bitmapResult?.encodeBase64(rot) else filePath
-                        val result = BarcodeResult(imagePath = filePath, image = imageResult, corners= cornersString, value = rawValue)
+                        val result = BarcodeResult(imagePath = filePath, image = imageResult, corners = cornersString, value = rawValue)
                         when (intent.action) {
                             ScannerConstants.IDPASS_SMARTSCANNER_BARCODE_INTENT,
                             ScannerConstants.IDPASS_SMARTSCANNER_ODK_BARCODE_INTENT -> {
@@ -121,7 +121,7 @@ class BarcodeAnalyzer(
         }
     }
 
-    private fun sendAnalyzerResult(result: String? = null) {
+    private fun sendAnalyzerResult(result: String) {
         val data = Intent()
         Log.d(SmartScannerActivity.TAG, "Success from BARCODE")
         Log.d(SmartScannerActivity.TAG, "value: $result")

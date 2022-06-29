@@ -243,7 +243,7 @@ open class MRZAnalyzer(
         }
     }
 
-    private fun sendAnalyzerResult(result: String? = null) {
+    private fun sendAnalyzerResult(result: String) {
         val data = Intent()
         Log.d(SmartScannerActivity.TAG, "Success from MRZ")
         Log.d(SmartScannerActivity.TAG, "value: $result")

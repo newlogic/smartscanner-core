@@ -188,7 +188,7 @@ class MainActivity : AppCompatActivity() {
                     // Get Result from JSON String
                     val result = intent?.getStringExtra(SCANNER_RESULT)
                     Log.d(SmartScannerActivity.TAG, "Scanner result string: $result")
-                    if (result != null) {
+                    if (!result.isNullOrEmpty()) {
                         // Go to Barcode/MRZ Results Screen
                         val resultIntent = Intent(this, ResultActivity::class.java)
                         resultIntent.putExtra(ResultActivity.RESULT, result)
