@@ -346,9 +346,14 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                         imageCapture
                     )
                 }
+                // Adjust initial zoom ratio of camera to aid high resolution capture of Pdf417 or QR Code or ID PASS Lite
                 if (isPdf417 || mode == Modes.QRCODE.value || mode == Modes.IDPASS_LITE.value) {
-                    // Reduce initial zoom ratio of camera to aid high resolution capture of Pdf417 or QR Code or ID PASS Lite
-                    camera?.cameraControl?.setZoomRatio(1.2F)
+                    camera?.cameraControl?.setZoomRatio(
+                        when {
+                            isPdf417 -> 0.5F
+                            else ->  1.2F
+                        }
+                    )
                 }
                 preview?.setSurfaceProvider(viewFinder.createSurfaceProvider())
                 Log.d(
