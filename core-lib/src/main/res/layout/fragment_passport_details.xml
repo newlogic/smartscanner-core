@@ -35,7 +35,7 @@
                     android:padding="@dimen/margin_small">
 
                     <ImageView
-                        android:id="@+id/iconWarning"
+                        android:id="@+id/icon_warning"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
@@ -61,7 +61,7 @@
                         android:layout_below="@+id/textWarningTitle"
                         android:layout_marginStart="@dimen/margin_small"
                         android:layout_marginEnd="@dimen/margin_small"
-                        android:layout_toEndOf="@+id/iconWarning"
+                        android:layout_toEndOf="@+id/icon_warning"
                         android:text="@string/document_chip_content_success"
                         android:textColor="@color/white" />
 

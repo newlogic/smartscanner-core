@@ -92,16 +92,16 @@
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/textViewNfcTitle"
-        android:layout_alignRight="@+id/textViewNfcTitle"
-        android:layout_above="@+id/textViewNfcTitle"
+        android:layout_alignLeft="@+id/tv_nfc_title"
+        android:layout_alignRight="@+id/tv_nfc_title"
+        android:layout_above="@+id/tv_nfc_title"
         android:indeterminateTint="@color/grey"
         android:indeterminate="true"
         android:visibility="gone"
         />
 
     <TextView
-        android:id="@+id/textViewNfcTitle"
+        android:id="@+id/tv_nfc_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/nfc_title"

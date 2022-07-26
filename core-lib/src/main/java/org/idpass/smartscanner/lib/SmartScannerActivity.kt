@@ -125,20 +125,20 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         setContentView(R.layout.activity_smart_scanner)
 
         // assign view ids
-        coordinatorLayoutView = findViewById(R.id.coordinatorLayout)
-        modelLayoutView = findViewById(R.id.viewLayout)
-        viewFinder = findViewById(R.id.viewFinder)
+        coordinatorLayoutView = findViewById(R.id.coordinator_layout)
+        modelLayoutView = findViewById(R.id.view_layout)
+        viewFinder = findViewById(R.id.view_finder)
         flashButton = findViewById(R.id.flash_button)
         closeButton = findViewById(R.id.close_button)
-        rectangle = findViewById(R.id.rectimage)
+        rectangle = findViewById(R.id.rect_image)
         rectangleMRZGuide = findViewById(R.id.rect_image_crop)
-        modelText = findViewById(R.id.modelText)
-        modelTextLoading = findViewById(R.id.modelTextLoading)
-        brandingImage = findViewById(R.id.brandingImage)
-        manualCapture = findViewById(R.id.manualCapture)
-        captureLabelText = findViewById(R.id.captureLabelText)
-        captureHeaderText = findViewById(R.id.captureHeaderText)
-        captureSubHeaderText = findViewById(R.id.captureSubHeaderText)
+        modelText = findViewById(R.id.model_text)
+        modelTextLoading = findViewById(R.id.model_text_loading)
+        brandingImage = findViewById(R.id.branding_image)
+        manualCapture = findViewById(R.id.manual_capture)
+        captureLabelText = findViewById(R.id.capture_label_text)
+        captureHeaderText = findViewById(R.id.capture_header_text)
+        captureSubHeaderText = findViewById(R.id.capture_sub_header_text)
         // Scanner setup from intent
         hideActionBar()
         if (intent.action != null)  {
@@ -539,7 +539,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     }
                 }
             }
-            R.id.manualCapture -> {
+            R.id.manual_capture -> {
                 // hide capture button during image capture
                 manualCapture?.isEnabled = false
                 val imageFile = File(cacheImagePath())
@@ -602,9 +602,9 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         // id pass reader
         val reader = IDPassManager.getIDPassReader()
         // bottom sheet ids
-        val pinCodeInpt = sheetView.findViewById<EditText>(R.id.cardPinCode)
-        val verifyBtn = sheetView.findViewById<Button>(R.id.pinCodeVerify)
-        val skipBtn = sheetView.findViewById<Button>(R.id.pinCodeSkip)
+        val pinCodeInpt = sheetView.findViewById<EditText>(R.id.card_pin_code)
+        val verifyBtn = sheetView.findViewById<Button>(R.id.pin_code_verify)
+        val skipBtn = sheetView.findViewById<Button>(R.id.pin_code_skip)
         // stop smartscanner camera scanning
         cameraProvider?.unbindAll()
         // bottom sheet listeners

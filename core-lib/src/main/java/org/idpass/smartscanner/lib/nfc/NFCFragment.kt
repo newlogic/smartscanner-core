@@ -95,7 +95,7 @@ class NFCFragment : Fragment() {
         if (arguments?.containsKey(IntentData.KEY_CAPTURE_LOG) == true) {
             captureLog = arguments.getBoolean(IntentData.KEY_CAPTURE_LOG)
         }
-        textViewNfcTitle = view.findViewById(R.id.textViewNfcTitle)
+        textViewNfcTitle = view.findViewById(R.id.tv_nfc_title)
         textViewPassportNumber = view.findViewById(R.id.value_passport_number)
         textViewDateOfBirth = view.findViewById(R.id.value_DOB)
         textViewDateOfExpiry = view.findViewById(R.id.value_expiration_date)

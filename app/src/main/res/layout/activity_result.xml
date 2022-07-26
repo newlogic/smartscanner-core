@@ -7,7 +7,7 @@
     tools:context="org.newlogic.smartscanner.result.ResultActivity">
 
     <LinearLayout
-        android:id="@+id/linearLayout"
+        android:id="@+id/linear_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -25,7 +25,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
                 <TextView
-                    android:id="@+id/toolbarTitle"
+                    android:id="@+id/toolbar_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -40,7 +40,7 @@
         </androidx.appcompat.widget.Toolbar>
 
         <TextView
-            android:id="@+id/textResult"
+            android:id="@+id/text_result"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -55,7 +55,7 @@
             tools:text="54 65 73 74 20 51 52 20  Test QR\n43 6F 64 65              Code" />
 
         <TextView
-            android:id="@+id/imageLabel"
+            android:id="@+id/image_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
@@ -69,7 +69,7 @@
             android:visibility="gone" />
 
         <com.jsibbold.zoomage.ZoomageView
-            android:id="@+id/imageResult"
+            android:id="@+id/image_result"
             android:layout_width="match_parent"
             android:layout_height="220dp"
             android:layout_marginStart="16dp"
@@ -81,7 +81,7 @@
             android:visibility="gone" />
 
         <TextView
-            android:id="@+id/textRawLabel"
+            android:id="@+id/text_raw_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
@@ -94,7 +94,7 @@
             android:visibility="gone" />
 
         <EditText
-            android:id="@+id/editTextRaw"
+            android:id="@+id/edit_text_raw"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"

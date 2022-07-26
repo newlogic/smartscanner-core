@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
         binding.itemBarcode.item.setOnClickListener { scanBarcode(BarcodeOptions.default) }
         binding.itemIdpassLite.item.setOnClickListener { scanIDPassLite() }
         binding.itemMrz.item.setOnClickListener { scanMRZ() }
-        binding.itemQR.item.setOnClickListener { scanQRCode() }
+        binding.itemQr.item.setOnClickListener { scanQRCode() }
         binding.itemNfc.item.setOnClickListener { scanNFC() }
         // Change language
         binding.languageSettings.setOnClickListener {

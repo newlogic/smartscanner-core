@@ -60,7 +60,7 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
         setContentView(R.layout.activity_idpass_result)
         // Initialize UI
         val toolbar : Toolbar? = findViewById(R.id.toolbar)
-        val pinCodeBtn: Button = findViewById(R.id.pinCodeAuth)
+        val pinCodeBtn: Button = findViewById(R.id.pin_code_auth)
         pinCodeBtn.setOnClickListener(this)
         // Setup toolbar
         setSupportActionBar(toolbar)
@@ -197,8 +197,8 @@ class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onClick(v: View?) {
         when (v?.id) {
-            R.id.pinCodeAuth -> {
-                val cardpincode = findViewById<EditText>(R.id.cardPinCode)
+            R.id.pin_code_auth -> {
+                val cardpincode = findViewById<EditText>(R.id.card_pin_code)
                 pinCode = cardpincode.text.toString()
                 displayResult(qrBytes)
                 hideKeyboard(cardpincode)

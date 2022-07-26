@@ -8,7 +8,7 @@
     app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
 
     <LinearLayout
-        android:id="@+id/btnGzipped"
+        android:id="@+id/btn_gzipped"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:clickable="true"
@@ -33,7 +33,7 @@
         android:background="@android:color/darker_gray" />
 
     <LinearLayout
-        android:id="@+id/btnRegular"
+        android:id="@+id/btn_regular"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:clickable="true"
@@ -58,7 +58,7 @@
         android:background="@android:color/darker_gray" />
 
     <LinearLayout
-        android:id="@+id/btnCancel"
+        android:id="@+id/btn_cancel"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:clickable="true"

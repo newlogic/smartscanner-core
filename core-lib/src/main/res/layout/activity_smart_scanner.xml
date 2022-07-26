@@ -2,7 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/coordinatorLayout"
+    android:id="@+id/coordinator_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/transparent_grey"
@@ -11,7 +11,7 @@
     tools:context="org.idpass.smartscanner.lib.SmartScannerActivity">
 
     <androidx.appcompat.widget.AppCompatImageButton
-        android:id="@+id/manualCapture"
+        android:id="@+id/manual_capture"
         style="@style/Widget.AppCompat.Button.Borderless"
         android:layout_width="48dp"
         android:layout_height="48dp"
@@ -33,7 +33,7 @@
         app:layout_constraintStart_toStartOf="parent"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/viewLayout"
+        android:id="@+id/view_layout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginHorizontal="8dp"
@@ -44,7 +44,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/captureHeaderText"
+            android:id="@+id/capture_header_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/white"
@@ -57,7 +57,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/captureSubHeaderText"
+            android:id="@+id/capture_sub_header_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/white"
@@ -67,7 +67,7 @@
             android:lineSpacingMultiplier="0.9"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/captureHeaderText" />
+            app:layout_constraintTop_toBottomOf="@+id/capture_header_text" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/bottom"
@@ -84,7 +84,7 @@
             app:layout_constraintGuide_percent="0.20" />
 
         <androidx.camera.view.PreviewView
-            android:id="@+id/viewFinder"
+            android:id="@+id/view_finder"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginHorizontal="16dp"
@@ -96,7 +96,7 @@
             app:layout_constraintTop_toTopOf="@+id/top" />
 
         <ImageView
-            android:id="@+id/rectimage"
+            android:id="@+id/rect_image"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginHorizontal="10dp"
@@ -110,19 +110,19 @@
             app:layout_constraintTop_toTopOf="@+id/top" />
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/brandingImage"
+            android:id="@+id/branding_image"
             android:layout_width="64dp"
             android:layout_height="32dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="4dp"
-            android:src="@drawable/ic_id_pass_logo_greyed"
+            app:srcCompat="@drawable/ic_id_pass_logo_greyed"
             android:textColor="@color/white"
             android:visibility="invisible"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/rectimage" />
+            app:layout_constraintTop_toBottomOf="@+id/rect_image" />
 
         <TextView
-            android:id="@+id/captureLabelText"
+            android:id="@+id/capture_label_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="36dp"
@@ -134,12 +134,12 @@
             android:lineSpacingMultiplier="0.9"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/brandingImage" />
+            app:layout_constraintTop_toBottomOf="@+id/branding_image" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
-        android:id="@+id/modelText"
+        android:id="@+id/model_text"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@color/transparent_grey"
@@ -157,7 +157,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ProgressBar
-        android:id="@+id/modelTextLoading"
+        android:id="@+id/model_text_loading"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:elevation="2dp"

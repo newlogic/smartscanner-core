@@ -6,7 +6,7 @@
     android:paddingBottom="24dp">
 
     <LinearLayout
-        android:id="@+id/linearLayout"
+        android:id="@+id/linear_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -24,7 +24,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
                 <TextView
-                    android:id="@+id/toolbarTitle"
+                    android:id="@+id/toolbar_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -39,7 +39,7 @@
     </LinearLayout>
 
     <androidx.appcompat.widget.AppCompatEditText
-        android:id="@+id/cardPinCode"
+        android:id="@+id/card_pin_code"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -53,10 +53,10 @@
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+        app:layout_constraintTop_toBottomOf="@+id/linear_layout" />
 
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/pinCodeVerify"
+        android:id="@+id/pin_code_verify"
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:layout_marginStart="16dp"
@@ -68,10 +68,10 @@
         android:textColor="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardPinCode" />
+        app:layout_constraintTop_toBottomOf="@+id/card_pin_code" />
 
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/pinCodeSkip"
+        android:id="@+id/pin_code_skip"
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:layout_marginStart="16dp"
@@ -83,5 +83,5 @@
         android:textColor="@color/idpass_orange"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pinCodeVerify" />
+        app:layout_constraintTop_toBottomOf="@+id/pin_code_verify" />
 </androidx.constraintlayout.widget.ConstraintLayout>
