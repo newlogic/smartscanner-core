@@ -25,7 +25,8 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import org.idpass.smartscanner.lib.platform.utils.LanguageUtils
 import org.idpass.smartscanner.lib.scanner.config.Language
-import org.idpass.smartscanner.lib.scanner.config.Orientation
+import org.idpass.smartscanner.lib.scanner.config.Orientation.LANDSCAPE
+import org.idpass.smartscanner.lib.scanner.config.Orientation.PORTRAIT
 import org.newlogic.smartscanner.BuildConfig
 import org.newlogic.smartscanner.MainActivity
 import org.newlogic.smartscanner.R
@@ -77,27 +78,27 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         // Orientation (Portrait/Landscape)
-        val orientation = preference.getString(ORIENTATION, Orientation.LANDSCAPE.value)
-        if (orientation == Orientation.LANDSCAPE.value) {
-            binding.portraitCheck.visibility = View.INVISIBLE
-            binding.landscapeCheck.visibility = View.VISIBLE
-        } else {
+        val orientation = preference.getString(ORIENTATION, PORTRAIT.value)
+        if (orientation == PORTRAIT.value) {
             binding.portraitCheck.visibility = View.VISIBLE
             binding.landscapeCheck.visibility = View.INVISIBLE
+        } else {
+            binding.portraitCheck.visibility = View.INVISIBLE
+            binding.landscapeCheck.visibility = View.VISIBLE
         }
 
         // Landscape
         binding.landscapeLayout.setOnClickListener {
             binding.portraitCheck.visibility = View.INVISIBLE
             binding.landscapeCheck.visibility = View.VISIBLE
-            saveToPreference(editor = editor, key = ORIENTATION, value = Orientation.LANDSCAPE.value)
+            saveToPreference(editor = editor, key = ORIENTATION, value = LANDSCAPE.value)
             startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
         }
         // Portrait
         binding.portraitLayout.setOnClickListener {
             binding.portraitCheck.visibility = View.VISIBLE
             binding.landscapeCheck.visibility = View.INVISIBLE
-            saveToPreference(editor = editor, key = ORIENTATION, value = Orientation.PORTRAIT.value)
+            saveToPreference(editor = editor, key = ORIENTATION, value = PORTRAIT.value)
             startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
         }
 
