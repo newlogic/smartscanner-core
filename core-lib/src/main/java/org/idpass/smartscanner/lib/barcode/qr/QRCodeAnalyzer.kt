@@ -37,6 +37,7 @@ import org.idpass.smartscanner.lib.platform.utils.BitmapUtils
 import org.idpass.smartscanner.lib.platform.utils.GzipUtils
 import org.idpass.smartscanner.lib.scanner.config.Modes
 import org.json.JSONObject
+import java.io.ByteArrayInputStream
 import java.util.zip.ZipException
 
 
@@ -150,7 +151,8 @@ class QRCodeAnalyzer(
     private fun getGzippedData(rawBytes: ByteArray?) : String? {
         var data: String? = null
         try {
-            data = if (rawBytes != null)  GzipUtils.decompress(rawBytes) else null
+            val inputStream = ByteArrayInputStream(rawBytes)
+            data = if (rawBytes != null && GzipUtils.isGZipped(inputStream)) GzipUtils.decompress(rawBytes) else null
         } catch (ez : ZipException) {
             ez.printStackTrace()
         }

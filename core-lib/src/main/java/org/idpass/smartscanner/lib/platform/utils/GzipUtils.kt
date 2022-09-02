@@ -17,15 +17,13 @@
  */
 package org.idpass.smartscanner.lib.platform.utils
 
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.IOException
+import java.io.*
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 
 object GzipUtils {
     @Throws(IOException::class)
-    fun compress(jsonString : String) : ByteArray {
+    fun compress(jsonString: String) : ByteArray {
         val os = ByteArrayOutputStream(jsonString.length)
         val gos = GZIPOutputStream(os)
         gos.write(jsonString.toByteArray())
@@ -38,16 +36,33 @@ object GzipUtils {
     @Throws(IOException::class)
     fun decompress(bytes: ByteArray) : String {
         val BUFFER_SIZE = 32
-        val `is` = ByteArrayInputStream(bytes)
-        val gis = GZIPInputStream(`is`, BUFFER_SIZE)
-        val string = StringBuilder()
+        val inputStream = ByteArrayInputStream(bytes)
+        val gis = GZIPInputStream(inputStream, BUFFER_SIZE)
+        val sb = StringBuilder()
         val data = ByteArray(BUFFER_SIZE)
         var bytesRead: Int
         while (gis.read(data).also { bytesRead = it } != -1) {
-            string.append(String(data, 0, bytesRead))
+            sb.append(String(data, 0, bytesRead))
         }
         gis.close()
-        `is`.close()
-        return string.toString()
+        inputStream.close()
+        return sb.toString()
+    }
+
+    fun isGZipped(inputStream: InputStream): Boolean {
+        var input: InputStream = inputStream
+        if (!input.markSupported()) {
+            input = BufferedInputStream(input)
+        }
+        input.mark(2)
+        var magic = 0
+        try {
+            magic = input.read() and 0xff or (input.read() shl 8 and 0xff00)
+            input.reset()
+        } catch (e: IOException) {
+            e.printStackTrace(System.err)
+            return false
+        }
+        return magic == GZIPInputStream.GZIP_MAGIC
     }
 }
