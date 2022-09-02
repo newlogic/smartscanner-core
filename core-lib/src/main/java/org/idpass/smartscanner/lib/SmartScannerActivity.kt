@@ -42,7 +42,6 @@ import androidx.camera.camera2.interop.Camera2Interop
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.Guideline
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -111,8 +110,6 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
     private var captureLabelText: TextView? = null
     private var captureHeaderText: TextView? = null
     private var captureSubHeaderText: TextView? = null
-    private var modelText: TextView? = null
-    private var modelTextLoading: ProgressBar? = null
 
     private lateinit var modelLayoutView: View
     private lateinit var coordinatorLayoutView: View
@@ -132,8 +129,6 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         closeButton = findViewById(R.id.close_button)
         rectangle = findViewById(R.id.rect_image)
         rectangleMRZGuide = findViewById(R.id.rect_image_crop)
-        modelText = findViewById(R.id.model_text)
-        modelTextLoading = findViewById(R.id.model_text_loading)
         brandingImage = findViewById(R.id.branding_image)
         manualCapture = findViewById(R.id.manual_capture)
         captureLabelText = findViewById(R.id.capture_label_text)
@@ -231,22 +226,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
                     format = scannerOptions?.mrzFormat
                         ?: intent.getStringExtra(ScannerConstants.MRZ_FORMAT_EXTRA),
-                    analyzeStart = System.currentTimeMillis(),
-                    onConnectSuccess = {
-                        if (modelText?.visibility == VISIBLE) {
-                            modelText?.text = it
-                        }
-                        modelTextLoading?.visibility = INVISIBLE
-                        modelText?.visibility = INVISIBLE
-                    },
-                    onConnectFail = {
-                        modelTextLoading?.visibility = VISIBLE
-                        modelText?.visibility = VISIBLE
-                        modelText?.text = it
-                    }
-                ).also {
-                    if (!isMLKit) it.initializeTesseract(this)
-                }
+                    analyzeStart = System.currentTimeMillis()
+                )
                 rectangleMRZGuide?.visibility = VISIBLE
             }
             if (mode == Modes.NFC_SCAN.value) {
@@ -268,19 +249,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                         ?: false, // default is false, capture log and send to Sentry
                     enableLogging = nfcOptions?.enableLogging
                         ?: false, // default is false, logging is disabled
-                    analyzeStart = System.currentTimeMillis(),
-                    onConnectSuccess = {
-                        modelTextLoading?.visibility = INVISIBLE
-                        modelText?.visibility = INVISIBLE
-                    },
-                    onConnectFail = {
-                        modelTextLoading?.visibility = VISIBLE
-                        modelText?.visibility = VISIBLE
-                        modelText?.text = it
-                    }
-                ).also {
-                    if (!isMLKit) it.initializeTesseract(this)
-                }
+                    analyzeStart = System.currentTimeMillis()
+                )
             }
             // set Analyzer and start camera
             analyzer?.let {
@@ -297,145 +267,135 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun startCamera(analyzer: ImageAnalysis.Analyzer? = null, isPdf417: Boolean = false) {
-        this.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
-        cameraProviderFuture.addListener({
-            // Used to bind the lifecycle of cameras to the lifecycle owner
-            cameraProvider = cameraProviderFuture.get()
-            // Preview
-            preview = Preview.Builder().build()
-            val imageAnalysisBuilder = ImageAnalysis.Builder()
-            val resolution = when {
-                isPdf417 -> Size(1080, 1920)
-                mode == Modes.QRCODE.value || mode == Modes.IDPASS_LITE.value -> Size(720, 1280)
-                else -> Size(480, 640)
-            }
-            imageAnalyzer = imageAnalysisBuilder
-                .setTargetResolution(resolution)
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .build()
-                .also {
-                    analyzer?.let { analysis -> it.setAnalyzer(cameraExecutor, analysis) }
+        viewFinder.post {
+            this.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+            val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
+            cameraProviderFuture.addListener({
+                // Used to bind the lifecycle of cameras to the lifecycle owner
+                cameraProvider = cameraProviderFuture.get()
+                // Preview
+                preview = Preview.Builder().build()
+                val imageAnalysisBuilder = ImageAnalysis.Builder()
+                val resolution = when {
+                    isPdf417 -> Size(1080, 1920)
+                    mode == Modes.QRCODE.value || mode == Modes.IDPASS_LITE.value -> Size(720, 1280)
+                    else -> Size(480, 640)
                 }
+                imageAnalyzer = imageAnalysisBuilder
+                    .setTargetResolution(resolution)
+                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .build()
+                    .also {
+                        analyzer?.let { analysis -> it.setAnalyzer(cameraExecutor, analysis) }
+                    }
 
-            // Create configuration object for the image capture use case
-            imageCapture = ImageCapture.Builder()
-                .setTargetResolution(Size(1080, 1920))
-                .setTargetRotation(Surface.ROTATION_0)
-                .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
-                .build()
-            // Select back camera
-            val cameraSelector = CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build()
-            try {
-                // Unbind use cases before rebinding
-                cameraProvider?.unbindAll()
-                // Bind use cases to camera
-                camera = if (analyzer != null) {
-                    cameraProvider?.bindToLifecycle(
-                        this,
-                        cameraSelector,
-                        preview,
-                        imageAnalyzer,
-                        imageCapture
-                    )
-                } else {
-                    cameraProvider?.bindToLifecycle(
-                        this,
-                        cameraSelector,
-                        preview,
-                        imageCapture
-                    )
-                }
-                // Adjust initial zoom ratio of camera to aid high resolution capture of Pdf417 or QR Code or ID PASS Lite
-                if (isPdf417 || mode == Modes.QRCODE.value || mode == Modes.IDPASS_LITE.value) {
-                    camera?.cameraControl?.setZoomRatio(
-                        when {
-                            isPdf417 -> 0.5F
-                            else ->  1.2F
-                        }
-                    )
-                }
-                preview?.setSurfaceProvider(viewFinder.createSurfaceProvider())
-                Log.d(
-                    TAG,
-                    "Measured size: ${viewFinder.width}x${viewFinder.height}"
-                )
-                // Autofocus modes and Tap to focus
-                val camera2InterOp = Camera2Interop.Extender(imageAnalysisBuilder)
-                camera2InterOp.setCaptureRequestOption(CaptureRequest.CONTROL_AF_MODE,CaptureRequest.CONTROL_AF_MODE_AUTO)
-                camera2InterOp.setCaptureRequestOption(CaptureRequest.CONTROL_AE_MODE,CaptureRequest.CONTROL_AE_MODE_ON)
-                viewFinder.afterMeasured {
-                    viewFinder.setOnTouchListener { _, event ->
-                        return@setOnTouchListener when (event.action) {
-                            MotionEvent.ACTION_DOWN -> {
-                                true
+                // Create configuration object for the image capture use case
+                imageCapture = ImageCapture.Builder()
+                    .setTargetResolution(Size(1080, 1920))
+                    .setTargetRotation(Surface.ROTATION_0)
+                    .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
+                    .build()
+                // Select back camera
+                val cameraSelector = CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build()
+                try {
+                    // Unbind use cases before rebinding
+                    cameraProvider?.unbindAll()
+                    // Bind use cases to camera
+                    camera = if (analyzer != null) {
+                        cameraProvider?.bindToLifecycle(
+                            this,
+                            cameraSelector,
+                            preview,
+                            imageAnalyzer,
+                            imageCapture
+                        )
+                    } else {
+                        cameraProvider?.bindToLifecycle(
+                            this,
+                            cameraSelector,
+                            preview,
+                            imageCapture
+                        )
+                    }
+                    // Adjust initial zoom ratio of camera to aid high resolution capture of Pdf417 or QR Code or ID PASS Lite
+                    if (isPdf417 || mode == Modes.QRCODE.value || mode == Modes.IDPASS_LITE.value) {
+                        camera?.cameraControl?.setZoomRatio(
+                            when {
+                                isPdf417 -> 0.5F
+                                else ->  1.2F
                             }
-                            MotionEvent.ACTION_UP -> {
-                                val factory: MeteringPointFactory = SurfaceOrientedMeteringPointFactory(
+                        )
+                    }
+                    preview?.setSurfaceProvider(viewFinder.createSurfaceProvider())
+                    Log.d(
+                        TAG,
+                        "Measured size: ${viewFinder.width}x${viewFinder.height}"
+                    )
+                    // Autofocus modes and Tap to focus
+                    val camera2InterOp = Camera2Interop.Extender(imageAnalysisBuilder)
+                    camera2InterOp.setCaptureRequestOption(CaptureRequest.CONTROL_AF_MODE,CaptureRequest.CONTROL_AF_MODE_AUTO)
+                    camera2InterOp.setCaptureRequestOption(CaptureRequest.CONTROL_AE_MODE,CaptureRequest.CONTROL_AE_MODE_ON)
+                    viewFinder.afterMeasured {
+                        viewFinder.setOnTouchListener { _, event ->
+                            return@setOnTouchListener when (event.action) {
+                                MotionEvent.ACTION_DOWN -> {
+                                    true
+                                }
+                                MotionEvent.ACTION_UP -> {
+                                    val factory: MeteringPointFactory = SurfaceOrientedMeteringPointFactory(
                                         viewFinder.width.toFloat(), viewFinder.height.toFloat()
-                                )
-                                val autoFocusPoint = factory.createPoint(event.x, event.y)
-                                try {
-                                    camera?.cameraControl?.startFocusAndMetering(
+                                    )
+                                    val autoFocusPoint = factory.createPoint(event.x, event.y)
+                                    try {
+                                        camera?.cameraControl?.startFocusAndMetering(
                                             FocusMeteringAction.Builder(
-                                                    autoFocusPoint,
-                                                    FocusMeteringAction.FLAG_AF
+                                                autoFocusPoint,
+                                                FocusMeteringAction.FLAG_AF
                                             ).apply {
                                                 //focus only when the user tap the preview
                                                 disableAutoCancel()
                                             }.build()
-                                    )
-                                } catch (e: CameraInfoUnavailableException) {
-                                    Log.d("ERROR", "cannot access camera", e)
+                                        )
+                                    } catch (e: CameraInfoUnavailableException) {
+                                        Log.d("ERROR", "cannot access camera", e)
+                                    }
+                                    true
                                 }
-                                true
+                                else -> false // Unhandled event.
                             }
-                            else -> false // Unhandled event.
                         }
                     }
-                }
 
-            } catch (exc: Exception) {
-                Log.e(TAG, "Use case binding failed", exc)
-            }
-        }, ContextCompat.getMainExecutor(this))
-        // assign camera click listeners
-        closeButton?.setOnClickListener(this)
-        flashButton?.setOnClickListener(this)
-        manualCapture?.setOnClickListener(this)
+                } catch (exc: Exception) {
+                    Log.e(TAG, "Use case binding failed", exc)
+                }
+            }, ContextCompat.getMainExecutor(this))
+            // assign camera click listeners
+            closeButton?.setOnClickListener(this)
+            flashButton?.setOnClickListener(this)
+            manualCapture?.setOnClickListener(this)
+        }
     }
 
     private fun setupViews() {
         // scanner layout size
-        val layoutParams = modelLayoutView.layoutParams as ConstraintLayout.LayoutParams
         val topGuideline = findViewById<Guideline>(R.id.top)
         val bottomGuideline = findViewById<Guideline>(R.id.bottom)
-        when (scannerOptions?.scannerSize) {
-            ScannerSize.LARGE.value -> {
-                bottomGuideline.setGuidelinePercent(0.925F)
-                topGuideline.setGuidelinePercent(0.0F)
-                layoutParams.dimensionRatio = "4:4"
-                modelLayoutView.layoutParams = layoutParams
-            }
-            ScannerSize.SMALL.value -> {
-                layoutParams.dimensionRatio = "4:4"
-                modelLayoutView.layoutParams = layoutParams
-            }
-            else -> {
-                layoutParams.dimensionRatio = "3:4"
-                modelLayoutView.layoutParams = layoutParams
-            }
-        }
-        captureOptions?.type?.let { type ->
-            if (type == CaptureType.ID.value) {
-                layoutParams.dimensionRatio = "3:4"
-                modelLayoutView.layoutParams = layoutParams
-            } else {
-                bottomGuideline.setGuidelinePercent(0.9F)
-                topGuideline.setGuidelinePercent(0.0F)
-                layoutParams.dimensionRatio = "3:4"
-                modelLayoutView.layoutParams = layoutParams
-
+        // scanner sizes available for Portrait only
+        if (config?.orientation == Orientation.PORTRAIT.value) {
+            when (scannerOptions?.scannerSize) {
+                ScannerSize.LARGE.value -> {
+                    bottomGuideline.setGuidelinePercent(0.7F)
+                    topGuideline.setGuidelinePercent(0.25F)
+                }
+                ScannerSize.SMALL.value -> {
+                    bottomGuideline.setGuidelinePercent(0.6F)
+                    topGuideline.setGuidelinePercent(0.375F)
+                }
+                else -> {
+                    bottomGuideline.setGuidelinePercent(0.625F)
+                    topGuideline.setGuidelinePercent(0.275F)
+                }
             }
         }
         // flash
@@ -517,9 +477,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         }
     }
 
-    private fun requestPermissions() {
-        ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
-    }
+    private fun requestPermissions() = ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
@@ -640,7 +598,6 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         }
         bottomSheetDialog.show()
     }
-
 
     private inline fun View.afterMeasured(crossinline block: () -> Unit) {
         if (measuredWidth > 0 && measuredHeight > 0) {
