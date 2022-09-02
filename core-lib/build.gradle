@@ -25,7 +25,7 @@ android {
     }
 
     buildFeatures {
-        viewBinding = true
+        viewBinding true
     }
 
     buildTypes {
@@ -61,15 +61,15 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'com.google.android.material:material:1.2.1'
     implementation 'com.google.firebase:firebase-analytics-ktx:18.0.1'
-    implementation 'com.google.firebase:firebase-crashlytics-ktx:17.3.0'
-    implementation 'com.google.firebase:firebase-crashlytics:17.3.0'
     implementation 'com.google.firebase:firebase-analytics:18.0.1'
+    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.2.12'
+    implementation 'com.google.firebase:firebase-crashlytics:18.2.12'
     implementation files('libs/jj2000_imageutil.jar')
     testImplementation 'junit:junit:4.13.1'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
     // ML Kit dependencies
-    implementation 'com.google.mlkit:text-recognition:16.0.0-beta3'
+    implementation 'com.google.mlkit:text-recognition:16.0.0-beta5'
     implementation 'com.google.mlkit:barcode-scanning:17.0.2'
     // CameraX
     def camerax_version = "1.0.0-beta07"
