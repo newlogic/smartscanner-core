@@ -49,7 +49,7 @@
                         android:layout_alignParentTop="true"
                         android:layout_marginStart="@dimen/margin_small"
                         android:layout_marginEnd="@dimen/margin_small"
-                        android:layout_toEndOf="@+id/iconWarning"
+                        android:layout_toEndOf="@+id/icon_warning"
                         android:text="@string/document_valid_passport"
                         android:textColor="@color/white" />
 

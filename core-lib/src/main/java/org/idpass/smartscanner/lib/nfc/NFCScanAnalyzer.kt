@@ -48,10 +48,8 @@ open class NFCScanAnalyzer(
     private val imageResultType: String,
     isMLKit: Boolean,
     format: String? = null,
-    analyzeStart: Long,
-    onConnectSuccess: (String) -> Unit,
-    onConnectFail: (String) -> Unit
-) : MRZAnalyzer(activity, intent, mode, label, language, locale, withMrzPhoto, withPhoto, captureLog, enableLogging, isMLKit, imageResultType, format, analyzeStart, onConnectSuccess, onConnectFail) {
+    analyzeStart: Long
+) : MRZAnalyzer(activity, intent, mode, label, language, locale, withMrzPhoto, withPhoto, captureLog, enableLogging, isMLKit, imageResultType, format, analyzeStart) {
 
     override fun processResult(result: String, bitmap: Bitmap, rotation: Int) {
         val mrzResult =  MRZResult.formatMrzResult(MRZCleaner.parseAndClean(result))
