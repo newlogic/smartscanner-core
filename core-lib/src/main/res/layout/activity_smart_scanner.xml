@@ -10,6 +10,129 @@
     android:textAlignment="gravity"
     tools:context="org.idpass.smartscanner.lib.SmartScannerActivity">
 
+    <include
+        android:id="@+id/action_bar_menu"
+        layout="@layout/top_action_bar_in_live_camera"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:elevation="10dp" />
+
+    <TextView
+        android:id="@+id/capture_header_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:textDirection="anyRtl"
+        android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="32dp"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/action_bar_menu"
+        tools:text="header text" />
+
+    <TextView
+        android:id="@+id/capture_sub_header_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_marginHorizontal="32dp"
+        android:lineSpacingMultiplier="0.9"
+        android:textColor="@color/white"
+        android:textDirection="anyRtl"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/capture_header_text"
+        tools:text="sub text" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.275" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/bottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.625" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/view_layout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:elevation="1dp"
+        android:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@+id/bottom"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/top">
+
+        <androidx.camera.view.PreviewView
+            android:id="@+id/view_finder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginVertical="8dp"
+            android:elevation="0dp"
+            app:layout_constraintDimensionRatio="4:3"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:scaleType="fillCenter"/>
+
+        <ImageView
+            android:id="@+id/rect_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginVertical="4dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/rectangle"
+            android:src="@drawable/rectangle"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/branding_image"
+        android:layout_width="64dp"
+        android:layout_height="32dp"
+        android:layout_marginEnd="16dp"
+        android:textColor="@color/white"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/view_layout"
+        app:srcCompat="@drawable/ic_id_pass_logo_greyed" />
+
+    <TextView
+        android:id="@+id/capture_label_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:lineSpacingMultiplier="0.9"
+        android:textColor="@color/white"
+        android:textDirection="anyRtl"
+        android:layout_marginHorizontal="32dp"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/branding_image"
+        tools:text="capture text" />
+
     <androidx.appcompat.widget.AppCompatImageButton
         android:id="@+id/manual_capture"
         style="@style/Widget.AppCompat.Button.Borderless"
@@ -30,150 +153,5 @@
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/view_layout"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginHorizontal="8dp"
-        android:elevation="1dp"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintDimensionRatio="3:4"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <TextView
-            android:id="@+id/capture_header_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/white"
-            android:textDirection="anyRtl"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:gravity="center"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/capture_sub_header_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/white"
-            android:textDirection="anyRtl"
-            android:textSize="16sp"
-            android:gravity="center"
-            android:lineSpacingMultiplier="0.9"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/capture_header_text" />
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/bottom"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.70" />
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/top"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.20" />
-
-        <androidx.camera.view.PreviewView
-            android:id="@+id/view_finder"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginVertical="6dp"
-            android:elevation="0dp"
-            app:layout_constraintBottom_toTopOf="@+id/bottom"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/top" />
-
-        <ImageView
-            android:id="@+id/rect_image"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginHorizontal="10dp"
-            android:layout_weight="1"
-            android:adjustViewBounds="false"
-            android:contentDescription="@string/rectangle"
-            android:src="@drawable/rectangle"
-            app:layout_constraintBottom_toTopOf="@+id/bottom"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/top" />
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/branding_image"
-            android:layout_width="64dp"
-            android:layout_height="32dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="4dp"
-            app:srcCompat="@drawable/ic_id_pass_logo_greyed"
-            android:textColor="@color/white"
-            android:visibility="invisible"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/rect_image" />
-
-        <TextView
-            android:id="@+id/capture_label_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="36dp"
-            android:textColor="@color/white"
-            android:textDirection="anyRtl"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:lineSpacingMultiplier="0.9"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/branding_image" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <TextView
-        android:id="@+id/model_text"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@color/transparent_grey"
-        android:elevation="2dp"
-        android:fontFamily="@font/sourcesanspro_medium"
-        android:gravity="center_horizontal|center_vertical"
-        android:text="@string/model_text"
-        android:textColor="#FFFFFF"
-        android:textSize="18sp"
-        android:layout_marginBottom="48dp"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ProgressBar
-        android:id="@+id/model_text_loading"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:elevation="2dp"
-        android:layout_marginTop="60dp"
-        android:visibility="invisible"
-        android:indeterminateTint="@color/white_30"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <include
-        android:id="@+id/action_bar_menu"
-        layout="@layout/top_action_bar_in_live_camera"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top"
-        android:elevation="10dp" />
+        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
