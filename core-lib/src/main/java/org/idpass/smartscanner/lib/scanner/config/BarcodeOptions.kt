@@ -34,5 +34,11 @@ data class BarcodeOptions(
             barcodeFormats = arrayListOf(BarcodeFormat.QR_CODE.label),
             idPassLiteSupport = true
         )
+        val defaultQRCode = BarcodeOptions(
+            barcodeFormats = arrayListOf(BarcodeFormat.QR_CODE.label)
+        )
+        val defaultPDF417 = BarcodeOptions(
+            barcodeFormats = arrayListOf(BarcodeFormat.PDF_417.label)
+        )
     }
 }

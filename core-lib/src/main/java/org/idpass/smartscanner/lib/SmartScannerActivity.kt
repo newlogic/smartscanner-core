@@ -100,6 +100,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
     private var captureOptions: CaptureOptions? = null
     private var mode: String? = null
     private var cameraProvider: ProcessCameraProvider? = null
+    private var orientation: String? = null
 
     private var flashButton: View? = null
     private var closeButton: View? = null
@@ -150,10 +151,11 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 throw SmartScannerException("Please set proper scanner options to be able to use ID PASS Smart Scanner.")
             }
         }
-        // setup modes & config for reader
+        // Setup modes & config for reader
         mode = scannerOptions?.mode
         config = scannerOptions?.config ?: Config.default
-
+        // Set orientation to PORTRAIT as default
+        orientation = config?.orientation ?: Orientation.PORTRAIT.value
         // Request camera permissions
         if (allPermissionsGranted()) {
             setupConfiguration()
@@ -382,7 +384,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         val topGuideline = findViewById<Guideline>(R.id.top)
         val bottomGuideline = findViewById<Guideline>(R.id.bottom)
         // scanner sizes available for Portrait only
-        if (config?.orientation == Orientation.PORTRAIT.value) {
+        if (orientation == Orientation.PORTRAIT.value) {
             when (scannerOptions?.scannerSize) {
                 ScannerSize.LARGE.value -> {
                     bottomGuideline.setGuidelinePercent(0.7F)
@@ -442,7 +444,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             LanguageUtils.changeLanguage(this, language)
         }
         // Device orientation
-        if (config?.orientation == Orientation.LANDSCAPE.value) {
+        if (orientation == Orientation.LANDSCAPE.value) {
             this.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
         }
     }

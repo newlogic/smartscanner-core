@@ -46,7 +46,7 @@ class BarcodeAnalyzer(
     private val barcodeFormats: List<Int>
 ) : BaseImageAnalyzer() {
 
-    @SuppressLint("UnsafeExperimentalUsageError")
+    @SuppressLint("UnsafeExperimentalUsageError", "UnsafeOptInUsageError")
     override fun analyze(imageProxy: ImageProxy) {
         val bitmap = BitmapUtils.getBitmap(imageProxy)
         bitmap?.let { bf ->
@@ -76,8 +76,9 @@ class BarcodeAnalyzer(
                         "barcode: success: $timeRequired ms"
                     )
                     val filePath = activity.cacheImagePath()
-                    if (barcodes.isNotEmpty()) {
-                        val corners = barcodes[0].cornerPoints
+                    if (barcodes != null && barcodes.isNotEmpty()) {
+                        val barcode = barcodes[0]
+                        val corners = barcode.cornerPoints
                         val builder = StringBuilder()
                         if (corners != null) {
                             for (corner in corners) {
@@ -89,7 +90,7 @@ class BarcodeAnalyzer(
                             imageProxy.imageInfo.rotationDegrees
                         )
                         cornersString = builder.toString()
-                        rawValue = barcodes[0].rawValue
+                        rawValue =  barcode.rawValue ?: barcode.displayValue
                         val bitmapResult = if (isPDF417) bf.getResizedBitmap(480, 640) else bf
                         val imageResult = if (imageResultType == ImageResultType.BASE_64.value) bitmapResult?.encodeBase64(rot) else filePath
                         val result = BarcodeResult(imagePath = filePath, image = imageResult, corners = cornersString, value = rawValue)
