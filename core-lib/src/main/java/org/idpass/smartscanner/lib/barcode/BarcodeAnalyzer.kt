@@ -35,6 +35,7 @@ import org.idpass.smartscanner.lib.platform.extension.*
 import org.idpass.smartscanner.lib.platform.utils.BitmapUtils
 import org.idpass.smartscanner.lib.scanner.config.ImageResultType
 import org.idpass.smartscanner.lib.scanner.config.Modes
+import java.io.File
 
 
 class BarcodeAnalyzer(
@@ -85,14 +86,17 @@ class BarcodeAnalyzer(
                                 builder.append("${corner.x},${corner.y} ")
                             }
                         }
-                        bf.cacheImageToLocal(
+                        val bitmapResult = if (isPDF417) bf.resize(640, 480) else bf
+                        val compressionQuality = if (imageResultType == ImageResultType.BASE_64.value) 30 else 80
+                        bitmapResult?.cacheImageToLocal(
                             filePath,
-                            imageProxy.imageInfo.rotationDegrees
+                            imageProxy.imageInfo.rotationDegrees,
+                            compressionQuality
                         )
                         cornersString = builder.toString()
                         rawValue =  barcode.rawValue ?: barcode.displayValue
-                        val bitmapResult = if (isPDF417) bf.getResizedBitmap(480, 640) else bf
-                        val imageResult = if (imageResultType == ImageResultType.BASE_64.value) bitmapResult?.encodeBase64(rot) else filePath
+                        val imageFile = File(filePath)
+                        val imageResult = if (imageResultType == ImageResultType.BASE_64.value) imageFile.encodeBase64() else filePath
                         val result = BarcodeResult(imagePath = filePath, image = imageResult, corners = cornersString, value = rawValue)
                         when (intent.action) {
                             ScannerConstants.IDPASS_SMARTSCANNER_BARCODE_INTENT,

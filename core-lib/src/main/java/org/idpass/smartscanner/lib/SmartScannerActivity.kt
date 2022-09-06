@@ -537,7 +537,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                                 .submit()
                                 .get()
                             bf.cacheImageToLocal(imageFile.path)
-                            val imageString = if (config?.imageResultType == ImageResultType.BASE_64.value) bf.encodeBase64() else imageFile.path
+                            val imageString = if (config?.imageResultType == ImageResultType.BASE_64.value) imageFile.encodeBase64() else imageFile.path
                             val result: Any = if (mode == Modes.MRZ.value) MrzUtils.getImageOnly(imageString) else ImageResult(imageString)
                             data.putExtra(SCANNER_RESULT, Gson().toJson(result))
                             setResult(Activity.RESULT_OK, data)

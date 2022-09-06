@@ -21,8 +21,10 @@ import android.content.Context
 import android.content.res.Resources
 import android.graphics.*
 import android.util.Base64
+import android.util.Base64OutputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
@@ -98,17 +100,17 @@ fun Bitmap.cacheImageToLocal(localPath: String, rotation: Int = 0, quality: Int 
     }
 }
 
-fun Bitmap.getResizedBitmap(newWidth: Int, newHeight: Int): Bitmap? {
-    val width = this.width
-    val height = this.height
-    val scaleWidth = newWidth.toFloat() / width
-    val scaleHeight = newHeight.toFloat() / height
-    // CREATE A MATRIX FOR THE MANIPULATION
-    val matrix = Matrix()
-    // RESIZE THE BIT MAP
-    matrix.postScale(scaleWidth, scaleHeight)
-    // "RECREATE" THE NEW BITMAP
-    return Bitmap.createBitmap(this, 0, 0, width, height, matrix, false)
+fun Bitmap.resize(newWidth: Int, newHeight: Int): Bitmap? {
+    val scaledBitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
+    val ratioX = newWidth / this.width.toFloat()
+    val ratioY = newHeight / this.height.toFloat()
+    val scaleMatrix = Matrix()
+    scaleMatrix.setScale(ratioX, ratioY, 0f, 0f)
+    val canvas = Canvas(scaledBitmap)
+    canvas.setMatrix(scaleMatrix)
+    val paint = Paint(Paint.FILTER_BITMAP_FLAG)
+    canvas.drawBitmap(this, 0f, 0f, paint)
+    return scaledBitmap
 }
 
 fun String.decodeBase64(): Bitmap? {
@@ -120,8 +122,22 @@ fun Bitmap.encodeBase64(rotation: Int = 0): String? {
     val outputStream = ByteArrayOutputStream()
     val matrix = Matrix().apply { postRotate(rotation.toFloat()) }
     val b = Bitmap.createBitmap(this, 0, 0, this.width, this.height, matrix, true)
+    val canvas = Canvas(b)
+    canvas.drawBitmap(b, 0f, 0f, null)
     b.compress(Bitmap.CompressFormat.JPEG, 50, outputStream)
     return Base64.encodeToString(outputStream.toByteArray(), Base64.DEFAULT)
+}
+
+fun File.encodeBase64(): String {
+    return FileInputStream(this).use { inputStream ->
+        ByteArrayOutputStream().use { outputStream ->
+            Base64OutputStream(outputStream, Base64.DEFAULT).use { base64FilterStream ->
+                inputStream.copyTo(base64FilterStream)
+                base64FilterStream.close()
+                outputStream.toString()
+            }
+        }
+    }
 }
 
 fun Bitmap.rotate(rotation: Int = 0): Bitmap {

@@ -75,10 +75,6 @@ object ImageUtils {
         return out.toByteArray()
     }
 
-
-    /* IMAGE DECODIFICATION METHODS */
-
-
     @Throws(IOException::class)
     fun decodeImage(inputStream: InputStream, imageLength: Int, mimeType: String): Bitmap {
         var inputStream = inputStream
@@ -115,8 +111,6 @@ object ImageUtils {
         matrix.postRotate(angle)
         return Bitmap.createBitmap(source, 0, 0, source.width, source.height, matrix, true)
     }
-
-    /* ONLY PRIVATE METHODS BELOW */
 
     private fun toAndroidBitmap(bitmap: org.jmrtd.jj2000.Bitmap): Bitmap {
         val intData = bitmap.pixels

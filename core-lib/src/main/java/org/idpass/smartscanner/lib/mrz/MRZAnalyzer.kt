@@ -36,6 +36,7 @@ import org.idpass.smartscanner.lib.platform.utils.BitmapUtils
 import org.idpass.smartscanner.lib.scanner.config.ImageResultType
 import org.idpass.smartscanner.lib.scanner.config.Modes
 import org.idpass.smartscanner.lib.scanner.config.MrzFormat
+import java.io.File
 import java.net.URLEncoder
 
 open class MRZAnalyzer(
@@ -137,9 +138,11 @@ open class MRZAnalyzer(
     }
 
     internal open fun processResult(result: String, bitmap: Bitmap, rotation: Int) {
-        val imagePathFile = activity.cacheImagePath()
-        bitmap.cacheImageToLocal(imagePathFile, rotation)
-        val imageString = if (imageResultType == ImageResultType.BASE_64.value) bitmap.encodeBase64(rotation) else imagePathFile
+        val imagePath = activity.cacheImagePath()
+        val compressionQuality = if (imageResultType == ImageResultType.BASE_64.value) 30 else 80
+        bitmap.cacheImageToLocal(imagePath, rotation, compressionQuality)
+        val imageFile = File(imagePath)
+        val imageString = if (imageResultType == ImageResultType.BASE_64.value) imageFile.encodeBase64() else imagePath
         val mrz = when (format) {
             MrzFormat.MRTD_TD1.value -> MRZResult.formatMrtdTd1Result(MRZCleaner.parseAndCleanMrtdTd1(result), imageString)
             else -> MRZResult.formatMrzResult(MRZCleaner.parseAndClean(result), imageString)
