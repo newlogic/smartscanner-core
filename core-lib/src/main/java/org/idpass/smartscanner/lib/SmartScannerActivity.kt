@@ -294,7 +294,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
 
                 // Create configuration object for the image capture use case
                 imageCapture = ImageCapture.Builder()
-                    .setTargetAspectRatio(viewFinder.width / viewFinder.height)
+                    .setTargetResolution(Size(1080, 1920))
                     .setTargetRotation(Surface.ROTATION_0)
                     .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
                     .build()

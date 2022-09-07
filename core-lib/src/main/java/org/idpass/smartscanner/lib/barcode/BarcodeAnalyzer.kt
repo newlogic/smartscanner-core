@@ -90,7 +90,7 @@ class BarcodeAnalyzer(
                         bitmapResult?.cropCenter()?.cacheImageToLocal(
                             filePath,
                             imageProxy.imageInfo.rotationDegrees,
-                            if (imageResultType == ImageResultType.BASE_64.value) 40 else 80
+                            if (imageResultType == ImageResultType.BASE_64.value) 30 else 80
                         )
                         cornersString = builder.toString()
                         rawValue =  barcode.rawValue ?: barcode.displayValue
