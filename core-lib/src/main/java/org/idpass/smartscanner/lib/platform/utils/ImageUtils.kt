@@ -78,20 +78,16 @@ object ImageUtils {
     @Throws(IOException::class)
     fun decodeImage(inputStream: InputStream, imageLength: Int, mimeType: String): Bitmap {
         var inputStream = inputStream
-        /* DEBUG */
         synchronized(inputStream) {
             val dataIn = DataInputStream(inputStream)
             val bytes = ByteArray(imageLength)
             dataIn.readFully(bytes)
             inputStream = ByteArrayInputStream(bytes)
         }
-        /* END DEBUG */
-
         if (JPEG2000_MIME_TYPE.equals(mimeType, ignoreCase = true) || JPEG2000_ALT_MIME_TYPE.equals(mimeType, ignoreCase = true)) {
             val bitmap = org.jmrtd.jj2000.JJ2000Decoder.decode(inputStream)
             return toAndroidBitmap(bitmap)
         } else if (WSQ_MIME_TYPE.equals(mimeType, ignoreCase = true)) {
-            //org.jnbis.Bitmap bitmap = WSQDecoder.decode(inputStream);
             val wsqDecoder = WsqDecoder()
             val bitmap = wsqDecoder.decode(inputStream.readBytes())
             val byteData = bitmap.pixels
@@ -100,7 +96,6 @@ object ImageUtils {
                 intData[j] = -0x1000000 or ((byteData[j].toInt() and 0xFF) shl 16) or ((byteData[j].toInt() and 0xFF) shl 8) or (byteData[j].toInt() and 0xFF)
             }
             return Bitmap.createBitmap(intData, 0, bitmap.width, bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
-            //return toAndroidBitmap(bitmap);
         } else {
             return BitmapFactory.decodeStream(inputStream)
         }
@@ -115,6 +110,5 @@ object ImageUtils {
     private fun toAndroidBitmap(bitmap: org.jmrtd.jj2000.Bitmap): Bitmap {
         val intData = bitmap.pixels
         return Bitmap.createBitmap(intData, 0, bitmap.width, bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
-
     }
 }

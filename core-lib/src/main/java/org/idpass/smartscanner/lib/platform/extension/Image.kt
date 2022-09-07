@@ -153,3 +153,25 @@ fun Context.cacheImagePath(identifier: String = "Scanner"): String {
     val currentDateTime = formatter.format(date)
     return "${this.cacheDir}/$identifier-$currentDateTime.jpg"
 }
+
+fun Bitmap.cropCenter() : Bitmap {
+    return if (this.width >= this.height){
+       Bitmap.createBitmap(
+            this,
+           this.width /2 - this.height /2,
+            0,
+           this.height,
+           this.height
+        )
+
+    }else{
+
+        Bitmap.createBitmap(
+            this,
+            0,
+            this.height /2 - this.width /2,
+            this.width,
+            this.width
+        )
+    }
+}

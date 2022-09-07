@@ -139,8 +139,11 @@ open class MRZAnalyzer(
 
     internal open fun processResult(result: String, bitmap: Bitmap, rotation: Int) {
         val imagePath = activity.cacheImagePath()
-        val compressionQuality = if (imageResultType == ImageResultType.BASE_64.value) 30 else 80
-        bitmap.cacheImageToLocal(imagePath, rotation, compressionQuality)
+        bitmap.cropCenter().cacheImageToLocal(
+            imagePath,
+            rotation,
+            if (imageResultType == ImageResultType.BASE_64.value) 40 else 80
+        )
         val imageFile = File(imagePath)
         val imageString = if (imageResultType == ImageResultType.BASE_64.value) imageFile.encodeBase64() else imagePath
         val mrz = when (format) {

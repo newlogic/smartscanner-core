@@ -240,7 +240,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     isMLKit = isMLKit,
                     imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
                     label = nfcOptions?.label,
-                    language = scannerOptions?.language ?: intent.getStringExtra(ScannerConstants.LANGUAGE),
+                    language = scannerOptions?.language
+                        ?: intent.getStringExtra(ScannerConstants.LANGUAGE),
                     locale = nfcOptions?.locale
                         ?: intent.getStringExtra(ScannerConstants.NFC_LOCALE),
                     withPhoto = nfcOptions?.withPhoto
@@ -293,7 +294,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
 
                 // Create configuration object for the image capture use case
                 imageCapture = ImageCapture.Builder()
-                    .setTargetResolution(Size(1080, 1920))
+                    .setTargetAspectRatio(viewFinder.width / viewFinder.height)
                     .setTargetRotation(Surface.ROTATION_0)
                     .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
                     .build()
@@ -324,7 +325,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                         camera?.cameraControl?.setZoomRatio(
                             when {
                                 isPdf417 -> 0.5F
-                                else ->  1.2F
+                                else -> 1.2F
                             }
                         )
                     }

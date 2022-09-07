@@ -87,11 +87,10 @@ class BarcodeAnalyzer(
                             }
                         }
                         val bitmapResult = if (isPDF417) bf.resize(640, 480) else bf
-                        val compressionQuality = if (imageResultType == ImageResultType.BASE_64.value) 30 else 80
-                        bitmapResult?.cacheImageToLocal(
+                        bitmapResult?.cropCenter()?.cacheImageToLocal(
                             filePath,
                             imageProxy.imageInfo.rotationDegrees,
-                            compressionQuality
+                            if (imageResultType == ImageResultType.BASE_64.value) 40 else 80
                         )
                         cornersString = builder.toString()
                         rawValue =  barcode.rawValue ?: barcode.displayValue
