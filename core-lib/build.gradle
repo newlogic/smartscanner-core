@@ -118,10 +118,6 @@ dependencies {
     implementation "androidx.work:work-runtime:$work_version"
     implementation "androidx.work:work-runtime-ktx:$work_version"
 
-    // Barcode
-    implementation('com.journeyapps:zxing-android-embedded:4.3.0') { transitive = false }
-    implementation 'com.google.zxing:core:3.3.0'
-
     // JWT
     api 'io.jsonwebtoken:jjwt-api:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
@@ -129,4 +125,9 @@ dependencies {
         exclude group: 'org.json', module: 'json' //provided by Android natively
     }
     implementation 'io.jsonwebtoken:jjwt-gson:0.11.5'
+
+    // Barcode
+    implementation('com.journeyapps:zxing-android-embedded:4.3.0') { transitive = false }
+    implementation 'com.google.zxing:core:3.3.0'
+
 }
