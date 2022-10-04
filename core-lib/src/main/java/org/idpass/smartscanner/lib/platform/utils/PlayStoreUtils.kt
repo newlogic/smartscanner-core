@@ -15,14 +15,17 @@
  *
  *
  */
-package org.idpass.smartscanner.lib.scanner.config
+package org.idpass.smartscanner.lib.platform.utils
 
-enum class Modes (val value : String) {
-    BARCODE("barcode"),
-    CAPTURE_ONLY("capture-only"),
-    IDPASS_LITE("idpass-lite"),
-    MRZ("mrz"),
-    NFC_SCAN("nfc-scan"),
-    PDF_417("pdf417"),
-    QRCODE("qrcode")
+import android.content.Context
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
+
+object PlayStoreUtils {
+
+    fun isPlayServicesAvailable(context: Context): Boolean {
+        val availability = GoogleApiAvailability.getInstance()
+        val resultCode = availability.isGooglePlayServicesAvailable(context)
+        return resultCode == ConnectionResult.SUCCESS
+    }
 }

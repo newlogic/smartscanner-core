@@ -88,6 +88,20 @@
             app:layout_constraintTop_toTopOf="parent"
             app:scaleType="fillCenter"/>
 
+        <com.journeyapps.barcodescanner.DecoratedBarcodeView
+            android:id="@+id/view_finder_barcode"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginVertical="8dp"
+            android:visibility="gone"
+            app:zxing_possible_result_points="@color/transparent"
+            app:zxing_preview_scaling_strategy="centerCrop"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
         <ImageView
             android:id="@+id/rect_image"
             android:layout_width="match_parent"

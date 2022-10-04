@@ -42,7 +42,7 @@ class BarcodeAnalyzer(
     override val activity: Activity,
     override val intent: Intent,
     override val mode: String = Modes.BARCODE.value,
-    private val isPDF417: Boolean,
+    private val hasPDF417: Boolean,
     private val imageResultType: String,
     private val barcodeFormats: List<Int>
 ) : BaseImageAnalyzer() {
@@ -86,7 +86,7 @@ class BarcodeAnalyzer(
                                 builder.append("${corner.x},${corner.y} ")
                             }
                         }
-                        val bitmapResult = if (isPDF417) bf.resize(640, 480) else bf
+                        val bitmapResult = if (hasPDF417) bf.resize(640, 480) else bf
                         bitmapResult?.cropCenter()?.cacheImageToLocal(
                             filePath,
                             imageProxy.imageInfo.rotationDegrees,
