@@ -48,16 +48,18 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions.bitmapTransform
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
+import com.google.zxing.BarcodeFormat.*
+import com.journeyapps.barcodescanner.DecoratedBarcodeView
+import com.journeyapps.barcodescanner.ViewfinderView
 import io.sentry.Sentry
 import io.sentry.SentryOptions
 import org.idpass.lite.android.IDPassLite
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.barcode.BarcodeAnalyzer
+import org.idpass.smartscanner.lib.barcode.BarcodeResult
 import org.idpass.smartscanner.lib.barcode.qr.QRCodeAnalyzer
 import org.idpass.smartscanner.lib.idpasslite.IDPassLiteAnalyzer
 import org.idpass.smartscanner.lib.idpasslite.IDPassManager
@@ -65,6 +67,7 @@ import org.idpass.smartscanner.lib.mrz.MRZAnalyzer
 import org.idpass.smartscanner.lib.mrz.MrzUtils
 import org.idpass.smartscanner.lib.nfc.NFCScanAnalyzer
 import org.idpass.smartscanner.lib.scanner.BaseActivity
+import org.idpass.smartscanner.lib.platform.utils.PlayStoreUtils
 import org.idpass.smartscanner.lib.scanner.ImageResult
 import org.idpass.smartscanner.lib.scanner.SmartScannerException
 import org.idpass.smartscanner.lib.scanner.config.*
@@ -113,6 +116,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
     private var captureLabelText: TextView? = null
     private var captureHeaderText: TextView? = null
     private var captureSubHeaderText: TextView? = null
+    private var barcodeScannerView: DecoratedBarcodeView? = null
 
     private lateinit var modelLayoutView: View
     private lateinit var coordinatorLayoutView: View
@@ -128,6 +132,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         coordinatorLayoutView = findViewById(R.id.coordinator_layout)
         modelLayoutView = findViewById(R.id.view_layout)
         viewFinder = findViewById(R.id.view_finder)
+        barcodeScannerView = findViewById(R.id.view_finder_barcode)
         flashButton = findViewById(R.id.flash_button)
         closeButton = findViewById(R.id.close_button)
         rectangle = findViewById(R.id.rect_image)
@@ -188,20 +193,22 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
 
     private fun setupConfiguration() {
         runOnUiThread {
-            val isMLKit = isPlayServicesAvailable()
+            val isMLKit = PlayStoreUtils.isPlayServicesAvailable(this)
             var analyzer : ImageAnalysis.Analyzer? = null
-            var isPdf417 = false
+            var hasPDF417 = false
             if (mode == Modes.BARCODE.value) {
                 val barcodeStrings = scannerOptions?.barcodeOptions?.barcodeFormats ?: BarcodeFormat.default
                 val barcodeFormats = barcodeStrings.map { BarcodeFormat.valueOf(it).value }
-                isPdf417 = barcodeStrings.find { it == "PDF_417" }?.isNotEmpty() == true
+                hasPDF417 = barcodeStrings.find { it == "PDF_417" }?.isNotEmpty() == true
                 analyzer = BarcodeAnalyzer(
                     activity = this,
                     intent = intent,
                     imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
-                    isPDF417 = isPdf417,
+                    hasPDF417 = hasPDF417,
                     barcodeFormats = barcodeFormats
                 )
+                viewFinder.visibility = VISIBLE
+                barcodeScannerView?.visibility = GONE
             }
             if (mode == Modes.QRCODE.value) {
                 val qrCodeOptions = scannerOptions?.qrCodeOptions
@@ -220,6 +227,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     intent = intent,
                     mode = Modes.QRCODE_CONFIG.value
                 )
+                viewFinder.visibility = VISIBLE
+                barcodeScannerView?.visibility = GONE
             }
             if (mode == Modes.IDPASS_LITE.value) {
                 val loaded = IDPassLite.initialize(cacheDir, assets)
@@ -233,6 +242,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                         }
                     }
                 )
+                viewFinder.visibility = VISIBLE
+                barcodeScannerView?.visibility = GONE
             }
             if (mode == Modes.MRZ.value) {
                 analyzer = MRZAnalyzer(
@@ -245,6 +256,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     analyzeStart = System.currentTimeMillis()
                 )
                 rectangleMRZGuide?.visibility = VISIBLE
+                viewFinder.visibility = VISIBLE
+                barcodeScannerView?.visibility = GONE
             }
             if (mode == Modes.NFC_SCAN.value) {
                 val nfcOptions = scannerOptions?.nfcOptions
@@ -268,22 +281,81 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                         ?: false, // default is false, logging is disabled
                     analyzeStart = System.currentTimeMillis()
                 )
+                viewFinder.visibility = VISIBLE
+                barcodeScannerView?.visibility = GONE
             }
-            // set Analyzer and start camera
-            analyzer?.let {
-                startCamera(analyzer, isPdf417)
-            } ?: run {
-                if (mode == Modes.CAPTURE_ONLY.value) {
-                    startCamera()
-                    captureOptions = scannerOptions?.captureOptions ?: CaptureOptions.default
-                } else throw SmartScannerException("Image Analysis Scanner is null. Please check the scanner options sent to SmartScanner.")
+            if (mode == Modes.PDF_417.value) {
+                // Set zxing barcode view finder
+                val viewFinderBarcode = findViewById<ViewfinderView>(R.id.zxing_viewfinder_view)
+                viewFinder.visibility = GONE
+                barcodeScannerView?.visibility = VISIBLE
+                barcodeScannerView?.initializeFromIntent(intent)
+                barcodeScannerView?.setStatusText("")
+                viewFinderBarcode.setLaserVisibility(false)
+                barcodeScannerView?.decodeContinuous { barcodePdf417 ->
+                    Log.d(TAG, "Success from PDF417")
+                    Log.d(TAG, "value: $barcodePdf417")
+
+                    val bitmapResult = barcodePdf417.bitmap
+                    val filePath = this.cacheImagePath()
+                    bitmapResult?.cropCenter()?.cacheImageToLocal(
+                            filePath,
+                            0,
+                            if (config?.imageResultType == ImageResultType.BASE_64.value) 30 else 80
+                    )
+                    val corners = barcodePdf417.resultPoints
+                    val builder = StringBuilder()
+                    for (corner in corners) {
+                        builder.append("${corner?.x},${corner?.y} ")
+                    }
+                    val cornersString = builder.toString()
+                    val rawValue =  barcodePdf417.text
+                    val imageFile = File(filePath)
+                    val imageResult = if (config?.imageResultType == ImageResultType.BASE_64.value) imageFile.encodeBase64() else filePath
+                    val barcodeResult = BarcodeResult(imagePath = filePath, image = imageResult, corners = cornersString, value = rawValue)
+
+                    val data = Intent()
+                    val result = Gson().toJson(barcodeResult)
+                    data.putExtra(SCANNER_RESULT, result)
+                    setResult(Activity.RESULT_OK, data)
+                    this.finish()
+                }
+                barcodeScannerView?.resume()
+            } else {
+                // Set Analyzer and start camera
+                analyzer?.let {
+                    startCamera(analyzer, hasPDF417)
+                } ?: run {
+                    if (mode == Modes.CAPTURE_ONLY.value) {
+                        startCamera()
+                        captureOptions = scannerOptions?.captureOptions ?: CaptureOptions.default
+                    } else throw SmartScannerException("Image Analysis Scanner is null. Please check the scanner options sent to SmartScanner.")
+                }
             }
         }
         setupViews()
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (mode != null && mode == Modes.PDF_417.value) {
+            if (barcodeScannerView != null) {
+                barcodeScannerView?.resume()
+            }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (mode != null && mode == Modes.PDF_417.value) {
+            if (barcodeScannerView != null) {
+                barcodeScannerView?.pause()
+            }
+        }
+    }
+
     @SuppressLint("ClickableViewAccessibility")
-    private fun startCamera(analyzer: ImageAnalysis.Analyzer? = null, isPdf417: Boolean = false) {
+    private fun startCamera(analyzer: ImageAnalysis.Analyzer? = null, hasPDF417: Boolean = false) {
         viewFinder.post {
             this.getSystemService(Context.CAMERA_SERVICE) as CameraManager
             val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
@@ -294,7 +366,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 preview = Preview.Builder().build()
                 val imageAnalysisBuilder = ImageAnalysis.Builder()
                 val resolution = when {
-                    isPdf417 -> Size(1080, 1920)
+                    hasPDF417 -> Size(1080, 1920)
                     mode == Modes.QRCODE.value || mode == Modes.IDPASS_LITE.value -> Size(720, 1280)
                     else -> Size(480, 640)
                 }
@@ -335,10 +407,10 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                         )
                     }
                     // Adjust initial zoom ratio of camera to aid high resolution capture of Pdf417 or QR Code or ID PASS Lite
-                    if (isPdf417 || mode == Modes.QRCODE.value || mode == Modes.IDPASS_LITE.value) {
+                    if (hasPDF417 || mode == Modes.QRCODE.value || mode == Modes.IDPASS_LITE.value) {
                         camera?.cameraControl?.setZoomRatio(
                             when {
-                                isPdf417 -> 0.5F
+                                hasPDF417 -> 0.5F
                                 else -> 1.2F
                             }
                         )
@@ -387,10 +459,6 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     Log.e(TAG, "Use case binding failed", exc)
                 }
             }, ContextCompat.getMainExecutor(this))
-            // assign camera click listeners
-            closeButton?.setOnClickListener(this)
-            flashButton?.setOnClickListener(this)
-            manualCapture?.setOnClickListener(this)
         }
     }
 
@@ -462,12 +530,10 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         if (orientation == Orientation.LANDSCAPE.value) {
             this.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
         }
-    }
-
-    private fun isPlayServicesAvailable(): Boolean {
-        val availability = GoogleApiAvailability.getInstance()
-        val resultCode = availability.isGooglePlayServicesAvailable(this)
-        return resultCode == ConnectionResult.SUCCESS
+        // assign camera click listeners
+        closeButton?.setOnClickListener(this)
+        flashButton?.setOnClickListener(this)
+        manualCapture?.setOnClickListener(this)
     }
 
     override fun onRequestPermissionsResult(
@@ -507,10 +573,10 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 flashButton?.let {
                     if (it.isSelected) {
                         it.isSelected = false
-                        camera?.cameraControl?.enableTorch(false)
+                        enableFlashlight(false)
                     } else {
                         it.isSelected = true
-                        camera?.cameraControl?.enableTorch(true)
+                        enableFlashlight(true)
                     }
                 }
             }
@@ -567,6 +633,14 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     }
                 )
             }
+        }
+    }
+
+    private fun enableFlashlight(torch : Boolean) {
+        if (barcodeScannerView != null && barcodeScannerView?.visibility == VISIBLE) {
+            if (torch) barcodeScannerView?.setTorchOn() else barcodeScannerView?.setTorchOff()
+        } else {
+            camera?.cameraControl?.enableTorch(torch)
         }
     }
 

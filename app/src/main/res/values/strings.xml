@@ -13,6 +13,7 @@
     <string name="mode_idpass_lite">ID PASS Lite</string>
     <string name="mode_mrz">MRZ Code</string>
     <string name="mode_nfc">E-Passport/ID Card (NFC)</string>
+    <string name="mode_pdf417">PDF417</string>
     <string name="mode_qr">QR Code</string>
     <string name="mode_qr_gzip">QR Code (GZIP)</string>
 
