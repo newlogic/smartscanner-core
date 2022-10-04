@@ -53,6 +53,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.google.zxing.BarcodeFormat.*
 import com.journeyapps.barcodescanner.DecoratedBarcodeView
+import com.journeyapps.barcodescanner.DefaultDecoderFactory
 import com.journeyapps.barcodescanner.ViewfinderView
 import io.sentry.Sentry
 import io.sentry.SentryOptions
@@ -281,9 +282,13 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 barcodeScannerView?.decodeContinuous { barcodePdf417 ->
                     Log.d(TAG, "Success from PDF417")
                     Log.d(TAG, "value: $barcodePdf417")
-
                     val bitmapResult = barcodePdf417.bitmap
                     val filePath = this.cacheImagePath()
+                    barcodeScannerView?.decoderFactory = DefaultDecoderFactory(listOf(PDF_417))
+                    barcodeScannerView?.cameraSettings?.isContinuousFocusEnabled = true
+                    barcodeScannerView?.cameraSettings?.isAutoFocusEnabled = true
+                    viewFinderBarcode.setLaserVisibility(false)
+                    viewFinderBarcode.setMaskColor(ContextCompat.getColor(this, R.color.transparent))
                     bitmapResult?.cropCenter()?.cacheImageToLocal(
                             filePath,
                             0,
