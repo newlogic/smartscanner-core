@@ -53,7 +53,6 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.google.zxing.BarcodeFormat.*
 import com.journeyapps.barcodescanner.DecoratedBarcodeView
-import com.journeyapps.barcodescanner.DefaultDecoderFactory
 import com.journeyapps.barcodescanner.ViewfinderView
 import io.sentry.Sentry
 import io.sentry.SentryOptions
@@ -61,6 +60,7 @@ import org.idpass.lite.android.IDPassLite
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.barcode.BarcodeAnalyzer
 import org.idpass.smartscanner.lib.barcode.BarcodeResult
+import org.idpass.smartscanner.lib.barcode.pdf417.PDF417DecoderFactory
 import org.idpass.smartscanner.lib.barcode.qr.QRCodeAnalyzer
 import org.idpass.smartscanner.lib.idpasslite.IDPassLiteAnalyzer
 import org.idpass.smartscanner.lib.idpasslite.IDPassManager
@@ -77,6 +77,7 @@ import org.idpass.smartscanner.lib.scanner.ImageResult
 import org.idpass.smartscanner.lib.scanner.SmartScannerException
 import org.idpass.smartscanner.lib.scanner.config.*
 import java.io.File
+import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -277,22 +278,23 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 viewFinder.visibility = GONE
                 barcodeScannerView?.visibility = VISIBLE
                 barcodeScannerView?.initializeFromIntent(intent)
+                // remove black border, text info and laser
                 barcodeScannerView?.setStatusText("")
+                barcodeScannerView?.viewFinder?.visibility = GONE
                 viewFinderBarcode.setLaserVisibility(false)
                 barcodeScannerView?.decodeContinuous { barcodePdf417 ->
                     Log.d(TAG, "Success from PDF417")
                     Log.d(TAG, "value: $barcodePdf417")
                     val bitmapResult = barcodePdf417.bitmap
                     val filePath = this.cacheImagePath()
-                    barcodeScannerView?.decoderFactory = DefaultDecoderFactory(listOf(PDF_417))
+                    barcodeScannerView?.barcodeView?.decoderFactory = PDF417DecoderFactory()
                     barcodeScannerView?.cameraSettings?.isContinuousFocusEnabled = true
                     barcodeScannerView?.cameraSettings?.isAutoFocusEnabled = true
-                    viewFinderBarcode.setLaserVisibility(false)
                     viewFinderBarcode.setMaskColor(ContextCompat.getColor(this, R.color.transparent))
                     bitmapResult?.cropCenter()?.cacheImageToLocal(
-                            filePath,
-                            0,
-                            if (config?.imageResultType == ImageResultType.BASE_64.value) 30 else 80
+                        filePath,
+                        0,
+                        if (config?.imageResultType == ImageResultType.BASE_64.value) 30 else 80
                     )
                     val corners = barcodePdf417.resultPoints
                     val builder = StringBuilder()
@@ -626,7 +628,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         }
     }
 
-    private fun enableFlashlight(torch : Boolean) {
+    private fun enableFlashlight(torch: Boolean) {
         if (barcodeScannerView != null && barcodeScannerView?.visibility == VISIBLE) {
             if (torch) barcodeScannerView?.setTorchOn() else barcodeScannerView?.setTorchOff()
         } else {
