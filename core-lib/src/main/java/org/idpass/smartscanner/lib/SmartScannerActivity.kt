@@ -296,36 +296,40 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 barcodeScannerView?.setStatusText("")
                 barcodeScannerView?.viewFinder?.visibility = GONE
                 viewFinderBarcode.setLaserVisibility(false)
+                viewFinderBarcode.setMaskColor(ContextCompat.getColor(this, R.color.transparent))
+                // set PDF417 decoder and autofocus settings
+                barcodeScannerView?.barcodeView?.decoderFactory = PDF417DecoderFactory()
+                barcodeScannerView?.cameraSettings?.isContinuousFocusEnabled = true
+                barcodeScannerView?.cameraSettings?.isAutoFocusEnabled = true
                 barcodeScannerView?.decodeContinuous { barcodePdf417 ->
                     Log.d(TAG, "Success from PDF417")
                     Log.d(TAG, "value: $barcodePdf417")
-                    val bitmapResult = barcodePdf417.bitmap
-                    val filePath = this.cacheImagePath()
-                    barcodeScannerView?.barcodeView?.decoderFactory = PDF417DecoderFactory()
-                    barcodeScannerView?.cameraSettings?.isContinuousFocusEnabled = true
-                    barcodeScannerView?.cameraSettings?.isAutoFocusEnabled = true
-                    viewFinderBarcode.setMaskColor(ContextCompat.getColor(this, R.color.transparent))
-                    bitmapResult?.cropCenter()?.cacheImageToLocal(
-                        filePath,
-                        0,
-                        if (config?.imageResultType == ImageResultType.BASE_64.value) 30 else 80
-                    )
-                    val corners = barcodePdf417.resultPoints
-                    val builder = StringBuilder()
-                    for (corner in corners) {
-                        builder.append("${corner?.x},${corner?.y} ")
-                    }
-                    val cornersString = builder.toString()
-                    val rawValue =  barcodePdf417.text
-                    val imageFile = File(filePath)
-                    val imageResult = if (config?.imageResultType == ImageResultType.BASE_64.value) imageFile.encodeBase64() else filePath
-                    val barcodeResult = BarcodeResult(imagePath = filePath, image = imageResult, corners = cornersString, value = rawValue)
+                    // Add checking to only output PDF417 barcode format response
+                    if (barcodePdf417.barcodeFormat == PDF_417) {
+                        val bitmapResult = barcodePdf417.bitmap
+                        val filePath = this.cacheImagePath()
+                        bitmapResult?.cropCenter()?.cacheImageToLocal(
+                            filePath,
+                            0,
+                            if (config?.imageResultType == ImageResultType.BASE_64.value) 30 else 80
+                        )
+                        val corners = barcodePdf417.resultPoints
+                        val builder = StringBuilder()
+                        for (corner in corners) {
+                            builder.append("${corner?.x},${corner?.y} ")
+                        }
+                        val cornersString = builder.toString()
+                        val rawValue =  barcodePdf417.text
+                        val imageFile = File(filePath)
+                        val imageResult = if (config?.imageResultType == ImageResultType.BASE_64.value) imageFile.encodeBase64() else filePath
+                        val barcodeResult = BarcodeResult(imagePath = filePath, image = imageResult, corners = cornersString, value = rawValue)
 
-                    val data = Intent()
-                    val result = Gson().toJson(barcodeResult)
-                    data.putExtra(SCANNER_RESULT, result)
-                    setResult(Activity.RESULT_OK, data)
-                    this.finish()
+                        val data = Intent()
+                        val result = Gson().toJson(barcodeResult)
+                        data.putExtra(SCANNER_RESULT, result)
+                        setResult(Activity.RESULT_OK, data)
+                        this.finish()
+                    }
                 }
                 barcodeScannerView?.resume()
             } else {

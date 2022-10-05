@@ -149,6 +149,7 @@ class MainActivity : AppCompatActivity() {
                 ScannerOptions(
                     mode = Modes.PDF_417.value,
                     language = getLanguage(preference),
+                    scannerSize = ScannerSize.SMALL.value,
                     config = sampleConfig(false)
                 )
         )
