@@ -116,9 +116,8 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun saveLanguage(editor: SharedPreferences.Editor, language : String) {
         // Set new language
-        LanguageUtils.changeLanguage(this, language)
-        // Save new language to sharedPrefs
         saveToPreference(editor, Language.NAME, language)
+        LanguageUtils.changeLanguage(this, language)
     }
 
     private fun saveToPreference( editor: SharedPreferences.Editor, key: String, value : String) {
