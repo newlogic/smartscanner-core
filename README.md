@@ -2,6 +2,8 @@
 
 ID scanning Android app and library. Supports MRZ, NFC, Barcodes, and [ID PASS Lite](https://github.com/idpass/idpass-lite) cards.
 
+[![Get it on Google Play](https://buttercup.pw/static/img/googleplay.svg)](https://play.google.com/store/apps/details?id=org.newlogic.smartscanner)
+
 **Note: The library's API might keep evolving before we reach v1.0, so be careful when upgrading between these pre-v1.0 versions. Starting at v1.0 we will be careful in introducing breaking API changes.**
 
 ## Features
