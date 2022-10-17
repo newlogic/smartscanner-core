@@ -21,7 +21,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.Base64
 import android.util.Log
 import androidx.camera.core.ImageProxy
 import com.github.wnameless.json.flattener.JsonFlattener
@@ -30,19 +29,23 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import com.jayway.jsonpath.JsonPath
+import io.jsonwebtoken.Claims
+import io.jsonwebtoken.JwsHeader
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.SigningKeyResolverAdapter
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.platform.BaseImageAnalyzer
 import org.idpass.smartscanner.lib.platform.extension.setContrast
 import org.idpass.smartscanner.lib.platform.utils.BitmapUtils
 import org.idpass.smartscanner.lib.platform.utils.GzipUtils
+import org.idpass.smartscanner.lib.platform.utils.JWTUtils
+import org.idpass.smartscanner.lib.platform.utils.JWTUtils.isJWT
+import org.idpass.smartscanner.lib.platform.utils.JWTUtils.removeEncapsulationBoundaries
 import org.idpass.smartscanner.lib.scanner.config.Modes
 import org.json.JSONObject
 import java.io.ByteArrayInputStream
-import java.security.KeyFactory
-import java.security.interfaces.RSAPublicKey
-import java.security.spec.X509EncodedKeySpec
+import java.security.Key
 import java.util.zip.ZipException
 
 
@@ -51,8 +54,8 @@ class QRCodeAnalyzer(
     override val intent: Intent,
     override val mode: String = Modes.QRCODE.value,
     private var isGzipped: Boolean? = null,
-    private var isJsonEnabled: Boolean? = false,
-    private val jsonPath: String? = null
+    private var isJson: Boolean? = false,
+    private var jsonPath: String? = null
 ) : BaseImageAnalyzer() {
 
     @SuppressLint("UnsafeExperimentalUsageError", "UnsafeOptInUsageError")
@@ -108,29 +111,44 @@ class QRCodeAnalyzer(
     }
 
     private fun sendResult(rawValue: String?, rawBytes: ByteArray?) {
-        var result : String? = if (isGzipped == true) {
-            getGzippedData(rawBytes)
-        } else {
-            rawValue
+        var result : String? = when (isGzipped) {
+            true -> getGzippedData(rawBytes)
+            else -> {
+                if (rawValue?.isJWT() == true) {
+                    val parser = Jwts.parserBuilder()
+                            .setSigningKeyResolver(object : SigningKeyResolverAdapter() {
+                                override fun resolveSigningKey(
+                                    header: JwsHeader<out JwsHeader<*>>?,
+                                    claims: Claims?
+                                ): Key {
+                                    //TODO update and use signing key lookup key id instead?
+                                    val publicKeyScanned = "-----BEGIN PUBLIC KEY-----\n" +
+                                            "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEEVs/o5+uQbTjL3chynL4wXgUg2R9\n" +
+                                            "q9UU8I5mEovUf86QZ7kOBIjJwqnzD1omageEHWwHdBO6B+dFabmdT9POxg==\n" +
+                                            "-----END PUBLIC KEY-----"
+                                    val publicKey = JWTUtils.generatePublicKey(publicKeyScanned.removeEncapsulationBoundaries())
+                                    return if (JWTUtils.verifyJWT(rawValue, publicKey)) {
+                                        publicKey
+                                    } else {
+                                        JWTUtils.generatePublicKey(JWTUtils.publicKeyFromConfig.removeEncapsulationBoundaries())
+                                    }
+                                }
+                            }).build()
+                    val claims = parser.parseClaimsJws(rawValue)
+                    claims.body.toString()
+                }
+                else rawValue
+            }
         }
-        // Read JWT here
-        val publicKeyString = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEEVs/o5+uQbTjL3chynL4wXgUg2R9" +
-                "q9UU8I5mEovUf86QZ7kOBIjJwqnzD1omageEHWwHdBO6B+dFabmdT9POxg=="
-        val keySpecPublic = X509EncodedKeySpec(Base64.decode(publicKeyString, Base64.DEFAULT))
-        val publicKey = KeyFactory.getInstance("RSA").generatePublic(keySpecPublic) as RSAPublicKey
-        val jwt = Jwts.parserBuilder()
-            .setSigningKey(publicKey)
-            .build()
-            .parseClaimsJws(rawValue)
-        result = jwt.body.get("tokenNumber") as String
-        // TODO add JSON flattening here
+        // TODO add JSON flattening here for enhanced display
         val data = Intent()
-        Log.d(SmartScannerActivity.TAG, "Success from BARCODE")
+        Log.d(SmartScannerActivity.TAG, "Success from QRCODE")
         Log.d(SmartScannerActivity.TAG, "value: $result")
         data.putExtra(SmartScannerActivity.SCANNER_RESULT, result)
         activity.setResult(Activity.RESULT_OK, data)
         activity.finish()
     }
+
     private fun sendBundleResult(rawValue: String?, rawBytes: ByteArray?) {
         // parse and read qr data and add to bundle intent
         val bundle = Bundle()
