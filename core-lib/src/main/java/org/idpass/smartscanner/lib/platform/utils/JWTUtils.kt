@@ -18,7 +18,7 @@
 package org.idpass.smartscanner.lib.platform.utils
 
 import org.apache.commons.codec.binary.Base64
-import java.security.KeyFactory
+import java.security.*
 import java.security.interfaces.ECPublicKey
 import java.security.spec.X509EncodedKeySpec
 import java.util.regex.Pattern
@@ -58,5 +58,21 @@ object JWTUtils {
         val keyPairGenerator : KeyFactory = KeyFactory.getInstance("EC")
         val keySpecPublic = X509EncodedKeySpec(Base64.decodeBase64(publicKeyString))
         return keyPairGenerator.generatePublic(keySpecPublic) as ECPublicKey
+    }
+
+    /**
+     * verify JWT via signature
+     *
+     */
+    @Throws(NoSuchAlgorithmException::class, InvalidKeyException::class, SignatureException::class)
+    fun verifyJWT(jwt: String, publicKey: ECPublicKey): Boolean {
+        val splitJwt = jwt.split("\\.").toTypedArray()
+        val headerStr = splitJwt[0]
+        val payloadStr = splitJwt[1]
+        val signatureStr = splitJwt[2]
+        val signature: Signature = Signature.getInstance("SHA256withECDSAinP1363Format")
+        signature.initVerify(publicKey)
+        signature.update("$headerStr.$payloadStr".toByteArray())
+        return signature.verify(Base64.decodeBase64(signatureStr))
     }
 }
