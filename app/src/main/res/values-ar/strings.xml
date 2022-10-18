@@ -14,6 +14,7 @@
     <string name="mode_mrz">كود MRZ</string>
     <string name="mode_nfc">الجواز الالكتروني/بطاقة الهوية (NFC)</string>
     <string name="mode_qr">كيو ار كود</string>
+    <string name="mode_qr_gzip">رمز الاستجابة السريعة (GZIP)</string>
 
     <!--Labels-->
     <string name="label_authenticate">المصادقة</string>

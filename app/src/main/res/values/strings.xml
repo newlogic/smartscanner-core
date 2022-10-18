@@ -14,6 +14,7 @@
     <string name="mode_mrz">MRZ Code</string>
     <string name="mode_nfc">E-Passport/ID Card (NFC)</string>
     <string name="mode_qr">QR Code</string>
+    <string name="mode_qr_gzip">QR Code (GZIP)</string>
 
     <!--Labels-->
     <string name="label_authenticate">Authenticate</string>

@@ -65,6 +65,7 @@ class MainActivity : AppCompatActivity() {
         binding.itemIdpassLite.item.setOnClickListener { scanIDPassLite() }
         binding.itemMrz.item.setOnClickListener { scanMRZ() }
         binding.itemQr.item.setOnClickListener { scanQRCode() }
+        binding.itemQrGzip.item.setOnClickListener { scanQRCodeGzip() }
         binding.itemNfc.item.setOnClickListener { scanNFC() }
         // Change language
         binding.languageSettings.setOnClickListener {
@@ -144,6 +145,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun scanQRCode()  {
+        val intent = Intent(this, SmartScannerActivity::class.java)
+        intent.putExtra(
+                SmartScannerActivity.SCANNER_OPTIONS,
+                ScannerOptions(
+                        mode = Modes.QRCODE.value,
+                        language = preference?.getString(Language.NAME, Language.EN),
+                        scannerSize = ScannerSize.LARGE.value,
+                        config = sampleConfig(false)
+                )
+        )
+        startActivityForResult(intent, OP_SCANNER)
+    }
+
+    private fun scanQRCodeGzip()  {
         val intent = ScannerIntent.intentQRCode(
             isGzipped = true,
             isJson = true,
