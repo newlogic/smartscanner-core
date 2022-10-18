@@ -29,6 +29,7 @@ import com.google.android.material.snackbar.Snackbar
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.api.ScannerIntent
 import org.idpass.smartscanner.lib.SmartScannerActivity
+import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_IMAGE_TYPE
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT_BYTES
 import org.idpass.smartscanner.lib.nfc.NFCActivity
@@ -188,34 +189,33 @@ class MainActivity : AppCompatActivity() {
             Log.d(SmartScannerActivity.TAG, "Scanner resultCode $resultCode")
             if (resultCode == RESULT_OK) {
                 // Get Result from Bundle Intent Call Out
-                intent?.getBundleExtra(ScannerConstants.RESULT)?.let { bundleResult ->
-                    Log.d(SmartScannerActivity.TAG, "Scanner result bundle: $bundleResult")
-                    if (bundleResult.getString(ScannerConstants.MODE) == Modes.IDPASS_LITE.value) {
+                val bundle = intent?.getBundleExtra(ScannerConstants.RESULT)
+                if (bundle != null) {
+                    if (bundle.getString(ScannerConstants.MODE) == Modes.IDPASS_LITE.value) {
                         // Go to ID PASS Lite Results Screen via bundle
                         val myIntent = Intent(this, IDPassResultActivity::class.java)
-                        myIntent.putExtra(IDPassResultActivity.BUNDLE_RESULT, bundleResult)
+                        myIntent.putExtra(IDPassResultActivity.BUNDLE_RESULT, bundle)
                         startActivity(myIntent)
                     } else {
-                        // Go to Barcode/MRZ Results Screen via bundle
+                        // Go to Results Screen via bundle
                         val resultIntent = Intent(this, ResultActivity::class.java)
-                        resultIntent.putExtra(ResultActivity.BUNDLE_RESULT, bundleResult)
+                        resultIntent.putExtra(ResultActivity.BUNDLE_RESULT, bundle)
                         startActivity(resultIntent)
                     }
-                } ?: run {
-                    // Get Result from JSON String
-                    val result = intent?.getStringExtra(SCANNER_RESULT)
-                    Log.d(SmartScannerActivity.TAG, "Scanner result string: $result")
-                    if (!result.isNullOrEmpty()) {
-                        // Go to Barcode/MRZ Results Screen
-                        val resultIntent = Intent(this, ResultActivity::class.java)
-                        resultIntent.putExtra(ResultActivity.RESULT, result)
-                        startActivity(resultIntent)
-                    } else {
+                } else {
+                    if (intent?.getStringExtra(ScannerConstants.MODE) == Modes.IDPASS_LITE.value) {
                         // Go to ID PASS Lite Results Screen
-                        val resultBytes = intent?.getByteArrayExtra(SCANNER_RESULT_BYTES)
+                        val resultBytes = intent.getByteArrayExtra(SCANNER_RESULT_BYTES)
                         val myIntent = Intent(this, IDPassResultActivity::class.java)
                         myIntent.putExtra(IDPassResultActivity.RESULT, resultBytes)
                         startActivity(myIntent)
+                    } else {
+                        // Go to Results Screen
+                        val result = intent?.getStringExtra(SCANNER_RESULT)
+                        val resultIntent = Intent(this, ResultActivity::class.java)
+                        resultIntent.putExtra(ResultActivity.IMAGE_TYPE, intent?.getStringExtra(SCANNER_IMAGE_TYPE))
+                        resultIntent.putExtra(ResultActivity.RESULT, result)
+                        startActivity(resultIntent)
                     }
                 }
             }

@@ -105,6 +105,7 @@ object IDPassManager {
         val data = Intent()
         Log.d(SmartScannerActivity.TAG, "Success from IDPASS LITE")
         Log.d(SmartScannerActivity.TAG, "value: $result")
+        data.putExtra(ScannerConstants.MODE, Modes.IDPASS_LITE.value)
         data.putExtra(SmartScannerActivity.SCANNER_RESULT_BYTES, result)
         activity.setResult(Activity.RESULT_OK, data)
         activity.finish()
