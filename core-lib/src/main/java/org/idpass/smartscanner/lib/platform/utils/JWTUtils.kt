@@ -25,7 +25,7 @@ import java.util.regex.Pattern
 
 object JWTUtils {
 
-    const val publicKeyFromConfig = "-----BEGIN PUBLIC KEY-----\n" +
+    const val configurationPublicKey = "-----BEGIN PUBLIC KEY-----\n" +
             "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEEVs/o5+uQbTjL3chynL4wXgUg2R9\n" +
             "q9UU8I5mEovUf86QZ7kOBIjJwqnzD1omageEHWwHdBO6B+dFabmdT9POxg==\n" +
             "-----END PUBLIC KEY-----"
