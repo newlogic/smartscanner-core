@@ -15,6 +15,7 @@
     <string name="mode_nfc">الجواز الالكتروني/بطاقة الهوية (NFC)</string>
     <string name="mode_pdf417">PDF417</string>
     <string name="mode_qr">كيو ار كود</string>
+    <string name="mode_qr_gzip">رمز الاستجابة السريعة (GZIP)</string>
 
     <!--Labels-->
     <string name="label_authenticate">المصادقة</string>
