@@ -31,7 +31,6 @@ import com.bumptech.glide.Glide
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonParser
 import org.idpass.smartscanner.api.ScannerConstants
-import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_IMAGE_TYPE
 import org.idpass.smartscanner.lib.platform.extension.decodeBase64
 import org.idpass.smartscanner.lib.scanner.config.ImageResultType
 import org.idpass.smartscanner.lib.scanner.config.Modes
@@ -43,6 +42,7 @@ class ResultActivity : AppCompatActivity() {
     companion object {
         const val RESULT = "SCAN_RESULT"
         const val BUNDLE_RESULT = "SCAN_BUNDLE_RESULT"
+        const val IMAGE_TYPE = "SCAN_IMAGE_TYPE"
     }
 
     private lateinit var binding : ActivityResultBinding
@@ -61,7 +61,7 @@ class ResultActivity : AppCompatActivity() {
         supportActionBar?.setHomeButtonEnabled(true)
         supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_close)
         result = intent.getStringExtra(RESULT)
-        imageType = intent.getStringExtra(SCANNER_IMAGE_TYPE)
+        imageType = intent.getStringExtra(IMAGE_TYPE)
     }
 
     override fun onStart() {
