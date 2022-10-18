@@ -39,7 +39,7 @@ class IDPassLiteAnalyzer(
         private val onVerify: (ByteArray?) -> Unit
 ) : BaseImageAnalyzer(){
 
-    @SuppressLint("UnsafeExperimentalUsageError")
+    @SuppressLint("UnsafeExperimentalUsageError", "UnsafeOptInUsageError")
     override fun analyze(imageProxy: ImageProxy) {
         val bitmap = BitmapUtils.getBitmap(imageProxy)
         bitmap?.let { bf ->
