@@ -36,6 +36,7 @@ import io.jsonwebtoken.SigningKeyResolverAdapter
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.platform.BaseImageAnalyzer
+import org.idpass.smartscanner.lib.platform.extension.setBrightness
 import org.idpass.smartscanner.lib.platform.extension.setContrast
 import org.idpass.smartscanner.lib.platform.utils.BitmapUtils
 import org.idpass.smartscanner.lib.platform.utils.GzipUtils
@@ -53,6 +54,7 @@ class QRCodeAnalyzer(
     override val activity: Activity,
     override val intent: Intent,
     override val mode: String = Modes.QRCODE.value,
+    private val imageResultType: String,
     private var isGzipped: Boolean? = null,
     private var isJson: Boolean? = false,
     private var jsonPath: String? = null
@@ -67,6 +69,7 @@ class QRCodeAnalyzer(
             bf.apply {
                 // Increase contrast and brightness for better image processing and reduce Moiré effect
                 setContrast(1.5F)
+                setBrightness(5F)
             }
             val barcodeFormat = Barcode.FORMAT_QR_CODE
             val options = BarcodeScannerOptions.Builder().setBarcodeFormats(barcodeFormat).build()
@@ -111,41 +114,37 @@ class QRCodeAnalyzer(
     }
 
     private fun sendResult(rawValue: String?, rawBytes: ByteArray?) {
-        var result : String? = when (isGzipped) {
+        val result : String? = when (isGzipped) {
             true -> getGzippedData(rawBytes)
             else -> {
                 if (rawValue?.isJWT() == true) {
-                    val parser = Jwts.parserBuilder()
-                            .setSigningKeyResolver(object : SigningKeyResolverAdapter() {
-                                override fun resolveSigningKey(
-                                    header: JwsHeader<out JwsHeader<*>>?,
-                                    claims: Claims?
-                                ): Key {
-                                    //TODO update and use signing key lookup key id instead?
-                                    val publicKeyScanned = "-----BEGIN PUBLIC KEY-----\n" +
-                                            "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEEVs/o5+uQbTjL3chynL4wXgUg2R9\n" +
-                                            "q9UU8I5mEovUf86QZ7kOBIjJwqnzD1omageEHWwHdBO6B+dFabmdT9POxg==\n" +
-                                            "-----END PUBLIC KEY-----"
-                                    val publicKey = JWTUtils.generatePublicKey(publicKeyScanned.removeEncapsulationBoundaries())
-                                    return if (JWTUtils.verifyJWT(rawValue, publicKey)) {
-                                        publicKey
-                                    } else {
-                                        JWTUtils.generatePublicKey(JWTUtils.publicKeyFromConfig.removeEncapsulationBoundaries())
-                                    }
-                                }
-                            }).build()
-                    val claims = parser.parseClaimsJws(rawValue)
-                    claims.body.toString()
+                    getJWTValue(rawValue)
                 }
-                else rawValue
+                else {
+                    rawValue
+                }
             }
         }
-        // TODO add JSON flattening here for enhanced display
-        val data = Intent()
+
+        val intent = Intent()
+        if (isJson == true) {
+            if (result != null) {
+                jsonPath?.let { path ->
+                    val ctx = JsonPath.parse(result)
+                    intent.putExtra(ScannerConstants.QRCODE_JSON_VALUE, ctx.read<Any>(path).toString())
+                }
+                val flattenMap = flattenJson(result)
+                for ((k, v) in flattenMap) {
+                    intent.putExtra(k, v)
+                }
+            }
+        }
         Log.d(SmartScannerActivity.TAG, "Success from QRCODE")
         Log.d(SmartScannerActivity.TAG, "value: $result")
-        data.putExtra(SmartScannerActivity.SCANNER_RESULT, result)
-        activity.setResult(Activity.RESULT_OK, data)
+        intent.putExtra(SmartScannerActivity.SCANNER_IMAGE_TYPE, imageResultType)
+        intent.putExtra(SmartScannerActivity.SCANNER_RESULT, result)
+        intent.putExtra(ScannerConstants.MODE, mode)
+        activity.setResult(Activity.RESULT_OK, intent)
         activity.finish()
     }
 
@@ -158,11 +157,17 @@ class QRCodeAnalyzer(
         val isJson = if (isOdk) intent.getStringExtra(ScannerConstants.JSON_ENABLED) == "1" else intent.getBooleanExtra(ScannerConstants.JSON_ENABLED, false)
         val jsonPath = intent.getStringExtra(ScannerConstants.JSON_PATH)
         // check gzipped parameters for bundle return result
-        var data : String? = if (isGzipped) {
-            getGzippedData(rawBytes)
-        } else {
-            rawValue
+        var data : String? = when (isGzipped) {
+            true -> getGzippedData(rawBytes)
+            else -> {
+                if (rawValue?.isJWT() == true) {
+                    getJWTValue(rawValue)
+                } else {
+                    rawValue
+                }
+            }
         }
+
         // check json parameters for bundle return result
         if (isJson) {
             if (data != null) {
@@ -224,5 +229,30 @@ class QRCodeAnalyzer(
             "flattenedMap: ${JSONObject(map as Map<*, *>)}"
         )
         return map
+    }
+
+    private fun getJWTValue(rawValue: String): String {
+        val parser = Jwts.parserBuilder()
+            .setSigningKeyResolver(object : SigningKeyResolverAdapter() {
+                override fun resolveSigningKey(
+                    header: JwsHeader<out JwsHeader<*>>?,
+                    claims: Claims?
+                ): Key {
+                    //TODO update and use signing key lookup key id instead?
+                    val scopePublicKey = "-----BEGIN PUBLIC KEY-----\n" +
+                            "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEEVs/o5+uQbTjL3chynL4wXgUg2R9\n" +
+                            "q9UU8I5mEovUf86QZ7kOBIjJwqnzD1omageEHWwHdBO6B+dFabmdT9POxg==\n" +
+                            "-----END PUBLIC KEY-----"
+                    val publicKey =
+                        JWTUtils.generatePublicKey(scopePublicKey.removeEncapsulationBoundaries())
+                    return if (JWTUtils.verifyJWT(rawValue, publicKey)) {
+                        publicKey
+                    } else {
+                        JWTUtils.generatePublicKey(JWTUtils.configurationPublicKey.removeEncapsulationBoundaries())
+                    }
+                }
+            }).build()
+        val claims = parser.parseClaimsJws(rawValue)
+        return claims.body.toString()
     }
 }
