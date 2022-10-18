@@ -164,7 +164,9 @@ open class MRZAnalyzer(
         val data = Intent()
         Log.d(SmartScannerActivity.TAG, "Success from MRZ")
         Log.d(SmartScannerActivity.TAG, "value: $result")
+        data.putExtra(SmartScannerActivity.SCANNER_IMAGE_TYPE, imageResultType)
         data.putExtra(SmartScannerActivity.SCANNER_RESULT, result)
+        data.putExtra(ScannerConstants.MODE, mode)
         activity.setResult(Activity.RESULT_OK, data)
         activity.finish()
     }
