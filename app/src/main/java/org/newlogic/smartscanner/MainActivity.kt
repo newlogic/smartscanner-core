@@ -67,6 +67,8 @@ class MainActivity : AppCompatActivity() {
         binding.itemBarcode.item.setOnClickListener { scanBarcode(BarcodeOptions.default) }
         binding.itemIdpassLite.item.setOnClickListener { scanIDPassLite() }
         binding.itemMrz.item.setOnClickListener { scanMRZ() }
+        binding.itemQr.item.setOnClickListener { scanQRCode() }
+        binding.itemQrGzip.item.setOnClickListener { scanQRCodeGzip() }
         binding.itemNfc.item.setOnClickListener { scanNFC() }
         binding.itemPdf417.item.setOnClickListener { scanPDF417() }
         binding.itemQr.item.setOnClickListener { scanQRCode() }
