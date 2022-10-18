@@ -44,6 +44,11 @@ import org.newlogic.smartscanner.settings.SettingsActivity
 
 class MainActivity : AppCompatActivity() {
 
+
+    companion object {
+        const val OP_SCANNER = 1001
+    }
+
     private var preference : SharedPreferences? = null
     private lateinit var binding : ActivityMainBinding
     private var imageType = ImageResultType.PATH.value
