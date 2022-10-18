@@ -89,6 +89,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         const val SCANNER_OPTIONS = "scanner_options"
         const val SCANNER_RESULT = "scanner_result"
         const val SCANNER_RESULT_BYTES = "scanner_result_bytes"
+        const val SCANNER_IMAGE_TYPE = "scanner_image_type"
     }
 
     private val REQUEST_CODE_PERMISSIONS = 10
@@ -213,7 +214,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             if (mode == Modes.QRCODE.value) {
                 analyzer = QRCodeAnalyzer(
                     activity = this,
-                    intent = intent
+                    intent = intent,
+                    imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
                 )
                 viewFinder.visibility = VISIBLE
                 barcodeScannerView?.visibility = GONE
@@ -617,6 +619,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                             bf.cacheImageToLocal(imageFile.path)
                             val imageString = if (config?.imageResultType == ImageResultType.BASE_64.value) imageFile.encodeBase64() else imageFile.path
                             val result: Any = if (mode == Modes.MRZ.value) MrzUtils.getImageOnly(imageString) else ImageResult(imageString)
+                            data.putExtra(SCANNER_IMAGE_TYPE, config?.imageResultType)
                             data.putExtra(SCANNER_RESULT, Gson().toJson(result))
                             setResult(Activity.RESULT_OK, data)
                             finish()

@@ -31,10 +31,10 @@ import com.bumptech.glide.Glide
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonParser
 import org.idpass.smartscanner.api.ScannerConstants
+import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_IMAGE_TYPE
 import org.idpass.smartscanner.lib.platform.extension.decodeBase64
 import org.idpass.smartscanner.lib.scanner.config.ImageResultType
 import org.idpass.smartscanner.lib.scanner.config.Modes
-import org.newlogic.smartscanner.MainActivity.Companion.imageType
 import org.newlogic.smartscanner.R
 import org.newlogic.smartscanner.databinding.ActivityResultBinding
 
@@ -46,7 +46,8 @@ class ResultActivity : AppCompatActivity() {
     }
 
     private lateinit var binding : ActivityResultBinding
-    private var resultString : String? = null
+    private var result : String? = null
+    private var imageType : String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,60 +60,81 @@ class ResultActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
         supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_close)
-        intent.getStringExtra(RESULT)?.let {
-            val scanResult = intent.getStringExtra(RESULT)
-            setupResult(result = scanResult, imageType = imageType)
-            resultString = getShareResult(result = scanResult)
-        } ?: run {
-            intent.getBundleExtra(BUNDLE_RESULT)?.let {
-                val result = when (it.getString(ScannerConstants.MODE)) {
-                    Modes.BARCODE.value -> it.getString(ScannerConstants.BARCODE_VALUE)
-                    Modes.QRCODE.value -> it.getString(ScannerConstants.QRCODE_TEXT)
-                    Modes.MRZ.value -> it.getString(ScannerConstants.MRZ_RAW)
+        result = intent.getStringExtra(RESULT)
+        imageType = intent.getStringExtra(SCANNER_IMAGE_TYPE)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (result != null) {
+            when (intent.getStringExtra(ScannerConstants.MODE)) {
+                Modes.MRZ.value -> {
+                    displayResult(result = result, imageType = imageType)
+                    // Check composite validity
+                    val resultObj = JsonParser.parseString(result).asJsonObject
+                    val validComposite = if (resultObj["validComposite"]!= null) resultObj["validComposite"].asBoolean else true
+                    if (!validComposite) {
+                        val snackBar = Snackbar.make(binding.root, getString(R.string.label_warning_invalid_composite_digit), Snackbar.LENGTH_INDEFINITE)
+                        snackBar.setAction("Dismiss") { _ -> snackBar.dismiss() }
+                        snackBar.setActionTextColor(ContextCompat.getColor(this, R.color.idpass_orange))
+                        snackBar.show()
+                    }
+                }
+                Modes.QRCODE.value -> {
+                    // TODO update Display for QR Code here
+                    displayResult(result = result, imageType = imageType)
+                }
+                else -> displayResult(result = result, imageType = imageType)
+            }
+        } else {
+            // Result from intent extras is null, check bundle result instead
+            val bundleResult = intent.getBundleExtra(BUNDLE_RESULT)
+            if (bundleResult != null) {
+                result = when (bundleResult.getString(ScannerConstants.MODE)) {
+                    Modes.BARCODE.value -> bundleResult.getString(ScannerConstants.BARCODE_VALUE)
+                    Modes.QRCODE.value -> bundleResult.getString(ScannerConstants.QRCODE_TEXT)
+                    Modes.MRZ.value -> bundleResult.getString(ScannerConstants.MRZ_RAW)
                     else -> null
                 }
-                resultString = result
+                // Raw Data Result
                 displayRaw(result)
-            } ?: run {
+            } else {
                 binding.textResult.text = getString(R.string.label_result_none)
             }
         }
+
     }
 
-    private fun setupResult(result: String? = null,  imageType: String) {
+    private fun displayResult(result: String? = null, imageType: String?) {
         val dump: StringBuilder = getResult(result)
         // Text Data Result
         if (dump.isNotEmpty()) {
             binding.textResult.visibility = VISIBLE
             binding.textResult.text = dump.toString()
         }
-        // Image & Raw Data Result
-        result?.let {
-            // image object from MRZ or Barcode
-            val image = JsonParser.parseString(it).asJsonObject["image"]
-            if (image != null) {
-                displayImage(image.asString, imageType)
+        // image object from result
+        val imageJson = JsonParser.parseString(result).asJsonObject["image"]
+        if (imageJson != null) {
+            val image = imageJson.asString
+            if (image.isNotEmpty()) {
+                val imageBitmap = if (imageType == ImageResultType.PATH.value) BitmapFactory.decodeFile(image) else image.decodeBase64()
+                Glide.with(this)
+                    .load(imageBitmap)
+                    .optionalCenterCrop()
+                    .into(binding.imageResult)
+                binding.imageLabel.paintFlags = binding.imageLabel.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+                binding.imageLabel.visibility = VISIBLE
+                binding.imageResult.visibility = VISIBLE
+            } else {
+                binding.imageLabel.visibility = GONE
+                binding.imageResult.visibility = GONE
             }
-        } ?: run {
-            // TODO implement proper image passing
-            //  if (bundle != null) {
-            //  showResultImage(bundle.getString(ScannerConstants.MRZ_IMAGE) ?: "", imageType)
-            //  }
         }
-        // Check composite validity
-        val resultObj = JsonParser.parseString(result).asJsonObject
-        val validComposite = if (resultObj["validComposite"]!= null) resultObj["validComposite"].asBoolean else true
-        if (!validComposite) {
-            val snackBar = Snackbar.make(binding.root, getString(R.string.label_warning_invalid_composite_digit), Snackbar.LENGTH_INDEFINITE)
-            snackBar.setAction("Dismiss") { _ -> snackBar.dismiss() }
-            snackBar.setActionTextColor(ContextCompat.getColor(this, R.color.idpass_orange))
-            snackBar.show()
-        }
+        // Raw Data Result
         displayRaw(result)
     }
 
     private fun displayRaw(result : String?) {
-        // Raw Data Result
         if (result?.isNotEmpty() != null) {
             binding.editTextRaw.setText(result)
             binding.textRawLabel.paintFlags = binding.textRawLabel.paintFlags or Paint.UNDERLINE_TEXT_FLAG
@@ -123,23 +145,6 @@ class ResultActivity : AppCompatActivity() {
             binding.editTextRaw.visibility = GONE
         }
     }
-
-    private fun displayImage(image: String, imageType: String) {
-        if (image.isNotEmpty()) {
-            val imageBitmap = if (imageType == ImageResultType.PATH.value) BitmapFactory.decodeFile(image) else image.decodeBase64()
-            Glide.with(this)
-                .load(imageBitmap)
-                .optionalCenterCrop()
-                .into(binding.imageResult)
-            binding.imageLabel.paintFlags = binding.imageLabel.paintFlags or Paint.UNDERLINE_TEXT_FLAG
-            binding.imageLabel.visibility = VISIBLE
-            binding.imageResult.visibility = VISIBLE
-        } else {
-            binding.imageLabel.visibility = GONE
-            binding.imageResult.visibility = GONE
-        }
-    }
-
 
     private fun getShareResult(result: String? = null) : String {
         val dump: StringBuilder = getResult(result = result)
@@ -191,15 +196,14 @@ class ResultActivity : AppCompatActivity() {
         when (item.itemId) {
             android.R.id.home -> finish()
             R.id.share -> {
-                resultString?.let {
-                    val sendIntent: Intent = Intent().apply {
-                        action = Intent.ACTION_SEND
-                        putExtra(Intent.EXTRA_TEXT, it)
-                        type = "text/plain"
-                    }
-                    val shareIntent = Intent.createChooser(sendIntent, null)
-                    startActivity(shareIntent)
+                val sendIntent: Intent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, getShareResult(result = result))
+                    type = "text/plain"
                 }
+                val shareIntent = Intent.createChooser(sendIntent, null)
+                startActivity(shareIntent)
+
             }
         }
         return super.onOptionsItemSelected(item)
