@@ -159,14 +159,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun scanQRCode()  {
-        val intent = ScannerIntent.intentQRCode(
-            isGzipped = true,
-            isJson = true,
-            jsonPath = "" // ex: "$.members[1].lastName"
+        val intent = Intent(this, SmartScannerActivity::class.java)
+        intent.putExtra(
+                SmartScannerActivity.SCANNER_OPTIONS,
+                ScannerOptions(
+                        mode = Modes.QRCODE.value,
+                        language = preference?.getString(Language.NAME, Language.EN),
+                        scannerSize = ScannerSize.LARGE.value,
+                        config = sampleConfig(false)
+                )
         )
         startActivityForResult(intent, OP_SCANNER)
     }
-
+    
     private fun sampleConfig(isManualCapture: Boolean, label: String = "", orientation : String? = Orientation.PORTRAIT.value) = Config(
         branding = true,
         imageResultType = imageType,
