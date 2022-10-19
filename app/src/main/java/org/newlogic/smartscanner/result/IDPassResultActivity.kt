@@ -36,10 +36,10 @@ import org.idpass.lite.exceptions.InvalidKeyException
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.idpasslite.IDPassManager
-import org.idpass.smartscanner.lib.platform.extension.empty
-import org.idpass.smartscanner.lib.platform.extension.hideKeyboard
-import org.idpass.smartscanner.lib.platform.utils.DateUtils.formatDate
-import org.idpass.smartscanner.lib.platform.utils.DateUtils.isValidDate
+import org.idpass.smartscanner.lib.utils.DateUtils.formatDate
+import org.idpass.smartscanner.lib.utils.DateUtils.isValidDate
+import org.idpass.smartscanner.lib.utils.extension.empty
+import org.idpass.smartscanner.lib.utils.extension.hideKeyboard
 import org.newlogic.smartscanner.R
 
 class IDPassResultActivity : AppCompatActivity(), View.OnClickListener {

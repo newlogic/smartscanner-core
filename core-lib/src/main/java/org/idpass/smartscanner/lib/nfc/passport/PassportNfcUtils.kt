@@ -20,7 +20,7 @@ package org.idpass.smartscanner.lib.nfc.passport
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
-import org.idpass.smartscanner.lib.platform.utils.ImageUtils
+import org.idpass.smartscanner.lib.utils.ImageUtils
 import org.jmrtd.cert.CVCPrincipal
 import org.jmrtd.cert.CardVerifiableCertificate
 import org.jmrtd.lds.icao.DG2File

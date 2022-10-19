@@ -15,16 +15,9 @@
  *
  *
  */
-package org.idpass.smartscanner.lib.platform
+package org.idpass.smartscanner.lib.utils.extension
 
-import androidx.appcompat.app.AppCompatActivity
 
-abstract class BaseActivity : AppCompatActivity() {
+fun Double.Companion.noValue() = 0.0
 
-    fun hideActionBar() {
-        supportActionBar?.hide()
-        supportActionBar?.setDisplayShowTitleEnabled(false)
-        actionBar?.hide()
-        actionBar?.setDisplayShowTitleEnabled(false)
-    }
-}
+fun Int.Companion.noValue() = 0

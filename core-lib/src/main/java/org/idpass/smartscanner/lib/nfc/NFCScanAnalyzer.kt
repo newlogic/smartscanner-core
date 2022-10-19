@@ -28,12 +28,12 @@ import org.idpass.smartscanner.lib.mrz.MRZCleaner
 import org.idpass.smartscanner.lib.mrz.MRZResult
 import org.idpass.smartscanner.lib.nfc.NFCActivity.Companion.FOR_SMARTSCANNER_APP
 import org.idpass.smartscanner.lib.nfc.details.IntentData
-import org.idpass.smartscanner.lib.platform.extension.cacheImagePath
-import org.idpass.smartscanner.lib.platform.extension.cacheImageToLocal
-import org.idpass.smartscanner.lib.platform.extension.cropCenter
-import org.idpass.smartscanner.lib.platform.extension.encodeBase64
 import org.idpass.smartscanner.lib.scanner.config.ImageResultType
 import org.idpass.smartscanner.lib.scanner.config.Modes
+import org.idpass.smartscanner.lib.utils.extension.cacheImagePath
+import org.idpass.smartscanner.lib.utils.extension.cacheImageToLocal
+import org.idpass.smartscanner.lib.utils.extension.cropCenter
+import org.idpass.smartscanner.lib.utils.extension.encodeBase64
 import java.io.File
 
 open class NFCScanAnalyzer(

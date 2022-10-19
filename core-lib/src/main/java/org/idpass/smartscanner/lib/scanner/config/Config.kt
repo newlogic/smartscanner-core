@@ -19,7 +19,7 @@ package org.idpass.smartscanner.lib.scanner.config
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
-import org.idpass.smartscanner.lib.platform.extension.empty
+import org.idpass.smartscanner.lib.utils.extension.empty
 
 @Parcelize
 data class Config(

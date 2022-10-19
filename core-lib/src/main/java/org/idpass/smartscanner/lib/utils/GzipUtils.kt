@@ -15,7 +15,7 @@
  *
  *
  */
-package org.idpass.smartscanner.lib.platform.utils
+package org.idpass.smartscanner.lib.utils
 
 import java.io.*
 import java.util.zip.GZIPInputStream
