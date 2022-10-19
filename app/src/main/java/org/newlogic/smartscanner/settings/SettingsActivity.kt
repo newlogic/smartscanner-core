@@ -25,6 +25,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+
 import com.google.gson.GsonBuilder
 import com.google.gson.stream.JsonReader
 import org.idpass.smartscanner.lib.SmartScannerActivity
@@ -33,6 +34,7 @@ import org.idpass.smartscanner.lib.scanner.config.Config.Companion.CONFIG_PROFIL
 import org.idpass.smartscanner.lib.scanner.config.Config.Companion.CONFIG_PUB_KEY
 import org.idpass.smartscanner.lib.scanner.config.Config.Companion.OP_SCANNER
 import org.idpass.smartscanner.lib.scanner.config.Config.Companion.ORIENTATION
+import org.idpass.smartscanner.lib.scanner.config.Language
 import org.idpass.smartscanner.lib.scanner.config.Orientation.LANDSCAPE
 import org.idpass.smartscanner.lib.scanner.config.Orientation.PORTRAIT
 import org.idpass.smartscanner.lib.utils.LanguageUtils
