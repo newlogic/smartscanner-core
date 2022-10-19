@@ -25,7 +25,7 @@ import java.util.regex.Pattern
 
 object JWTUtils {
 
-    const val configurationPublicKey = "-----BEGIN PUBLIC KEY-----\n" +
+    private const val configurationPublicKey = "-----BEGIN PUBLIC KEY-----\n" +
             "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEEVs/o5+uQbTjL3chynL4wXgUg2R9\n" +
             "q9UU8I5mEovUf86QZ7kOBIjJwqnzD1omageEHWwHdBO6B+dFabmdT9POxg==\n" +
             "-----END PUBLIC KEY-----"
@@ -60,12 +60,21 @@ object JWTUtils {
         return keyPairGenerator.generatePublic(keySpecPublic) as ECPublicKey
     }
 
+    fun lookupVerificationKey(keyId : String?, publicKeyScanned: String) : Key {
+        return if (keyId == "CONF") {
+            // TODO load from settings
+            generatePublicKey(configurationPublicKey.removeEncapsulationBoundaries())
+        } else {
+            generatePublicKey(publicKeyScanned.removeEncapsulationBoundaries())
+        }
+    }
+
     /**
      * verify JWT via signature
      *
      */
     @Throws(NoSuchAlgorithmException::class, InvalidKeyException::class, SignatureException::class)
-    fun verifyJWT(jwt: String, publicKey: ECPublicKey): Boolean {
+    fun verifySignature(jwt: String, publicKey: ECPublicKey): Boolean {
         val splitJwt = jwt.split("\\.").toTypedArray()
         val headerStr = splitJwt[0]
         val payloadStr = splitJwt[1]
