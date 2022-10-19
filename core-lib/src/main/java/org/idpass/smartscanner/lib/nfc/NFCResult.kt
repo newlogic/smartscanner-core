@@ -18,11 +18,11 @@
 package org.idpass.smartscanner.lib.nfc
 
 import org.idpass.smartscanner.lib.nfc.passport.Passport
-import org.idpass.smartscanner.lib.platform.extension.arrayToString
-import org.idpass.smartscanner.lib.platform.utils.DateUtils
-import org.idpass.smartscanner.lib.platform.utils.DateUtils.formatStandardDate
-import org.idpass.smartscanner.lib.platform.utils.LanguageUtils.isRTL
 import org.idpass.smartscanner.lib.scanner.config.Language.Locale
+import org.idpass.smartscanner.lib.utils.DateUtils
+import org.idpass.smartscanner.lib.utils.DateUtils.formatStandardDate
+import org.idpass.smartscanner.lib.utils.LanguageUtils.isRTL
+import org.idpass.smartscanner.lib.utils.extension.arrayToString
 import org.jmrtd.lds.icao.MRZInfo
 
 

@@ -31,10 +31,10 @@ import com.bumptech.glide.Glide
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonParser
 import org.idpass.smartscanner.api.ScannerConstants
-import org.idpass.smartscanner.lib.platform.extension.decodeBase64
-import org.idpass.smartscanner.lib.platform.extension.isJSONValid
 import org.idpass.smartscanner.lib.scanner.config.ImageResultType
 import org.idpass.smartscanner.lib.scanner.config.Modes
+import org.idpass.smartscanner.lib.utils.extension.decodeBase64
+import org.idpass.smartscanner.lib.utils.extension.isJSONValid
 import org.newlogic.smartscanner.R
 import org.newlogic.smartscanner.databinding.ActivityResultBinding
 
@@ -150,7 +150,7 @@ class ResultActivity : AppCompatActivity() {
     }
 
     private fun getShareResult(result: String? = null) : String {
-        val dump: StringBuilder = getResult(result = result)
+        val dump: StringBuilder = if (result?.isJSONValid() == true)  getResult(result = result) else StringBuilder()
         if (dump.isEmpty()) {
             dump.append(result)
         }

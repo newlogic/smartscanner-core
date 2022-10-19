@@ -30,11 +30,11 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.SmartScannerActivity
-import org.idpass.smartscanner.lib.platform.BaseImageAnalyzer
-import org.idpass.smartscanner.lib.platform.extension.*
-import org.idpass.smartscanner.lib.platform.utils.BitmapUtils
+import org.idpass.smartscanner.lib.scanner.BaseImageAnalyzer
 import org.idpass.smartscanner.lib.scanner.config.ImageResultType
 import org.idpass.smartscanner.lib.scanner.config.Modes
+import org.idpass.smartscanner.lib.utils.BitmapUtils
+import org.idpass.smartscanner.lib.utils.extension.*
 import java.io.File
 
 

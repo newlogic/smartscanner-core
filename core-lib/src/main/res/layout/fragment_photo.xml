@@ -8,7 +8,7 @@
     android:clipToPadding="false"
     android:orientation="vertical">
 
-    <org.idpass.smartscanner.lib.platform.utils.transform.TouchImageView
+    <org.idpass.smartscanner.lib.utils.transform.TouchImageView
         android:id="@+id/image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -1,4 +1,4 @@
-package org.idpass.smartscanner.lib.platform.utils.transform
+package org.idpass.smartscanner.lib.utils.transform
 
 /*
  * TouchImageView.java
