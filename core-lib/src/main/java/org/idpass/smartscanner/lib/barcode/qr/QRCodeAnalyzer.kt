@@ -40,9 +40,8 @@ import org.idpass.smartscanner.lib.platform.extension.setBrightness
 import org.idpass.smartscanner.lib.platform.extension.setContrast
 import org.idpass.smartscanner.lib.platform.utils.BitmapUtils
 import org.idpass.smartscanner.lib.platform.utils.GzipUtils
-import org.idpass.smartscanner.lib.platform.utils.JWTUtils
 import org.idpass.smartscanner.lib.platform.utils.JWTUtils.isJWT
-import org.idpass.smartscanner.lib.platform.utils.JWTUtils.removeEncapsulationBoundaries
+import org.idpass.smartscanner.lib.platform.utils.JWTUtils.lookupVerificationKey
 import org.idpass.smartscanner.lib.scanner.config.Modes
 import org.json.JSONObject
 import java.io.ByteArrayInputStream
@@ -125,7 +124,6 @@ class QRCodeAnalyzer(
                 }
             }
         }
-
         val intent = Intent()
         if (isJson == true) {
             if (result != null) {
@@ -238,18 +236,11 @@ class QRCodeAnalyzer(
                     header: JwsHeader<out JwsHeader<*>>?,
                     claims: Claims?
                 ): Key {
-                    //TODO update and use signing key lookup key id instead?
                     val scopePublicKey = "-----BEGIN PUBLIC KEY-----\n" +
                             "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEEVs/o5+uQbTjL3chynL4wXgUg2R9\n" +
                             "q9UU8I5mEovUf86QZ7kOBIjJwqnzD1omageEHWwHdBO6B+dFabmdT9POxg==\n" +
                             "-----END PUBLIC KEY-----"
-                    val publicKey =
-                        JWTUtils.generatePublicKey(scopePublicKey.removeEncapsulationBoundaries())
-                    return if (JWTUtils.verifyJWT(rawValue, publicKey)) {
-                        publicKey
-                    } else {
-                        JWTUtils.generatePublicKey(JWTUtils.configurationPublicKey.removeEncapsulationBoundaries())
-                    }
+                    return lookupVerificationKey(header?.keyId, scopePublicKey)
                 }
             }).build()
         val claims = parser.parseClaimsJws(rawValue)
