@@ -19,6 +19,8 @@ package org.idpass.smartscanner.lib.platform.extension
 
 import android.util.Patterns
 import android.webkit.URLUtil
+import com.google.gson.Gson
+import com.google.gson.JsonSyntaxException
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -54,4 +56,13 @@ fun List<String>.arrayToString(): String {
 
 fun String.isValidUrl() : Boolean {
     return URLUtil.isValidUrl(this) && Patterns.WEB_URL.matcher(this).matches()
+}
+
+fun String.isJSONValid(): Boolean {
+    return try {
+        Gson().fromJson(this, Any::class.java)
+        true
+    } catch (ex: JsonSyntaxException) {
+        false
+    }
 }

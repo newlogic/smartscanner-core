@@ -32,6 +32,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonParser
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.platform.extension.decodeBase64
+import org.idpass.smartscanner.lib.platform.extension.isJSONValid
 import org.idpass.smartscanner.lib.scanner.config.ImageResultType
 import org.idpass.smartscanner.lib.scanner.config.Modes
 import org.newlogic.smartscanner.R
@@ -106,28 +107,30 @@ class ResultActivity : AppCompatActivity() {
     }
 
     private fun displayResult(result: String? = null, imageType: String?) {
-        val dump: StringBuilder = getResult(result)
-        // Text Data Result
-        if (dump.isNotEmpty()) {
-            binding.textResult.visibility = VISIBLE
-            binding.textResult.text = dump.toString()
-        }
-        // image object from result
-        val imageJson = JsonParser.parseString(result).asJsonObject["image"]
-        if (imageJson != null) {
-            val image = imageJson.asString
-            if (image.isNotEmpty()) {
-                val imageBitmap = if (imageType == ImageResultType.PATH.value) BitmapFactory.decodeFile(image) else image.decodeBase64()
-                Glide.with(this)
-                    .load(imageBitmap)
-                    .optionalCenterCrop()
-                    .into(binding.imageResult)
-                binding.imageLabel.paintFlags = binding.imageLabel.paintFlags or Paint.UNDERLINE_TEXT_FLAG
-                binding.imageLabel.visibility = VISIBLE
-                binding.imageResult.visibility = VISIBLE
-            } else {
-                binding.imageLabel.visibility = GONE
-                binding.imageResult.visibility = GONE
+        if (result?.isJSONValid() == true) {
+            val dump: StringBuilder = getResult(result)
+            // Text Data Result
+            if (dump.isNotEmpty()) {
+                binding.textResult.visibility = VISIBLE
+                binding.textResult.text = dump.toString()
+            }
+            // image object from result
+            val imageJson = JsonParser.parseString(result).asJsonObject["image"]
+            if (imageJson != null) {
+                val image = imageJson.asString
+                if (image.isNotEmpty()) {
+                    val imageBitmap = if (imageType == ImageResultType.PATH.value) BitmapFactory.decodeFile(image) else image.decodeBase64()
+                    Glide.with(this)
+                            .load(imageBitmap)
+                            .optionalCenterCrop()
+                            .into(binding.imageResult)
+                    binding.imageLabel.paintFlags = binding.imageLabel.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+                    binding.imageLabel.visibility = VISIBLE
+                    binding.imageResult.visibility = VISIBLE
+                } else {
+                    binding.imageLabel.visibility = GONE
+                    binding.imageResult.visibility = GONE
+                }
             }
         }
         // Raw Data Result
@@ -155,7 +158,7 @@ class ResultActivity : AppCompatActivity() {
         return dump.toString()
     }
 
-    private fun getResult(result: String? = null, ): StringBuilder {
+    private fun getResult(result: String? = null): StringBuilder {
         val dump = StringBuilder()
         val givenNames: String?
         val surname: String?
