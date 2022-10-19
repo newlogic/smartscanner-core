@@ -183,9 +183,9 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == OP_SCANNER) {
             Log.d(SmartScannerActivity.TAG, "Scanner resultCode $resultCode")
             if (resultCode == RESULT_OK) {
-                // Get Result from Bundle Intent Call Out
                 val bundle = intent?.getBundleExtra(ScannerConstants.RESULT)
                 if (bundle != null) {
+                    // Get Result from Bundle Intent Call Out
                     if (bundle.getString(ScannerConstants.MODE) == Modes.IDPASS_LITE.value) {
                         // Go to ID PASS Lite Results Screen via bundle
                         val myIntent = Intent(this, IDPassResultActivity::class.java)
@@ -198,6 +198,7 @@ class MainActivity : AppCompatActivity() {
                         startActivity(resultIntent)
                     }
                 } else {
+                    // Get Result from Intent extras
                     if (intent?.getStringExtra(ScannerConstants.MODE) == Modes.IDPASS_LITE.value) {
                         // Go to ID PASS Lite Results Screen
                         val resultBytes = intent.getByteArrayExtra(SCANNER_RESULT_BYTES)
