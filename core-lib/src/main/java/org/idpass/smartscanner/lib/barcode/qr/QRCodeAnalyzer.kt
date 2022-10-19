@@ -121,6 +121,8 @@ class QRCodeAnalyzer(
         var result: String? = when (isGzipped) {
             true -> getGzippedData(rawBytes)
             else -> {
+                Log.v("RJ", "QR rawValue : $rawValue")
+                Log.v("RJ", "QR isJWT() : ${rawValue?.isJWT()}")
                 if (rawValue?.isJWT() == true) {
                     val preference = activity.getSharedPreferences(Config.SHARED, Context.MODE_PRIVATE)
                     val configurationPublicKey = preference.getString(Config.CONFIG_PUB_KEY, null)
@@ -135,6 +137,8 @@ class QRCodeAnalyzer(
                 }
             }
         }
+        Log.v("RJ", "QR result : $result")
+        val intent = Intent()
         if (isJson == true) {
             if (result != null) {
                 jsonPath?.let { path ->

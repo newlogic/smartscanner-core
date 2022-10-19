@@ -35,9 +35,6 @@ import org.idpass.smartscanner.lib.scanner.config.ImageResultType
 import org.idpass.smartscanner.lib.scanner.config.Modes
 import org.idpass.smartscanner.lib.utils.extension.decodeBase64
 import org.idpass.smartscanner.lib.utils.extension.isJSONValid
-import org.json.JSONException
-import org.json.JSONObject
-import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_IMAGE_TYPE
 import org.newlogic.smartscanner.R
 import org.newlogic.smartscanner.databinding.ActivityResultBinding
 
