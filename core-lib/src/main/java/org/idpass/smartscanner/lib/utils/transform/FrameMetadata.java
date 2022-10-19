@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.idpass.smartscanner.lib.platform.utils;
+package org.idpass.smartscanner.lib.utils.transform;
 
 /** Describing a frame info. */
 public class FrameMetadata {

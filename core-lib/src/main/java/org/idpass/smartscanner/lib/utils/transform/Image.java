@@ -15,7 +15,7 @@
  *
  *
  */
-package org.idpass.smartscanner.lib.platform.utils.transform;
+package org.idpass.smartscanner.lib.utils.transform;
 
 import android.graphics.Bitmap;
 

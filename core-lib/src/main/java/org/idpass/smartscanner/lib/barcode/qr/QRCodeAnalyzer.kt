@@ -35,14 +35,14 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SigningKeyResolverAdapter
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.SmartScannerActivity
-import org.idpass.smartscanner.lib.platform.BaseImageAnalyzer
-import org.idpass.smartscanner.lib.platform.extension.setBrightness
-import org.idpass.smartscanner.lib.platform.extension.setContrast
-import org.idpass.smartscanner.lib.platform.utils.BitmapUtils
-import org.idpass.smartscanner.lib.platform.utils.GzipUtils
-import org.idpass.smartscanner.lib.platform.utils.JWTUtils.isJWT
-import org.idpass.smartscanner.lib.platform.utils.JWTUtils.lookupVerificationKey
+import org.idpass.smartscanner.lib.scanner.BaseImageAnalyzer
 import org.idpass.smartscanner.lib.scanner.config.Modes
+import org.idpass.smartscanner.lib.utils.BitmapUtils
+import org.idpass.smartscanner.lib.utils.GzipUtils
+import org.idpass.smartscanner.lib.utils.JWTUtils.isJWT
+import org.idpass.smartscanner.lib.utils.JWTUtils.lookupVerificationKey
+import org.idpass.smartscanner.lib.utils.extension.setBrightness
+import org.idpass.smartscanner.lib.utils.extension.setContrast
 import org.json.JSONObject
 import java.io.ByteArrayInputStream
 import java.security.Key
@@ -116,6 +116,8 @@ class QRCodeAnalyzer(
         val result : String? = when (isGzipped) {
             true -> getGzippedData(rawBytes)
             else -> {
+                Log.v("RJ", "QR rawValue : $rawValue")
+                Log.v("RJ", "QR isJWT() : ${rawValue?.isJWT()}")
                 if (rawValue?.isJWT() == true) {
                     getJWTValue(rawValue)
                 }
@@ -124,6 +126,7 @@ class QRCodeAnalyzer(
                 }
             }
         }
+        Log.v("RJ", "QR result : $result")
         val intent = Intent()
         if (isJson == true) {
             if (result != null) {

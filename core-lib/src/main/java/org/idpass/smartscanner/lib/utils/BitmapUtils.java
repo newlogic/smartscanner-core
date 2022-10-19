@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.idpass.smartscanner.lib.platform.utils;
+package org.idpass.smartscanner.lib.utils;
 
 import android.annotation.TargetApi;
 import android.content.ContentResolver;
@@ -36,6 +36,8 @@ import androidx.annotation.RequiresApi;
 import androidx.camera.core.ExperimentalGetImage;
 import androidx.camera.core.ImageProxy;
 import androidx.exifinterface.media.ExifInterface;
+
+import org.idpass.smartscanner.lib.utils.transform.FrameMetadata;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

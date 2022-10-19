@@ -15,14 +15,15 @@
  *
  *
  */
-package org.idpass.smartscanner.lib.platform.extension
+package org.idpass.smartscanner.lib.utils.extension
 
 import android.util.Patterns
 import android.webkit.URLUtil
-import com.google.gson.Gson
-import com.google.gson.JsonSyntaxException
+import org.json.JSONException
+import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
+
 
 private val hexArray = "0123456789ABCDEF".toCharArray()
 
@@ -30,7 +31,10 @@ fun String.Companion.empty() = ""
 
 fun String.Companion.space() = " "
 
-fun String.Companion.formatToSimpleDate(date : Date): String = SimpleDateFormat("yyyyMMddHHmmss", Locale.ROOT).format(date)
+fun String.Companion.formatToSimpleDate(date: Date): String = SimpleDateFormat(
+    "yyyyMMddHHmmss",
+    Locale.ROOT
+).format(date)
 
 fun ByteArray.bytesToHex(): String {
     val hexChars = CharArray(this.size * 2)
@@ -60,9 +64,9 @@ fun String.isValidUrl() : Boolean {
 
 fun String.isJSONValid(): Boolean {
     return try {
-        Gson().fromJson(this, Any::class.java)
+        val o = JSONObject(this)
         true
-    } catch (ex: JsonSyntaxException) {
+    } catch (e: JSONException) {
         false
     }
 }

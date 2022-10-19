@@ -15,7 +15,7 @@
  *
  *
  */
-package org.idpass.smartscanner.lib.platform.utils
+package org.idpass.smartscanner.lib.utils
 
 import org.apache.commons.codec.binary.Base64
 import java.security.*
@@ -35,7 +35,7 @@ object JWTUtils {
      *
      */
     fun String.isJWT() : Boolean {
-        val pattern = "^[A-Za-z0-9-_=]+\\\\.[A-Za-z0-9-_=]+\\\\.[A-Za-z0-9-_.+/=]*\$"
+        val pattern = "(^(?:[\\w-]*\\.){2}[\\w-]*\$)"
         val r: Pattern = Pattern.compile(pattern)
         return r.matcher(this).find()
     }

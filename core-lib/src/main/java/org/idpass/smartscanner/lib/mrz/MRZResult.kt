@@ -17,7 +17,7 @@
  */
 package org.idpass.smartscanner.lib.mrz
 
-import org.idpass.smartscanner.lib.platform.utils.DateUtils
+import org.idpass.smartscanner.lib.utils.DateUtils
 import org.idpass.smartscanner.mrz.parser.innovatrics.MrzRecord
 import org.idpass.smartscanner.mrz.parser.innovatrics.records.MrtdTd1
 

@@ -30,10 +30,10 @@ import org.idpass.smartscanner.lib.R
 import org.idpass.smartscanner.lib.databinding.FragmentPassportDetailsBinding
 import org.idpass.smartscanner.lib.nfc.NFCResult
 import org.idpass.smartscanner.lib.nfc.details.IntentData
-import org.idpass.smartscanner.lib.platform.extension.arrayToString
-import org.idpass.smartscanner.lib.platform.extension.bytesToHex
-import org.idpass.smartscanner.lib.platform.utils.DateUtils
-import org.idpass.smartscanner.lib.platform.utils.DateUtils.formatStandardDate
+import org.idpass.smartscanner.lib.utils.DateUtils
+import org.idpass.smartscanner.lib.utils.DateUtils.formatStandardDate
+import org.idpass.smartscanner.lib.utils.extension.arrayToString
+import org.idpass.smartscanner.lib.utils.extension.bytesToHex
 import org.jmrtd.FeatureStatus
 import org.jmrtd.VerificationStatus
 import java.security.MessageDigest

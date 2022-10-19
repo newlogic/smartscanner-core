@@ -17,8 +17,8 @@
  */
 package org.idpass.smartscanner.lib.mrz
 
-import org.idpass.smartscanner.lib.platform.extension.empty
-import org.idpass.smartscanner.lib.platform.extension.noValue
+import org.idpass.smartscanner.lib.utils.extension.empty
+import org.idpass.smartscanner.lib.utils.extension.noValue
 
 
 object MrzUtils {

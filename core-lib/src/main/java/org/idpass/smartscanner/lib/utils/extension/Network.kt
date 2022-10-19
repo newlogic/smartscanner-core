@@ -15,7 +15,7 @@
  *
  *
  */
-package org.idpass.smartscanner.lib.platform.extension
+package org.idpass.smartscanner.lib.utils.extension
 
 import android.content.Context
 import android.net.ConnectivityManager

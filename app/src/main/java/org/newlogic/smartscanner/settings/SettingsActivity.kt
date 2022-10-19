@@ -23,10 +23,10 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import org.idpass.smartscanner.lib.platform.utils.LanguageUtils
 import org.idpass.smartscanner.lib.scanner.config.Language
 import org.idpass.smartscanner.lib.scanner.config.Orientation.LANDSCAPE
 import org.idpass.smartscanner.lib.scanner.config.Orientation.PORTRAIT
+import org.idpass.smartscanner.lib.utils.LanguageUtils
 import org.newlogic.smartscanner.BuildConfig
 import org.newlogic.smartscanner.MainActivity
 import org.newlogic.smartscanner.R
