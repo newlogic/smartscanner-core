@@ -18,6 +18,7 @@
 package org.idpass.smartscanner.lib.utils
 
 import org.apache.commons.codec.binary.Base64
+import java.nio.charset.Charset
 import java.security.*
 import java.security.interfaces.ECPublicKey
 import java.security.spec.X509EncodedKeySpec
@@ -74,14 +75,14 @@ object JWTUtils {
      *
      */
     @Throws(NoSuchAlgorithmException::class, InvalidKeyException::class, SignatureException::class)
-    fun verifySignature(jwt: String, publicKey: ECPublicKey): Boolean {
-        val splitJwt = jwt.split("\\.").toTypedArray()
+    fun verifySignature(jwt: String, key: String = configurationPublicKey): Boolean {
+        val splitJwt = jwt.split(".")
         val headerStr = splitJwt[0]
         val payloadStr = splitJwt[1]
         val signatureStr = splitJwt[2]
-        val signature: Signature = Signature.getInstance("SHA256withECDSAinP1363Format")
-        signature.initVerify(publicKey)
-        signature.update("$headerStr.$payloadStr".toByteArray())
+        val signature = Signature.getInstance("SHA256withECDSA")
+        signature.initVerify(generatePublicKey(key.removeEncapsulationBoundaries()))
+        signature.update("$headerStr.$payloadStr".toByteArray(Charset.forName("UTF-8")))
         return signature.verify(Base64.decodeBase64(signatureStr))
     }
 }
