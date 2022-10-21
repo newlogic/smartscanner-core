@@ -25,7 +25,8 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.google.gson.JsonParser
+import com.google.gson.GsonBuilder
+import com.google.gson.stream.JsonReader
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.scanner.config.*
 import org.idpass.smartscanner.lib.scanner.config.Config.Companion.CONFIG_PROFILE_NAME
@@ -39,6 +40,7 @@ import org.newlogic.smartscanner.BuildConfig
 import org.newlogic.smartscanner.MainActivity
 import org.newlogic.smartscanner.R
 import org.newlogic.smartscanner.databinding.ActivitySettingsBinding
+import java.io.StringReader
 
 
 class SettingsActivity : AppCompatActivity() {
@@ -75,8 +77,8 @@ class SettingsActivity : AppCompatActivity() {
             binding.landscapeCheck.visibility = View.VISIBLE
         }
         // Configuration Profile
-        if (preference?.getString(CONFIG_PROFILE_NAME, "") == null ||
-            preference?.getString(CONFIG_PUB_KEY, "") == null
+        if (preference?.getString(CONFIG_PROFILE_NAME, null) == null ||
+            preference?.getString(CONFIG_PUB_KEY, null) == null
         ) {
             binding.layoutConfigEmpty.visibility = View.VISIBLE
             binding.layoutConfigLoaded.visibility = View.GONE
@@ -194,17 +196,22 @@ class SettingsActivity : AppCompatActivity() {
         if (requestCode == OP_SCANNER) {
             Log.d(SmartScannerActivity.TAG, "Settings Config resultCode $resultCode")
             if (resultCode == RESULT_OK) {
-                val resultFromIntent = intent?.getStringExtra(SmartScannerActivity.SCANNER_RESULT)
-                val result = JsonParser.parseString(resultFromIntent).asJsonObject
+                // TODO fix malformed crash maybe due to pub key not being parsed properly
+                val resultFromIntent = data?.getStringExtra(SmartScannerActivity.SCANNER_RESULT)
+                Log.d(
+                    SmartScannerActivity.TAG,
+                    "Settings Config resultFromIntent $resultFromIntent"
+                )
+                //val result : JSONObject = JsonParser.parseString(resultFromIntent).asJsonObject
+                val reader = JsonReader(StringReader(resultFromIntent)).apply {
+                    isLenient = true
+                }
+                val result : ConfigProfile = GsonBuilder().disableHtmlEscaping().create().fromJson(reader, ConfigProfile::class.java)
                 // Save config profile name and public key
-                saveToPreference(
-                    CONFIG_PROFILE_NAME,
-                    if (result["conf"] != null) result["conf"].asString else null
-                )
-                saveToPreference(
-                    CONFIG_PUB_KEY,
-                    if (result["pub"] != null) result["pub"].asString else null
-                )
+                saveToPreference(CONFIG_PROFILE_NAME, result.conf)
+                saveToPreference(CONFIG_PUB_KEY, result.pub)
+                binding.layoutConfigEmpty.visibility = View.GONE
+                binding.layoutConfigLoaded.visibility = View.VISIBLE
             }
         }
     }
