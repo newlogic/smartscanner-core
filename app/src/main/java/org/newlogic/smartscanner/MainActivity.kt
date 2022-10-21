@@ -150,7 +150,6 @@ class MainActivity : AppCompatActivity() {
                         mode = Modes.QRCODE.value,
                         language = preference?.getString(Language.NAME, Language.EN),
                         scannerSize = ScannerSize.LARGE.value,
-                        qrCodeOptions = QRcodeOptions(isJson = true),
                         config = sampleConfig(false)
                 )
         )
@@ -197,7 +196,8 @@ class MainActivity : AppCompatActivity() {
                     }
                 } else {
                     // Get Result from Intent extras
-                    if (intent?.getStringExtra(ScannerConstants.MODE) == Modes.IDPASS_LITE.value) {
+                    val mode = intent?.getStringExtra(ScannerConstants.MODE)
+                    if (mode == Modes.IDPASS_LITE.value) {
                         // Go to ID PASS Lite Results Screen
                         val resultBytes = intent.getByteArrayExtra(SCANNER_RESULT_BYTES)
                         val myIntent = Intent(this, IDPassResultActivity::class.java)
@@ -208,6 +208,7 @@ class MainActivity : AppCompatActivity() {
                         val result = intent?.getStringExtra(SCANNER_RESULT)
                         val resultIntent = Intent(this, ResultActivity::class.java)
                         resultIntent.putExtra(ResultActivity.IMAGE_TYPE, intent?.getStringExtra(SCANNER_IMAGE_TYPE))
+                        resultIntent.putExtra(ScannerConstants.MODE, mode)
                         resultIntent.putExtra(ResultActivity.RESULT, result)
                         startActivity(resultIntent)
                     }

@@ -35,8 +35,11 @@ import org.idpass.smartscanner.lib.scanner.config.ImageResultType
 import org.idpass.smartscanner.lib.scanner.config.Modes
 import org.idpass.smartscanner.lib.utils.extension.decodeBase64
 import org.idpass.smartscanner.lib.utils.extension.isJSONValid
+import org.json.JSONException
+import org.json.JSONObject
 import org.newlogic.smartscanner.R
 import org.newlogic.smartscanner.databinding.ActivityResultBinding
+
 
 class ResultActivity : AppCompatActivity() {
 
@@ -82,8 +85,40 @@ class ResultActivity : AppCompatActivity() {
                     }
                 }
                 Modes.QRCODE.value -> {
-                    // TODO update Display for QR Code here
-                    displayResult(result = result, imageType = imageType)
+                    // TODO update proper Display for QR Code here based on UI/UX
+                    // Temporary sample result output
+                    val parsedResult = JSONObject(result)
+                    val resultIterator = parsedResult.keys()
+                    val dump = StringBuilder()
+                    while (resultIterator.hasNext()) {
+                        val key = resultIterator.next()
+                        try {
+                            dump.append("$key: ${parsedResult.get(key)} \n" )
+                        } catch (e: JSONException) {
+                            e.printStackTrace()
+                        }
+                    }
+                    binding.textResultSample.text = dump.toString()
+                    binding.layoutResultList.visibility = VISIBLE
+                    // val isSignatureValid = intent.getBooleanExtra(SCANNER_SIGNATURE_VERIFICATION, false)
+                    // ================================================
+                    // if (signature is valid or public key is not loaded) -> show text error
+                    // binding.textResultError.visibility = VISIBLE
+                    // binding.textResultError.text = Add error here
+                    // ================================================
+                    // else ->  display result value and key list
+                    // val resultArray = JSONArray(result) --> TODO check why not working
+                    // val keyList = arrayListOf<String>()
+                    // for (i in 0 until resultArray.length()) {
+                    //    resultArray.getJSONObject(i).keys().forEach {
+                    //        keyList.add(it)
+                    //    }
+                    // }
+                    // binding.rvResults.layoutManager = LinearLayoutManager(this)
+                    // binding.rvResults.adapter = ResultListAdapter(resultArray, keyList)
+                    // ================================================
+                    // binding.layoutResultList.visibility = VISIBLE
+                    //displayRaw(result)
                 }
                 else -> displayResult(result = result, imageType = imageType)
             }
@@ -137,7 +172,7 @@ class ResultActivity : AppCompatActivity() {
         displayRaw(result)
     }
 
-    private fun displayRaw(result : String?) {
+    private fun displayRaw(result: String?) {
         if (result?.isNotEmpty() != null) {
             binding.editTextRaw.setText(result)
             binding.textRawLabel.paintFlags = binding.textRawLabel.paintFlags or Paint.UNDERLINE_TEXT_FLAG
