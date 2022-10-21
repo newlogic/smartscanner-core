@@ -25,5 +25,6 @@ enum class Modes (val value : String) {
     NFC_SCAN("nfc-scan"),
     QRCODE_CONFIG("qrcode-config"),
     PDF_417("pdf417"),
-    QRCODE("qrcode")
+    QRCODE("qrcode"),
+    QRCODE_CONFIG("qrcode-config")
 }

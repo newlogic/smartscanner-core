@@ -22,12 +22,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-
-import com.google.gson.GsonBuilder
-import com.google.gson.stream.JsonReader
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.scanner.config.*
 import org.idpass.smartscanner.lib.scanner.config.Config.Companion.CONFIG_PROFILE_NAME
@@ -188,33 +184,5 @@ class SettingsActivity : AppCompatActivity() {
         editor?.remove(key)?.apply()
         editor?.putString(key, value)
         editor?.apply()
-    }
-
-    @SuppressLint("LogNotTimber")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        super.onActivityResult(requestCode, resultCode, intent)
-        Log.d(SmartScannerActivity.TAG, "Settings Config requestCode $requestCode")
-        if (requestCode == OP_SCANNER) {
-            Log.d(SmartScannerActivity.TAG, "Settings Config resultCode $resultCode")
-            if (resultCode == RESULT_OK) {
-                // TODO fix malformed crash maybe due to pub key not being parsed properly
-                val resultFromIntent = data?.getStringExtra(SmartScannerActivity.SCANNER_RESULT)
-                Log.d(
-                    SmartScannerActivity.TAG,
-                    "Settings Config resultFromIntent $resultFromIntent"
-                )
-                //val result : JSONObject = JsonParser.parseString(resultFromIntent).asJsonObject
-                val reader = JsonReader(StringReader(resultFromIntent)).apply {
-                    isLenient = true
-                }
-                val result : ConfigProfile = GsonBuilder().disableHtmlEscaping().create().fromJson(reader, ConfigProfile::class.java)
-                // Save config profile name and public key
-                saveToPreference(CONFIG_PROFILE_NAME, result.conf)
-                saveToPreference(CONFIG_PUB_KEY, result.pub)
-                binding.layoutConfigEmpty.visibility = View.GONE
-                binding.layoutConfigLoaded.visibility = View.VISIBLE
-            }
-        }
     }
 }

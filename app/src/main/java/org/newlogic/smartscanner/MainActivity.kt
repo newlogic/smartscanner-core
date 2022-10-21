@@ -171,6 +171,7 @@ class MainActivity : AppCompatActivity() {
                         mode = Modes.QRCODE.value,
                         language = preference?.getString(Language.NAME, Language.EN),
                         scannerSize = ScannerSize.LARGE.value,
+                        qrCodeOptions = QRcodeOptions(isJson = true),
                         config = sampleConfig(false)
                 )
         )
