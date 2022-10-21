@@ -64,13 +64,14 @@ object JWTUtils {
     fun lookupVerificationKey(keyId: String?, publicKey: String): Key {
         // TODO remove usage of hardcoded keys?
         val key: String = if (keyId == "CONF") publicKey else configurationPublicKey
-        return JWTUtils.generatePublicKey(key.removeEncapsulationBoundaries())
+        return generatePublicKey(key.removeEncapsulationBoundaries())
     }
 
     /**
      * verify JWT via signature
      *
      */
+    // TODO fix verify signature algo, as it always returns false
     @Throws(NoSuchAlgorithmException::class, InvalidKeyException::class, SignatureException::class)
     fun verifySignature(jwt: String, key: String = configurationPublicKey): Boolean {
         val splitJwt = jwt.split(".")

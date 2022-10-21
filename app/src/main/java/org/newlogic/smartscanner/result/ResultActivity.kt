@@ -87,7 +87,7 @@ class ResultActivity : AppCompatActivity() {
                 Modes.QRCODE.value -> {
                     // TODO update proper Display for QR Code here based on UI/UX
                     // Temporary sample result output
-                    val parsedResult = JSONObject(result)
+                    val parsedResult = JSONObject(result?.replace("(\": [ ]*([\\\\w@\\\\.-]+)\", \": \\\"\$1\\\"\")".toRegex(), ""))
                     val resultIterator = parsedResult.keys()
                     val dump = StringBuilder()
                     while (resultIterator.hasNext()) {
