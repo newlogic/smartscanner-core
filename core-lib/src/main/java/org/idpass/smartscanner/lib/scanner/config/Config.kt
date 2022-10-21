@@ -34,6 +34,12 @@ data class Config(
     val orientation: String? = null
 ) : Parcelable {
     companion object {
+        const val CONFIG_PUB_KEY = "CONFIG_PUB_KEY"
+        const val CONFIG_PROFILE_NAME = "CONFIG_PROFILE_NAME"
+        const val OP_SCANNER = 1001
+        const val ORIENTATION = "ORIENTATION"
+        const val SHARED = "SHARED"
+
         val default = Config(
             background = String.empty(),
             branding = true,

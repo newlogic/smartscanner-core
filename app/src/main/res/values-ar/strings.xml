@@ -46,5 +46,13 @@
     <string name="label_orientation">توجيه</string>
     <string name="label_portrait">لوحة</string>
     <string name="label_landscape">منظر جمالي</string>
+    <string name="label_config_profile">ملف تعريف التكوين</string>
+    <string name="label_config_load">لتحميل تكوين ، امسح رمز QR متوافقًا</string>
+    <string name="label_config_scan">مسح تكوين رمز الاستجابة السريعة </string>
+    <string name="label_config_name">اسم الشخصية</string>
+    <string name="label_config_pub_key">المفتاح العمومي</string>
+    <string name="label_config_reset">إعادة تعيين ملف تعريف التكوين</string>
+    <string name="label_config_reset_desc">يؤدي هذا الإجراء إلى إعادة تعيين التطبيق إلى التكوين الافتراضي.</string>
+    <string name="label_signature_verified">تم التحقق من التوقيع</string>
 
 </resources>
