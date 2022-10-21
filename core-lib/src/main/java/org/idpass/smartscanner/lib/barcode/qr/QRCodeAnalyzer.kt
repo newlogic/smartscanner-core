@@ -126,8 +126,10 @@ class QRCodeAnalyzer(
                     val configurationPublicKey = preference.getString(Config.CONFIG_PUB_KEY, null)
                     if (configurationPublicKey == null) {
                         // TODO send error here
+                        // use intent to pass error
                     }
-                    configurationPublicKey?.let { key -> getJWTValue(rawValue, key) }
+                    //configurationPublicKey?.let { key -> getJWTValue(rawValue, key) }
+                    getJWTValue(rawValue, JWTUtils.configurationPublicKey)
                 } else {
                     rawValue
                 }
