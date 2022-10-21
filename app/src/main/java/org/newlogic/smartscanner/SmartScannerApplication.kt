@@ -50,8 +50,4 @@ class SmartScannerApplication : MultiDexApplication() {
             }
         }
     }
-
-    companion object {
-        const val SHARED = "SHARED"
-    }
 }

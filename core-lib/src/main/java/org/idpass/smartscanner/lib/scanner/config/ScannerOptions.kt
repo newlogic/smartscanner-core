@@ -33,6 +33,7 @@ data class ScannerOptions(
     val barcodeOptions: BarcodeOptions? = null,
     val captureOptions: CaptureOptions? = null,
     val nfcOptions: NFCOptions? = null,
+    val qrCodeOptions: QRcodeOptions? = null,
     val sentryLogger: SentryLogger? = null,
 ) : Parcelable {
     companion object {
