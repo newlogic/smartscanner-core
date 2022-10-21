@@ -7,7 +7,7 @@
     android:layout_marginTop="16dp">
 
     <LinearLayout
-        android:id="@+id/linearLayout2"
+        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layoutDirection="ltr"
@@ -23,6 +23,7 @@
             android:layout_marginTop="10dp"
             android:layout_marginEnd="8dp"
             android:src="@drawable/ic_settings_backspace" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -40,13 +41,13 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="@string/languages"
-        android:textColor="#70000000"
+        android:textColor="#000"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.048"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
         app:layout_constraintVertical_bias="0.026" />
 
     <LinearLayout
@@ -74,19 +75,21 @@
                 android:layout_height="20dp"
                 android:layout_gravity="center"
                 android:src="@drawable/ic_settings_option" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginStart="8dp"
                 android:text="@string/english" />
+
             <ImageView
                 android:id="@+id/englishpic"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:layout_gravity="end"
                 android:layout_marginStart="200dp"
-                android:src="@drawable/ic_settings_check"/>
+                android:src="@drawable/ic_settings_check" />
 
         </LinearLayout>
 
@@ -109,19 +112,21 @@
                 android:layout_height="20dp"
                 android:layout_gravity="center"
                 android:src="@drawable/ic_settings_option" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:text="  العربية\nArabic" />
+
             <ImageView
                 android:id="@+id/arabicpic"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:layout_gravity="end"
                 android:layout_marginStart="200dp"
-                android:visibility="gone"
-                android:src="@drawable/ic_settings_check" />
+                android:src="@drawable/ic_settings_check"
+                android:visibility="gone" />
 
         </LinearLayout>
 
@@ -141,7 +146,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="@string/label_orientation"
-        android:textColor="#70000000"
+        android:textColor="#000"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -151,6 +156,7 @@
         app:layout_constraintVertical_bias="0.026" />
 
     <LinearLayout
+        android:id="@+id/layout_orientation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -174,12 +180,14 @@
                 android:layout_height="20dp"
                 android:layout_gravity="center"
                 android:src="@drawable/ic_settings_option" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginStart="8dp"
                 android:text="@string/label_portrait" />
+
             <ImageView
                 android:id="@+id/portrait_check"
                 android:layout_width="25dp"
@@ -209,19 +217,21 @@
                 android:layout_height="20dp"
                 android:layout_gravity="center"
                 android:src="@drawable/ic_settings_option" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:text="@string/label_landscape" />
+
             <ImageView
                 android:id="@+id/landscape_check"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:layout_gravity="end"
                 android:layout_marginStart="180dp"
-                android:visibility="gone"
-                android:src="@drawable/ic_settings_check" />
+                android:src="@drawable/ic_settings_check"
+                android:visibility="gone" />
 
         </LinearLayout>
 
@@ -235,6 +245,142 @@
     </LinearLayout>
 
     <TextView
+        android:id="@+id/tv_config_profile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/label_config_profile"
+        android:textColor="#000"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.048"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layout_orientation"
+        app:layout_constraintVertical_bias="0.026" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_config_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.049"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_config_profile"
+        app:layout_constraintVertical_bias="0.033">
+
+        <TextView
+            android:id="@+id/tv_load_description"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/label_config_load"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_scan_config_qr"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="16dp"
+            android:background="@color/black"
+            android:fontFamily="@font/sourcesanspro_medium"
+            android:text="@string/label_config_scan"
+            android:textColor="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_load_description" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_config_loaded"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.049"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_config_profile"
+        app:layout_constraintVertical_bias="0.033">
+
+        <TextView
+            android:id="@+id/tv_config_name_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/label_config_name"
+            android:textColor="@color/black"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_config_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_config_name_label"
+            tools:text="ConfigABC-123" />
+
+        <TextView
+            android:id="@+id/tv_config_pub_key_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/label_config_pub_key"
+            android:textColor="@color/black"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_config_name" />
+
+        <TextView
+            android:id="@+id/tv_config_pub_key"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_config_pub_key_label"
+            tools:text="5VjeCuyhzM3dvR4RKtGUn6J5XDLK1EP1kSozG5XxoXquvENi" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_config_reset"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="16dp"
+            android:background="#f44436"
+            android:fontFamily="@font/sourcesanspro_medium"
+            android:text="@string/label_config_reset"
+            android:textColor="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_config_pub_key" />
+
+        <TextView
+            android:id="@+id/tv_config_reset_desc"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/label_config_reset_desc"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btn_config_reset" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
         android:id="@+id/version_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -242,16 +388,16 @@
         android:textSize="13sp"
         app:layout_constraintBottom_toTopOf="@+id/branding_text"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/branding_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
         android:fontFamily="@font/sourcesanspro_regular"
         android:text="@string/label_newlogic"
         android:textSize="13sp"
-        android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

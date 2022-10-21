@@ -34,18 +34,15 @@ import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT_BYTES
 import org.idpass.smartscanner.lib.nfc.NFCActivity
 import org.idpass.smartscanner.lib.scanner.config.*
+import org.idpass.smartscanner.lib.scanner.config.Config.Companion.OP_SCANNER
+import org.idpass.smartscanner.lib.scanner.config.Config.Companion.ORIENTATION
 import org.newlogic.smartscanner.databinding.ActivityMainBinding
 import org.newlogic.smartscanner.result.IDPassResultActivity
 import org.newlogic.smartscanner.result.ResultActivity
 import org.newlogic.smartscanner.settings.SettingsActivity
-import org.newlogic.smartscanner.settings.SettingsActivity.Companion.ORIENTATION
 
 
 class MainActivity : AppCompatActivity() {
-
-    companion object {
-        const val OP_SCANNER = 1001
-    }
 
     private var preference : SharedPreferences? = null
     private lateinit var binding : ActivityMainBinding
@@ -56,7 +53,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
-        preference = getSharedPreferences(SmartScannerApplication.SHARED, Context.MODE_PRIVATE)
+        preference = getSharedPreferences(Config.SHARED, Context.MODE_PRIVATE)
     }
 
     override fun onStart() {
@@ -167,6 +164,7 @@ class MainActivity : AppCompatActivity() {
                         mode = Modes.QRCODE.value,
                         language = preference?.getString(Language.NAME, Language.EN),
                         scannerSize = ScannerSize.LARGE.value,
+                        qrCodeOptions = QRcodeOptions(isJson = true),
                         config = sampleConfig(false)
                 )
         )

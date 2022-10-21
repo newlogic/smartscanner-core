@@ -47,5 +47,13 @@
     <string name="label_orientation">ORIENTATION</string>
     <string name="label_portrait">Portrait</string>
     <string name="label_landscape">Landscape</string>
+    <string name="label_config_profile">CONFIGURATION PROFILE</string>
+    <string name="label_config_load">To load a configuration, scan a compatible QR code</string>
+    <string name="label_config_scan">Scan Configuration QR Code </string>
+    <string name="label_config_name">Profile Name</string>
+    <string name="label_config_pub_key">Public Key</string>
+    <string name="label_config_reset">Reset Configuration Profile</string>
+    <string name="label_config_reset_desc">This action resets the app back to default configuration.</string>
+    <string name="label_signature_verified">Signature verified</string>
 
 </resources>

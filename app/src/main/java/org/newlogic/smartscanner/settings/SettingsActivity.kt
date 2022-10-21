@@ -17,42 +17,46 @@
  */
 package org.newlogic.smartscanner.settings
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import org.idpass.smartscanner.lib.scanner.config.Language
+import com.google.gson.JsonParser
+import org.idpass.smartscanner.lib.SmartScannerActivity
+import org.idpass.smartscanner.lib.scanner.config.*
+import org.idpass.smartscanner.lib.scanner.config.Config.Companion.CONFIG_PROFILE_NAME
+import org.idpass.smartscanner.lib.scanner.config.Config.Companion.CONFIG_PUB_KEY
+import org.idpass.smartscanner.lib.scanner.config.Config.Companion.OP_SCANNER
+import org.idpass.smartscanner.lib.scanner.config.Config.Companion.ORIENTATION
 import org.idpass.smartscanner.lib.scanner.config.Orientation.LANDSCAPE
 import org.idpass.smartscanner.lib.scanner.config.Orientation.PORTRAIT
 import org.idpass.smartscanner.lib.utils.LanguageUtils
 import org.newlogic.smartscanner.BuildConfig
 import org.newlogic.smartscanner.MainActivity
 import org.newlogic.smartscanner.R
-import org.newlogic.smartscanner.SmartScannerApplication
 import org.newlogic.smartscanner.databinding.ActivitySettingsBinding
 
 
 class SettingsActivity : AppCompatActivity() {
 
-    companion object {
-      val ORIENTATION = "Orientation"
-    }
-
-    private lateinit var binding : ActivitySettingsBinding
+    private lateinit var binding: ActivitySettingsBinding
+    private var preference: SharedPreferences? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
-        setupViews()
+        preference = getSharedPreferences(Config.SHARED, Context.MODE_PRIVATE)
     }
 
-    private fun setupViews() {
-        val preference = getSharedPreferences(SmartScannerApplication.SHARED, Context.MODE_PRIVATE)
-        val editor = preference.edit()
+    override fun onStart() {
+        super.onStart()
+        // Language (English/Arabic)
         val currentLanguage = resources.configuration.locale.displayLanguage
         if (currentLanguage == "English") {
             binding.arabicpic.visibility = View.INVISIBLE
@@ -61,24 +65,8 @@ class SettingsActivity : AppCompatActivity() {
             binding.arabicpic.visibility = View.VISIBLE
             binding.englishpic.visibility = View.INVISIBLE
         }
-
-        // Arabic language
-        binding.arabiclayout.setOnClickListener {
-            binding.arabicpic.visibility = View.VISIBLE
-            binding.englishpic.visibility = View.INVISIBLE
-            saveLanguage(editor = editor, language = Language.AR)
-            startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-        }
-        // English language
-        binding.englishLayout.setOnClickListener {
-            binding.arabicpic.visibility = View.INVISIBLE
-            binding.englishpic.visibility = View.VISIBLE
-            saveLanguage(editor = editor, language = Language.EN)
-            startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-        }
-
         // Orientation (Portrait/Landscape)
-        val orientation = preference.getString(ORIENTATION, PORTRAIT.value)
+        val orientation = preference?.getString(ORIENTATION, PORTRAIT.value)
         if (orientation == PORTRAIT.value) {
             binding.portraitCheck.visibility = View.VISIBLE
             binding.landscapeCheck.visibility = View.INVISIBLE
@@ -86,44 +74,138 @@ class SettingsActivity : AppCompatActivity() {
             binding.portraitCheck.visibility = View.INVISIBLE
             binding.landscapeCheck.visibility = View.VISIBLE
         }
-
-        // Landscape
-        binding.landscapeLayout.setOnClickListener {
-            binding.portraitCheck.visibility = View.INVISIBLE
-            binding.landscapeCheck.visibility = View.VISIBLE
-            saveToPreference(editor = editor, key = ORIENTATION, value = LANDSCAPE.value)
-            startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
+        // Configuration Profile
+        if (preference?.getString(CONFIG_PROFILE_NAME, "") == null ||
+            preference?.getString(CONFIG_PUB_KEY, "") == null
+        ) {
+            binding.layoutConfigEmpty.visibility = View.VISIBLE
+            binding.layoutConfigLoaded.visibility = View.GONE
+        } else {
+            binding.layoutConfigEmpty.visibility = View.GONE
+            binding.layoutConfigLoaded.visibility = View.VISIBLE
         }
-        // Portrait
-        binding.portraitLayout.setOnClickListener {
-            binding.portraitCheck.visibility = View.VISIBLE
-            binding.landscapeCheck.visibility = View.INVISIBLE
-            saveToPreference(editor = editor, key = ORIENTATION, value = PORTRAIT.value)
-            startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-        }
-
         // Display version
         val version = BuildConfig.VERSION_NAME
         val versionLabel = if (BuildConfig.DEBUG) version else version.split("-").first()
         binding.versionText.text = getString(R.string.label_version, versionLabel)
+
+        // Setup click listeners
+        setupViewListeners(preference)
+    }
+
+    private fun setupViewListeners(preference: SharedPreferences?) {
+        val editor = preference?.edit()
+        // Language (English/Arabic)
+        binding.arabiclayout.setOnClickListener {
+            binding.arabicpic.visibility = View.VISIBLE
+            binding.englishpic.visibility = View.INVISIBLE
+            saveLanguage(editor = editor, language = Language.AR)
+            startActivity(
+                Intent(
+                    this,
+                    MainActivity::class.java
+                ).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            )
+        }
+        binding.englishLayout.setOnClickListener {
+            binding.arabicpic.visibility = View.INVISIBLE
+            binding.englishpic.visibility = View.VISIBLE
+            saveLanguage(editor = editor, language = Language.EN)
+            startActivity(
+                Intent(
+                    this,
+                    MainActivity::class.java
+                ).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            )
+        }
+
+        // Orientation (Portrait/Landscape)
+        binding.landscapeLayout.setOnClickListener {
+            binding.portraitCheck.visibility = View.INVISIBLE
+            binding.landscapeCheck.visibility = View.VISIBLE
+            saveToPreference(key = ORIENTATION, value = LANDSCAPE.value)
+            startActivity(
+                Intent(
+                    this,
+                    MainActivity::class.java
+                ).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            )
+        }
+        binding.portraitLayout.setOnClickListener {
+            binding.portraitCheck.visibility = View.VISIBLE
+            binding.landscapeCheck.visibility = View.INVISIBLE
+            saveToPreference(key = ORIENTATION, value = PORTRAIT.value)
+            startActivity(
+                Intent(
+                    this,
+                    MainActivity::class.java
+                ).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            )
+        }
 
         // Go Back
         binding.backspace.setOnClickListener {
             onBackPressed()
             this.finish()
         }
+
+        // Configuration Profile
+        binding.btnScanConfigQr.setOnClickListener {
+            val intent = Intent(this, SmartScannerActivity::class.java)
+            intent.putExtra(
+                SmartScannerActivity.SCANNER_OPTIONS,
+                ScannerOptions(
+                    mode = Modes.QRCODE_CONFIG.value,
+                    language = preference?.getString(Language.NAME, Language.EN),
+                    scannerSize = ScannerSize.LARGE.value,
+                    config = Config(
+                        branding = true,
+                    )
+                )
+            )
+            startActivityForResult(intent, OP_SCANNER)
+        }
+        binding.btnConfigReset.setOnClickListener {
+            // Reset and remove config profile name and public key
+            preference?.edit()?.remove(CONFIG_PUB_KEY)?.apply()
+            preference?.edit()?.remove(CONFIG_PROFILE_NAME)?.apply()
+        }
     }
 
-    private fun saveLanguage(editor: SharedPreferences.Editor, language : String) {
+    private fun saveLanguage(editor: SharedPreferences.Editor?, language: String) {
         // Set new language
-        saveToPreference(editor, Language.NAME, language)
+        saveToPreference(Language.NAME, language)
         LanguageUtils.changeLanguage(this, language)
     }
 
-    private fun saveToPreference( editor: SharedPreferences.Editor, key: String, value : String) {
-        // Remove previous set language
-        editor.remove(key).apply()
-        editor.putString(key, value)
-        editor.apply()
+    private fun saveToPreference(key: String, value: String?) {
+        // Remove previous set
+        val editor = preference?.edit()
+        editor?.remove(key)?.apply()
+        editor?.putString(key, value)
+        editor?.apply()
+    }
+
+    @SuppressLint("LogNotTimber")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        super.onActivityResult(requestCode, resultCode, intent)
+        Log.d(SmartScannerActivity.TAG, "Settings Config requestCode $requestCode")
+        if (requestCode == OP_SCANNER) {
+            Log.d(SmartScannerActivity.TAG, "Settings Config resultCode $resultCode")
+            if (resultCode == RESULT_OK) {
+                val resultFromIntent = intent?.getStringExtra(SmartScannerActivity.SCANNER_RESULT)
+                val result = JsonParser.parseString(resultFromIntent).asJsonObject
+                // Save config profile name and public key
+                saveToPreference(
+                    CONFIG_PROFILE_NAME,
+                    if (result["conf"] != null) result["conf"].asString else null
+                )
+                saveToPreference(
+                    CONFIG_PUB_KEY,
+                    if (result["pub"] != null) result["pub"].asString else null
+                )
+            }
+        }
     }
 }

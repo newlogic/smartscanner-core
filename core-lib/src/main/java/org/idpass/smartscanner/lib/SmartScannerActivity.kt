@@ -213,10 +213,21 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 barcodeScannerView?.visibility = GONE
             }
             if (mode == Modes.QRCODE.value) {
+                val qrCodeOptions = scannerOptions?.qrCodeOptions
                 analyzer = QRCodeAnalyzer(
                     activity = this,
                     intent = intent,
                     imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
+                    isGzipped = qrCodeOptions?.isGzipped ?: false,
+                    isJson = qrCodeOptions?.isJson ?: false,
+                    jsonPath = qrCodeOptions?.jsonPath
+                )
+            }
+            if (mode == Modes.QRCODE_CONFIG.value) {
+                analyzer = QRCodeAnalyzer(
+                    activity = this,
+                    intent = intent,
+                    mode = Modes.QRCODE_CONFIG.value
                 )
                 viewFinder.visibility = VISIBLE
                 barcodeScannerView?.visibility = GONE
