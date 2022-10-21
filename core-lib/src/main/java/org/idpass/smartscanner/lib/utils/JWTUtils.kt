@@ -26,7 +26,7 @@ import java.util.regex.Pattern
 
 object JWTUtils {
 
-    private const val configurationPublicKey = "-----BEGIN PUBLIC KEY-----\n" +
+    const val configurationPublicKey = "-----BEGIN PUBLIC KEY-----\n" +
             "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEEVs/o5+uQbTjL3chynL4wXgUg2R9\n" +
             "q9UU8I5mEovUf86QZ7kOBIjJwqnzD1omageEHWwHdBO6B+dFabmdT9POxg==\n" +
             "-----END PUBLIC KEY-----"
@@ -61,13 +61,10 @@ object JWTUtils {
         return keyPairGenerator.generatePublic(keySpecPublic) as ECPublicKey
     }
 
-    fun lookupVerificationKey(keyId : String?, publicKeyScanned: String) : Key {
-        return if (keyId == "CONF") {
-            // TODO load from settings
-            generatePublicKey(configurationPublicKey.removeEncapsulationBoundaries())
-        } else {
-            generatePublicKey(publicKeyScanned.removeEncapsulationBoundaries())
-        }
+    fun lookupVerificationKey(keyId: String?, publicKey: String): Key {
+        // TODO remove usage of hardcoded keys?
+        val key: String = if (keyId == "CONF") publicKey else configurationPublicKey
+        return JWTUtils.generatePublicKey(key.removeEncapsulationBoundaries())
     }
 
     /**
