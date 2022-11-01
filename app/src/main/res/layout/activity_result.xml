@@ -9,11 +9,9 @@
     <LinearLayout
         android:id="@+id/linear_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_height="match_parent"
+        android:paddingTop="12dp"
+        android:orientation="vertical">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
@@ -40,134 +38,115 @@
             </FrameLayout>
         </androidx.appcompat.widget.Toolbar>
 
-        <TextView
-            android:id="@+id/text_result"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            android:fontFamily="@font/sourcesanspro_regular"
-            android:text="@string/label_hex"
-            android:textColor="@color/newlogic_black"
-            android:textSize="16sp"
-            android:visibility="gone"
-            tools:ignore="MissingConstraints"
-            tools:text="54 65 73 74 20 51 52 20  Test QR\n43 6F 64 65              Code" />
-
-        <TextView
-            android:id="@+id/image_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="4dp"
-            android:fontFamily="@font/sourcesanspro_regular"
-            android:gravity="start"
-            android:text="@string/label_result_image"
-            android:textColor="@color/newlogic_black"
-            android:textSize="16sp"
-            android:visibility="gone" />
-
-        <com.jsibbold.zoomage.ZoomageView
-            android:id="@+id/image_result"
-            android:layout_width="match_parent"
-            android:layout_height="280dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            android:adjustViewBounds="true"
-            android:contentDescription="@string/label_content_description"
-            android:visibility="gone"
-            tools:srcCompat="@tools:sample/avatars" />
-
-        <TextView
-            android:id="@+id/text_raw_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="14dp"
-            android:fontFamily="@font/sourcesanspro_regular"
-            android:text="@string/label_result_raw"
-            android:textColor="@color/newlogic_black"
-            android:textSize="15sp"
-            android:visibility="gone" />
-
-
         <LinearLayout
-            android:id="@+id/layout_result_list"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="16dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginBottom="10dp"
             android:orientation="vertical"
-            android:visibility="gone">
+            android:padding="16dp">
 
             <TextView
-                android:id="@+id/text_result_error"
+                android:id="@+id/image_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
+                android:layout_gravity="start"
                 android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:drawablePadding="16dp"
+                android:layout_marginTop="4dp"
                 android:fontFamily="@font/sourcesanspro_regular"
-                android:gravity="center"
-                android:textSize="16sp"
-                android:visibility="gone"
-                tools:text="Error: Signature verification failed. Please
-ensure a configuration profile was loaded" />
-
-            <TextView
-                android:id="@+id/text_signature_verified"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:drawablePadding="16dp"
-                android:fontFamily="@font/sourcesanspro_regular"
-                android:gravity="center"
-                android:text="@string/label_signature_verified"
+                android:gravity="start"
+                android:text="@string/label_result_image"
                 android:textColor="@color/newlogic_black"
                 android:textSize="16sp"
-                app:drawableEndCompat="@drawable/ic_checkbox_marked_circle" />
+                android:visibility="gone" />
 
-            <TextView
-                android:id="@+id/text_result_sample"
+            <com.jsibbold.zoomage.ZoomageView
+                android:id="@+id/image_result"
+                android:layout_width="match_parent"
+                android:layout_height="280dp"
+                android:adjustViewBounds="true"
+                android:contentDescription="@string/label_content_description"
+                android:visibility="gone"
+                tools:srcCompat="@tools:sample/avatars" />
+
+<!--            <TextView-->
+<!--                android:id="@+id/text_raw_label"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_gravity="start"-->
+<!--                android:fontFamily="@font/sourcesanspro_regular"-->
+<!--                android:text="@string/label_result_raw"-->
+<!--                android:textColor="@color/newlogic_black"-->
+<!--                android:textSize="15sp"-->
+<!--                android:visibility="gone" />-->
+
+<!--            <EditText-->
+<!--                android:id="@+id/edit_text_raw"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginStart="16dp"-->
+<!--                android:layout_marginEnd="16dp"-->
+<!--                android:editable="false"-->
+<!--                android:ems="10"-->
+<!--                android:focusable="false"-->
+<!--                android:fontFamily="@font/sourcesanspro_regular"-->
+<!--                android:gravity="start"-->
+<!--                android:inputType="textMultiLine"-->
+<!--                android:textIsSelectable="true"-->
+<!--                android:textSize="13sp"-->
+<!--                android:visibility="gone"-->
+<!--                tools:ignore="Autofill,LabelFor" />-->
+
+
+            <LinearLayout
+                android:id="@+id/lv_signature_verified"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="32dp"
-                android:layout_marginEnd="32dp"
-                android:layout_marginTop="24dp"
-                android:fontFamily="@font/sourcesanspro_medium"
-                android:textSize="18sp"
-                tools:text="key: value"/>
+                android:orientation="horizontal"
+                android:gravity="center_horizontal"
+                android:visibility="gone">
+                <TextView
+                    android:id="@+id/tv_signature_verified"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="18sp"
+                    android:text="@string/label_signature_verified"
+                    app:drawableRightCompat="@drawable/ic_circle_check_fill"
+                    android:drawablePadding="10dp"/>
+            </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_results"
+                android:id="@+id/rv_result_list"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                tools:listitem="@layout/recycler_result_item"
+                tools:ignore="NestedWeights" />
+
+            <TextView
+                android:id="@+id/text_result"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:fontFamily="@font/sourcesanspro_regular"
+                android:text="@string/label_hex"
+                android:textColor="@color/newlogic_black"
+                android:textSize="16sp"
                 android:visibility="gone"
-                tools:listitem="@layout/row_result" />
-
+                tools:ignore="MissingConstraints"
+                tools:text="54 65 73 74 20 51 52 20  Test QR\n43 6F 64 65              Code" />
         </LinearLayout>
 
-        <EditText
-            android:id="@+id/edit_text_raw"
+        <Button
+            android:id="@+id/btn_view_raw_result"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:editable="false"
-            android:ems="10"
-            android:focusable="false"
-            android:fontFamily="@font/sourcesanspro_regular"
-            android:gravity="start"
-            android:inputType="textMultiLine"
-            android:textIsSelectable="true"
-            android:textSize="13sp"
-            android:visibility="gone"
-            tools:ignore="Autofill,LabelFor" />
+            android:padding="12dp"
+            android:layout_margin="16dp"
+            android:text="View Raw Result" />
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

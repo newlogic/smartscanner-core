@@ -75,7 +75,8 @@ class SettingsActivity : AppCompatActivity() {
             binding.landscapeCheck.visibility = View.VISIBLE
         }
         // Configuration Profile
-        if (preference?.getString(CONFIG_PROFILE_NAME, null) == null ||
+        if (
+            preference?.getString(CONFIG_PROFILE_NAME, null) == null ||
             preference?.getString(CONFIG_PUB_KEY, null) == null
         ) {
             binding.layoutConfigEmpty.visibility = View.VISIBLE
@@ -83,6 +84,8 @@ class SettingsActivity : AppCompatActivity() {
         } else {
             binding.layoutConfigEmpty.visibility = View.GONE
             binding.layoutConfigLoaded.visibility = View.VISIBLE
+            binding.tvConfigName.text = preference?.getString(CONFIG_PROFILE_NAME, "")
+            binding.tvConfigPubKey.text = preference?.getString(CONFIG_PUB_KEY, "")
         }
         // Display version
         val version = BuildConfig.VERSION_NAME
@@ -150,25 +153,30 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         // Configuration Profile
-        binding.btnScanConfigQr.setOnClickListener {
-            val intent = Intent(this, SmartScannerActivity::class.java)
-            intent.putExtra(
-                SmartScannerActivity.SCANNER_OPTIONS,
-                ScannerOptions(
-                    mode = Modes.QRCODE_CONFIG.value,
-                    language = preference?.getString(Language.NAME, Language.EN),
-                    scannerSize = ScannerSize.LARGE.value,
-                    config = Config(
-                        branding = true,
-                    )
-                )
-            )
-            startActivityForResult(intent, OP_SCANNER)
-        }
+//        binding.btnScanConfigQr.setOnClickListener {
+//            val intent = Intent(this, SmartScannerActivity::class.java)
+//            intent.putExtra(
+//                SmartScannerActivity.SCANNER_OPTIONS,
+//                ScannerOptions(
+//                    mode = Modes.QRCODE_CONFIG.value,
+//                    language = preference?.getString(Language.NAME, Language.EN),
+//                    scannerSize = ScannerSize.LARGE.value,
+//                    config = Config(
+//                        branding = true,
+//                    )
+//                )
+//            )
+//            startActivityForResult(intent, OP_SCANNER)
+//        }
         binding.btnConfigReset.setOnClickListener {
             // Reset and remove config profile name and public key
             preference?.edit()?.remove(CONFIG_PUB_KEY)?.apply()
             preference?.edit()?.remove(CONFIG_PROFILE_NAME)?.apply()
+            binding.tvConfigName.text = ""
+            binding.tvConfigPubKey.text = ""
+
+            binding.layoutConfigEmpty.visibility = View.VISIBLE
+            binding.layoutConfigLoaded.visibility = View.GONE
         }
     }
 

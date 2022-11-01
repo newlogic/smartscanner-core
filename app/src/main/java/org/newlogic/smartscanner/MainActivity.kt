@@ -30,8 +30,10 @@ import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.api.ScannerIntent
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_IMAGE_TYPE
+import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RAW_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT_BYTES
+import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_SIGNATURE_VERIFICATION
 import org.idpass.smartscanner.lib.nfc.NFCActivity
 import org.idpass.smartscanner.lib.scanner.config.*
 import org.idpass.smartscanner.lib.scanner.config.Config.Companion.OP_SCANNER
@@ -203,18 +205,18 @@ class MainActivity : AppCompatActivity() {
             Log.d(SmartScannerActivity.TAG, "Scanner resultCode $resultCode")
             if (resultCode == RESULT_OK) {
                 val bundle = intent?.getBundleExtra(ScannerConstants.RESULT)
+                val mIntent: Intent;
+
                 if (bundle != null) {
                     // Get Result from Bundle Intent Call Out
                     if (bundle.getString(ScannerConstants.MODE) == Modes.IDPASS_LITE.value) {
                         // Go to ID PASS Lite Results Screen via bundle
-                        val myIntent = Intent(this, IDPassResultActivity::class.java)
-                        myIntent.putExtra(IDPassResultActivity.BUNDLE_RESULT, bundle)
-                        startActivity(myIntent)
+                        mIntent = Intent(this, IDPassResultActivity::class.java)
+                        mIntent.putExtra(IDPassResultActivity.BUNDLE_RESULT, bundle)
                     } else {
                         // Go to Results Screen via bundle
-                        val resultIntent = Intent(this, ResultActivity::class.java)
-                        resultIntent.putExtra(ResultActivity.BUNDLE_RESULT, bundle)
-                        startActivity(resultIntent)
+                        mIntent = Intent(this, ResultActivity::class.java)
+                        mIntent.putExtra(ResultActivity.BUNDLE_RESULT, bundle)
                     }
                 } else {
                     // Get Result from Intent extras
@@ -222,19 +224,24 @@ class MainActivity : AppCompatActivity() {
                     if (mode == Modes.IDPASS_LITE.value) {
                         // Go to ID PASS Lite Results Screen
                         val resultBytes = intent.getByteArrayExtra(SCANNER_RESULT_BYTES)
-                        val myIntent = Intent(this, IDPassResultActivity::class.java)
-                        myIntent.putExtra(IDPassResultActivity.RESULT, resultBytes)
-                        startActivity(myIntent)
+                        mIntent = Intent(this, IDPassResultActivity::class.java)
+                        mIntent.putExtra(IDPassResultActivity.RESULT, resultBytes)
                     } else {
                         // Go to Results Screen
                         val result = intent?.getStringExtra(SCANNER_RESULT)
-                        val resultIntent = Intent(this, ResultActivity::class.java)
-                        resultIntent.putExtra(ResultActivity.IMAGE_TYPE, intent?.getStringExtra(SCANNER_IMAGE_TYPE))
-                        resultIntent.putExtra(ScannerConstants.MODE, mode)
-                        resultIntent.putExtra(ResultActivity.RESULT, result)
-                        startActivity(resultIntent)
+                        val verified = intent?.getBooleanExtra(SCANNER_SIGNATURE_VERIFICATION, false)
+                        val rawResult = intent?.getStringExtra(SCANNER_RAW_RESULT)
+                        mIntent = Intent(this, ResultActivity::class.java)
+                        mIntent.putExtra(ResultActivity.SIGNATURE_VERIFIED, verified)
+                        mIntent.putExtra(ResultActivity.IMAGE_TYPE, intent?.getStringExtra(SCANNER_IMAGE_TYPE))
+                        mIntent.putExtra(ResultActivity.RESULT, result)
+                        mIntent.putExtra(ResultActivity.RAW_RESULT, rawResult)
                     }
                 }
+
+
+                mIntent.putExtra(ScannerConstants.MODE, intent?.getStringExtra(ScannerConstants.MODE))
+                startActivity(mIntent)
             }
         }
     }

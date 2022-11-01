@@ -17,7 +17,9 @@
  */
 package org.newlogic.smartscanner.result
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.BitmapFactory
 import android.graphics.Paint
 import android.os.Bundle
@@ -27,29 +29,43 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonParser
 import org.idpass.smartscanner.api.ScannerConstants
+import org.idpass.smartscanner.lib.scanner.config.Config
 import org.idpass.smartscanner.lib.scanner.config.ImageResultType
 import org.idpass.smartscanner.lib.scanner.config.Modes
+import org.idpass.smartscanner.lib.utils.JWTUtils.removeEncapsulationBoundaries
 import org.idpass.smartscanner.lib.utils.extension.decodeBase64
 import org.idpass.smartscanner.lib.utils.extension.isJSONValid
+import org.json.JSONException
+import org.json.JSONObject
 import org.newlogic.smartscanner.R
+import org.newlogic.smartscanner.adapters.RecyclerResultAdapter
 import org.newlogic.smartscanner.databinding.ActivityResultBinding
 
 
 class ResultActivity : AppCompatActivity() {
 
     companion object {
+        const val RAW_RESULT = "SCAN_RAW_RESULT"
         const val RESULT = "SCAN_RESULT"
         const val BUNDLE_RESULT = "SCAN_BUNDLE_RESULT"
         const val IMAGE_TYPE = "SCAN_IMAGE_TYPE"
+        const val SIGNATURE_VERIFIED = "SCAN_SIGNATURE_VERIFIED"
     }
 
     private lateinit var binding : ActivityResultBinding
     private var result : String? = null
+    private var rawResult : String? = null
     private var imageType : String? = null
+    private var resultList = mutableMapOf<String, String>();
+    private var verifiedSignature: Boolean = false
+
+    private var preference: SharedPreferences? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,8 +78,24 @@ class ResultActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
         supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_close)
+
+        rawResult = intent.getStringExtra(RAW_RESULT)
         result = intent.getStringExtra(RESULT)
         imageType = intent.getStringExtra(IMAGE_TYPE)
+        verifiedSignature = intent.getBooleanExtra(SIGNATURE_VERIFIED, false)
+
+        binding.rvResultList.layoutManager = LinearLayoutManager(this)
+        binding.rvResultList.adapter = RecyclerResultAdapter(resultList as HashMap<String, String>)
+
+        val dividerItemDecoration = DividerItemDecoration(
+            this,
+            LinearLayoutManager(this).orientation
+        )
+        binding.rvResultList.addItemDecoration(dividerItemDecoration)
+        binding.btnViewRawResult.setOnClickListener { showRawResult() }
+
+        // settings config
+        preference = getSharedPreferences(Config.SHARED, Context.MODE_PRIVATE)
     }
 
     override fun onStart() {
@@ -98,8 +130,11 @@ class ResultActivity : AppCompatActivity() {
                     Modes.MRZ.value -> bundleResult.getString(ScannerConstants.MRZ_RAW)
                     else -> null
                 }
-                // Raw Data Result
-                displayRaw(result)
+
+                // TODO this should not show raw result, for this one it only needs the result directly
+                // we have to end this
+                finish()
+                showRawResult()
             } else {
                 binding.textResult.text = getString(R.string.label_result_none)
             }
@@ -109,12 +144,15 @@ class ResultActivity : AppCompatActivity() {
 
     private fun displayResult(result: String? = null, imageType: String?) {
         if (result?.isJSONValid() == true) {
-            val dump: StringBuilder = getResult(result)
+            val predefinedResult: StringBuilder = getResult(result)
             // Text Data Result
-            if (dump.isNotEmpty()) {
+            if (predefinedResult.isNotEmpty()) {
                 binding.textResult.visibility = VISIBLE
-                binding.textResult.text = dump.toString()
+                binding.textResult.text = predefinedResult.toString()
+            } else {
+                showListResult(result)
             }
+
             // image object from result
             val imageJson = JsonParser.parseString(result).asJsonObject["image"]
             if (imageJson != null) {
@@ -134,20 +172,13 @@ class ResultActivity : AppCompatActivity() {
                 }
             }
         }
-        // Raw Data Result
-        displayRaw(result)
     }
 
-    private fun displayRaw(result : String?) {
-        if (result?.isNotEmpty() != null) {
-            binding.editTextRaw.setText(result)
-            binding.textRawLabel.paintFlags = binding.textRawLabel.paintFlags or Paint.UNDERLINE_TEXT_FLAG
-            binding.textRawLabel.visibility = VISIBLE
-            binding.editTextRaw.visibility = VISIBLE
-        } else {
-            binding.textRawLabel.visibility = GONE
-            binding.editTextRaw.visibility = GONE
-        }
+
+    private fun showRawResult() {
+        val intent = Intent(this, RawResultActivity::class.java)
+        intent.putExtra(RESULT, rawResult)
+        startActivity(intent)
     }
 
     private fun getShareResult(result: String? = null) : String {
@@ -190,6 +221,48 @@ class ResultActivity : AppCompatActivity() {
         if (dump.isNotEmpty()) dump.append("-------------------------")
         return dump
     }
+
+
+    private fun showListResult(result: String) {
+        val jsonResult = JSONObject(result.toString())
+        val iResult: Iterator<String> = jsonResult.keys()
+        while (iResult.hasNext()) {
+            val mKey: String = iResult.next()
+            try {
+                var value: String = jsonResult.get(mKey).toString()
+
+                var configKey: String? = null
+                when (mKey) {
+                    "conf" -> {
+                        configKey = Config.CONFIG_PROFILE_NAME
+                    }
+                    "pub" -> {
+                        configKey = Config.CONFIG_PUB_KEY
+                        value = value.removeEncapsulationBoundaries()
+                    }
+                }
+
+                if (configKey != null) {
+                    val editor = preference?.edit()
+                    editor?.remove(configKey)?.apply()
+                    editor?.putString(configKey, value)
+                    editor?.apply()
+                }
+
+
+                resultList[mKey] = value
+            } catch (e: JSONException) {
+                // TODO Something went wrong!
+            }
+        }
+
+        binding.rvResultList.adapter?.notifyItemInserted(jsonResult.length())
+
+        if (verifiedSignature) {
+            binding.lvSignatureVerified.visibility = VISIBLE
+        }
+    }
+
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.share_menu, menu)

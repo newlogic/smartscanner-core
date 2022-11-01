@@ -55,5 +55,6 @@
     <string name="label_config_reset">Reset Configuration Profile</string>
     <string name="label_config_reset_desc">This action resets the app back to default configuration.</string>
     <string name="label_signature_verified">Signature verified</string>
+    <!-- Strings used for fragments for navigation -->
 
 </resources>

@@ -17,8 +17,12 @@
  */
 package org.idpass.smartscanner.lib.utils
 
+import io.jsonwebtoken.Claims
+import io.jsonwebtoken.JwsHeader
+import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.SigningKeyResolverAdapter
 import org.apache.commons.codec.binary.Base64
-import java.nio.charset.Charset
+import org.json.JSONObject
 import java.security.*
 import java.security.interfaces.ECPublicKey
 import java.security.spec.X509EncodedKeySpec
@@ -61,26 +65,35 @@ object JWTUtils {
         return keyPairGenerator.generatePublic(keySpecPublic) as ECPublicKey
     }
 
-    fun lookupVerificationKey(keyId: String?, publicKey: String): Key {
-        // TODO remove usage of hardcoded keys?
-        val key: String = if (keyId == "CONF") publicKey else configurationPublicKey
-        return generatePublicKey(key.removeEncapsulationBoundaries())
+    fun lookupVerificationKey(keyId : String?, publicKeyScanned: String?) : Key {
+        return if (keyId == "CONF" || publicKeyScanned.isNullOrEmpty()) {
+            generatePublicKey(configurationPublicKey.removeEncapsulationBoundaries())
+        } else {
+            generatePublicKey(publicKeyScanned.removeEncapsulationBoundaries())
+        }
     }
 
     /**
-     * verify JWT via signature
-     *
+     * Get the value from rawValue with verifying signed key provided
+     * @param publicKey by default will use system config public key, but can add manually add to specify
+     * which public key to use
      */
-    // TODO fix verify signature algo, as it always returns false
-    @Throws(NoSuchAlgorithmException::class, InvalidKeyException::class, SignatureException::class)
-    fun verifySignature(jwt: String, key: String = configurationPublicKey): Boolean {
-        val splitJwt = jwt.split(".")
-        val headerStr = splitJwt[0]
-        val payloadStr = splitJwt[1]
-        val signatureStr = splitJwt[2]
-        val signature = Signature.getInstance("SHA256withECDSA")
-        signature.initVerify(generatePublicKey(key.removeEncapsulationBoundaries()))
-        signature.update("$headerStr.$payloadStr".toByteArray(Charset.forName("UTF-8")))
-        return signature.verify(Base64.decodeBase64(signatureStr))
+    fun getValueWithSignedKey(rawValue: String, publicKey: String?): String {
+        val parser = Jwts.parserBuilder()
+            .setSigningKeyResolver(object : SigningKeyResolverAdapter() {
+                override fun resolveSigningKey(
+                    header: JwsHeader<out JwsHeader<*>>?,
+                    claims: Claims?
+                ): Key {
+                    return lookupVerificationKey(header?.keyId, publicKey)
+                }
+            }).build()
+        val claims = parser.parseClaimsJws(rawValue)
+
+        // do the parsing here
+        val json = JSONObject()
+        claims.body.entries.iterator().forEach { (key, value) -> json.put(key, value) }
+        return json.toString()
     }
+
 }
