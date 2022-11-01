@@ -42,6 +42,11 @@
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="nosensor" />
         <activity
+            android:name=".result.RawResultActivity"
+            android:exported="true"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="nosensor" />
+        <activity
             android:name=".settings.SettingsActivity"
             android:exported="true"
             android:configChanges="orientation|keyboardHidden"
