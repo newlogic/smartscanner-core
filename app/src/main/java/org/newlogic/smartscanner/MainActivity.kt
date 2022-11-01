@@ -68,12 +68,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        // Choose scan type
+        // Choose scan modes
         binding.itemBarcode.item.setOnClickListener { scanBarcode(BarcodeOptions.default) }
         binding.itemIdpassLite.item.setOnClickListener { scanIDPassLite() }
         binding.itemMrz.item.setOnClickListener { scanMRZ() }
-        binding.itemQr.item.setOnClickListener { scanQRCode() }
         binding.itemNfc.item.setOnClickListener { scanNFC() }
+        binding.itemPdf417.item.setOnClickListener { scanPDF417() }
+        binding.itemQr.item.setOnClickListener { scanQRCode() }
         // Change language
         binding.languageSettings.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
@@ -149,6 +150,20 @@ class MainActivity : AppCompatActivity() {
             startActivityForResult(intent, OP_SCANNER)
         } else Snackbar.make(binding.main, R.string.required_nfc_not_supported, Snackbar.LENGTH_LONG).show()
 
+    }
+
+    private fun scanPDF417() {
+        val intent = Intent(this, SmartScannerActivity::class.java)
+        intent.putExtra(
+                SmartScannerActivity.SCANNER_OPTIONS,
+                ScannerOptions(
+                    mode = Modes.PDF_417.value,
+                    language = getLanguage(preference),
+                    scannerSize = ScannerSize.SMALL.value,
+                    config = sampleConfig(false)
+                )
+        )
+        startActivityForResult(intent, OP_SCANNER)
     }
 
     private fun scanQRCode()  {
