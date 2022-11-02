@@ -65,7 +65,8 @@ class ResultActivity : AppCompatActivity() {
     private var failResult : String? = null
     private var imageType : String? = null
     private var resultList = mutableMapOf<String, String>();
-    private var verifiedSignature: Boolean = false
+    private var isVerifiedSignature: Boolean = false
+    private var isConfigUpdated : Boolean = false
 
     private var preference: SharedPreferences? = null
 
@@ -85,7 +86,7 @@ class ResultActivity : AppCompatActivity() {
         failResult = intent.getStringExtra(FAIL_RESULT)
         result = intent.getStringExtra(RESULT)
         imageType = intent.getStringExtra(IMAGE_TYPE)
-        verifiedSignature = intent.getBooleanExtra(SIGNATURE_VERIFIED, false)
+        isVerifiedSignature = intent.getBooleanExtra(SIGNATURE_VERIFIED, false)
 
         binding.rvResultList.layoutManager = LinearLayoutManager(this)
         binding.rvResultList.adapter = RecyclerResultAdapter(resultList as HashMap<String, String>)
@@ -202,8 +203,8 @@ class ResultActivity : AppCompatActivity() {
 
 
 
-        binding.tvFailResult.text = failMessage
-        binding.tvFailResult.visibility = VISIBLE
+        binding.tvInformation.text = failMessage
+        binding.tvInformation.visibility = VISIBLE
         binding.btnViewRawResult.visibility = GONE
     }
 
@@ -252,6 +253,9 @@ class ResultActivity : AppCompatActivity() {
     private fun showListResult(result: String) {
         val jsonResult = JSONObject(result.toString())
         val iResult: Iterator<String> = jsonResult.keys()
+
+        isConfigUpdated = false
+
         while (iResult.hasNext()) {
             val mKey: String = iResult.next()
             try {
@@ -268,11 +272,13 @@ class ResultActivity : AppCompatActivity() {
                     }
                 }
 
-                if (configKey != null) {
+                if (configKey != null && value.isNotEmpty()) {
                     val editor = preference?.edit()
                     editor?.remove(configKey)?.apply()
                     editor?.putString(configKey, value)
                     editor?.apply()
+
+                    isConfigUpdated = true
                 }
 
 
@@ -284,8 +290,16 @@ class ResultActivity : AppCompatActivity() {
 
         binding.rvResultList.adapter?.notifyItemInserted(jsonResult.length())
 
-        if (verifiedSignature) {
+        if (isVerifiedSignature) {
             binding.tvSignatureVerified.visibility = VISIBLE
+        }
+
+        if (isConfigUpdated) {
+            binding.tvInformation.text = getString(R.string.label_success_config_set)
+            binding.tvInformation.visibility = VISIBLE
+        } else {
+            binding.tvInformation.text = ""
+            binding.tvInformation.visibility = GONE
         }
     }
 
