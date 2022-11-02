@@ -131,40 +131,46 @@ class QRCodeAnalyzer(
                     rawValue
                 }
             }
-        }
 
-        if (isJson == true) {
-            if (result != null) {
-                jsonPath?.let { path ->
-                    val ctx = JsonPath.parse(result)
-                    intent.putExtra(
-                        ScannerConstants.QRCODE_JSON_VALUE,
-                        ctx.read<Any>(path).toString()
-                    )
-                }
-                val flattenMap = JSONUtils.flattenJson(result)
-                for ((k, v) in flattenMap) {
-                    intent.putExtra(k, v)
+            if (isJson == true) {
+                if (result != null) {
+                    jsonPath?.let { path ->
+                        val ctx = JsonPath.parse(result)
+                        intent.putExtra(
+                            ScannerConstants.QRCODE_JSON_VALUE,
+                            ctx.read<Any>(path).toString()
+                        )
+                    }
+                    val flattenMap = flattenJson(result)
+                    for ((k, v) in flattenMap) {
+                        intent.putExtra(k, v)
+                    }
                 }
                 result = flattenMap.toString()
             }
+
+            if (result != null && rawValue?.isJWT() == true) {
+                intent.putExtra(SmartScannerActivity.SCANNER_SIGNATURE_VERIFICATION, true)
+            }
+
+            Log.d(SmartScannerActivity.TAG, "raw " + rawValue.toString())
+            Log.d(SmartScannerActivity.TAG, "Success from QRCODE")
+            Log.d(SmartScannerActivity.TAG, "value: $result")
+            intent.putExtra(ScannerConstants.MODE, mode)
+            intent.putExtra(SmartScannerActivity.SCANNER_IMAGE_TYPE, imageResultType)
+            intent.putExtra(SmartScannerActivity.SCANNER_RESULT, result)
+            intent.putExtra(SmartScannerActivity.SCANNER_RAW_RESULT, rawValue)
+
+
+            activity.setResult(Activity.RESULT_OK, intent)
+            activity.finish()
+        } catch (ex : Exception) {
+            Log.d(SmartScannerActivity.TAG, "Exception: ${ex.localizedMessage}")
+
+            intent.putExtra(SmartScannerActivity.SCANNER_FAIL_RESULT, ex.localizedMessage)
+            activity.setResult(Activity.RESULT_OK, intent)
+            activity.finish()
         }
-
-        if (result != null && rawValue?.isJWT() == true) {
-            intent.putExtra(SmartScannerActivity.SCANNER_SIGNATURE_VERIFICATION, true)
-        }
-
-        Log.d(SmartScannerActivity.TAG, "raw " + rawValue.toString())
-        Log.d(SmartScannerActivity.TAG, "Success from QRCODE")
-        Log.d(SmartScannerActivity.TAG, "value: $result")
-        intent.putExtra(ScannerConstants.MODE, mode)
-        intent.putExtra(SmartScannerActivity.SCANNER_IMAGE_TYPE, imageResultType)
-        intent.putExtra(SmartScannerActivity.SCANNER_RESULT, result)
-        intent.putExtra(SmartScannerActivity.SCANNER_RAW_RESULT, rawValue)
-
-
-        activity.setResult(Activity.RESULT_OK, intent)
-        activity.finish()
     }
 
     private fun sendBundleResult(rawValue: String?, rawBytes: ByteArray?) {

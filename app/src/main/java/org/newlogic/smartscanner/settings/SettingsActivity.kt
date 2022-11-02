@@ -152,22 +152,6 @@ class SettingsActivity : AppCompatActivity() {
             this.finish()
         }
 
-        // Configuration Profile
-//        binding.btnScanConfigQr.setOnClickListener {
-//            val intent = Intent(this, SmartScannerActivity::class.java)
-//            intent.putExtra(
-//                SmartScannerActivity.SCANNER_OPTIONS,
-//                ScannerOptions(
-//                    mode = Modes.QRCODE_CONFIG.value,
-//                    language = preference?.getString(Language.NAME, Language.EN),
-//                    scannerSize = ScannerSize.LARGE.value,
-//                    config = Config(
-//                        branding = true,
-//                    )
-//                )
-//            )
-//            startActivityForResult(intent, OP_SCANNER)
-//        }
         binding.btnConfigReset.setOnClickListener {
             // Reset and remove config profile name and public key
             preference?.edit()?.remove(CONFIG_PUB_KEY)?.apply()
