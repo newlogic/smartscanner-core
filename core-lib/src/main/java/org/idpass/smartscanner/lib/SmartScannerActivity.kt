@@ -89,6 +89,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         const val SCANNER_OPTIONS = "scanner_options"
         const val SCANNER_RAW_RESULT = "scanner_raw_result"
         const val SCANNER_RESULT = "scanner_result"
+        const val SCANNER_FAIL_RESULT = "scanner_fail_result"
         const val SCANNER_RESULT_BYTES = "scanner_result_bytes"
         const val SCANNER_IMAGE_TYPE = "scanner_image_type"
         const val SCANNER_SIGNATURE_VERIFICATION = "scanner_signature_verification"

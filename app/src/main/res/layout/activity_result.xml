@@ -69,42 +69,19 @@
                 android:visibility="gone"
                 tools:srcCompat="@tools:sample/avatars" />
 
-<!--            <TextView-->
-<!--                android:id="@+id/text_raw_label"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_gravity="start"-->
-<!--                android:fontFamily="@font/sourcesanspro_regular"-->
-<!--                android:text="@string/label_result_raw"-->
-<!--                android:textColor="@color/newlogic_black"-->
-<!--                android:textSize="15sp"-->
-<!--                android:visibility="gone" />-->
-
-<!--            <EditText-->
-<!--                android:id="@+id/edit_text_raw"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_marginStart="16dp"-->
-<!--                android:layout_marginEnd="16dp"-->
-<!--                android:editable="false"-->
-<!--                android:ems="10"-->
-<!--                android:focusable="false"-->
-<!--                android:fontFamily="@font/sourcesanspro_regular"-->
-<!--                android:gravity="start"-->
-<!--                android:inputType="textMultiLine"-->
-<!--                android:textIsSelectable="true"-->
-<!--                android:textSize="13sp"-->
-<!--                android:visibility="gone"-->
-<!--                tools:ignore="Autofill,LabelFor" />-->
-
-
             <LinearLayout
-                android:id="@+id/lv_signature_verified"
+                android:id="@+id/lv_information"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_horizontal"
-                android:visibility="gone">
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+                <TextView
+                    android:id="@+id/tv_fail_result"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="18sp"
+                    android:drawablePadding="10dp"
+                    android:visibility="gone"/>
                 <TextView
                     android:id="@+id/tv_signature_verified"
                     android:layout_width="wrap_content"
@@ -112,7 +89,8 @@
                     android:textSize="18sp"
                     android:text="@string/label_signature_verified"
                     app:drawableRightCompat="@drawable/ic_circle_check_fill"
-                    android:drawablePadding="10dp"/>
+                    android:drawablePadding="10dp"
+                    android:visibility="gone"/>
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
