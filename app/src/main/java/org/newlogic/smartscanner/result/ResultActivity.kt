@@ -46,12 +46,16 @@ import org.json.JSONObject
 import org.newlogic.smartscanner.R
 import org.newlogic.smartscanner.adapters.RecyclerResultAdapter
 import org.newlogic.smartscanner.databinding.ActivityResultBinding
+import org.newlogic.smartscanner.result.RawResultActivity.Companion.PAYLOAD
+import org.newlogic.smartscanner.settings.SettingsActivity
+import org.newlogic.smartscanner.settings.SettingsActivity.Companion.CONFIG_UPDATED
 
 
 class ResultActivity : AppCompatActivity() {
 
     companion object {
         const val RAW_RESULT = "SCAN_RAW_RESULT"
+        const val HEADER_RESULT = "SCAN_HEADER_RESULT"
         const val RESULT = "SCAN_RESULT"
         const val FAIL_RESULT = "SCAN_FAIL_RESULT"
         const val BUNDLE_RESULT = "SCAN_BUNDLE_RESULT"
@@ -62,6 +66,7 @@ class ResultActivity : AppCompatActivity() {
     private lateinit var binding : ActivityResultBinding
     private var result : String? = null
     private var rawResult : String? = null
+    private var headerResult : String? = null
     private var failResult : String? = null
     private var imageType : String? = null
     private var resultList = mutableMapOf<String, String>();
@@ -83,6 +88,7 @@ class ResultActivity : AppCompatActivity() {
         supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_close)
 
         rawResult = intent.getStringExtra(RAW_RESULT)
+        headerResult = intent.getStringExtra(HEADER_RESULT)
         failResult = intent.getStringExtra(FAIL_RESULT)
         result = intent.getStringExtra(RESULT)
         imageType = intent.getStringExtra(IMAGE_TYPE)
@@ -187,7 +193,9 @@ class ResultActivity : AppCompatActivity() {
 
     private fun showRawResult() {
         val intent = Intent(this, RawResultActivity::class.java)
+        intent.putExtra(HEADER_RESULT, headerResult)
         intent.putExtra(RESULT, rawResult)
+        intent.putExtra(PAYLOAD, result)
         startActivity(intent)
     }
 
@@ -288,18 +296,20 @@ class ResultActivity : AppCompatActivity() {
             }
         }
 
-        binding.rvResultList.adapter?.notifyItemInserted(jsonResult.length())
-
-        if (isVerifiedSignature) {
-            binding.tvSignatureVerified.visibility = VISIBLE
+        if (isConfigUpdated) {
+            // should go to settings
+            val intent = Intent(this, SettingsActivity::class.java)
+            intent.putExtra(CONFIG_UPDATED, true)
+            startActivity(intent)
+            finish()
+            return
         }
 
-        if (isConfigUpdated) {
-            binding.tvInformation.text = getString(R.string.label_success_config_set)
-            binding.tvInformation.visibility = VISIBLE
-        } else {
-            binding.tvInformation.text = ""
-            binding.tvInformation.visibility = GONE
+        binding.rvResultList.adapter?.notifyItemInserted(jsonResult.length())
+
+        binding.tvInformation.visibility = GONE
+        if (isVerifiedSignature) {
+            binding.tvSignatureVerified.visibility = VISIBLE
         }
     }
 

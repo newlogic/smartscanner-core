@@ -29,6 +29,8 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import com.jayway.jsonpath.JsonPath
+import io.jsonwebtoken.Claims
+import io.jsonwebtoken.Jws
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.scanner.BaseImageAnalyzer
@@ -39,6 +41,8 @@ import org.idpass.smartscanner.lib.utils.BitmapUtils
 import org.idpass.smartscanner.lib.utils.GzipUtils
 import org.idpass.smartscanner.lib.utils.JSONUtils
 import org.idpass.smartscanner.lib.utils.JWTUtils
+import org.idpass.smartscanner.lib.utils.JWTUtils.getJsonBody
+import org.idpass.smartscanner.lib.utils.JWTUtils.getJsonHeader
 import org.idpass.smartscanner.lib.utils.JWTUtils.isJWT
 import org.idpass.smartscanner.lib.utils.extension.setBrightness
 import org.idpass.smartscanner.lib.utils.extension.setContrast
@@ -112,23 +116,21 @@ class QRCodeAnalyzer(
     }
 
     private fun sendResult(rawValue: String?, rawBytes: ByteArray?) {
-        val intent = Intent()
-        var result: String? = when (isGzipped) {
-            true -> getGzippedData(rawBytes)
-            else -> {
-                Log.v("RJ", "QR rawValue : $rawValue")
-                Log.v("RJ", "QR isJWT() : ${rawValue?.isJWT()}")
-                if (rawValue?.isJWT() == true) {
-                    val preference = activity.getSharedPreferences(Config.SHARED, Context.MODE_PRIVATE)
-                    val configurationPublicKey = preference.getString(Config.CONFIG_PUB_KEY, null)
-                    if (configurationPublicKey == null) {
-                        // TODO send error here
-                        // use intent to pass error
+
+        try {
+            val intent = Intent()
+            val result: String? = when (isGzipped) {
+                true -> getGzippedData(rawBytes)
+                else -> {
+                    if (rawValue?.isJWT() == true) {
+                        val value = getValueJWT(rawValue)
+                        intent.putExtra(SmartScannerActivity.SCANNER_HEADER_RESULT, value.getJsonHeader().toString())
+                        value.getJsonBody().toString()
+                    } else {
+                        rawValue
                     }
                     //configurationPublicKey?.let { key -> getJWTValue(rawValue, key) }
                     getJWTValue(rawValue, JWTUtils.configurationPublicKey)
-                } else {
-                    rawValue
                 }
             }
 
@@ -179,14 +181,14 @@ class QRCodeAnalyzer(
         Log.d(SmartScannerActivity.TAG, "Success from QRCODE")
         val isOdk = intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_QRCODE_INTENT
         val isGzipped = if (isOdk) intent.getStringExtra(ScannerConstants.GZIPPED_ENABLED) == "1" else intent.getBooleanExtra(ScannerConstants.GZIPPED_ENABLED, false)
-        var isJson = if (isOdk) intent.getStringExtra(ScannerConstants.JSON_ENABLED) == "1" else intent.getBooleanExtra(ScannerConstants.JSON_ENABLED, false)
+        val isJson = if (isOdk) intent.getStringExtra(ScannerConstants.JSON_ENABLED) == "1" else intent.getBooleanExtra(ScannerConstants.JSON_ENABLED, false)
         val jsonPath = intent.getStringExtra(ScannerConstants.JSON_PATH)
         // check gzipped parameters for bundle return result
         var data: String? = when (isGzipped) {
             true -> getGzippedData(rawBytes)
             else -> {
                 if (rawValue?.isJWT() == true) {
-                    getValueJWT(rawValue)
+                    getValueJWT(rawValue).getJsonBody().toString()
                 } else {
                     rawValue
                 }

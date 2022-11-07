@@ -55,5 +55,8 @@
     <string name="label_config_reset_desc">يؤدي هذا الإجراء إلى إعادة تعيين التطبيق إلى التكوين الافتراضي.</string>
     <string name="label_signature_verified">تم التحقق من التوقيع</string>
     <string name="label_success_config_set">Successfully set public key into the configuration</string>
+    <string name="header">Header</string>
+    <string name="payload">Payload</string>
+    <string name="raw_result">Raw result</string>
 
 </resources>

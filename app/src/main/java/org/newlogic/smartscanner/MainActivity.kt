@@ -30,6 +30,7 @@ import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.api.ScannerIntent
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_FAIL_RESULT
+import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_HEADER_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_IMAGE_TYPE
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RAW_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT
@@ -233,12 +234,15 @@ class MainActivity : AppCompatActivity() {
                         val verified = intent?.getBooleanExtra(SCANNER_SIGNATURE_VERIFICATION, false)
                         val rawResult = intent?.getStringExtra(SCANNER_RAW_RESULT)
                         val failResult = intent?.getStringExtra(SCANNER_FAIL_RESULT)
+                        val headerResult = intent?.getStringExtra(SCANNER_HEADER_RESULT)
+
                         mIntent = Intent(this, ResultActivity::class.java)
                         mIntent.putExtra(ResultActivity.SIGNATURE_VERIFIED, verified)
                         mIntent.putExtra(ResultActivity.IMAGE_TYPE, intent?.getStringExtra(SCANNER_IMAGE_TYPE))
                         mIntent.putExtra(ResultActivity.RESULT, result)
                         mIntent.putExtra(ResultActivity.FAIL_RESULT, failResult)
                         mIntent.putExtra(ResultActivity.RAW_RESULT, rawResult)
+                        mIntent.putExtra(ResultActivity.HEADER_RESULT, headerResult)
                     }
                 }
 
