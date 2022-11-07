@@ -88,6 +88,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         val TAG: String = SmartScannerActivity::class.java.simpleName
         const val SCANNER_OPTIONS = "scanner_options"
         const val SCANNER_RAW_RESULT = "scanner_raw_result"
+        const val SCANNER_HEADER_RESULT = "scanner_header_result"
         const val SCANNER_RESULT = "scanner_result"
         const val SCANNER_FAIL_RESULT = "scanner_fail_result"
         const val SCANNER_RESULT_BYTES = "scanner_result_bytes"

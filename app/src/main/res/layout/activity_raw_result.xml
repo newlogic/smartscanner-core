@@ -46,12 +46,90 @@
             </FrameLayout>
         </androidx.appcompat.widget.Toolbar>
 
-        <TextView
-            android:id="@+id/txt_raw_value"
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:padding="16dp"
-            android:textSize="18sp"/>
+            android:orientation="vertical">
+
+
+            <!-- HEADER -->
+            <TextView
+                android:id="@+id/txt_header_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:text="@string/header"
+                android:textAllCaps="true"
+                android:textStyle="bold"
+                android:textSize="18sp"/>
+
+            <TextView
+                android:id="@+id/tv_header_value"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="18sp" />
+
+            <View
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="26dp"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/lighter_grey"/>
+
+
+            <!-- PAYLOAD -->
+            <TextView
+                android:id="@+id/txt_payload_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:text="@string/payload"
+                android:textAllCaps="true"
+                android:textStyle="bold"
+                android:textSize="18sp"/>
+
+            <TextView
+                android:id="@+id/tv_payload_value"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"/>
+
+            <View
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="26dp"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/lighter_grey"/>
+
+
+            <!-- RAW RESULT -->
+            <TextView
+                android:id="@+id/txt_raw_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:text="@string/raw_result"
+                android:textAllCaps="true"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:id="@+id/tv_raw_value"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"/>
+
+            <View
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="26dp"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/lighter_grey"/>
+
+        </LinearLayout>
 
 
     </LinearLayout>
