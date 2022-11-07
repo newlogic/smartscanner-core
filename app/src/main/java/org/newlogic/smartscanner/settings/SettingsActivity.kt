@@ -23,6 +23,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.scanner.config.*
@@ -38,19 +39,25 @@ import org.newlogic.smartscanner.BuildConfig
 import org.newlogic.smartscanner.MainActivity
 import org.newlogic.smartscanner.R
 import org.newlogic.smartscanner.databinding.ActivitySettingsBinding
-import java.io.StringReader
 
 
 class SettingsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySettingsBinding
     private var preference: SharedPreferences? = null
+    private var isConfigUpdated: Boolean = false
+
+    companion object {
+        const val CONFIG_UPDATED = "CONFIG_UPDATED"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySettingsBinding.inflate(layoutInflater)
-        val view = binding.root
-        setContentView(view)
+        setContentView(binding.root)
+
+        isConfigUpdated = intent.getBooleanExtra(CONFIG_UPDATED, false)
+
         preference = getSharedPreferences(Config.SHARED, Context.MODE_PRIVATE)
     }
 
@@ -91,6 +98,15 @@ class SettingsActivity : AppCompatActivity() {
         val version = BuildConfig.VERSION_NAME
         val versionLabel = if (BuildConfig.DEBUG) version else version.split("-").first()
         binding.versionText.text = getString(R.string.label_version, versionLabel)
+
+        // Display Toast message once a flag for config update's true
+        if (isConfigUpdated) {
+            Toast.makeText(
+                    this@SettingsActivity,
+                    "Configuration loaded successfully!",
+                    Toast.LENGTH_SHORT)
+                .show()
+        }
 
         // Setup click listeners
         setupViewListeners(preference)

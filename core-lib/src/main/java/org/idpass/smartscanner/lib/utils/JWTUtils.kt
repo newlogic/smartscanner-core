@@ -17,10 +17,7 @@
  */
 package org.idpass.smartscanner.lib.utils
 
-import io.jsonwebtoken.Claims
-import io.jsonwebtoken.JwsHeader
-import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SigningKeyResolverAdapter
+import io.jsonwebtoken.*
 import org.apache.commons.codec.binary.Base64
 import org.json.JSONObject
 import java.security.*
@@ -78,7 +75,7 @@ object JWTUtils {
      * @param publicKey by default will use system config public key, but can add manually add to specify
      * which public key to use
      */
-    fun getValueWithSignedKey(rawValue: String, publicKey: String?): String {
+    fun getWithSignedKey(rawValue: String, publicKey: String?): Jws<Claims> {
         val parser = Jwts.parserBuilder()
             .setSigningKeyResolver(object : SigningKeyResolverAdapter() {
                 override fun resolveSigningKey(
@@ -88,12 +85,24 @@ object JWTUtils {
                     return lookupVerificationKey(header?.keyId, publicKey)
                 }
             }).build()
-        val claims = parser.parseClaimsJws(rawValue)
+        return parser.parseClaimsJws(rawValue)
 
         // do the parsing here
+//        val json = JSONObject()
+//        claims.body.entries.iterator().forEach { (key, value) -> json.put(key, value) }
+//        return json.toString()
+    }
+
+    fun Jws<Claims>.getJsonBody(): JSONObject {
         val json = JSONObject()
-        claims.body.entries.iterator().forEach { (key, value) -> json.put(key, value) }
-        return json.toString()
+        this.body.entries.iterator().forEach { (key, value) -> json.put(key, value) }
+        return json
+    }
+
+    fun Jws<Claims>.getJsonHeader(): JSONObject {
+        val json = JSONObject()
+        this.header.entries.iterator().forEach { (key, value) -> json.put(key, value) }
+        return json
     }
 
 }

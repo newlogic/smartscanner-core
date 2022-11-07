@@ -19,22 +19,25 @@
 package org.newlogic.smartscanner.result
 
 import android.os.Bundle
-import android.os.PersistableBundle
-import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import com.google.gson.Gson
 import org.newlogic.smartscanner.R
 import org.newlogic.smartscanner.databinding.ActivityRawResultBinding
 
 class RawResultActivity : AppCompatActivity() {
 
     companion object {
+        const val HEADER = "SCAN_HEADER_RESULT"
         const val RESULT = "SCAN_RESULT"
+        const val PAYLOAD = "SCAN_PAYLOAD"
     }
 
     private lateinit var binding: ActivityRawResultBinding
 
+    private var resultHeader: String? = null
     private var resultRaw: String? = null
+    private var payload: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,15 +52,21 @@ class RawResultActivity : AppCompatActivity() {
 
         // TODO handle view here
 
+        resultHeader = intent.getStringExtra(HEADER)
         resultRaw = intent.getStringExtra(RESULT)
+        payload = intent.getStringExtra(PAYLOAD)
     }
 
     override fun onStart() {
         super.onStart()
 
         if (resultRaw != null) {
-            binding.txtRawValue.text = resultRaw
+            binding.tvRawValue.text = resultRaw
         }
+
+//        val gson = Gson()
+        binding.tvHeaderValue.text = formatString(resultHeader.toString())
+        binding.tvPayloadValue.text = formatString(payload.toString())
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -66,6 +75,44 @@ class RawResultActivity : AppCompatActivity() {
         }
 
         return super.onOptionsItemSelected(item)
+    }
+
+
+    private fun formatString(text: String): String {
+        val json = StringBuilder()
+        var indentString = ""
+        for (element in text) {
+            when (element) {
+                '{', '[' -> {
+                    json.append(
+                        """
+                        
+                        $indentString$element
+                        
+                        """.trimIndent()
+                    )
+                    indentString += "\t"
+                    json.append(indentString)
+                }
+                '}', ']' -> {
+                    indentString = indentString.replaceFirst("\t".toRegex(), "")
+                    json.append(
+                        """
+                        
+                        $indentString$element
+                        """.trimIndent()
+                    )
+                }
+                ',' -> json.append(
+                    """
+                    $element
+                    $indentString
+                    """.trimIndent()
+                )
+                else -> json.append(element)
+            }
+        }
+        return json.toString()
     }
 
 }
