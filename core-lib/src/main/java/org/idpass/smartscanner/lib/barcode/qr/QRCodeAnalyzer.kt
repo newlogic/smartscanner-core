@@ -43,6 +43,7 @@ import org.idpass.smartscanner.lib.utils.JSONUtils
 import org.idpass.smartscanner.lib.utils.JWTUtils
 import org.idpass.smartscanner.lib.utils.JWTUtils.getJsonBody
 import org.idpass.smartscanner.lib.utils.JWTUtils.getJsonHeader
+import org.idpass.smartscanner.lib.utils.JWTUtils.isDefaultConfigPublicKey
 import org.idpass.smartscanner.lib.utils.JWTUtils.isJWT
 import org.idpass.smartscanner.lib.utils.extension.setBrightness
 import org.idpass.smartscanner.lib.utils.extension.setContrast
