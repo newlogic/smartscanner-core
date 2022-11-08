@@ -52,6 +52,20 @@ object JWTUtils {
             .replace("-{5}[a-zA-Z]*-{5}".toRegex(), "")
     }
 
+    fun String.addEncapsulationBoundaries(): String {
+        val text = this.removeEncapsulationBoundaries()
+        val builder = StringBuilder()
+        builder.append("-----BEGIN PUBLIC KEY-----\n")
+            .append(text)
+            .append("\n-----END PUBLIC KEY-----")
+
+        return builder.toString()
+    }
+
+    fun String.isDefaultConfigPublicKey(): Boolean {
+        return (this.removeEncapsulationBoundaries()) == (configurationPublicKey.removeEncapsulationBoundaries())
+    }
+
     /**
      * Generate public key from ECDSASHA256 algo
      *
@@ -86,11 +100,6 @@ object JWTUtils {
                 }
             }).build()
         return parser.parseClaimsJws(rawValue)
-
-        // do the parsing here
-//        val json = JSONObject()
-//        claims.body.entries.iterator().forEach { (key, value) -> json.put(key, value) }
-//        return json.toString()
     }
 
     fun Jws<Claims>.getJsonBody(): JSONObject {
