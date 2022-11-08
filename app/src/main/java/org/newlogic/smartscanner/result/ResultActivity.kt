@@ -38,6 +38,7 @@ import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.scanner.config.Config
 import org.idpass.smartscanner.lib.scanner.config.ImageResultType
 import org.idpass.smartscanner.lib.scanner.config.Modes
+import org.idpass.smartscanner.lib.utils.JWTUtils.addEncapsulationBoundaries
 import org.idpass.smartscanner.lib.utils.JWTUtils.removeEncapsulationBoundaries
 import org.idpass.smartscanner.lib.utils.extension.decodeBase64
 import org.idpass.smartscanner.lib.utils.extension.isJSONValid
@@ -272,11 +273,14 @@ class ResultActivity : AppCompatActivity() {
                 var configKey: String? = null
                 when (mKey) {
                     "conf" -> {
+                        
                         configKey = Config.CONFIG_PROFILE_NAME
                     }
                     "pub" -> {
                         configKey = Config.CONFIG_PUB_KEY
-                        value = value.removeEncapsulationBoundaries()
+
+                        // clean encapsulation and add safeguards
+                        value = value.addEncapsulationBoundaries()
                     }
                 }
 
