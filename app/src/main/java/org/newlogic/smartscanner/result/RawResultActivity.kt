@@ -21,7 +21,8 @@ package org.newlogic.smartscanner.result
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import com.google.gson.Gson
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import org.newlogic.smartscanner.R
 import org.newlogic.smartscanner.databinding.ActivityRawResultBinding
 
@@ -50,11 +51,13 @@ class RawResultActivity : AppCompatActivity() {
         supportActionBar?.setHomeButtonEnabled(true)
         supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_close)
 
-        // TODO handle view here
-
         resultHeader = intent.getStringExtra(HEADER)
         resultRaw = intent.getStringExtra(RESULT)
         payload = intent.getStringExtra(PAYLOAD)
+
+        binding.layoutHeader.visibility = GONE
+        binding.layoutPayload.visibility = GONE
+        binding.layoutRaw.visibility = GONE
     }
 
     override fun onStart() {
@@ -62,11 +65,19 @@ class RawResultActivity : AppCompatActivity() {
 
         if (resultRaw != null) {
             binding.tvRawValue.text = resultRaw
+            binding.layoutRaw.visibility = VISIBLE
         }
 
-//        val gson = Gson()
-        binding.tvHeaderValue.text = formatString(resultHeader.toString())
-        binding.tvPayloadValue.text = formatString(payload.toString())
+        if (resultHeader != null) {
+            binding.tvHeaderValue.text = formatString(resultHeader)
+            binding.layoutHeader.visibility = VISIBLE
+        }
+
+        if (payload != null) {
+            binding.tvPayloadValue.text = formatString(payload)
+            binding.layoutPayload.visibility = VISIBLE
+        }
+
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -78,7 +89,13 @@ class RawResultActivity : AppCompatActivity() {
     }
 
 
-    private fun formatString(text: String): String {
+    private fun formatString(text: String?): String {
+
+        if (text == null) {
+            return ""
+        }
+
+
         val json = StringBuilder()
         var indentString = ""
         for (element in text) {

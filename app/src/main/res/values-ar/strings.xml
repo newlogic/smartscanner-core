@@ -58,5 +58,6 @@
     <string name="header">Header</string>
     <string name="payload">Payload</string>
     <string name="raw_result">Raw result</string>
+    <string name="view_raw_result">View Raw Result</string>
 
 </resources>

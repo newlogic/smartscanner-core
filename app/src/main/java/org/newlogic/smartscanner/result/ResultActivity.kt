@@ -119,6 +119,8 @@ class ResultActivity : AppCompatActivity() {
 
         if (result != null) {
             when (intent.getStringExtra(ScannerConstants.MODE)) {
+
+                // Display for MRZ here
                 Modes.MRZ.value -> {
                     displayResult(result = result, imageType = imageType)
                     // Check composite validity
@@ -131,10 +133,11 @@ class ResultActivity : AppCompatActivity() {
                         snackBar.show()
                     }
                 }
-                Modes.QRCODE.value -> {
-                    // TODO update Display for QR Code here
-                    displayResult(result = result, imageType = imageType)
-                }
+
+                // Display for QR Code here
+                Modes.QRCODE.value -> showListResult(result)
+
+                // Otherwise
                 else -> displayResult(result = result, imageType = imageType)
             }
         } else {
@@ -163,12 +166,9 @@ class ResultActivity : AppCompatActivity() {
         if (result?.isJSONValid() == true) {
             val predefinedResult: StringBuilder = getResult(result)
             // Text Data Result
-            if (predefinedResult.isNotEmpty()) {
-                binding.textResult.visibility = VISIBLE
-                binding.textResult.text = predefinedResult.toString()
-            } else {
-                showListResult(result)
-            }
+
+            binding.textResult.text = if (predefinedResult.isNotEmpty()) predefinedResult.toString() else result
+            binding.textResult.visibility = VISIBLE
 
             // image object from result
             val imageJson = JsonParser.parseString(result).asJsonObject["image"]
@@ -259,7 +259,12 @@ class ResultActivity : AppCompatActivity() {
     }
 
 
-    private fun showListResult(result: String) {
+    private fun showListResult(result: String?) {
+
+        if (result == null || !result.isJSONValid()) {
+            // TODO show error invalid json
+            return
+        }
         val jsonResult = JSONObject(result.toString())
         val iResult: Iterator<String> = jsonResult.keys()
 
@@ -273,7 +278,7 @@ class ResultActivity : AppCompatActivity() {
                 var configKey: String? = null
                 when (mKey) {
                     "conf" -> {
-                        
+
                         configKey = Config.CONFIG_PROFILE_NAME
                     }
                     "pub" -> {
@@ -309,6 +314,7 @@ class ResultActivity : AppCompatActivity() {
             return
         }
 
+        binding.rvResultList.visibility = VISIBLE
         binding.rvResultList.adapter?.notifyItemInserted(jsonResult.length())
 
         binding.tvInformation.visibility = GONE
