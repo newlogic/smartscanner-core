@@ -120,19 +120,14 @@ class QRCodeAnalyzer(
 
         try {
             val intent = Intent()
-            val result: String? = when (isGzipped) {
-                true -> getGzippedData(rawBytes)
-                else -> {
-                    if (rawValue?.isJWT() == true) {
-                        val value = getValueJWT(rawValue)
-                        intent.putExtra(SmartScannerActivity.SCANNER_HEADER_RESULT, value.getJsonHeader().toString())
-                        value.getJsonBody().toString()
-                    } else {
-                        rawValue
-                    }
-                    //configurationPublicKey?.let { key -> getJWTValue(rawValue, key) }
-                    getJWTValue(rawValue, JWTUtils.configurationPublicKey)
+            val result: String? = when (rawValue?.isJWT()) {
+                true -> {
+                    val value = getValueJWT(rawValue)
+                    intent.putExtra(SmartScannerActivity.SCANNER_HEADER_RESULT, value.getJsonHeader().toString())
+                    value.getJsonBody().toString()
                 }
+                else -> getGzippedData(rawBytes) ?: rawValue
+
             }
 
             if (isJson == true) {

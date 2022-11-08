@@ -51,8 +51,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
-                android:layout_marginStart="16dp"
                 android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
                 android:fontFamily="@font/sourcesanspro_regular"
                 android:gravity="start"
                 android:text="@string/label_result_image"
@@ -101,15 +101,14 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 tools:listitem="@layout/recycler_result_item"
-                tools:ignore="NestedWeights" />
+                tools:ignore="NestedWeights"
+                android:visibility="gone"/>
 
             <TextView
                 android:id="@+id/text_result"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
                 android:fontFamily="@font/sourcesanspro_regular"
                 android:text="@string/label_hex"
                 android:textColor="@color/newlogic_black"
@@ -125,7 +124,7 @@
             android:layout_height="wrap_content"
             android:padding="12dp"
             android:layout_margin="16dp"
-            android:text="View Raw Result" />
+            android:text="@string/view_raw_result" />
 
     </LinearLayout>
 

@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
         binding.itemIdpassLite.item.setOnClickListener { scanIDPassLite() }
         binding.itemMrz.item.setOnClickListener { scanMRZ() }
         binding.itemQr.item.setOnClickListener { scanQRCode() }
-        binding.itemQrGzip.item.setOnClickListener { scanQRCodeGzip() }
+//        binding.itemQrGzip.item.setOnClickListener { scanQRCodeGzip() }
         binding.itemNfc.item.setOnClickListener { scanNFC() }
         binding.itemPdf417.item.setOnClickListener { scanPDF417() }
         binding.itemQr.item.setOnClickListener { scanQRCode() }
@@ -181,7 +181,7 @@ class MainActivity : AppCompatActivity() {
         )
         startActivityForResult(intent, OP_SCANNER)
     }
-    
+
     private fun sampleConfig(isManualCapture: Boolean, label: String = "", orientation : String? = Orientation.PORTRAIT.value) = Config(
         branding = true,
         imageResultType = imageType,
