@@ -48,14 +48,22 @@ import org.newlogic.smartscanner.settings.SettingsActivity
 
 class MainActivity : AppCompatActivity() {
 
-
     companion object {
+
         const val OP_SCANNER = 1001
+        private val imageType = ImageResultType.PATH.value
+
+        private fun sampleConfig(isManualCapture: Boolean, label: String = "", orientation : String? = Orientation.PORTRAIT.value) = Config(
+            branding = true,
+            imageResultType = imageType,
+            label = label,
+            isManualCapture = isManualCapture,
+            orientation = orientation
+        )
     }
 
     private var preference : SharedPreferences? = null
     private lateinit var binding : ActivityMainBinding
-    private var imageType = ImageResultType.PATH.value
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -93,7 +101,7 @@ class MainActivity : AppCompatActivity() {
             SmartScannerActivity.SCANNER_OPTIONS,
             ScannerOptions(
                 mode = Modes.BARCODE.value,
-                language = preference?.getString(Language.NAME, Language.EN),
+                language = getLanguage(preference),
                 scannerSize = ScannerSize.SMALL.value,
                 config = sampleConfig(false),
                 barcodeOptions = barcodeOptions
@@ -108,7 +116,7 @@ class MainActivity : AppCompatActivity() {
             SmartScannerActivity.SCANNER_OPTIONS,
             ScannerOptions(
                 mode = Modes.IDPASS_LITE.value,
-                language = preference?.getString(Language.NAME, Language.EN),
+                language = getLanguage(preference),
                 scannerSize = ScannerSize.LARGE.value,
                 config = sampleConfig(false)
             )
@@ -122,8 +130,8 @@ class MainActivity : AppCompatActivity() {
             SmartScannerActivity.SCANNER_OPTIONS,
             ScannerOptions(
                 mode = Modes.MRZ.value,
-                language = preference?.getString(Language.NAME, Language.EN),
-                config = sampleConfig(isManualCapture = true, orientation = preference?.getString(ORIENTATION, Orientation.PORTRAIT.value)),
+                language = getLanguage(preference),
+                config = sampleConfig(isManualCapture = true, orientation = getOrientation(preference)),
             )
         )
         startActivityForResult(intent, OP_SCANNER)
@@ -137,7 +145,7 @@ class MainActivity : AppCompatActivity() {
                 SmartScannerActivity.SCANNER_OPTIONS,
                 ScannerOptions(
                     mode = Modes.NFC_SCAN.value,
-                    language = preference?.getString(Language.NAME, Language.EN),
+                    language = getLanguage(preference),
                     nfcOptions = NFCOptions.default,
                     sentryLogger = SentryLogger.default,
                     config = Config(
@@ -182,13 +190,8 @@ class MainActivity : AppCompatActivity() {
         startActivityForResult(intent, OP_SCANNER)
     }
 
-    private fun sampleConfig(isManualCapture: Boolean, label: String = "", orientation : String? = Orientation.PORTRAIT.value) = Config(
-        branding = true,
-        imageResultType = imageType,
-        label = label,
-        isManualCapture = isManualCapture,
-        orientation = orientation
-    )
+    private fun getOrientation(pref : SharedPreferences?) = pref?.getString(ORIENTATION, Orientation.PORTRAIT.value)
+    private fun getLanguage(pref : SharedPreferences?) = pref?.getString(Language.NAME, Language.EN)
 
     @SuppressLint("LogNotTimber")
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
