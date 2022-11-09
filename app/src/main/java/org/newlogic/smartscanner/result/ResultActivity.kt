@@ -261,10 +261,19 @@ class ResultActivity : AppCompatActivity() {
 
     private fun showListResult(result: String?) {
 
-        if (result == null || !result.isJSONValid()) {
-            // TODO show error invalid json
+        if (result == null) {
+            // show error here
+            failResult = "Err: Unable to get any result."
+            showFailResult()
+            return
+        } else if (!result.isJSONValid()) {
+            // show the raw result
+            showRawResult()
+            finish()
             return
         }
+
+
         val jsonResult = JSONObject(result.toString())
         val iResult: Iterator<String> = jsonResult.keys()
 
