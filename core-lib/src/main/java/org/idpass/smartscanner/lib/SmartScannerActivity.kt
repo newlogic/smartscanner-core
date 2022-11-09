@@ -332,6 +332,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                         val data = Intent()
                         val result = Gson().toJson(barcodeResult)
                         data.putExtra(SCANNER_RESULT, result)
+                        data.putExtra(SCANNER_IMAGE_TYPE, config?.imageResultType)
+
                         setResult(Activity.RESULT_OK, data)
                         this.finish()
                     }
