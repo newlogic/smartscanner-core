@@ -192,11 +192,16 @@ class ResultActivity : AppCompatActivity() {
     }
 
 
-    private fun showRawResult() {
+    private fun showRawResult(isRawOnly: Boolean = false) {
         val intent = Intent(this, RawResultActivity::class.java)
-        intent.putExtra(HEADER_RESULT, headerResult)
+
+        if (!isRawOnly) {
+            intent.putExtra(HEADER_RESULT, headerResult)
+            intent.putExtra(PAYLOAD, result)
+        }
+
         intent.putExtra(RESULT, rawResult)
-        intent.putExtra(PAYLOAD, result)
+
         startActivity(intent)
     }
 
@@ -268,7 +273,7 @@ class ResultActivity : AppCompatActivity() {
             return
         } else if (!result.isJSONValid()) {
             // show the raw result
-            showRawResult()
+            showRawResult(true)
             finish()
             return
         }
