@@ -54,10 +54,10 @@
     <string name="label_config_reset">إعادة تعيين ملف تعريف التكوين</string>
     <string name="label_config_reset_desc">يؤدي هذا الإجراء إلى إعادة تعيين التطبيق إلى التكوين الافتراضي.</string>
     <string name="label_signature_verified">تم التحقق من التوقيع</string>
-    <string name="label_success_config_set">Successfully set public key into the configuration</string>
-    <string name="header">Header</string>
-    <string name="payload">Payload</string>
-    <string name="raw_result">Raw result</string>
-    <string name="view_raw_result">View Raw Result</string>
+    <string name="header">عنوان</string>
+    <string name="payload">الحمولة</string>
+    <string name="raw_result">البيانات الخام</string>
+    <string name="view_raw_result">عرض البيانات الخام</string>
+    <string name="config_loaded">تم تحميل التكوين بنجاح</string>
 
 </resources>

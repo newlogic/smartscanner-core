@@ -55,11 +55,11 @@
     <string name="label_config_reset">Reset Configuration Profile</string>
     <string name="label_config_reset_desc">This action resets the app back to default configuration.</string>
     <string name="label_signature_verified">Signature verified</string>
-    <string name="label_success_config_set">Successfully set public key into the configuration</string>
     <string name="header">Header</string>
     <string name="payload">Payload</string>
     <string name="raw_result">Raw result</string>
     <string name="view_raw_result">View Raw Result</string>
+    <string name="config_loaded">Configuration loaded successfully</string>
     <!-- Strings used for fragments for navigation -->
 
 </resources>
