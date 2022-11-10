@@ -24,6 +24,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.camera.core.ImageProxy
+import com.github.wnameless.json.flattener.JsonFlattener
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
@@ -35,11 +36,9 @@ import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.scanner.BaseImageAnalyzer
 import org.idpass.smartscanner.lib.scanner.config.Config
-import org.idpass.smartscanner.lib.scanner.config.ImageResultType
 import org.idpass.smartscanner.lib.scanner.config.Modes
 import org.idpass.smartscanner.lib.utils.BitmapUtils
 import org.idpass.smartscanner.lib.utils.GzipUtils
-import org.idpass.smartscanner.lib.utils.JSONUtils
 import org.idpass.smartscanner.lib.utils.JWTUtils
 import org.idpass.smartscanner.lib.utils.JWTUtils.getJsonBody
 import org.idpass.smartscanner.lib.utils.JWTUtils.getJsonHeader
@@ -47,6 +46,7 @@ import org.idpass.smartscanner.lib.utils.JWTUtils.isDefaultConfigPublicKey
 import org.idpass.smartscanner.lib.utils.JWTUtils.isJWT
 import org.idpass.smartscanner.lib.utils.extension.setBrightness
 import org.idpass.smartscanner.lib.utils.extension.setContrast
+import org.json.JSONObject
 import java.io.ByteArrayInputStream
 import java.util.zip.ZipException
 
@@ -55,7 +55,7 @@ class QRCodeAnalyzer(
     override val activity: Activity,
     override val intent: Intent,
     override val mode: String = Modes.QRCODE.value,
-    private val imageResultType: String = ImageResultType.PATH.value,
+    private val imageResultType: String,
     private var isGzipped: Boolean? = null,
     private var isJson: Boolean? = false,
     private var jsonPath: String? = null
@@ -88,8 +88,7 @@ class QRCodeAnalyzer(
                     if (barcodes.isNotEmpty()) {
                         rawValue = barcodes[0].rawValue
                         if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_QRCODE_INTENT ||
-                            intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_QRCODE_INTENT
-                        ) {
+                            intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_QRCODE_INTENT){
                             sendBundleResult(
                                 rawValue = rawValue,
                                 rawBytes = barcodes[0].rawBytes
@@ -120,10 +119,12 @@ class QRCodeAnalyzer(
 
         try {
             val intent = Intent()
+
             val result: String? = when (rawValue?.isJWT()) {
                 true -> {
                     val value = getValueJWT(rawValue)
                     intent.putExtra(SmartScannerActivity.SCANNER_HEADER_RESULT, value.getJsonHeader().toString())
+                    intent.putExtra(SmartScannerActivity.SCANNER_SIGNATURE_VERIFICATION, true)
                     value.getJsonBody().toString()
                 }
                 else -> getGzippedData(rawBytes) ?: rawValue
@@ -144,12 +145,9 @@ class QRCodeAnalyzer(
                         intent.putExtra(k, v)
                     }
                 }
-                result = flattenMap.toString()
             }
 
-            if (result != null && rawValue?.isJWT() == true) {
-                intent.putExtra(SmartScannerActivity.SCANNER_SIGNATURE_VERIFICATION, true)
-            }
+
 
             Log.d(SmartScannerActivity.TAG, "raw " + rawValue.toString())
             Log.d(SmartScannerActivity.TAG, "Success from QRCODE")
@@ -180,7 +178,7 @@ class QRCodeAnalyzer(
         val isJson = if (isOdk) intent.getStringExtra(ScannerConstants.JSON_ENABLED) == "1" else intent.getBooleanExtra(ScannerConstants.JSON_ENABLED, false)
         val jsonPath = intent.getStringExtra(ScannerConstants.JSON_PATH)
         // check gzipped parameters for bundle return result
-        var data: String? = when (isGzipped) {
+        var data : String? = when (isGzipped) {
             true -> getGzippedData(rawBytes)
             else -> {
                 if (rawValue?.isJWT() == true) {
@@ -198,7 +196,7 @@ class QRCodeAnalyzer(
                     val ctx = JsonPath.parse(data)
                     bundle.putString(ScannerConstants.QRCODE_JSON_VALUE, ctx.read<Any>(path).toString())
                 }
-                val flattenMap = JSONUtils.flattenJson(data)
+                val flattenMap = flattenJson(data)
                 for ((k, v) in flattenMap) {
                     bundle.putString(k, v)
                 }
@@ -226,7 +224,7 @@ class QRCodeAnalyzer(
         activity.finish()
     }
 
-    private fun getGzippedData(rawBytes: ByteArray?): String? {
+    private fun getGzippedData(rawBytes: ByteArray?) : String? {
         var data: String? = null
         try {
             val inputStream = ByteArrayInputStream(rawBytes)
@@ -237,21 +235,44 @@ class QRCodeAnalyzer(
         return data
     }
 
-    private fun getJWTValue(
-        rawValue: String,
-        publicKey: String
-    ): String {
-        val parser = Jwts.parserBuilder()
-            .setSigningKeyResolver(object : SigningKeyResolverAdapter() {
-                override fun resolveSigningKey(
-                    header: JwsHeader<out JwsHeader<*>>?,
-                    claims: Claims?
-                ): Key {
-                    return lookupVerificationKey(header?.keyId, publicKey)
-                }
-            }).build()
-        val claims = parser.parseClaimsJws(rawValue)
-        return claims.body.toString()
+    private fun flattenJson(json: String): HashMap<String, String> {
+        val flattenedMap = JsonFlattener.flattenAsMap(json)
+        val map: HashMap<String, String> = HashMap()
+        for ((k, v) in flattenedMap) {
+            val key = k.replace(".", "_").replace("[", "_").replace("]", "_").replace("__", "_")
+            if (v != null) {
+                map[key] = v.toString()
+                print("$key, ")
+            }
+        }
+        Log.d(
+            "${SmartScannerActivity.TAG}/SmartScanner",
+            "flattenedMap: ${JSONObject(map as Map<*, *>)}"
+        )
+        return map
+    }
+
+    private fun getValueJWT(rawValue: String): Jws<Claims> {
+
+        // identify which public key to use first
+        val preference = activity.getSharedPreferences(Config.SHARED, Context.MODE_PRIVATE)
+        val publicKey = preference.getString(Config.CONFIG_PUB_KEY, null)
+
+        return try {
+            JWTUtils.getWithSignedKey(rawValue, publicKey)
+
+        } catch (ex : Exception) {
+            // Fallback goal is to allow multiple save of the config
+
+            // We only fallback if the publicKey saved is not the default public key
+            if (publicKey != null && !publicKey.isDefaultConfigPublicKey()) {
+                // Lets add fallback here for JWT rawValue
+                return JWTUtils.getWithSignedKey(rawValue, null)
+            }
+
+            // otherwise lets throw the exception
+            throw ex
+        }
     }
 
 }

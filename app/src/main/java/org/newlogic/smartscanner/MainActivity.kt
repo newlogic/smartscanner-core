@@ -164,13 +164,13 @@ class MainActivity : AppCompatActivity() {
     private fun scanPDF417() {
         val intent = Intent(this, SmartScannerActivity::class.java)
         intent.putExtra(
-                SmartScannerActivity.SCANNER_OPTIONS,
-                ScannerOptions(
-                    mode = Modes.PDF_417.value,
-                    language = getLanguage(preference),
-                    scannerSize = ScannerSize.SMALL.value,
-                    config = sampleConfig(false)
-                )
+            SmartScannerActivity.SCANNER_OPTIONS,
+            ScannerOptions(
+                mode = Modes.PDF_417.value,
+                language = getLanguage(preference),
+                scannerSize = ScannerSize.SMALL.value,
+                config = sampleConfig(false)
+            )
         )
         startActivityForResult(intent, OP_SCANNER)
     }
@@ -178,14 +178,14 @@ class MainActivity : AppCompatActivity() {
     private fun scanQRCode()  {
         val intent = Intent(this, SmartScannerActivity::class.java)
         intent.putExtra(
-                SmartScannerActivity.SCANNER_OPTIONS,
-                ScannerOptions(
-                        mode = Modes.QRCODE.value,
-                        language = preference?.getString(Language.NAME, Language.EN),
-                        scannerSize = ScannerSize.LARGE.value,
-                        qrCodeOptions = QRcodeOptions(isJson = true),
-                        config = sampleConfig(false)
-                )
+            SmartScannerActivity.SCANNER_OPTIONS,
+            ScannerOptions(
+                mode = Modes.QRCODE.value,
+                language = preference?.getString(Language.NAME, Language.EN),
+                scannerSize = ScannerSize.LARGE.value,
+                qrCodeOptions = QRcodeOptions(isJson = true),
+                config = sampleConfig(false)
+            )
         )
         startActivityForResult(intent, OP_SCANNER)
     }
@@ -216,8 +216,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 } else {
                     // Get Result from Intent extras
-                    val mode = intent?.getStringExtra(ScannerConstants.MODE)
-                    if (mode == Modes.IDPASS_LITE.value) {
+                    if (intent?.getStringExtra(ScannerConstants.MODE) == Modes.IDPASS_LITE.value) {
                         // Go to ID PASS Lite Results Screen
                         val resultBytes = intent.getByteArrayExtra(SCANNER_RESULT_BYTES)
                         mIntent = Intent(this, IDPassResultActivity::class.java)
