@@ -25,6 +25,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.camera.core.ImageProxy
 import com.github.wnameless.json.flattener.JsonFlattener
+import com.google.gson.JsonParseException
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
@@ -48,6 +49,7 @@ import org.idpass.smartscanner.lib.utils.extension.setBrightness
 import org.idpass.smartscanner.lib.utils.extension.setContrast
 import org.json.JSONObject
 import java.io.ByteArrayInputStream
+import java.lang.RuntimeException
 import java.util.zip.ZipException
 
 
@@ -131,19 +133,17 @@ class QRCodeAnalyzer(
 
             }
 
-            if (isJson == true) {
-                if (result != null) {
-                    jsonPath?.let { path ->
-                        val ctx = JsonPath.parse(result)
-                        intent.putExtra(
-                            ScannerConstants.QRCODE_JSON_VALUE,
-                            ctx.read<Any>(path).toString()
-                        )
-                    }
-                    val flattenMap = flattenJson(result)
-                    for ((k, v) in flattenMap) {
-                        intent.putExtra(k, v)
-                    }
+            if (isJson == true && result != null && result != rawValue) {
+                jsonPath?.let { path ->
+                    val ctx = JsonPath.parse(result)
+                    intent.putExtra(
+                        ScannerConstants.QRCODE_JSON_VALUE,
+                        ctx.read<Any>(path).toString()
+                    )
+                }
+                val flattenMap = flattenJson(result)
+                for ((k, v) in flattenMap) {
+                    intent.putExtra(k, v)
                 }
             }
 
