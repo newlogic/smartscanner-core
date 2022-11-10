@@ -22,16 +22,17 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.gson.JsonParser
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.scanner.config.*
 import org.idpass.smartscanner.lib.scanner.config.Config.Companion.CONFIG_PROFILE_NAME
 import org.idpass.smartscanner.lib.scanner.config.Config.Companion.CONFIG_PUB_KEY
 import org.idpass.smartscanner.lib.scanner.config.Config.Companion.OP_SCANNER
 import org.idpass.smartscanner.lib.scanner.config.Config.Companion.ORIENTATION
-import org.idpass.smartscanner.lib.scanner.config.Language
 import org.idpass.smartscanner.lib.scanner.config.Orientation.LANDSCAPE
 import org.idpass.smartscanner.lib.scanner.config.Orientation.PORTRAIT
 import org.idpass.smartscanner.lib.utils.LanguageUtils
@@ -39,6 +40,7 @@ import org.newlogic.smartscanner.BuildConfig
 import org.newlogic.smartscanner.MainActivity
 import org.newlogic.smartscanner.R
 import org.newlogic.smartscanner.databinding.ActivitySettingsBinding
+import org.newlogic.smartscanner.result.ResultActivity
 
 
 class SettingsActivity : AppCompatActivity() {
@@ -102,9 +104,9 @@ class SettingsActivity : AppCompatActivity() {
         // Display Toast message once a flag for config update's true
         if (isConfigUpdated) {
             Toast.makeText(
-                    this@SettingsActivity,
-                    getString(R.string.config_loaded),
-                    Toast.LENGTH_LONG)
+                this@SettingsActivity,
+                getString(R.string.config_loaded),
+                Toast.LENGTH_LONG)
                 .show()
         }
 
@@ -193,4 +195,5 @@ class SettingsActivity : AppCompatActivity() {
         editor?.putString(key, value)
         editor?.apply()
     }
+
 }

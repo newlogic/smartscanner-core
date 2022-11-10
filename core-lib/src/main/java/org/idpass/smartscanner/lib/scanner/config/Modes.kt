@@ -23,7 +23,6 @@ enum class Modes (val value : String) {
     IDPASS_LITE("idpass-lite"),
     MRZ("mrz"),
     NFC_SCAN("nfc-scan"),
-    QRCODE_CONFIG("qrcode-config"),
     PDF_417("pdf417"),
     QRCODE("qrcode"),
     QRCODE_CONFIG("qrcode-config")
