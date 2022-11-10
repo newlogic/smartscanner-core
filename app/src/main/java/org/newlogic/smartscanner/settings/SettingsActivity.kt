@@ -103,8 +103,8 @@ class SettingsActivity : AppCompatActivity() {
         if (isConfigUpdated) {
             Toast.makeText(
                     this@SettingsActivity,
-                    "Configuration loaded successfully!",
-                    Toast.LENGTH_SHORT)
+                    getString(R.string.config_loaded),
+                    Toast.LENGTH_LONG)
                 .show()
         }
 
