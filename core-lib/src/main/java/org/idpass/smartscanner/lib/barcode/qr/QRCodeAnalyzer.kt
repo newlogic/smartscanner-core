@@ -267,7 +267,11 @@ class QRCodeAnalyzer(
             // We only fallback if the publicKey saved is not the default public key
             if (publicKey != null && !publicKey.isDefaultConfigPublicKey()) {
                 // Lets add fallback here for JWT rawValue
-                return JWTUtils.getWithSignedKey(rawValue, null)
+                val valueJws = JWTUtils.getWithSignedKey(rawValue, null)
+                // and we only allow fallback if payload is conf and public
+                if (valueJws.body.containsKey("conf") && valueJws.body.containsKey("public")) {
+                    return valueJws
+                }
             }
 
             // otherwise lets throw the exception
