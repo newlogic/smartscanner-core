@@ -269,7 +269,7 @@ class QRCodeAnalyzer(
                 // Lets add fallback here for JWT rawValue
                 val valueJws = JWTUtils.getWithSignedKey(rawValue, null)
                 // and we only allow fallback if payload is conf and public
-                if (valueJws.body.containsKey("conf") && valueJws.body.containsKey("public")) {
+                if (valueJws.body.containsKey("conf")) {
                     return valueJws
                 }
             }
