@@ -28,8 +28,8 @@ import java.util.regex.Pattern
 object JWTUtils {
 
     const val configurationPublicKey = "-----BEGIN PUBLIC KEY-----\n" +
-            "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEuiHgI23kz82XObC8oPA+/bNhQFGA\n" +
-            "ALFyk+n2P9a8N4vwVe1hIuDfx1GicdM7l4SC8hUdgczK8UbRDhvMIFKtFg==\n" +
+            "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEHmAB470dV0Zay8SSo0lSKXaYr2Rj\n" +
+            "3niL8ZxPRZfQvmbscSgA8i27z7uf0Z5svVfMa5O7gNDuWQ3FCeRJxDSy/g==\n" +
             "-----END PUBLIC KEY-----"
 
     /**
