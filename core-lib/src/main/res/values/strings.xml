@@ -50,7 +50,7 @@
     <string name="warning_ocr_install_progress">Installation OCR: %1d%%</string>
 
 
-    <string name="status_bar_ocr">Document Number: %1s Date of Birth: %2s Expiration Date: %3s</string>
+    <string name="status_bar_ocr" formatted="false">Document Number: %1s Date of Birth: %2s Expiration Date: %3s</string>
     <string name="status_bar_success">OCR Detected - Time required: %2dms</string>
     <string name="status_bar_failure">OCR Read failure - Time required: %1d ms</string>
 
@@ -64,7 +64,7 @@
     <string name="label_passport">Passport</string>
     <string name="label_not_available">NA</string>
 
-    <string name="name">%1s %2s</string>
+    <string name="name" formatted="false">%1s %2s</string>
 
     <string name="doc_number">Doc Number: %1s</string>
     <string name="doc_dob">Date of Birth: %1s</string>
