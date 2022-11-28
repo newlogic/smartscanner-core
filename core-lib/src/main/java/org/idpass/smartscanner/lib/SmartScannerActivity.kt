@@ -94,6 +94,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         const val SCANNER_RESULT_BYTES = "scanner_result_bytes"
         const val SCANNER_IMAGE_TYPE = "scanner_image_type"
         const val SCANNER_SIGNATURE_VERIFICATION = "scanner_signature_verification"
+        const val SCANNER_JWT_CONFIG_UPDATE = "scanner_jwt_config_update"
     }
 
     private val REQUEST_CODE_PERMISSIONS = 10
