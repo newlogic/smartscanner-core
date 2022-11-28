@@ -17,9 +17,7 @@
  */
 package org.newlogic.smartscanner.result
 
-import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.graphics.BitmapFactory
 import android.graphics.Paint
 import android.os.Bundle
@@ -35,11 +33,8 @@ import com.bumptech.glide.Glide
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonParser
 import org.idpass.smartscanner.api.ScannerConstants
-import org.idpass.smartscanner.lib.scanner.config.Config
 import org.idpass.smartscanner.lib.scanner.config.ImageResultType
 import org.idpass.smartscanner.lib.scanner.config.Modes
-import org.idpass.smartscanner.lib.utils.JWTUtils.addEncapsulationBoundaries
-import org.idpass.smartscanner.lib.utils.JWTUtils.removeEncapsulationBoundaries
 import org.idpass.smartscanner.lib.utils.extension.decodeBase64
 import org.idpass.smartscanner.lib.utils.extension.isJSONValid
 import org.json.JSONException
@@ -48,8 +43,6 @@ import org.newlogic.smartscanner.R
 import org.newlogic.smartscanner.adapters.RecyclerResultAdapter
 import org.newlogic.smartscanner.databinding.ActivityResultBinding
 import org.newlogic.smartscanner.result.RawResultActivity.Companion.PAYLOAD
-import org.newlogic.smartscanner.settings.SettingsActivity
-import org.newlogic.smartscanner.settings.SettingsActivity.Companion.CONFIG_UPDATED
 
 
 class ResultActivity : AppCompatActivity() {
@@ -72,9 +65,6 @@ class ResultActivity : AppCompatActivity() {
     private var imageType : String? = null
     private var resultList = mutableMapOf<String, String>();
     private var isVerifiedSignature: Boolean = false
-    private var isConfigUpdated : Boolean = false
-
-    private var preference: SharedPreferences? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -105,8 +95,6 @@ class ResultActivity : AppCompatActivity() {
         binding.rvResultList.addItemDecoration(dividerItemDecoration)
         binding.btnViewRawResult.setOnClickListener { showRawResult() }
 
-        // settings config
-        preference = getSharedPreferences(Config.SHARED, Context.MODE_PRIVATE)
     }
 
     override fun onStart() {
@@ -282,50 +270,15 @@ class ResultActivity : AppCompatActivity() {
         val jsonResult = JSONObject(result.toString())
         val iResult: Iterator<String> = jsonResult.keys()
 
-        isConfigUpdated = false
-
         while (iResult.hasNext()) {
             val mKey: String = iResult.next()
             try {
-                var value: String = jsonResult.get(mKey).toString()
-
-                var configKey: String? = null
-                when (mKey) {
-                    "conf" -> {
-
-                        configKey = Config.CONFIG_PROFILE_NAME
-                    }
-                    "pub" -> {
-                        configKey = Config.CONFIG_PUB_KEY
-
-                        // clean encapsulation and add safeguards
-                        value = value.addEncapsulationBoundaries()
-                    }
-                }
-
-                if (configKey != null && value.isNotEmpty()) {
-                    val editor = preference?.edit()
-                    editor?.remove(configKey)?.apply()
-                    editor?.putString(configKey, value)
-                    editor?.apply()
-
-                    isConfigUpdated = true
-                }
-
+                val value: String = jsonResult.get(mKey).toString()
 
                 resultList[mKey] = value
             } catch (e: JSONException) {
                 // TODO Something went wrong!
             }
-        }
-
-        if (isConfigUpdated) {
-            // should go to settings
-            val intent = Intent(this, SettingsActivity::class.java)
-            intent.putExtra(CONFIG_UPDATED, true)
-            startActivity(intent)
-            finish()
-            return
         }
 
         binding.rvResultList.visibility = VISIBLE

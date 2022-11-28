@@ -32,6 +32,7 @@ import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_FAIL_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_HEADER_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_IMAGE_TYPE
+import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_JWT_CONFIG_UPDATE
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RAW_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT_BYTES
@@ -222,6 +223,18 @@ class MainActivity : AppCompatActivity() {
                         mIntent = Intent(this, IDPassResultActivity::class.java)
                         mIntent.putExtra(IDPassResultActivity.RESULT, resultBytes)
                     } else {
+
+                        // Check if it should go to the settings instead
+                        val isConfigUpdated = intent?.getBooleanExtra(SCANNER_JWT_CONFIG_UPDATE, false)
+
+                        // should go to settings
+                        if (isConfigUpdated == true) {
+                            val sIntent = Intent(this, SettingsActivity::class.java)
+                            sIntent.putExtra(SettingsActivity.CONFIG_UPDATED, true)
+                            startActivity(sIntent)
+                            return
+                        }
+
                         // Go to Results Screen
                         val result = intent?.getStringExtra(SCANNER_RESULT)
                         val verified = intent?.getBooleanExtra(SCANNER_SIGNATURE_VERIFICATION, false)
@@ -236,6 +249,7 @@ class MainActivity : AppCompatActivity() {
                         mIntent.putExtra(ResultActivity.FAIL_RESULT, failResult)
                         mIntent.putExtra(ResultActivity.RAW_RESULT, rawResult)
                         mIntent.putExtra(ResultActivity.HEADER_RESULT, headerResult)
+
                     }
                 }
 

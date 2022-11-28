@@ -127,6 +127,27 @@ class QRCodeAnalyzer(
                     val value = getValueJWT(rawValue)
                     intent.putExtra(SmartScannerActivity.SCANNER_HEADER_RESULT, value.getJsonHeader().toString())
                     intent.putExtra(SmartScannerActivity.SCANNER_SIGNATURE_VERIFICATION, true)
+
+
+                    // checks for config result jwt
+                    val jsonResult = JSONObject(value.getJsonBody().toString())
+
+                    if (jsonResult.has("conf") and jsonResult.has("pub")) {
+
+                        val preference = activity.getSharedPreferences(Config.SHARED, Context.MODE_PRIVATE)
+                        val editor = preference?.edit()
+
+                        editor?.remove(Config.CONFIG_PROFILE_NAME)?.apply()
+                        editor?.putString(Config.CONFIG_PROFILE_NAME, jsonResult.getString("conf"))
+
+                        editor?.remove(Config.CONFIG_PUB_KEY)?.apply()
+                        editor?.putString(Config.CONFIG_PUB_KEY, jsonResult.getString("pub"))
+
+                        editor?.apply()
+
+                        intent.putExtra(SmartScannerActivity.SCANNER_JWT_CONFIG_UPDATE, true)
+                    }
+
                     value.getJsonBody().toString()
                 }
                 else -> getGzippedData(rawBytes) ?: rawValue
