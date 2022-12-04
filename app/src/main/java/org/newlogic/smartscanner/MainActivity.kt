@@ -132,7 +132,14 @@ class MainActivity : AppCompatActivity() {
             ScannerOptions(
                 mode = Modes.MRZ.value,
                 language = getLanguage(preference),
-                config = sampleConfig(isManualCapture = true, orientation = getOrientation(preference)),
+                config = Config(
+                    branding = true,
+                    imageResultType = imageType,
+                    label = "",
+                    isManualCapture = true,
+                    orientation = getOrientation(preference),
+                    showGuide = true
+                )
             )
         )
         startActivityForResult(intent, OP_SCANNER)
