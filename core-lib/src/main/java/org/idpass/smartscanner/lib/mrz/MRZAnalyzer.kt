@@ -22,11 +22,9 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.*
 import android.os.Bundle
-import android.os.Environment
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
-import android.widget.RelativeLayout
 import androidx.camera.core.ImageProxy
 import com.google.gson.Gson
 import com.google.mlkit.vision.common.InputImage
@@ -40,10 +38,8 @@ import org.idpass.smartscanner.lib.scanner.config.ImageResultType
 import org.idpass.smartscanner.lib.scanner.config.Modes
 import org.idpass.smartscanner.lib.scanner.config.MrzFormat
 import org.idpass.smartscanner.lib.utils.BitmapUtils
-import org.idpass.smartscanner.lib.utils.draw.BoundingBoxDraw
 import org.idpass.smartscanner.lib.utils.extension.*
 import java.io.File
-import java.io.FileOutputStream
 import java.net.URLEncoder
 
 
@@ -79,7 +75,7 @@ open class MRZAnalyzer(
             val rectGuide = activity.findViewById<ImageView>(R.id.rect_guide)
             val viewFInder = activity.findViewById<View>(R.id.view_finder)
             // try to cropped forcefully
-            val rotatedBF = rotateImage(bf, rot, 0, 0)
+            val rotatedBF = rotateImage(bf, rot)
             val resizedBF = getResizedBitmap(rotatedBF, viewFInder.width, viewFInder.height)
 
 //            Log.d("${SmartScannerActivity.TAG}/SmartScanner", "rectBoundingBox dimension ${rectBoundingBox.left}, ${rectBoundingBox.top}, ${rectBoundingBox.width}, ${rectBoundingBox.height}")
@@ -104,11 +100,11 @@ open class MRZAnalyzer(
 
                 .addOnSuccessListener { visionText ->
 
-//                    rectBoundingBox.setImageBitmap(cropped);
+//                    rectGuide.setImageBitmap(cropped);
 
 //                    Log.d(
 //                        "${SmartScannerActivity.TAG}/SmartScanner",
-//                        "rect imagveview box ${rectBoundingBox.width} , ${rectBoundingBox.height}",
+//                        "rect imagveview box ${rectGuide.width} , ${rectGuide.height}",
 //                    )
 
                     val timeRequired = System.currentTimeMillis() - start
@@ -182,11 +178,30 @@ open class MRZAnalyzer(
         }
     }
 
-    private fun getResizedBitmap(bm: Bitmap, newWidth: Int, newHeight: Int): Bitmap? {
+    open fun getResizedBitmap(bitmap: Bitmap, newWidth: Int, newHeight: Int): Bitmap? {
+        val scaledBitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
+        val ratioX = newWidth / bitmap.width.toFloat()
+        val ratioY = newHeight / bitmap.height.toFloat()
+        val middleX = newWidth / 2.0f
+        val middleY = newHeight / 2.0f
+        val scaleMatrix = Matrix()
+        scaleMatrix.setScale(ratioX, ratioY, middleX, middleY)
+        val canvas = Canvas(scaledBitmap)
+        canvas.setMatrix(scaleMatrix)
+        canvas.drawBitmap(
+            bitmap,
+            middleX - bitmap.width / 2,
+            middleY - bitmap.height / 2,
+            Paint(Paint.FILTER_BITMAP_FLAG)
+        )
+        return scaledBitmap
+    }
+
+    private fun getResizedBitmapOld(bm: Bitmap, newWidth: Int, newHeight: Int): Bitmap? {
         val width = bm.width
         val height = bm.height
-        val scaleWidth = newWidth.toFloat() / width
-        val scaleHeight = newHeight.toFloat() / height
+        val scaleWidth = ((newWidth.toFloat() / width)).toFloat()
+        val scaleHeight = ((newHeight.toFloat() / height)).toFloat()
         // CREATE A MATRIX FOR THE MANIPULATION
         val matrix = Matrix()
         // RESIZE THE BIT MAP
@@ -200,7 +215,7 @@ open class MRZAnalyzer(
         return resizedBitmap
     }
 
-    private fun rotateImage(myBitmap: Bitmap, rotation: Int, x: Int = 0, y: Int): Bitmap {
+    private fun rotateImage(myBitmap: Bitmap, rotation: Int): Bitmap {
         val matrix = Matrix()
         when (rotation) {
             90 -> {
@@ -216,10 +231,10 @@ open class MRZAnalyzer(
 
         return Bitmap.createBitmap(
             myBitmap,
-            x,
-            y,
-            if (x > 0) myBitmap.getWidth() / 2 else myBitmap.getWidth(),
-            if (y > 0) myBitmap.getHeight() / 2 else myBitmap.getHeight(),
+            0,
+            0,
+            myBitmap.width,
+            myBitmap.height,
             matrix,
             true
         ) // rotating bitmap
