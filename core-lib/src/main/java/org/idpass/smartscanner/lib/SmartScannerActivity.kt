@@ -35,6 +35,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.util.Size
+import android.util.TypedValue
 import android.view.*
 import android.view.View.*
 import android.widget.*
@@ -80,6 +81,7 @@ import java.io.File
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import kotlin.math.roundToInt
 
 
 class SmartScannerActivity : BaseActivity(), OnClickListener {
@@ -116,7 +118,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
     private var flashButton: View? = null
     private var closeButton: View? = null
     private var rectangle: View? = null
-    private var rectangleMRZGuide: View? = null
+    private var rectangleGuide: View? = null
     private var manualCapture: View? = null
     private var brandingImage: ImageView? = null
     private var captureLabelText: TextView? = null
@@ -142,7 +144,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         flashButton = findViewById(R.id.flash_button)
         closeButton = findViewById(R.id.close_button)
         rectangle = findViewById(R.id.rect_image)
-        rectangleMRZGuide = findViewById(R.id.rect_image_crop)
+        rectangleGuide = findViewById(R.id.rect_guide)
         brandingImage = findViewById(R.id.branding_image)
         manualCapture = findViewById(R.id.manual_capture)
         captureLabelText = findViewById(R.id.capture_label_text)
@@ -202,6 +204,30 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             val isMLKit = PlayStoreUtils.isPlayServicesAvailable(this)
             var analyzer : ImageAnalysis.Analyzer? = null
             var hasPDF417 = false
+
+            if (config != null && config?.showGuide == true) {
+                rectangleGuide?.visibility = VISIBLE
+
+                config?.let { conf ->
+                    if (conf.widthGuide != 0) {
+                        val nWidth = TypedValue.applyDimension(
+                            TypedValue.COMPLEX_UNIT_DIP, conf.widthGuide.toFloat(), resources.displayMetrics
+                        ).roundToInt()
+                        rectangleGuide?.layoutParams?.width = nWidth
+                    }
+
+                    // if height guide is not by default
+                    if (conf.heightGuide != 70) {
+                        val nHeight = TypedValue.applyDimension(
+                            TypedValue.COMPLEX_UNIT_DIP, conf.heightGuide.toFloat(), resources.displayMetrics
+                        ).roundToInt()
+                        rectangleGuide?.layoutParams?.height = nHeight
+                    }
+                    rectangleGuide?.requestLayout()
+                }
+
+            }
+
             if (mode == Modes.BARCODE.value) {
                 val barcodeStrings = scannerOptions?.barcodeOptions?.barcodeFormats ?: BarcodeFormat.default
                 val barcodeFormats = barcodeStrings.map { BarcodeFormat.valueOf(it).value }
@@ -263,7 +289,6 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                         ?: intent.getStringExtra(ScannerConstants.MRZ_FORMAT_EXTRA),
                     analyzeStart = System.currentTimeMillis()
                 )
-                rectangleMRZGuide?.visibility = VISIBLE
                 viewFinder.visibility = VISIBLE
                 barcodeScannerView?.visibility = GONE
             }
