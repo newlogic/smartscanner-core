@@ -20,12 +20,18 @@ package org.idpass.smartscanner.lib.mrz
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Matrix
+import android.graphics.Paint
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import androidx.camera.core.ImageProxy
+import androidx.core.view.marginBottom
+import androidx.core.view.marginLeft
+import androidx.core.view.marginTop
 import com.google.gson.Gson
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
@@ -80,12 +86,28 @@ open class MRZAnalyzer(
 
 //            Log.d("${SmartScannerActivity.TAG}/SmartScanner", "rectBoundingBox dimension ${rectBoundingBox.left}, ${rectBoundingBox.top}, ${rectBoundingBox.width}, ${rectBoundingBox.height}")
 
-            val cropped = resizedBF?.let {
-                Log.d("${SmartScannerActivity.TAG}/SmartScanner", "resizedBF ${it.width}, ${it.height}")
-                val recWidth = if (it.width < rectGuide.width) it.width else rectGuide.width
-                val recHeight = if (it.height < rectGuide.height) it.height else rectGuide.height
-                Bitmap.createBitmap(it, rectGuide.left, rectGuide.top - 70, recWidth - rectGuide.left, recHeight)
-            } ?: return
+//            val scaleLeft = 50
+//            val scaleWidth = rotatedBF.width / (viewFInder.width - (rectGuide.width + scaleLeft))
+//            val scaleHeight = rotatedBF.height / (viewFInder.height / (rectGuide.height - (rectGuide.marginTop + rectGuide.marginBottom)))
+//            val scaleTop = rotatedBF.height - (scaleHeight + rectGuide.height)
+
+            val ratioHeight: Float = rectGuide.height / viewFInder.height.toFloat()
+            val ratioWidth: Float = rectGuide.width / viewFInder.width.toFloat()
+            val ratioTop: Float = rectGuide.top / viewFInder.height.toFloat()
+
+//            val ratio = ratioHeight / ratioWidth
+            val scaleWidth = (ratioWidth * rotatedBF.width).toInt() + 20
+            val scaleHeight = (ratioHeight * rotatedBF.height).toInt()
+            val scaleTop = (ratioTop * rotatedBF.height).toInt() - 120
+            val scaleLeft = 0
+            val cropped = Bitmap.createBitmap(rotatedBF, scaleLeft, scaleTop, scaleWidth, scaleHeight)
+
+//            val cropped = resizedBF?.let {
+//                Log.d("${SmartScannerActivity.TAG}/SmartScanner", "resizedBF ${it.width}, ${it.height}")
+//                val recWidth = if (it.width < rectGuide.width) it.width else rectGuide.width
+//                val recHeight = if (it.height < rectGuide.height) it.height else rectGuide.height
+//                Bitmap.createBitmap(it, rectGuide.left, rectGuide.top - 70, recWidth - rectGuide.left, recHeight)
+//            } ?: return
 
 
             // Pass image to an ML Kit Vision API
@@ -163,7 +185,18 @@ open class MRZAnalyzer(
                                     .replace("%3C", "<").replace("%0A", "↩")
                             }]"
                         )
+
+
+                        val tsLong = System.currentTimeMillis() / 1000
+                        val ts = tsLong.toString()
+
+                        BitmapUtils.saveImage(rotatedBF, "mrz-${ts}-original.png")
+                        BitmapUtils.saveImage(cropped, "mrz-${ts}-check.png")
+
                         processResult(result = cleanMRZ, bitmap = bf, rotation = rotation)
+
+                        BitmapUtils.saveImage(cropped, "mrz-${ts}-success.png")
+
                     } catch (e: Exception) {
                         Log.d("${SmartScannerActivity.TAG}/SmartScanner", e.toString())
                     }
