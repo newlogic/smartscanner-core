@@ -17,7 +17,19 @@
  */
 package org.idpass.smartscanner.lib.utils.extension
 
+import android.content.res.Resources
+
 
 fun Double.Companion.noValue() = 0.0
 
 fun Int.Companion.noValue() = 0
+
+/**
+ * Converts pixel to dp
+ */
+val Int.toDp: Int get() = (this / Resources.getSystem().displayMetrics.density).toInt()
+
+/**
+ * Converts dp to pixel
+ */
+val Int.toPx: Int get() = (this * Resources.getSystem().displayMetrics.density).toInt()
