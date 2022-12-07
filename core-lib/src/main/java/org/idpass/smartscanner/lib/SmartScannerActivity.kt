@@ -131,6 +131,26 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
     private lateinit var viewFinder: PreviewView
     private lateinit var cameraExecutor: ExecutorService
 
+    private val orientationEventListener by lazy {
+        object : OrientationEventListener(this) {
+            override fun onOrientationChanged(orientation: Int) {
+                if (orientation == ORIENTATION_UNKNOWN) {
+                    return
+                }
+
+                val rotation = when (orientation) {
+                    in 45 until 135 -> Surface.ROTATION_270
+                    in 135 until 225 -> Surface.ROTATION_180
+                    in 225 until 315 -> Surface.ROTATION_90
+                    else -> Surface.ROTATION_0
+                }
+
+                imageAnalyzer?.targetRotation = rotation
+                imageCapture?.targetRotation = rotation
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
         super.onCreate(savedInstanceState)
@@ -380,6 +400,11 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         setupViews()
     }
 
+    override fun onStart() {
+        super.onStart()
+        orientationEventListener.enable()
+    }
+
     override fun onResume() {
         super.onResume()
         if (mode != null && mode == Modes.PDF_417.value) {
@@ -398,24 +423,35 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
+    override fun onStop() {
+        super.onStop()
+        orientationEventListener.disable()
+    }
+
+    @SuppressLint("ClickableViewAccessibility", "UnsafeOptInUsageError")
     private fun startCamera(analyzer: ImageAnalysis.Analyzer? = null, hasPDF417: Boolean = false) {
         viewFinder.post {
             this.getSystemService(Context.CAMERA_SERVICE) as CameraManager
             val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
             cameraProviderFuture.addListener({
-                // Used to bind the lifecycle of cameras to the lifecycle owner
-                cameraProvider = cameraProviderFuture.get()
-                // Preview
-                preview = Preview.Builder().build()
-                val imageAnalysisBuilder = ImageAnalysis.Builder()
                 val resolution = when {
                     hasPDF417 -> Size(1080, 1920)
                     mode == Modes.QRCODE.value || mode == Modes.IDPASS_LITE.value -> Size(720, 1280)
                     else -> Size(480, 640)
                 }
+                val rotation = viewFinder.display.rotation
+                // Used to bind the lifecycle of cameras to the lifecycle owner
+                cameraProvider = cameraProviderFuture.get()
+                // Preview
+                preview = Preview.Builder()
+                    .setTargetResolution(resolution)
+                    .setTargetRotation(rotation)
+                    .build()
+                val imageAnalysisBuilder = ImageAnalysis.Builder()
+
                 imageAnalyzer = imageAnalysisBuilder
                     .setTargetResolution(resolution)
+                    .setTargetRotation(rotation)
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                     .build()
                     .also {
