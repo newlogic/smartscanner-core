@@ -81,10 +81,11 @@ open class MRZAnalyzer(
 
             var inputBitmap = bf
             var inputRot = rotation
+            val rotatedBF = rotateImage(bf, rotation)
             if (isShowGuide != null && isShowGuide) {
                 val rectGuide = activity.findViewById<ImageView>(R.id.rect_guide)
                 val viewFinder = activity.findViewById<View>(R.id.view_finder)
-                val rotatedBF = rotateImage(bf, rotation)
+//                val rotatedBF = rotateImage(bf, rotation)
 
 //              Note! No need for this any more because it will only tries to resize the bitmap but quality gets distoreted
 //              val resizedBF = getResizedBitmap(rotatedBF, viewFInder.width, viewFInder.height)
@@ -179,12 +180,10 @@ open class MRZAnalyzer(
                         val tsLong = System.currentTimeMillis() / 1000
                         val ts = tsLong.toString()
 
-//                        BitmapUtils.saveImage(rotatedBF, "mrz-${ts}-original.png")
-//                        BitmapUtils.saveImage(cropped, "mrz-${ts}-check.png")
-
+                        BitmapUtils.saveImage(rotatedBF, "mrz-${ts}-original.png")
+                        BitmapUtils.saveImage(inputBitmap, "mrz-${ts}-check.png")
                         processResult(result = cleanMRZ, bitmap = bf, rotation = rotation)
-
-//                        BitmapUtils.saveImage(cropped, "mrz-${ts}-success.png")
+                        BitmapUtils.saveImage(inputBitmap, "mrz-${ts}-success.png")
 
                     } catch (e: Exception) {
                         Log.d("${SmartScannerActivity.TAG}/SmartScanner", e.toString())
