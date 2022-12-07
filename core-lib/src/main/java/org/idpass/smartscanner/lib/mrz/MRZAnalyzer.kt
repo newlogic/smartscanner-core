@@ -92,8 +92,6 @@ open class MRZAnalyzer(
             val cropTop = (rotated.height / 2) - (cropHeight / 2)
             var cropped = Bitmap.createBitmap(rotated, 0, cropTop.toInt(), rotated.width, cropHeight.toInt())
 
-            if (rectGuide.width == 0 || rectGuide.height == 0) return
-
             // Crop MRZ area
             val ratio = cropped.width.toFloat() / viewFinder.width.toFloat()
             val x = (rectGuide.left - viewFinder.left) * ratio
