@@ -160,7 +160,8 @@ class MainActivity : AppCompatActivity() {
                         header = getString(R.string.label_scan_nfc_capture),
                         subHeader = getString(R.string.label_scan_nfc_via_mrz),
                         isManualCapture = false,
-                        branding = true
+                        branding = true,
+                        showGuide = true
                     )
                 )
             )

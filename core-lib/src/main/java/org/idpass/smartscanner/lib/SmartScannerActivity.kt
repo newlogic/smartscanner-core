@@ -287,7 +287,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
                     format = scannerOptions?.mrzFormat
                         ?: intent.getStringExtra(ScannerConstants.MRZ_FORMAT_EXTRA),
-                    analyzeStart = System.currentTimeMillis()
+                    analyzeStart = System.currentTimeMillis(),
+                    isShowGuide = config?.showGuide
                 )
                 viewFinder.visibility = VISIBLE
                 barcodeScannerView?.visibility = GONE
@@ -312,7 +313,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                         ?: false, // default is false, capture log and send to Sentry
                     enableLogging = nfcOptions?.enableLogging
                         ?: false, // default is false, logging is disabled
-                    analyzeStart = System.currentTimeMillis()
+                    analyzeStart = System.currentTimeMillis(),
+                    isShowGuide = config?.showGuide
                 )
                 viewFinder.visibility = VISIBLE
                 barcodeScannerView?.visibility = GONE
