@@ -29,9 +29,6 @@ import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import androidx.camera.core.ImageProxy
-import androidx.core.view.marginBottom
-import androidx.core.view.marginLeft
-import androidx.core.view.marginTop
 import com.google.gson.Gson
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
@@ -47,7 +44,6 @@ import org.idpass.smartscanner.lib.utils.BitmapUtils
 import org.idpass.smartscanner.lib.utils.extension.*
 import java.io.File
 import java.net.URLEncoder
-
 
 open class MRZAnalyzer(
     override val activity: Activity,
@@ -66,7 +62,6 @@ open class MRZAnalyzer(
     private val analyzeStart: Long
 ) : BaseImageAnalyzer() {
 
-
     @SuppressLint("UnsafeExperimentalUsageError", "UnsafeOptInUsageError")
     override fun analyze(imageProxy: ImageProxy) {
         val bitmap = BitmapUtils.getBitmap(imageProxy)
@@ -79,36 +74,30 @@ open class MRZAnalyzer(
             }
 
             val rectGuide = activity.findViewById<ImageView>(R.id.rect_guide)
-            val viewFInder = activity.findViewById<View>(R.id.view_finder)
+            val viewFinder = activity.findViewById<View>(R.id.view_finder)
             // try to cropped forcefully
-            val rotatedBF = rotateImage(bf, rot)
-            val resizedBF = getResizedBitmap(rotatedBF, viewFInder.width, viewFInder.height)
+            var rotatedBF = rotateImage(bf, rot)
 
-//            Log.d("${SmartScannerActivity.TAG}/SmartScanner", "rectBoundingBox dimension ${rectBoundingBox.left}, ${rectBoundingBox.top}, ${rectBoundingBox.width}, ${rectBoundingBox.height}")
+            // Crop preview area
+            val cropHeight = if (rotatedBF.width < viewFinder.width) {
+                // if preview area larger than analysing image
+                val koeff = rotatedBF.width.toFloat() / viewFinder!!.width.toFloat()
+                viewFinder.height.toFloat() * koeff
+            } else {
+                // if preview area smaller than analysing image
+                val prc = 100 - (viewFinder.width.toFloat() / (rotatedBF.width.toFloat() / 100f))
+                viewFinder.height + ((viewFinder.height.toFloat() / 100f) * prc)
+            }
+            val cropTop = (rotatedBF.height / 2) - (cropHeight / 2)
+            rotatedBF = Bitmap.createBitmap(rotatedBF, 0, cropTop.toInt(), rotatedBF.width, cropHeight.toInt())
 
-//            val scaleLeft = 50
-//            val scaleWidth = rotatedBF.width / (viewFInder.width - (rectGuide.width + scaleLeft))
-//            val scaleHeight = rotatedBF.height / (viewFInder.height / (rectGuide.height - (rectGuide.marginTop + rectGuide.marginBottom)))
-//            val scaleTop = rotatedBF.height - (scaleHeight + rectGuide.height)
-
-            val ratioHeight: Float = rectGuide.height / viewFInder.height.toFloat()
-            val ratioWidth: Float = rectGuide.width / viewFInder.width.toFloat()
-            val ratioTop: Float = rectGuide.top / viewFInder.height.toFloat()
-
-//            val ratio = ratioHeight / ratioWidth
-            val scaleWidth = (ratioWidth * rotatedBF.width).toInt() + 20
-            val scaleHeight = (ratioHeight * rotatedBF.height).toInt()
-            val scaleTop = (ratioTop * rotatedBF.height).toInt() - 120
-            val scaleLeft = 0
-            val cropped = Bitmap.createBitmap(rotatedBF, scaleLeft, scaleTop, scaleWidth, scaleHeight)
-
-//            val cropped = resizedBF?.let {
-//                Log.d("${SmartScannerActivity.TAG}/SmartScanner", "resizedBF ${it.width}, ${it.height}")
-//                val recWidth = if (it.width < rectGuide.width) it.width else rectGuide.width
-//                val recHeight = if (it.height < rectGuide.height) it.height else rectGuide.height
-//                Bitmap.createBitmap(it, rectGuide.left, rectGuide.top - 70, recWidth - rectGuide.left, recHeight)
-//            } ?: return
-
+            // Crop MRZ area
+            val ratio = rotatedBF.width.toFloat() / viewFinder.width.toFloat()
+            val x = (25 - 16).toPx * ratio
+            val y = (viewFinder.height - 30.toPx - rectGuide.height) * ratio
+            val width = rectGuide.width * ratio
+            val height = rectGuide.height * ratio
+            val cropped = Bitmap.createBitmap(rotatedBF, x.toInt(), y.toInt(), width.toInt(), height.toInt())
 
             // Pass image to an ML Kit Vision API
             Log.d("${SmartScannerActivity.TAG}/SmartScanner", "MRZ MLKit: start")
