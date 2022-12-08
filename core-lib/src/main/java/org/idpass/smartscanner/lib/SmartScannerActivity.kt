@@ -225,28 +225,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             var analyzer : ImageAnalysis.Analyzer? = null
             var hasPDF417 = false
 
-            if (config != null && config?.showGuide == true) {
-                rectangleGuide?.visibility = VISIBLE
-
-                config?.let { conf ->
-                    if (conf.widthGuide != 0) {
-                        val nWidth = TypedValue.applyDimension(
-                            TypedValue.COMPLEX_UNIT_DIP, conf.widthGuide.toFloat(), resources.displayMetrics
-                        ).roundToInt()
-                        rectangleGuide?.layoutParams?.width = nWidth
-                    }
-
-                    // if height guide is not by default
-                    if (conf.heightGuide != 70) {
-                        val nHeight = TypedValue.applyDimension(
-                            TypedValue.COMPLEX_UNIT_DIP, conf.heightGuide.toFloat(), resources.displayMetrics
-                        ).roundToInt()
-                        rectangleGuide?.layoutParams?.height = nHeight
-                    }
-                    rectangleGuide?.requestLayout()
-                }
-
-            }
+            checkGuideView()
 
             if (mode == Modes.BARCODE.value) {
                 val barcodeStrings = scannerOptions?.barcodeOptions?.barcodeFormats ?: BarcodeFormat.default
@@ -307,7 +286,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
                     format = scannerOptions?.mrzFormat
                         ?: intent.getStringExtra(ScannerConstants.MRZ_FORMAT_EXTRA),
-                    analyzeStart = System.currentTimeMillis()
+                    analyzeStart = System.currentTimeMillis(),
+                    isShowGuide = config?.showGuide
                 )
                 viewFinder.visibility = VISIBLE
                 barcodeScannerView?.visibility = GONE
@@ -332,7 +312,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                         ?: false, // default is false, capture log and send to Sentry
                     enableLogging = nfcOptions?.enableLogging
                         ?: false, // default is false, logging is disabled
-                    analyzeStart = System.currentTimeMillis()
+                    analyzeStart = System.currentTimeMillis(),
+                    isShowGuide = config?.showGuide
                 )
                 viewFinder.visibility = VISIBLE
                 barcodeScannerView?.visibility = GONE
@@ -437,7 +418,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 val resolution = when {
                     hasPDF417 -> Size(1080, 1920)
                     mode == Modes.QRCODE.value || mode == Modes.IDPASS_LITE.value -> Size(720, 1280)
-                    else -> Size(480, 640)
+                    else -> Size(640, 480)
                 }
                 val rotation = viewFinder.display.rotation
                 // Used to bind the lifecycle of cameras to the lifecycle owner
@@ -783,6 +764,32 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     }
                 }
             })
+        }
+    }
+
+    private fun checkGuideView() {
+        if (config != null && config?.showGuide == true) {
+            rectangleGuide?.alpha = 1f;
+            config?.let { conf ->
+                if (conf.widthGuide != 0) {
+                    val nWidth = TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP, conf.widthGuide.toFloat(), resources.displayMetrics
+                    ).roundToInt()
+                    rectangleGuide?.layoutParams?.width = nWidth
+                }
+
+                // if height guide is not by default
+                if (conf.heightGuide != 70) {
+                    val nHeight = TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP, conf.heightGuide.toFloat(), resources.displayMetrics
+                    ).roundToInt()
+                    rectangleGuide?.layoutParams?.height = nHeight
+                }
+                rectangleGuide?.requestLayout()
+            }
+
+        } else {
+            rectangleGuide?.alpha = 0f;
         }
     }
 }
