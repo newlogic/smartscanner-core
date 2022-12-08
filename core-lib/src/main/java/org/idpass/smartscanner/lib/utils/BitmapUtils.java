@@ -20,8 +20,10 @@ import android.annotation.TargetApi;
 import android.content.ContentResolver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.media.Image;
@@ -323,4 +325,50 @@ public class BitmapUtils {
             e.printStackTrace();
         }
     }
+
+    public static Bitmap getResizedBitmap(Bitmap bitmap, int newWidth, int newHeight) {
+        Bitmap scaledBitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888);
+        float ratioX = (float) newWidth / bitmap.getWidth();
+        float ratioY = (float) newHeight / bitmap.getHeight();
+        float middleX = newWidth / 2.0f;
+        float middleY = newHeight / 2.0f;
+        Matrix scaleMatrix = new Matrix();
+        scaleMatrix.setScale(ratioX, ratioY, middleX, middleY);
+        Canvas canvas = new Canvas(scaledBitmap);
+        canvas.setMatrix(scaleMatrix);
+        canvas.drawBitmap(
+                bitmap,
+                middleX - (float) bitmap.getWidth() / 2,
+                middleY - (float) bitmap.getHeight() / 2,
+                new Paint(Paint.FILTER_BITMAP_FLAG)
+        );
+        return scaledBitmap;
+    }
+
+    public static Bitmap rotateImage(Bitmap myBitmap, int rotation) {
+        Matrix matrix = new Matrix();
+        switch (rotation) {
+            case 90:
+                matrix.postRotate(90F);
+                break;
+            case 180:
+                matrix.postRotate(180F);
+                break;
+            case 270:
+                matrix.postRotate(270F);
+                break;
+        }
+
+        return Bitmap.createBitmap(
+                myBitmap,
+                0,
+                0,
+                myBitmap.getWidth(),
+                myBitmap.getHeight(),
+                matrix,
+                true
+        );
+    }
+
+
 }

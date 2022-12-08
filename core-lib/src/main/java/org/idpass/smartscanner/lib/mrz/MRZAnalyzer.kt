@@ -81,20 +81,10 @@ open class MRZAnalyzer(
 
             var inputBitmap = bf
             var inputRot = rotation
-            val rotatedBF = rotateImage(bf, rotation)
+            val rotatedBF = BitmapUtils.rotateImage(bf, rotation)
             if (isShowGuide != null && isShowGuide) {
                 val rectGuide = activity.findViewById<ImageView>(R.id.rect_guide)
                 val viewFinder = activity.findViewById<View>(R.id.view_finder)
-//                val rotatedBF = rotateImage(bf, rotation)
-
-//              Note! No need for this any more because it will only tries to resize the bitmap but quality gets distoreted
-//              val resizedBF = getResizedBitmap(rotatedBF, viewFInder.width, viewFInder.height)
-//              val cropped = resizedBF?.let {
-//                  Log.d("${SmartScannerActivity.TAG}/SmartScanner", "resizedBF ${it.width}, ${it.height}")
-//                  val recWidth = if (it.width < rectGuide.width) it.width else rectGuide.width
-//                  val recHeight = if (it.height < rectGuide.height) it.height else rectGuide.height
-//                  Bitmap.createBitmap(it, rectGuide.left, rectGuide.top - 70, recWidth - rectGuide.left, recHeight)
-//              } ?: return
 
                 val ratioHeight: Float = rectGuide.height / viewFinder.height.toFloat()
                 val ratioWidth: Float = rectGuide.width / viewFinder.width.toFloat()
@@ -181,7 +171,7 @@ open class MRZAnalyzer(
                         val ts = tsLong.toString()
 
                         BitmapUtils.saveImage(rotatedBF, "mrz-${ts}-original.png")
-                        BitmapUtils.saveImage(inputBitmap, "mrz-${ts}-check.png")
+                        BitmapUtils.saveImage(inputBitmap, "mrz-${ts}-cropped.png")
                         processResult(result = cleanMRZ, bitmap = bf, rotation = rotation)
                         BitmapUtils.saveImage(inputBitmap, "mrz-${ts}-success.png")
 
@@ -197,50 +187,6 @@ open class MRZAnalyzer(
 
 
         }
-    }
-
-    open fun getResizedBitmap(bitmap: Bitmap, newWidth: Int, newHeight: Int): Bitmap? {
-        val scaledBitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
-        val ratioX = newWidth / bitmap.width.toFloat()
-        val ratioY = newHeight / bitmap.height.toFloat()
-        val middleX = newWidth / 2.0f
-        val middleY = newHeight / 2.0f
-        val scaleMatrix = Matrix()
-        scaleMatrix.setScale(ratioX, ratioY, middleX, middleY)
-        val canvas = Canvas(scaledBitmap)
-        canvas.setMatrix(scaleMatrix)
-        canvas.drawBitmap(
-            bitmap,
-            middleX - bitmap.width / 2,
-            middleY - bitmap.height / 2,
-            Paint(Paint.FILTER_BITMAP_FLAG)
-        )
-        return scaledBitmap
-    }
-
-    private fun rotateImage(myBitmap: Bitmap, rotation: Int): Bitmap {
-        val matrix = Matrix()
-        when (rotation) {
-            90 -> {
-                matrix.postRotate(90F)
-            }
-            180 -> {
-                matrix.postRotate(180F)
-            }
-            270 -> {
-                matrix.postRotate(270F)
-            }
-        }
-
-        return Bitmap.createBitmap(
-            myBitmap,
-            0,
-            0,
-            myBitmap.width,
-            myBitmap.height,
-            matrix,
-            true
-        ) // rotating bitmap
     }
 
     internal open fun processResult(result: String, bitmap: Bitmap, rotation: Int) {
