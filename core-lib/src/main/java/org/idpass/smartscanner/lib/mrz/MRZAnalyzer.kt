@@ -59,51 +59,58 @@ open class MRZAnalyzer(
     private val isMLKit: Boolean,
     private val imageResultType: String,
     private val format: String?,
-    private val analyzeStart: Long
+    private val analyzeStart: Long,
+    private val isShowGuide: Boolean? = false
 ) : BaseImageAnalyzer() {
 
     @SuppressLint("UnsafeExperimentalUsageError", "UnsafeOptInUsageError")
     override fun analyze(imageProxy: ImageProxy) {
         val bitmap = BitmapUtils.getBitmap(imageProxy)
         bitmap?.let { bf ->
-            val rot = imageProxy.imageInfo.rotationDegrees
+            val rotation = imageProxy.imageInfo.rotationDegrees
             bf.apply {
                 // Increase brightness and contrast for clearer image to be processed
-                setContrast(1.5F)
-                setBrightness(5F)
+                setContrast(1.1F)
+                setBrightness(3F)
             }
 
             val rectGuide = activity.findViewById<ImageView>(R.id.rect_guide)
             val viewFinder = activity.findViewById<View>(R.id.view_finder)
-            // try to cropped forcefully
-            var rotatedBF = rotateImage(bf, rot)
+            var inputBitmap = bf
+            var inputRot = rotation
+            var rotatedBF = BitmapUtils.rotateImage(bf, rotation)
 
-            // Crop preview area
-            val cropHeight = if (rotatedBF.width < viewFinder.width) {
-                // if preview area larger than analysing image
-                val koeff = rotatedBF.width.toFloat() / viewFinder!!.width.toFloat()
-                viewFinder.height.toFloat() * koeff
-            } else {
-                // if preview area smaller than analysing image
-                val prc = 100 - (viewFinder.width.toFloat() / (rotatedBF.width.toFloat() / 100f))
-                viewFinder.height + ((viewFinder.height.toFloat() / 100f) * prc)
+            if (isShowGuide != null && isShowGuide) {
+                // try to cropped forcefully
+
+                // Crop preview area
+                val cropHeight = if (rotatedBF.width < viewFinder.width) {
+                    // if preview area larger than analysing image
+                    val koeff = rotatedBF.width.toFloat() / viewFinder!!.width.toFloat()
+                    viewFinder.height.toFloat() * koeff
+                } else {
+                    // if preview area smaller than analysing image
+                    val prc = 100 - (viewFinder.width.toFloat() / (rotatedBF.width.toFloat() / 100f))
+                    viewFinder.height + ((viewFinder.height.toFloat() / 100f) * prc)
+                }
+                val cropTop = (rotatedBF.height / 2) - (cropHeight / 2)
+                rotatedBF = Bitmap.createBitmap(rotatedBF, 0, cropTop.toInt(), rotatedBF.width, cropHeight.toInt())
+
+                // Crop MRZ area
+                val ratio = rotatedBF.width.toFloat() / viewFinder.width.toFloat()
+                val x = (25 - 16).toPx * ratio
+                val y = (viewFinder.height - 30.toPx - rectGuide.height) * ratio
+                val width = rectGuide.width * ratio
+                val height = rectGuide.height * ratio
+                inputBitmap = Bitmap.createBitmap(rotatedBF, x.toInt(), y.toInt(), width.toInt(), height.toInt())
+                inputRot = 0
             }
-            val cropTop = (rotatedBF.height / 2) - (cropHeight / 2)
-            rotatedBF = Bitmap.createBitmap(rotatedBF, 0, cropTop.toInt(), rotatedBF.width, cropHeight.toInt())
 
-            // Crop MRZ area
-            val ratio = rotatedBF.width.toFloat() / viewFinder.width.toFloat()
-            val x = (25 - 16).toPx * ratio
-            val y = (viewFinder.height - 30.toPx - rectGuide.height) * ratio
-            val width = rectGuide.width * ratio
-            val height = rectGuide.height * ratio
-            val cropped = Bitmap.createBitmap(rotatedBF, x.toInt(), y.toInt(), width.toInt(), height.toInt())
 
             // Pass image to an ML Kit Vision API
             Log.d("${SmartScannerActivity.TAG}/SmartScanner", "MRZ MLKit: start")
             val start = System.currentTimeMillis()
-            val rotation = imageProxy.imageInfo.rotationDegrees
-            val image = InputImage.fromBitmap(cropped, 0)
+            val image = InputImage.fromBitmap(inputBitmap, inputRot)
             val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
             Log.d("${SmartScannerActivity.TAG}/SmartScanner", "MRZ MLKit TextRecognition: process")
 
@@ -146,14 +153,6 @@ open class MRZAnalyzer(
 
 //                                bdParent.addView(element)
 
-//                                val bb = blocks[i].boundingBox
-//
-//                                if (bb?.top != null) {
-//                                    top = bb.top
-//                                    left = bb.left
-//                                }
-
-
                             }
                         }
                     }
@@ -166,7 +165,7 @@ open class MRZAnalyzer(
                                     .replace("%3C", "<").replace("%0A", "↩")
                             }]"
                         )
-                        val cleanMRZ = MRZCleaner.clean(rawFullRead.uppercase())
+                        val cleanMRZ = MRZCleaner.clean(rawFullRead)
                         Log.d(
                             "${SmartScannerActivity.TAG}/SmartScanner",
                             "After cleaner = [${
@@ -179,12 +178,10 @@ open class MRZAnalyzer(
                         val tsLong = System.currentTimeMillis() / 1000
                         val ts = tsLong.toString()
 
-                        BitmapUtils.saveImage(rotatedBF, "mrz-${ts}-original.png")
-                        BitmapUtils.saveImage(cropped, "mrz-${ts}-check.png")
-
+//                        BitmapUtils.saveImage(rotatedBF, "mrz-${ts}-original.png")
+//                        BitmapUtils.saveImage(cropped, "mrz-${ts}-check.png")
                         processResult(result = cleanMRZ, bitmap = bf, rotation = rotation)
-
-                        BitmapUtils.saveImage(cropped, "mrz-${ts}-success.png")
+//                        BitmapUtils.saveImage(cropped, "mrz-${ts}-success.png")
 
                     } catch (e: Exception) {
                         Log.d("${SmartScannerActivity.TAG}/SmartScanner", e.toString())
@@ -198,68 +195,6 @@ open class MRZAnalyzer(
 
 
         }
-    }
-
-    open fun getResizedBitmap(bitmap: Bitmap, newWidth: Int, newHeight: Int): Bitmap? {
-        val scaledBitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
-        val ratioX = newWidth / bitmap.width.toFloat()
-        val ratioY = newHeight / bitmap.height.toFloat()
-        val middleX = newWidth / 2.0f
-        val middleY = newHeight / 2.0f
-        val scaleMatrix = Matrix()
-        scaleMatrix.setScale(ratioX, ratioY, middleX, middleY)
-        val canvas = Canvas(scaledBitmap)
-        canvas.setMatrix(scaleMatrix)
-        canvas.drawBitmap(
-            bitmap,
-            middleX - bitmap.width / 2,
-            middleY - bitmap.height / 2,
-            Paint(Paint.FILTER_BITMAP_FLAG)
-        )
-        return scaledBitmap
-    }
-
-    private fun getResizedBitmapOld(bm: Bitmap, newWidth: Int, newHeight: Int): Bitmap? {
-        val width = bm.width
-        val height = bm.height
-        val scaleWidth = ((newWidth.toFloat() / width)).toFloat()
-        val scaleHeight = ((newHeight.toFloat() / height)).toFloat()
-        // CREATE A MATRIX FOR THE MANIPULATION
-        val matrix = Matrix()
-        // RESIZE THE BIT MAP
-        matrix.postScale(scaleWidth, scaleHeight)
-
-        // "RECREATE" THE NEW BITMAP
-        val resizedBitmap = Bitmap.createBitmap(
-            bm, 0, 0, width, height, matrix, false
-        )
-        bm.recycle()
-        return resizedBitmap
-    }
-
-    private fun rotateImage(myBitmap: Bitmap, rotation: Int): Bitmap {
-        val matrix = Matrix()
-        when (rotation) {
-            90 -> {
-                matrix.postRotate(90F)
-            }
-            180 -> {
-                matrix.postRotate(180F)
-            }
-            270 -> {
-                matrix.postRotate(270F)
-            }
-        }
-
-        return Bitmap.createBitmap(
-            myBitmap,
-            0,
-            0,
-            myBitmap.width,
-            myBitmap.height,
-            matrix,
-            true
-        ) // rotating bitmap
     }
 
     internal open fun processResult(result: String, bitmap: Bitmap, rotation: Int) {
