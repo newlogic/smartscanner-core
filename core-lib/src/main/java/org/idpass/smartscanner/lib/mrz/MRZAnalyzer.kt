@@ -21,9 +21,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Matrix
-import android.graphics.Paint
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -175,8 +172,8 @@ open class MRZAnalyzer(
                         )
 
 
-                        val tsLong = System.currentTimeMillis() / 1000
-                        val ts = tsLong.toString()
+//                        val tsLong = System.currentTimeMillis() / 1000
+//                        val ts = tsLong.toString()
 
 //                        BitmapUtils.saveImage(rotatedBF, "mrz-${ts}-original.png")
 //                        BitmapUtils.saveImage(cropped, "mrz-${ts}-check.png")
