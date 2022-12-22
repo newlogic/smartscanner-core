@@ -146,6 +146,7 @@
                         android:id="@+id/tv_raw_value"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:autoLink="web"
                         android:textSize="18sp"/>
 
                     <View
