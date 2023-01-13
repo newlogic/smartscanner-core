@@ -139,7 +139,7 @@ class ResultActivity : AppCompatActivity() {
                     else -> null
                 }
 
-                // TODO this should not show raw result, for this one it only needs the result directly
+                // this should not show raw result, for this one it only needs the result directly
                 // we have to end this
                 finish()
                 showRawResult()
