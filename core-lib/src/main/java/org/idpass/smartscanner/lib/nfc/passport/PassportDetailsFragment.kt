@@ -20,11 +20,13 @@ package org.idpass.smartscanner.lib.nfc.passport
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import org.idpass.smartscanner.lib.R
 import org.idpass.smartscanner.lib.databinding.FragmentPassportDetailsBinding
@@ -88,6 +90,7 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
         refreshData(passport)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("SetTextI18n")
     private fun refreshData(passport: Passport?) {
         if (passport == null) return

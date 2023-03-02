@@ -18,15 +18,32 @@
 package org.idpass.smartscanner.lib.utils
 
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import org.idpass.smartscanner.lib.scanner.config.Language
 import java.text.DateFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
+import java.time.LocalDate
 import java.util.*
 
 object DateUtils {
 
     private val dateFormat = SimpleDateFormat("yyyy/MM/dd", Locale.ROOT)
+
+
+    /**
+     *  DATE THRESHOLD is for the staring year of date parsing yy -> yyyy
+     *  Example:
+     *      With THRESHOLD = 99, start date will be 99 years ago from present year
+     *          PRESENT_YEAR = 2023
+     *          LOWEST DATE = PRESENT_YEAR - THRESHOLD = 1924
+     *          HIGHEST DATE = 2023
+     *              240101 -> 01/01/1924
+     *              230101 -> 01/01/2023
+     */
+    const val BIRTH_DATE_THRESHOLD = 99
+    const val EXPIRY_DATE_THRESHOLD = 49
 
     fun isValidDate(inDate: String): Boolean {
         dateFormat.isLenient = false
@@ -39,10 +56,32 @@ object DateUtils {
     }
     fun formatDate(date: Date) : String = dateFormat.format(date)
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("SimpleDateFormat")
-    fun formatStandardDate(dateString: String?, fromPattern: String = "yyMMdd", toPattern: String = "MM/dd/yyyy", locale: Locale? = Locale(Language.EN)): String? {
+    fun formatStandardDate(dateString: String?, fromPattern: String = "yyMMdd", toPattern: String = "MM/dd/yyyy", locale: Locale? = Locale(Language.EN), threshold: Int? = null): String? {
+        if(fromPattern === "yyMMdd") {
+            val date = stringToDate2DigitsYear(dateString, threshold) ?: return null
+            return dateToString(date, SimpleDateFormat(toPattern, locale))
+        }
+
         val date = stringToDate(dateString, SimpleDateFormat(fromPattern)) ?: return null
         return dateToString(date, SimpleDateFormat(toPattern, locale))
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun stringToDate2DigitsYear(dateStr: String?, threshold: Int? = null): Date? {
+        if (dateStr == null || threshold == null) return null
+        var date: Date? = null
+        try {
+            val sdf = SimpleDateFormat("dd/MM/yyyy");
+            val startYear = LocalDate.now().minusYears(threshold.toLong()).year
+            sdf.set2DigitYearStart(sdf.parse("01/01/$startYear"))
+            sdf.applyPattern("yyMMdd")
+            date = sdf.parse(dateStr)
+        } catch (e: ParseException) {
+            e.printStackTrace()
+        }
+        return date
     }
 
     private fun stringToDate(dateStr: String?, dateFormat: DateFormat): Date? {

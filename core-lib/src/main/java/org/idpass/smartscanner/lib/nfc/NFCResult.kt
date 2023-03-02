@@ -17,9 +17,13 @@
  */
 package org.idpass.smartscanner.lib.nfc
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import org.idpass.smartscanner.lib.nfc.passport.Passport
 import org.idpass.smartscanner.lib.scanner.config.Language.Locale
 import org.idpass.smartscanner.lib.utils.DateUtils
+import org.idpass.smartscanner.lib.utils.DateUtils.BIRTH_DATE_THRESHOLD
+import org.idpass.smartscanner.lib.utils.DateUtils.EXPIRY_DATE_THRESHOLD
 import org.idpass.smartscanner.lib.utils.DateUtils.formatStandardDate
 import org.idpass.smartscanner.lib.utils.LanguageUtils.isRTL
 import org.idpass.smartscanner.lib.utils.extension.arrayToString
@@ -54,6 +58,7 @@ data class NFCResult(
 ) {
     companion object {
 
+        @RequiresApi(Build.VERSION_CODES.O)
         fun formatResult(passport: Passport?, locale: String?, mrzInfo: MRZInfo? = null, image: String? = null, mrzImage: String? = null): NFCResult {
             val personDetails = passport?.personDetails
             val additionalPersonDetails = passport?.additionalPersonDetails
@@ -102,9 +107,9 @@ data class NFCResult(
                 }
             }
             // Get proper date of birth
-            val dateOfBirth = if (additionalPersonDetails?.fullDateOfBirth.isNullOrEmpty()) {
-                DateUtils.toAdjustedDate (formatStandardDate(personDetails?.dateOfBirth))
-            } else formatStandardDate(additionalPersonDetails?.fullDateOfBirth, "yyyyMMdd")
+           val dateOfBirth = if (additionalPersonDetails?.fullDateOfBirth.isNullOrEmpty()) {
+               DateUtils.toAdjustedDate (formatStandardDate(personDetails?.dateOfBirth, threshold = BIRTH_DATE_THRESHOLD))
+           } else formatStandardDate(additionalPersonDetails?.fullDateOfBirth, "yyyyMMdd")
             return NFCResult(
                     image = image,
                     mrzImage = mrzImage,
@@ -113,7 +118,7 @@ data class NFCResult(
                     nameOfHolder = additionalPersonDetails?.nameOfHolder,
                     gender = personDetails?.gender?.name,
                     documentNumber = personDetails?.documentNumber,
-                    dateOfExpiry = DateUtils.toReadableDate(formatStandardDate(personDetails?.dateOfExpiry)),
+                    dateOfExpiry = DateUtils.toReadableDate(formatStandardDate(personDetails?.dateOfExpiry, threshold = EXPIRY_DATE_THRESHOLD)),
                     issuingState = personDetails?.issuingState,
                     nationality = personDetails?.nationality,
                     otherNames = additionalPersonDetails?.otherNames?.arrayToString(),
