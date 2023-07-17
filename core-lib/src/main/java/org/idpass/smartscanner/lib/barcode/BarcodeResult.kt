@@ -17,7 +17,8 @@
  */
 package org.idpass.smartscanner.lib.barcode
 
-data class BarcodeResult(
+data class
+BarcodeResult(
         val imagePath: String?,
         val image: String? = null,
         val corners: String?,

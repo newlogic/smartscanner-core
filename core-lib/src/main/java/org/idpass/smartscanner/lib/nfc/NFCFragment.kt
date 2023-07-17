@@ -21,7 +21,6 @@ import android.content.Context
 import android.content.Intent
 import android.nfc.NfcAdapter
 import android.nfc.Tag
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -32,7 +31,6 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import io.reactivex.disposables.CompositeDisposable
 import net.sf.scuba.smartcards.CardServiceException
@@ -41,13 +39,11 @@ import org.idpass.smartscanner.lib.R
 import org.idpass.smartscanner.lib.nfc.details.IntentData
 import org.idpass.smartscanner.lib.nfc.details.NFCDocumentTag
 import org.idpass.smartscanner.lib.nfc.passport.Passport
+import org.idpass.smartscanner.lib.platform.utils.DateUtils
+import org.idpass.smartscanner.lib.platform.utils.DateUtils.formatStandardDate
+import org.idpass.smartscanner.lib.platform.utils.KeyStoreUtils
+import org.idpass.smartscanner.lib.platform.utils.LanguageUtils
 import org.idpass.smartscanner.lib.scanner.config.Language
-import org.idpass.smartscanner.lib.utils.DateUtils
-import org.idpass.smartscanner.lib.utils.DateUtils.BIRTH_DATE_THRESHOLD
-import org.idpass.smartscanner.lib.utils.DateUtils.EXPIRY_DATE_THRESHOLD
-import org.idpass.smartscanner.lib.utils.DateUtils.formatStandardDate
-import org.idpass.smartscanner.lib.utils.KeyStoreUtils
-import org.idpass.smartscanner.lib.utils.LanguageUtils
 import org.jmrtd.*
 import org.jmrtd.lds.icao.MRZInfo
 import org.spongycastle.jce.provider.BouncyCastleProvider
@@ -187,7 +183,6 @@ class NFCFragment : Fragment() {
         super.onDetach()
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onResume() {
         super.onResume()
         // Display proper language
@@ -195,8 +190,8 @@ class NFCFragment : Fragment() {
         // Display MRZ details
         textViewNfcTitle?.text = if (label != null) label else getString(R.string.nfc_title)
         textViewPassportNumber?.text = getString(R.string.doc_number, mrzInfo?.documentNumber)
-        textViewDateOfBirth?.text = getString(R.string.doc_dob, DateUtils.toAdjustedDate(formatStandardDate(mrzInfo?.dateOfBirth, threshold = BIRTH_DATE_THRESHOLD)))
-        textViewDateOfExpiry?.text = getString(R.string.doc_expiry, DateUtils.toReadableDate(formatStandardDate(mrzInfo?.dateOfExpiry, threshold = EXPIRY_DATE_THRESHOLD)))
+        textViewDateOfBirth?.text = getString(R.string.doc_dob, DateUtils.toAdjustedDate(formatStandardDate(mrzInfo?.dateOfBirth)))
+        textViewDateOfExpiry?.text = getString(R.string.doc_expiry, DateUtils.toReadableDate(formatStandardDate(mrzInfo?.dateOfExpiry)))
 
         if (nfcFragmentListener != null) {
             nfcFragmentListener?.onEnableNfc()

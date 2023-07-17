@@ -10,76 +10,55 @@
     android:textAlignment="gravity"
     tools:context="org.idpass.smartscanner.lib.SmartScannerActivity">
 
-    <include
-        android:id="@+id/action_bar_menu"
-        layout="@layout/top_action_bar_in_live_camera"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top"
-        android:elevation="10dp" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/top"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.2" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/bottom"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.8" />
-
-
-    <TextView
-        android:id="@+id/capture_header_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textColor="@color/white"
-        android:layout_marginTop="8dp"
-        android:textDirection="anyRtl"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/capture_sub_header_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:lineSpacingMultiplier="0.9"
-        android:textColor="@color/white"
-        android:textDirection="anyRtl"
-        android:textSize="12sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/capture_header_text" />
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/view_layout"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:elevation="1dp"
         android:visibility="visible"
+        android:layout_marginTop="36dp"
+        android:layout_marginBottom="16dp"
+        android:paddingStart="100dp"
+        android:paddingEnd="100dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/bottom"
-        app:layout_constraintStart_toStartOf="@+id/top"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/action_bar_menu">
+
+        <TextView
+            android:id="@+id/capture_header_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:textDirection="anyRtl"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/capture_sub_header_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:lineSpacingMultiplier="0.9"
+            android:textColor="@color/white"
+            android:textDirection="anyRtl"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/capture_header_text" />
 
         <androidx.camera.view.PreviewView
             android:id="@+id/view_finder"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             android:layout_marginBottom="42dp"
             android:layout_marginTop="4dp"
             android:layout_marginHorizontal="4dp"
             android:elevation="0dp"
-            app:layout_constraintDimensionRatio="4:3"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -87,8 +66,8 @@
 
         <ImageView
             android:id="@+id/rect_image"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             android:layout_marginBottom="36dp"
             android:adjustViewBounds="false"
             android:contentDescription="@string/rectangle"
@@ -123,7 +102,7 @@
             app:layout_constraintTop_toBottomOf="@+id/branding_image" />
 
         <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/crop_guide"
+            android:id="@+id/bottom"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -141,9 +120,44 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/crop_guide" />
+            app:layout_constraintTop_toTopOf="@+id/bottom" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/model_text"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="48dp"
+        android:layout_marginHorizontal="96dp"
+        android:layout_marginTop="48dp"
+        android:background="@color/transparent_grey"
+        android:elevation="2dp"
+        android:fontFamily="@font/sourcesanspro_medium"
+        android:gravity="center_horizontal|center_vertical"
+        android:text="@string/model_text"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ProgressBar
+        android:id="@+id/model_text_loading"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="96dp"
+        android:elevation="2dp"
+        android:layout_marginTop="60dp"
+        android:visibility="invisible"
+        android:indeterminateTint="@color/white_30"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 
     <androidx.appcompat.widget.AppCompatImageButton
         android:id="@+id/manual_capture"
@@ -155,5 +169,13 @@
         app:layout_constraintTop_toBottomOf="@+id/action_bar_menu"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <include
+        android:id="@+id/action_bar_menu"
+        layout="@layout/top_action_bar_in_live_camera"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:elevation="10dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

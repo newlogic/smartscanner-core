@@ -19,7 +19,7 @@ package org.idpass.smartscanner.lib.scanner.config
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
-import org.idpass.smartscanner.lib.utils.extension.empty
+import org.idpass.smartscanner.lib.platform.extension.empty
 
 @Parcelize
 data class Config(
@@ -31,20 +31,9 @@ data class Config(
     val header: String? = null,
     val subHeader: String? = null,
     val label: String? = null,
-    val orientation: String? = null,
-    val showGuide: Boolean? = null,
-    val xGuide: Number? = 0,
-    val yGuide: Number? = 0,
-    val widthGuide: Int = 0,
-    val heightGuide: Int = 70,
+    val orientation: String? = null
 ) : Parcelable {
     companion object {
-        const val CONFIG_PUB_KEY = "CONFIG_PUB_KEY"
-        const val CONFIG_PROFILE_NAME = "CONFIG_PROFILE_NAME"
-        const val OP_SCANNER = 1001
-        const val ORIENTATION = "ORIENTATION"
-        const val SHARED = "SHARED"
-
         val default = Config(
             background = String.empty(),
             branding = true,

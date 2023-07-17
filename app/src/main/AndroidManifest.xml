@@ -1,16 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="org.newlogic.smartscanner">
+    package="org.newlogic.smartscanner"
+    android:versionName="1.0.2"
+    android:versionCode="1">
 
     <uses-feature android:name="android.hardware.camera.any" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        tools:ignore="ScopedStorage" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-        tools:ignore="CoarseFineLocation" />
-
     <uses-feature
         android:name="android.hardware.camera"
         android:required="true" />
@@ -26,7 +23,9 @@
         android:hardwareAccelerated="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:debuggable="true"
+        tools:ignore="HardcodedDebugMode">
         <activity
             android:name="MainActivity"
             android:exported="true"
@@ -44,11 +43,6 @@
             android:screenOrientation="nosensor" />
         <activity
             android:name=".result.IDPassResultActivity"
-            android:exported="true"
-            android:configChanges="orientation|keyboardHidden"
-            android:screenOrientation="nosensor" />
-        <activity
-            android:name=".result.RawResultActivity"
             android:exported="true"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="nosensor" />

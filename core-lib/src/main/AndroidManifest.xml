@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="org.idpass.smartscanner.lib">
+    package="org.idpass.smartscanner.lib"
+    android:versionName="1.0.2"
+    android:versionCode="1">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -45,6 +47,6 @@
             android:name=".nfc.NFCActivity"
             android:screenOrientation="nosensor"
             android:launchMode="singleInstance"
-            android:keepScreenOn="true"/>
+            android:keepScreenOn="true"/>]
     </application>
 </manifest>

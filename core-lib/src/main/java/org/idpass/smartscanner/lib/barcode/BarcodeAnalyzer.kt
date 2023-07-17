@@ -30,24 +30,23 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.SmartScannerActivity
-import org.idpass.smartscanner.lib.scanner.BaseImageAnalyzer
+import org.idpass.smartscanner.lib.platform.BaseImageAnalyzer
+import org.idpass.smartscanner.lib.platform.extension.*
+import org.idpass.smartscanner.lib.platform.utils.BitmapUtils
 import org.idpass.smartscanner.lib.scanner.config.ImageResultType
 import org.idpass.smartscanner.lib.scanner.config.Modes
-import org.idpass.smartscanner.lib.utils.BitmapUtils
-import org.idpass.smartscanner.lib.utils.extension.*
-import java.io.File
 
 
 class BarcodeAnalyzer(
     override val activity: Activity,
     override val intent: Intent,
     override val mode: String = Modes.BARCODE.value,
-    private val hasPDF417: Boolean,
+    private val isPDF417: Boolean,
     private val imageResultType: String,
     private val barcodeFormats: List<Int>
 ) : BaseImageAnalyzer() {
 
-    @SuppressLint("UnsafeExperimentalUsageError", "UnsafeOptInUsageError")
+    @SuppressLint("UnsafeExperimentalUsageError")
     override fun analyze(imageProxy: ImageProxy) {
         val bitmap = BitmapUtils.getBitmap(imageProxy)
         bitmap?.let { bf ->
@@ -77,25 +76,22 @@ class BarcodeAnalyzer(
                         "barcode: success: $timeRequired ms"
                     )
                     val filePath = activity.cacheImagePath()
-                    if (barcodes != null && barcodes.isNotEmpty()) {
-                        val barcode = barcodes[0]
-                        val corners = barcode.cornerPoints
+                    if (barcodes.isNotEmpty()) {
+                        val corners = barcodes[0].cornerPoints
                         val builder = StringBuilder()
                         if (corners != null) {
                             for (corner in corners) {
                                 builder.append("${corner.x},${corner.y} ")
                             }
                         }
-                        val bitmapResult = if (hasPDF417) bf.resize(640, 480) else bf
-                        bitmapResult?.cropCenter()?.cacheImageToLocal(
+                        bf.cacheImageToLocal(
                             filePath,
-                            imageProxy.imageInfo.rotationDegrees,
-                            if (imageResultType == ImageResultType.BASE_64.value) 30 else 80
+                            imageProxy.imageInfo.rotationDegrees
                         )
                         cornersString = builder.toString()
-                        rawValue =  barcode.rawValue ?: barcode.displayValue
-                        val imageFile = File(filePath)
-                        val imageResult = if (imageResultType == ImageResultType.BASE_64.value) imageFile.encodeBase64() else filePath
+                        rawValue = barcodes[0].rawValue
+                        val bitmapResult = if (isPDF417) bf.getResizedBitmap(480, 640) else bf
+                        val imageResult = if (imageResultType == ImageResultType.BASE_64.value) bitmapResult?.encodeBase64(rot) else filePath
                         val result = BarcodeResult(imagePath = filePath, image = imageResult, corners = cornersString, value = rawValue)
                         when (intent.action) {
                             ScannerConstants.IDPASS_SMARTSCANNER_BARCODE_INTENT,
@@ -129,9 +125,7 @@ class BarcodeAnalyzer(
         val data = Intent()
         Log.d(SmartScannerActivity.TAG, "Success from BARCODE")
         Log.d(SmartScannerActivity.TAG, "value: $result")
-        data.putExtra(SmartScannerActivity.SCANNER_IMAGE_TYPE, imageResultType)
         data.putExtra(SmartScannerActivity.SCANNER_RESULT, result)
-        data.putExtra(ScannerConstants.MODE, mode)
         activity.setResult(Activity.RESULT_OK, data)
         activity.finish()
     }

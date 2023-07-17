@@ -13,9 +13,8 @@
     <string name="mode_idpass_lite">ID PASS Lite</string>
     <string name="mode_mrz">MRZ Code</string>
     <string name="mode_nfc">E-Passport/ID Card (NFC)</string>
-    <string name="mode_pdf417">PDF417</string>
     <string name="mode_qr">QR Code</string>
-    <string name="mode_qr_gzip">QR Code (GZIP)</string>
+    <string name="mode_qr_voucher">Voucher Code</string>
 
     <!--Labels-->
     <string name="label_authenticate">Authenticate</string>
@@ -47,19 +46,15 @@
     <string name="label_orientation">ORIENTATION</string>
     <string name="label_portrait">Portrait</string>
     <string name="label_landscape">Landscape</string>
-    <string name="label_config_profile">CONFIGURATION PROFILE</string>
-    <string name="label_config_load">To load a configuration, scan a compatible QR code</string>
-    <string name="label_config_scan">Scan Configuration QR Code </string>
-    <string name="label_config_name">Profile Name</string>
-    <string name="label_config_pub_key">Public Key</string>
-    <string name="label_config_reset">Reset Configuration Profile</string>
-    <string name="label_config_reset_desc">This action resets the app back to default configuration.</string>
-    <string name="label_signature_verified">Signature verified</string>
-    <string name="header">Header</string>
-    <string name="payload">Payload</string>
-    <string name="raw_result">Raw result</string>
-    <string name="view_raw_result">View Raw Result</string>
-    <string name="config_loaded">Configuration loaded successfully</string>
-    <!-- Strings used for fragments for navigation -->
 
+    <!--Labels-->
+    <string name="field_voucher_id">Voucher ID</string>
+    <string name="field_date_issued">Date Issued</string>
+    <string name="field_date_expiry">Date of Expiry</string>
+    <string name="voucher_written">Voucher</string>
+    <string name="message">This voucher code is valid only for the service as mentioned in the below documents</string>
+<!--    <string name="field_voucher_id">Voucher ID</string>-->
+<!--    <string name="field_voucher_id">Voucher ID</string>-->
+<!--    <string name="field_voucher_id">Voucher ID</string>-->
+<!--    <string name="field_voucher_id">Voucher ID</string>-->
 </resources>

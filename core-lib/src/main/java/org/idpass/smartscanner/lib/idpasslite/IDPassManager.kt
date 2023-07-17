@@ -32,8 +32,8 @@ import org.idpass.lite.exceptions.InvalidCardException
 import org.idpass.lite.exceptions.InvalidKeyException
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.SmartScannerActivity
+import org.idpass.smartscanner.lib.platform.utils.DateUtils
 import org.idpass.smartscanner.lib.scanner.config.Modes
-import org.idpass.smartscanner.lib.utils.DateUtils
 
 
 object IDPassManager {
@@ -105,7 +105,6 @@ object IDPassManager {
         val data = Intent()
         Log.d(SmartScannerActivity.TAG, "Success from IDPASS LITE")
         Log.d(SmartScannerActivity.TAG, "value: $result")
-        data.putExtra(ScannerConstants.MODE, Modes.IDPASS_LITE.value)
         data.putExtra(SmartScannerActivity.SCANNER_RESULT_BYTES, result)
         activity.setResult(Activity.RESULT_OK, data)
         activity.finish()
