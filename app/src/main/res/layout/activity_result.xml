@@ -5,13 +5,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="org.newlogic.smartscanner.result.ResultActivity">
+    
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
     <LinearLayout
         android:id="@+id/linear_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingTop="12dp"
-        android:orientation="vertical">
+        android:layout_height="1000dp"
+        android:orientation="vertical"
+        android:background="#FAFAFA"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
@@ -22,7 +29,6 @@
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
-
                 <TextView
                     android:id="@+id/toolbar_title"
                     android:layout_width="wrap_content"
@@ -32,100 +38,464 @@
                     android:fontFamily="@font/sourcesanspro_medium"
                     android:text="@string/label_result"
                     android:textAllCaps="true"
-                    android:textColor="@color/black"
+                    android:textColor="#292727"
                     android:textSize="22sp"
                     android:textStyle="bold" />
             </FrameLayout>
         </androidx.appcompat.widget.Toolbar>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:layout_marginBottom="10dp"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <TextView
-                android:id="@+id/image_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="start"
-                android:layout_marginTop="4dp"
-                android:layout_marginBottom="4dp"
-                android:fontFamily="@font/sourcesanspro_regular"
-                android:gravity="start"
-                android:text="@string/label_result_image"
-                android:textColor="@color/newlogic_black"
-                android:textSize="16sp"
-                android:visibility="gone" />
-
-            <com.jsibbold.zoomage.ZoomageView
-                android:id="@+id/image_result"
-                android:layout_width="match_parent"
-                android:layout_height="280dp"
-                android:adjustViewBounds="true"
-                android:contentDescription="@string/label_content_description"
-                android:visibility="gone"
-                tools:srcCompat="@tools:sample/avatars" />
-
-            <LinearLayout
-                android:id="@+id/lv_information"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center_horizontal">
-                <TextView
-                    android:id="@+id/tv_information"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="18sp"
-                    android:drawablePadding="10dp"
-                    android:visibility="gone"
-                    android:textAlignment="center"
-                    android:layout_marginBottom="16dp"/>
-                <TextView
-                    android:id="@+id/tv_signature_verified"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="18sp"
-                    android:text="@string/label_signature_verified"
-                    app:drawableRightCompat="@drawable/ic_circle_check_fill"
-                    android:drawablePadding="10dp"
-                    android:visibility="gone"/>
-            </LinearLayout>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_result_list"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                tools:listitem="@layout/recycler_result_item"
-                tools:ignore="NestedWeights"
-                android:visibility="gone"/>
-
-            <TextView
-                android:id="@+id/text_result"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:fontFamily="@font/sourcesanspro_regular"
-                android:text="@string/label_hex"
-                android:textColor="@color/newlogic_black"
-                android:textSize="16sp"
-                android:visibility="gone"
-                tools:ignore="MissingConstraints"
-                tools:text="54 65 73 74 20 51 52 20  Test QR\n43 6F 64 65              Code" />
-        </LinearLayout>
-
-        <Button
-            android:id="@+id/btn_view_raw_result"
+        <TextView
+            android:id="@+id/text_result"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="12dp"
-            android:layout_margin="16dp"
-            android:text="@string/view_raw_result" />
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:fontFamily="@font/sourcesanspro_regular"
+            android:text="@string/label_hex"
+            android:textColor="@color/newlogic_black"
+            android:textSize="16sp"
+            tools:ignore="MissingConstraints"
+            android:visibility="gone"
+            tools:text="54 65 73 74 20 51 52 20  Test QR\n43 6F 64 65              Code" />
+
+        <TextView
+            android:id="@+id/image_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:fontFamily="@font/sourcesanspro_regular"
+            android:gravity="start"
+            android:text="@string/label_result_image"
+            android:textColor="@color/newlogic_black"
+            android:textSize="16sp"
+            android:visibility="gone" />
+
+        <com.jsibbold.zoomage.ZoomageView
+            android:id="@+id/image_result"
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/label_content_description"
+            tools:srcCompat="@tools:sample/avatars"
+            android:visibility="gone" />
+
+<!--        Main box-->
+        <FrameLayout
+            android:id="@+id/Box1"
+            android:layout_width="350dp"
+            android:layout_height="406dp"
+            android:layout_marginTop="40dp"
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone"
+            android:background="@drawable/rectangle_background">
+            <EditText
+                android:id="@+id/edit_text_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop = "71.5dp"
+                android:fontFamily="@font/inter_semi_bold"
+                android:gravity="center_horizontal"
+                android:editable="false"
+                android:textColor="#000000"
+                android:textSize="20sp"
+                android:background="@null"
+                tools:ignore="Autofill,LabelFor"/>
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginTop="105dp"
+                    android:src="@drawable/location"/>
+
+                <!--        Address-->
+                <EditText
+                    android:id="@+id/edit_text_address"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop = "105dp"
+                    android:layout_marginStart="15dp"
+                    android:fontFamily="@font/inter_semi_bold"
+                    android:textColor="#9B9B9B"
+                    android:editable="false"
+                    android:textSize="12sp"
+                    android:background="@null"
+                    tools:ignore="Autofill,LabelFor"/>
+            </FrameLayout>
+
+            <!--        Amount Approved-->
+            <EditText
+                android:id="@+id/edit_text_amount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop = "137dp"
+                android:fontFamily="@font/inter_bold"
+                android:gravity="center"
+                android:textColor="#E2781D"
+                android:editable="false"
+                android:textSize="34sp"
+                android:background="@null"
+                tools:ignore="Autofill,LabelFor"/>
+
+<!--            Service Provider Text-->
+            <TextView
+                android:id="@+id/service_provider"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="203dp"
+                android:gravity="center"
+                android:fontFamily="@font/inter_regular"
+                android:textColor="#666666"
+                android:textSize="13sp"
+                android:text="@string/service_provider"/>
+
+            <!--        Service Provider Name-->
+            <EditText
+                android:id="@+id/edit_text_serviceProvider"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop = "219dp"
+                android:textColor="#000000"
+                android:fontFamily="@font/inter_semi_bold"
+                android:editable="false"
+                android:gravity="center"
+                android:textSize="15sp"
+                android:background="@null"
+                tools:ignore="Autofill,LabelFor" />
+
+
+            <FrameLayout
+                android:layout_width="315dp"
+                android:layout_height="108dp"
+                android:layout_marginTop="284dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/rectangle_border">
+
+<!--                            Valid From Text-->
+                <TextView
+                    android:id="@+id/valid_from"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="20dp"
+                    android:fontFamily="@font/inter_regular"
+                    android:textColor="#666666"
+                    android:textSize="11sp"
+                    android:text="@string/valid_from"/>
+
+                <!--        Date Issued-->
+                <EditText
+                    android:id="@+id/edit_text_dateIssue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="40dp"
+                    android:layout_marginStart="20dp"
+                    android:textColor="#000000"
+                    android:fontFamily="@font/inter_semi_bold"
+                    android:editable="false"
+                    android:textSize="12sp"
+                    android:background="@null"
+                    tools:ignore="Autofill,LabelFor"
+                    app:layout_constraintTop_toBottomOf="@+id/valid_from"/>
+
+    <!--                Valid To-->
+                <TextView
+                    android:id="@+id/valid_to"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="225dp"
+                    android:layout_marginTop="20dp"
+                    android:fontFamily="@font/inter_regular"
+                    android:textColor="#666666"
+                    android:textSize="11sp"
+                    android:text="@string/valid_to"/>
+
+                <!--        Date Expires-->
+                <EditText
+                    android:id="@+id/edit_text_dateExpiry"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="225dp"
+                    android:layout_marginTop="40dp"
+                    android:fontFamily="@font/inter_semi_bold"
+                    android:editable="false"
+                    android:textSize="12sp"
+                    android:background="@null"
+                    tools:ignore="Autofill,LabelFor"
+                    app:layout_constraintTop_toBottomOf="@+id/valid_to"/>
+
+<!--                Voucher Code box-->
+                <FrameLayout
+                    android:layout_width="300dp"
+                    android:layout_height="34dp"
+                    android:layout_marginTop="30dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/orange_rectangle">
+
+                    <!--        Voucher code-->
+                    <EditText
+                        android:id="@+id/edit_text_code"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:focusable="false"
+                        android:fontFamily="@font/inter_semi_bold"
+                        android:editable="false"
+                        android:gravity="center"
+                        android:textColor="#A35918"
+                        android:textIsSelectable="true"
+                        android:textSize="15sp"
+                        android:background="@null"
+                        tools:ignore="Autofill,LabelFor"/>
+
+                </FrameLayout>
+
+            </FrameLayout>
+
+            <!--                Voucher written-->
+
+            <FrameLayout
+                android:layout_width="103dp"
+                android:layout_height="38dp"
+                android:layout_marginTop="80dp"
+                android:layout_gravity="center"
+                android:background="@drawable/orange_rounded_rectangle"
+                >
+                
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="left"
+                    android:src="@drawable/voucher"/>
+                
+                <TextView
+                    android:id="@+id/voucher_written"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/inter_semi_bold"
+                    android:textColor="#535353"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginStart="40dp"
+                    android:textSize="12sp"
+                    android:text="@string/voucher_written"/>
+            </FrameLayout>
+
+        </FrameLayout>
+
+<!--        Box 2-->
+        <FrameLayout
+            android:id="@+id/Box2"
+            android:layout_width="350dp"
+            android:layout_height="180dp"
+            android:layout_marginTop="15dp"
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone"
+            android:background="@drawable/rectangle_background">
+
+            <TextView
+                android:id="@+id/edit_text_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                android:fontFamily="@font/inter_medium"
+                android:text="@string/message"
+                android:editable="false"
+                android:textColor="@color/black"
+                android:textSize="15sp"
+                />
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="10dp"/>
+<!--            Doc 1-->
+            <FrameLayout
+                android:id="@+id/iconOne"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginTop="60dp"
+                android:visibility="gone"
+                android:layout_marginStart="14dp"
+                android:background="@drawable/docs_icon_box">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/attachment_icon"/>
+
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/docOneBox"
+                android:layout_width="300dp"
+                android:layout_height="35dp"
+                android:layout_marginTop="60dp"
+                android:layout_marginStart="45dp"
+                android:visibility="gone"
+                android:background="@drawable/docs_box">
+
+                <TextView
+                    android:id="@+id/docOne"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="10dp"
+                    android:textSize="10sp"
+                    android:gravity="center_vertical"
+                    android:autoLink="web"
+                    android:linksClickable="true"/>
+
+
+            </FrameLayout>
+
+            <!--            Doc 2-->
+            <FrameLayout
+                android:id="@+id/iconTwo"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:visibility="gone"
+                android:layout_marginTop="95dp"
+                android:layout_marginStart="15dp"
+                android:background="@drawable/docs_icon_box">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/attachment_icon"/>
+
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/docTwoBox"
+                android:layout_width="300dp"
+                android:layout_height="35dp"
+                android:layout_marginTop="95dp"
+                android:layout_marginStart="45dp"
+                android:visibility="gone"
+                android:background="@drawable/docs_box">
+
+                <TextView
+                    android:id="@+id/docTwo"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="10dp"
+                    android:textSize="10sp"
+                    android:gravity="center_vertical"
+                    android:autoLink="web"
+                    android:linksClickable="true"/>
+
+
+            </FrameLayout>
+
+            <!--            Doc 3-->
+
+            <FrameLayout
+                android:id="@+id/iconThree"
+                android:visibility="gone"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginTop="130dp"
+                android:layout_marginStart="15dp"
+                android:background="@drawable/docs_icon_box">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/attachment_icon"/>
+
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/docThreeBox"
+                android:visibility="gone"
+                android:layout_width="300dp"
+                android:layout_height="35dp"
+                android:layout_marginTop="130dp"
+                android:layout_marginStart="45dp"
+
+                android:background="@drawable/docs_box">
+
+                <TextView
+                    android:id="@+id/docThree"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="10dp"
+                    android:textSize="10sp"
+                    android:gravity="center_vertical"
+                    android:autoLink="web"
+                    android:linksClickable="true"/>
+
+
+            </FrameLayout>
+
+        </FrameLayout>
 
     </LinearLayout>
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/greenTick"
+            android:layout_width="match_parent"
+            android:layout_height="140dp"
+            android:layout_marginTop="40dp"
+            android:src="@drawable/success_message_icon"
+            android:visibility="gone"/>
+    </FrameLayout>
+
+
+<!--    Failed Screen-->
+    <FrameLayout
+        android:id="@+id/failed"
+        android:layout_width="331dp"
+        android:layout_height="270dp"
+        android:visibility="gone"
+        android:layout_marginTop="134dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginEnd="22dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:background="@drawable/rectangle_background">
+
+        <ImageView
+            android:layout_width="41.52dp"
+            android:layout_height="41.52dp"
+            android:layout_marginTop="52.24dp"
+            android:layout_marginStart="143.24dp"
+            android:src="@drawable/failure_message_icon"/>
+        
+        <TextView
+            android:layout_width="116dp"
+            android:layout_height="20dp"
+            android:layout_marginTop="122.25dp"
+            android:layout_marginStart="116.26dp"
+            android:text="@string/qr_scan_failed"
+            android:fontFamily="@font/inter_semi_bold"
+            android:textColor="@color/black"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="156.75dp"
+            android:layout_marginStart="14dp"
+            android:layout_marginEnd="14dp"
+            android:text="@string/fail_message"
+            android:fontFamily="@font/inter_regular"
+            android:textColor="#9B9B9B"/>
+
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

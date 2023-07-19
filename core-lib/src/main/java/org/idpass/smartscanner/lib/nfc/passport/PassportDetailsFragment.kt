@@ -20,22 +20,20 @@ package org.idpass.smartscanner.lib.nfc.passport
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import org.idpass.smartscanner.lib.R
 import org.idpass.smartscanner.lib.databinding.FragmentPassportDetailsBinding
 import org.idpass.smartscanner.lib.nfc.NFCResult
 import org.idpass.smartscanner.lib.nfc.details.IntentData
-import org.idpass.smartscanner.lib.utils.DateUtils
-import org.idpass.smartscanner.lib.utils.DateUtils.formatStandardDate
-import org.idpass.smartscanner.lib.utils.extension.arrayToString
-import org.idpass.smartscanner.lib.utils.extension.bytesToHex
+import org.idpass.smartscanner.lib.platform.extension.arrayToString
+import org.idpass.smartscanner.lib.platform.extension.bytesToHex
+import org.idpass.smartscanner.lib.platform.utils.DateUtils
+import org.idpass.smartscanner.lib.platform.utils.DateUtils.formatStandardDate
 import org.jmrtd.FeatureStatus
 import org.jmrtd.VerificationStatus
 import java.security.MessageDigest
@@ -90,7 +88,6 @@ class PassportDetailsFragment : androidx.fragment.app.Fragment() {
         refreshData(passport)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("SetTextI18n")
     private fun refreshData(passport: Passport?) {
         if (passport == null) return

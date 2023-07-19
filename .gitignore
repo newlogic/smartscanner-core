@@ -1,7 +1,7 @@
 # Built application files
 *.apk
 *.aab
-google-services.json
+app/google-services.json
 #*.aar
 #*.ap_
 

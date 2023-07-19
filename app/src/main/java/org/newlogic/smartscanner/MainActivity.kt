@@ -29,30 +29,22 @@ import com.google.android.material.snackbar.Snackbar
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.api.ScannerIntent
 import org.idpass.smartscanner.lib.SmartScannerActivity
-import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_FAIL_RESULT
-import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_HEADER_RESULT
-import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_IMAGE_TYPE
-import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_JWT_CONFIG_UPDATE
-import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RAW_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT_BYTES
-import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_SIGNATURE_VERIFICATION
 import org.idpass.smartscanner.lib.nfc.NFCActivity
 import org.idpass.smartscanner.lib.scanner.config.*
-import org.idpass.smartscanner.lib.scanner.config.Config.Companion.OP_SCANNER
-import org.idpass.smartscanner.lib.scanner.config.Config.Companion.ORIENTATION
 import org.newlogic.smartscanner.databinding.ActivityMainBinding
 import org.newlogic.smartscanner.result.IDPassResultActivity
 import org.newlogic.smartscanner.result.ResultActivity
 import org.newlogic.smartscanner.settings.SettingsActivity
+import org.newlogic.smartscanner.settings.SettingsActivity.Companion.ORIENTATION
 
 
 class MainActivity : AppCompatActivity() {
 
     companion object {
-
         const val OP_SCANNER = 1001
-        private val imageType = ImageResultType.PATH.value
+        var imageType = ImageResultType.PATH.value
 
         private fun sampleConfig(isManualCapture: Boolean, label: String = "", orientation : String? = Orientation.PORTRAIT.value) = Config(
             branding = true,
@@ -71,20 +63,18 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
-        preference = getSharedPreferences(Config.SHARED, Context.MODE_PRIVATE)
+        preference = getSharedPreferences(SmartScannerApplication.SHARED, Context.MODE_PRIVATE)
     }
 
     override fun onStart() {
         super.onStart()
-        // Choose scan modes
-        binding.itemBarcode.item.setOnClickListener { scanBarcode(BarcodeOptions.default) }
-        binding.itemIdpassLite.item.setOnClickListener { scanIDPassLite() }
-        binding.itemMrz.item.setOnClickListener { scanMRZ() }
-        binding.itemQr.item.setOnClickListener { scanQRCode() }
-//        binding.itemQrGzip.item.setOnClickListener { scanQRCodeGzip() }
-        binding.itemNfc.item.setOnClickListener { scanNFC() }
-        binding.itemPdf417.item.setOnClickListener { scanPDF417() }
-        binding.itemQr.item.setOnClickListener { scanQRCode() }
+        // Choose scan type
+//        binding.itemBarcode.item.setOnClickListener { scanBarcode(BarcodeOptions.default) }
+//        binding.itemIdpassLite.item.setOnClickListener { scanIDPassLite() }
+//        binding.itemMrz.item.setOnClickListener { scanMRZ() }
+//        binding.itemQr.item.setOnClickListener { scanQRCode() }
+//        binding.itemNfc.item.setOnClickListener { scanNFC() }
+        binding.itemQrVoucher.item.setOnClickListener { scanQRCode() }
         // Change language
         binding.languageSettings.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
@@ -132,14 +122,7 @@ class MainActivity : AppCompatActivity() {
             ScannerOptions(
                 mode = Modes.MRZ.value,
                 language = getLanguage(preference),
-                config = Config(
-                    branding = true,
-                    imageResultType = imageType,
-                    label = "",
-                    isManualCapture = true,
-                    orientation = getOrientation(preference),
-                    showGuide = true
-                )
+                config = sampleConfig(isManualCapture = true, orientation = getOrientation(preference)),
             )
         )
         startActivityForResult(intent, OP_SCANNER)
@@ -160,8 +143,7 @@ class MainActivity : AppCompatActivity() {
                         header = getString(R.string.label_scan_nfc_capture),
                         subHeader = getString(R.string.label_scan_nfc_via_mrz),
                         isManualCapture = false,
-                        branding = true,
-                        showGuide = true
+                        branding = true
                     )
                 )
             )
@@ -170,31 +152,11 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun scanPDF417() {
-        val intent = Intent(this, SmartScannerActivity::class.java)
-        intent.putExtra(
-            SmartScannerActivity.SCANNER_OPTIONS,
-            ScannerOptions(
-                mode = Modes.PDF_417.value,
-                language = getLanguage(preference),
-                scannerSize = ScannerSize.SMALL.value,
-                config = sampleConfig(false)
-            )
-        )
-        startActivityForResult(intent, OP_SCANNER)
-    }
-
     private fun scanQRCode()  {
-        val intent = Intent(this, SmartScannerActivity::class.java)
-        intent.putExtra(
-            SmartScannerActivity.SCANNER_OPTIONS,
-            ScannerOptions(
-                mode = Modes.QRCODE.value,
-                language = preference?.getString(Language.NAME, Language.EN),
-                scannerSize = ScannerSize.LARGE.value,
-                qrCodeOptions = QRcodeOptions(isJson = true),
-                config = sampleConfig(false)
-            )
+        val intent = ScannerIntent.intentQRCode(
+            isGzipped = true,
+            isJson = true,
+            jsonPath = "" // ex: "$.members[1].lastName"
         )
         startActivityForResult(intent, OP_SCANNER)
     }
@@ -209,61 +171,37 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == OP_SCANNER) {
             Log.d(SmartScannerActivity.TAG, "Scanner resultCode $resultCode")
             if (resultCode == RESULT_OK) {
-                val bundle = intent?.getBundleExtra(ScannerConstants.RESULT)
-                val mIntent: Intent;
-
-                if (bundle != null) {
-                    // Get Result from Bundle Intent Call Out
-                    if (bundle.getString(ScannerConstants.MODE) == Modes.IDPASS_LITE.value) {
+                // Get Result from Bundle Intent Call Out
+                intent?.getBundleExtra(ScannerConstants.RESULT)?.let { bundleResult ->
+                    Log.d(SmartScannerActivity.TAG, "Scanner result bundle: $bundleResult")
+                    if (bundleResult.getString(ScannerConstants.MODE) == Modes.IDPASS_LITE.value) {
                         // Go to ID PASS Lite Results Screen via bundle
-                        mIntent = Intent(this, IDPassResultActivity::class.java)
-                        mIntent.putExtra(IDPassResultActivity.BUNDLE_RESULT, bundle)
+                        val myIntent = Intent(this, IDPassResultActivity::class.java)
+                        myIntent.putExtra(IDPassResultActivity.BUNDLE_RESULT, bundleResult)
+                        startActivity(myIntent)
                     } else {
-                        // Go to Results Screen via bundle
-                        mIntent = Intent(this, ResultActivity::class.java)
-                        mIntent.putExtra(ResultActivity.BUNDLE_RESULT, bundle)
+                        // Go to Barcode/MRZ Results Screen via bundle
+                        val resultIntent = Intent(this, ResultActivity::class.java)
+                        resultIntent.putExtra(ResultActivity.BUNDLE_RESULT, bundleResult)
+                        startActivity(resultIntent)
                     }
-                } else {
-                    // Get Result from Intent extras
-                    if (intent?.getStringExtra(ScannerConstants.MODE) == Modes.IDPASS_LITE.value) {
-                        // Go to ID PASS Lite Results Screen
-                        val resultBytes = intent.getByteArrayExtra(SCANNER_RESULT_BYTES)
-                        mIntent = Intent(this, IDPassResultActivity::class.java)
-                        mIntent.putExtra(IDPassResultActivity.RESULT, resultBytes)
+                } ?: run {
+                    // Get Result from JSON String
+                    val result = intent?.getStringExtra(SCANNER_RESULT)
+                    Log.d(SmartScannerActivity.TAG, "Scanner result string: $result")
+                    if (!result.isNullOrEmpty()) {
+                        // Go to Barcode/MRZ Results Screen
+                        val resultIntent = Intent(this, ResultActivity::class.java)
+                        resultIntent.putExtra(ResultActivity.RESULT, result)
+                        startActivity(resultIntent)
                     } else {
-
-                        // Check if it should go to the settings instead
-                        val isConfigUpdated = intent?.getBooleanExtra(SCANNER_JWT_CONFIG_UPDATE, false)
-
-                        // should go to settings
-                        if (isConfigUpdated == true) {
-                            val sIntent = Intent(this, SettingsActivity::class.java)
-                            sIntent.putExtra(SettingsActivity.CONFIG_UPDATED, true)
-                            startActivity(sIntent)
-                            return
-                        }
-
-                        // Go to Results Screen
-                        val result = intent?.getStringExtra(SCANNER_RESULT)
-                        val verified = intent?.getBooleanExtra(SCANNER_SIGNATURE_VERIFICATION, false)
-                        val rawResult = intent?.getStringExtra(SCANNER_RAW_RESULT)
-                        val failResult = intent?.getStringExtra(SCANNER_FAIL_RESULT)
-                        val headerResult = intent?.getStringExtra(SCANNER_HEADER_RESULT)
-
-                        mIntent = Intent(this, ResultActivity::class.java)
-                        mIntent.putExtra(ResultActivity.SIGNATURE_VERIFIED, verified)
-                        mIntent.putExtra(ResultActivity.IMAGE_TYPE, intent?.getStringExtra(SCANNER_IMAGE_TYPE))
-                        mIntent.putExtra(ResultActivity.RESULT, result)
-                        mIntent.putExtra(ResultActivity.FAIL_RESULT, failResult)
-                        mIntent.putExtra(ResultActivity.RAW_RESULT, rawResult)
-                        mIntent.putExtra(ResultActivity.HEADER_RESULT, headerResult)
-
+                        // Go to ID PASS Lite Results Screen
+                        val resultBytes = intent?.getByteArrayExtra(SCANNER_RESULT_BYTES)
+                        val myIntent = Intent(this, IDPassResultActivity::class.java)
+                        myIntent.putExtra(IDPassResultActivity.RESULT, resultBytes)
+                        startActivity(myIntent)
                     }
                 }
-
-
-                mIntent.putExtra(ScannerConstants.MODE, intent?.getStringExtra(ScannerConstants.MODE))
-                startActivity(mIntent)
             }
         }
     }

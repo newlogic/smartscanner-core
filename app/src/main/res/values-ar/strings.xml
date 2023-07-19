@@ -13,9 +13,8 @@
     <string name="mode_idpass_lite">معرف باس لايت</string>
     <string name="mode_mrz">كود MRZ</string>
     <string name="mode_nfc">الجواز الالكتروني/بطاقة الهوية (NFC)</string>
-    <string name="mode_pdf417">PDF417</string>
     <string name="mode_qr">كيو ار كود</string>
-    <string name="mode_qr_gzip">رمز الاستجابة السريعة (GZIP)</string>
+    <string name="mode_qr_voucher">Voucher Code</string>
 
     <!--Labels-->
     <string name="label_authenticate">المصادقة</string>
@@ -35,7 +34,7 @@
     <string name="label_cancel">الفاء</string>
     <string name="label_gzip_json">GZIP/JSON</string>
     <string name="please">يرجى مسح MRZ للتحقق من الهوية</string>
-    <string name="english">English</string>
+    <string name="english">اللغه الانجليزيه</string>
     <string name="developed_by_newlogic">طور بواسطة Newlogic</string>
     <string name="languages">اللغات</string>
     <string name="language_and_region">اللغه والمنطقة</string>
@@ -46,18 +45,13 @@
     <string name="label_orientation">توجيه</string>
     <string name="label_portrait">لوحة</string>
     <string name="label_landscape">منظر جمالي</string>
-    <string name="label_config_profile">ملف تعريف التكوين</string>
-    <string name="label_config_load">لتحميل تكوين ، امسح رمز QR متوافقًا</string>
-    <string name="label_config_scan">مسح تكوين رمز الاستجابة السريعة </string>
-    <string name="label_config_name">اسم الشخصية</string>
-    <string name="label_config_pub_key">المفتاح العمومي</string>
-    <string name="label_config_reset">إعادة تعيين ملف تعريف التكوين</string>
-    <string name="label_config_reset_desc">يؤدي هذا الإجراء إلى إعادة تعيين التطبيق إلى التكوين الافتراضي.</string>
-    <string name="label_signature_verified">تم التحقق من التوقيع</string>
-    <string name="header">عنوان</string>
-    <string name="payload">الحمولة</string>
-    <string name="raw_result">البيانات الخام</string>
-    <string name="view_raw_result">عرض البيانات الخام</string>
-    <string name="config_loaded">تم تحميل التكوين بنجاح</string>
+
+    <string name="field_voucher_id">Voucher ID</string>
+    <string name="voucher_written">Voucher</string>
+    <string name="field_date_issued">Date Issued</string>
+    <string name="field_date_expiry">Date of Expiry</string>
+    <string name="message">Dear Maria Isabel, please note that this voucher code
+        is valid only for the services as mentioned by you
+        in the below documents.</string>
 
 </resources>

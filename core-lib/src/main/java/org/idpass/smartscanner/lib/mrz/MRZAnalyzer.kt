@@ -19,197 +19,223 @@ package org.idpass.smartscanner.lib.mrz
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
-import android.view.View
-import android.widget.ImageView
 import androidx.camera.core.ImageProxy
 import com.google.gson.Gson
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import com.googlecode.tesseract.android.TessBaseAPI
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.R
 import org.idpass.smartscanner.lib.SmartScannerActivity
-import org.idpass.smartscanner.lib.scanner.BaseImageAnalyzer
+import org.idpass.smartscanner.lib.platform.BaseImageAnalyzer
+import org.idpass.smartscanner.lib.platform.extension.*
+import org.idpass.smartscanner.lib.platform.utils.BitmapUtils
+import org.idpass.smartscanner.lib.platform.utils.FileUtils
 import org.idpass.smartscanner.lib.scanner.config.ImageResultType
 import org.idpass.smartscanner.lib.scanner.config.Modes
 import org.idpass.smartscanner.lib.scanner.config.MrzFormat
-import org.idpass.smartscanner.lib.utils.BitmapUtils
-import org.idpass.smartscanner.lib.utils.extension.*
-import java.io.File
 import java.net.URLEncoder
 
 open class MRZAnalyzer(
-    override val activity: Activity,
-    override val intent: Intent,
-    override val mode: String = Modes.MRZ.value,
-    private val language: String? = null,
-    private val label: String? = null,
-    private val locale: String? = null,
-    private val withPhoto: Boolean? = null,
-    private val withMrzPhoto: Boolean? = null,
-    private val captureLog: Boolean? = null,
-    private val enableLogging: Boolean? = null,
-    private val isMLKit: Boolean,
-    private val imageResultType: String,
-    private val format: String?,
-    private val analyzeStart: Long,
-    private val isShowGuide: Boolean? = false
+        override val activity: Activity,
+        override val intent: Intent,
+        override val mode: String = Modes.MRZ.value,
+        private val language: String? = null,
+        private val label: String? = null,
+        private val locale: String? = null,
+        private val withPhoto: Boolean? = null,
+        private val withMrzPhoto: Boolean? = null,
+        private val captureLog: Boolean? = null,
+        private val enableLogging: Boolean? = null,
+        private val isMLKit: Boolean,
+        private val imageResultType: String,
+        private val format: String?,
+        private val analyzeStart: Long,
+        private val onConnectSuccess: (String) -> Unit,
+        private val onConnectFail: (String) -> Unit
 ) : BaseImageAnalyzer() {
 
-    @SuppressLint("UnsafeExperimentalUsageError", "UnsafeOptInUsageError")
+    private lateinit var tessBaseAPI: TessBaseAPI
+
+    fun initializeTesseract(context : Context) {
+        val extDirPath: String = context.getExternalFilesDir(null)!!.absolutePath
+        Log.d(SmartScannerActivity.TAG, "path: $extDirPath")
+        FileUtils.copyAssets(context, "tessdata", extDirPath)
+        tessBaseAPI = TessBaseAPI()
+        tessBaseAPI.init(extDirPath, "ocrb_int", TessBaseAPI.OEM_DEFAULT)
+        tessBaseAPI.pageSegMode = TessBaseAPI.PageSegMode.PSM_SINGLE_BLOCK
+    }
+
+    @SuppressLint("UnsafeExperimentalUsageError")
     override fun analyze(imageProxy: ImageProxy) {
         val bitmap = BitmapUtils.getBitmap(imageProxy)
         bitmap?.let { bf ->
-            val rotation = imageProxy.imageInfo.rotationDegrees
+            val rot = imageProxy.imageInfo.rotationDegrees
             bf.apply {
                 // Increase brightness and contrast for clearer image to be processed
-                setContrast(1.1F)
-                setBrightness(3F)
+                setContrast(1.5F)
+                setBrightness(5F)
             }
-
-            val rectGuide = activity.findViewById<ImageView>(R.id.rect_guide)
-            val viewFinder = activity.findViewById<View>(R.id.view_finder)
-            var inputBitmap = bf
-            var inputRot = rotation
-            var rotatedBF = BitmapUtils.rotateImage(bf, rotation)
-
-            if (isShowGuide != null && isShowGuide) {
-                // try to cropped forcefully
-
-                // Crop preview area
-                val cropHeight = if (rotatedBF.width < viewFinder.width) {
-                    // if preview area larger than analysing image
-                    val koeff = rotatedBF.width.toFloat() / viewFinder!!.width.toFloat()
-                    viewFinder.height.toFloat() * koeff
-                } else {
-                    // if preview area smaller than analysing image
-                    val prc = 100 - (viewFinder.width.toFloat() / (rotatedBF.width.toFloat() / 100f))
-                    viewFinder.height + ((viewFinder.height.toFloat() / 100f) * prc)
-                }
-                val cropTop = (rotatedBF.height / 2) - (cropHeight / 2)
-                rotatedBF = Bitmap.createBitmap(rotatedBF, 0, cropTop.toInt(), rotatedBF.width, cropHeight.toInt())
-
-                // Crop MRZ area
-                val ratio = rotatedBF.width.toFloat() / viewFinder.width.toFloat()
-                val x = (25 - 16).toPx * ratio
-                val y = (viewFinder.height - 30.toPx - rectGuide.height) * ratio
-                val width = rectGuide.width * ratio
-                val height = rectGuide.height * ratio
-                inputBitmap = Bitmap.createBitmap(rotatedBF, x.toInt(), y.toInt(), width.toInt(), height.toInt())
-                inputRot = 0
-            }
-
-
-            // Pass image to an ML Kit Vision API
-            Log.d("${SmartScannerActivity.TAG}/SmartScanner", "MRZ MLKit: start")
-            val start = System.currentTimeMillis()
-            val image = InputImage.fromBitmap(inputBitmap, inputRot)
-            val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-            Log.d("${SmartScannerActivity.TAG}/SmartScanner", "MRZ MLKit TextRecognition: process")
-
-            recognizer.process(image)
-
-                .addOnSuccessListener { visionText ->
-
-//                    rectGuide.setImageBitmap(cropped);
-
-//                    Log.d(
-//                        "${SmartScannerActivity.TAG}/SmartScanner",
-//                        "rect imagveview box ${rectGuide.width} , ${rectGuide.height}",
-//                    )
-
-                    val timeRequired = System.currentTimeMillis() - start
-                    Log.d(
-                        "${SmartScannerActivity.TAG}/SmartScanner",
-                        "MRZ MLKit TextRecognition: success: $timeRequired ms"
+            val cropped = when (rot) {
+                90, 270 -> {
+                    Bitmap.createBitmap(
+                        bf,
+                        bf.width / 2,
+                        0,
+                        bf.width / 2,
+                        bf.height
                     )
-                    var rawFullRead = ""
-                    val blocks = visionText.textBlocks
+                }
+                180 -> Bitmap.createBitmap(bf, 0 , bf.height / 4, bf.width, bf.height / 4)
+                else -> Bitmap.createBitmap(bf, 0 , bf.height / 3, bf.width, bf.height / 3)
 
-//                    val boxes = ArrayList<MRZBox>()
-//                    val bdParent = activity.findViewById<RelativeLayout>(R.id.rect_bounding_layout)
-//
-//                    if (bdParent.childCount > 1) {
-//                        bdParent.removeAllViews()
-//                    }
-
-                    for (i in blocks.indices) {
-                        val lines = blocks[i].lines
-                        for (j in lines.indices) {
-                            if (lines[j].text.contains('<')) {
-                                rawFullRead += lines[j].text + "\n"
-
-                                // get boundingBox here
-//                                blocks[i].boundingBox?.let { MRZBox(it) }?.let { boxes.add(it) }
-
-//                                val element = blocks[i].boundingBox?.let { BoundingBoxDraw(activity, it) }
-
-//                                bdParent.addView(element)
-
+            }
+            Log.d(
+                    SmartScannerActivity.TAG,
+                    "Bitmap: (${bf.width}, ${bf.height} Cropped: (${cropped.width}, ${cropped.height}), Rotation: $rot"
+            )
+            //if (isMLKit) {
+                // Pass image to an ML Kit Vision API
+                Log.d("${SmartScannerActivity.TAG}/SmartScanner", "MRZ MLKit: start")
+                val start = System.currentTimeMillis()
+                val rotation = imageProxy.imageInfo.rotationDegrees
+                val image = InputImage.fromBitmap(cropped, rotation)
+                val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+                Log.d("${SmartScannerActivity.TAG}/SmartScanner", "MRZ MLKit TextRecognition: process")
+                recognizer.process(image)
+                        .addOnSuccessListener { visionText ->
+                            onConnectSuccess.invoke(activity.getString(R.string.model_text_loaded))
+                            val timeRequired = System.currentTimeMillis() - start
+                            Log.d(
+                                    "${SmartScannerActivity.TAG}/SmartScanner",
+                                    "MRZ MLKit TextRecognition: success: $timeRequired ms"
+                            )
+                            var rawFullRead = ""
+                            val blocks = visionText.textBlocks
+                            for (i in blocks.indices) {
+                                val lines = blocks[i].lines
+                                for (j in lines.indices) {
+                                    if (lines[j].text.contains('<')) {
+                                        rawFullRead += lines[j].text + "\n"
+                                    }
+                                }
                             }
+                            try {
+                                Log.d(
+                                        "${SmartScannerActivity.TAG}/SmartScanner",
+                                        "Before cleaner: [${
+                                            URLEncoder.encode(rawFullRead, "UTF-8")
+                                                    .replace("%3C", "<").replace("%0A", "↩")
+                                        }]"
+                                )
+                                val cleanMRZ = MRZCleaner.clean(rawFullRead)
+                                Log.d(
+                                        "${SmartScannerActivity.TAG}/SmartScanner",
+                                        "After cleaner = [${
+                                            URLEncoder.encode(cleanMRZ, "UTF-8")
+                                                    .replace("%3C", "<").replace("%0A", "↩")
+                                        }]"
+                                )
+                                processResult(result = cleanMRZ, bitmap = bf, rotation = rotation)
+                            } catch (e: Exception) {
+                                Log.d("${SmartScannerActivity.TAG}/SmartScanner", e.toString())
+                            }
+                            imageProxy.close()
                         }
-                    }
-
-                    try {
+                        .addOnFailureListener { e ->
+                            e.printStackTrace()
+                            val timeElapsed = (System.currentTimeMillis() - analyzeStart).toDouble() / 1000
+                            Log.d(
+                                    "${SmartScannerActivity.TAG}/SmartScanner",
+                                    "MRZ MLKit TextRecognition: failure: ${e.message}"
+                            )
+                            val connectionId = if (activity.getConnectionType() == 0) {
+                                R.string.connection_text
+                            }
+                            else {
+                                when (timeElapsed) {
+                                    in 0.0..10.0 -> R.string.model_text_waiting // 0-10 secs msg
+                                    in 10.0..60.0 -> R.string.model_text // 10-60 secs msg
+                                    in 60.0..180.0-> R.string.model_text_download // 60-180 secs msg
+                                    in 180.0..300.0-> R.string.model_text_process // 180-300 secs msg
+                                    else -> R.string.model_text_process_wait
+                                }
+                            }
+                            onConnectFail.invoke(activity.getString(connectionId))
+                            imageProxy.close()
+                        }
+            /*} else {
+                if (::tessBaseAPI.isInitialized) {
+                    Log.d("${SmartScannerActivity.TAG}/SmartScanner", "MRZ Tesseract: start")
+                    val start = System.currentTimeMillis()
+                    thread(start = true) {
+                        Log.d("${SmartScannerActivity.TAG}/SmartScanner", "MRZ Tesseract: process")
+                        val rotation = imageProxy.imageInfo.rotationDegrees
+                        val matrix = Matrix()
+                        matrix.postRotate(rotation.toFloat())
+                        val rotatedBitmap = Bitmap.createBitmap(
+                                cropped,
+                                0,
+                                0,
+                                cropped.width,
+                                cropped.height,
+                                matrix,
+                                true
+                        )
+                        tessBaseAPI.setImage(rotatedBitmap)
+                        val tessResult = tessBaseAPI.utF8Text
+                        val timeRequired = System.currentTimeMillis() - start
                         Log.d(
                             "${SmartScannerActivity.TAG}/SmartScanner",
-                            "Before cleaner: [${
-                                URLEncoder.encode(rawFullRead, "UTF-8")
-                                    .replace("%3C", "<").replace("%0A", "↩")
-                            }]"
+                            "MRZ Tesseract result: success: $timeRequired ms"
                         )
-                        val cleanMRZ = MRZCleaner.clean(rawFullRead)
-                        Log.d(
-                            "${SmartScannerActivity.TAG}/SmartScanner",
-                            "After cleaner = [${
-                                URLEncoder.encode(cleanMRZ, "UTF-8")
-                                    .replace("%3C", "<").replace("%0A", "↩")
-                            }]"
-                        )
-
-
-//                        val tsLong = System.currentTimeMillis() / 1000
-//                        val ts = tsLong.toString()
-
-//                        BitmapUtils.saveImage(rotatedBF, "mrz-${ts}-original.png")
-//                        BitmapUtils.saveImage(cropped, "mrz-${ts}-check.png")
-                        processResult(result = cleanMRZ, bitmap = bf, rotation = rotation)
-//                        BitmapUtils.saveImage(cropped, "mrz-${ts}-success.png")
-
-                    } catch (e: Exception) {
-                        Log.d("${SmartScannerActivity.TAG}/SmartScanner", e.toString())
+                        try {
+                            Log.d(
+                                    "${SmartScannerActivity.TAG}/Tesseract",
+                                    "Before cleaner: [${
+                                        URLEncoder.encode(tessResult, "UTF-8")
+                                                .replace("%3C", "<").replace("%0A", "↩")
+                                    }]"
+                            )
+                            val cleanMRZ = MRZCleaner.clean(tessResult)
+                            Log.d(
+                                    "${SmartScannerActivity.TAG}/Tesseract",
+                                    "After cleaner = [${
+                                        URLEncoder.encode(cleanMRZ, "UTF-8")
+                                                .replace("%3C", "<")
+                                                .replace("%0A", "↩")
+                                    }]"
+                            )
+                            processResult(result = cleanMRZ, bitmap = bf, rotation = imageProxy.imageInfo.rotationDegrees)
+                        } catch (e: Exception) { // MrzParseException, IllegalArgumentException
+                            Log.d("${SmartScannerActivity.TAG}/Tesseract", e.toString())
+                        }
+                        imageProxy.close()
                     }
+                } else {
                     imageProxy.close()
+                    throw SmartScannerException("Please initialize Tesseract properly using initializeTesseract() method.")
                 }
-                .addOnFailureListener { e ->
-                    e.printStackTrace()
-                    imageProxy.close()
-                }
-
-
+            }*/
         }
     }
 
     internal open fun processResult(result: String, bitmap: Bitmap, rotation: Int) {
-        val imagePath = activity.cacheImagePath()
-        bitmap.cropCenter().cacheImageToLocal(
-            imagePath,
-            rotation,
-            if (imageResultType == ImageResultType.BASE_64.value) 40 else 80
-        )
-        val imageFile = File(imagePath)
-        val imageString = if (imageResultType == ImageResultType.BASE_64.value) imageFile.encodeBase64() else imagePath
+        val imagePathFile = activity.cacheImagePath()
+        bitmap.cacheImageToLocal(imagePathFile, rotation)
+        val imageString = if (imageResultType == ImageResultType.BASE_64.value) bitmap.encodeBase64(rotation) else imagePathFile
         val mrz = when (format) {
             MrzFormat.MRTD_TD1.value -> MRZResult.formatMrtdTd1Result(MRZCleaner.parseAndCleanMrtdTd1(result), imageString)
             else -> MRZResult.formatMrzResult(MRZCleaner.parseAndClean(result), imageString)
         }
         if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_MRZ_INTENT ||
-            intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_MRZ_INTENT
-        ) {
+            intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_MRZ_INTENT) {
             sendBundleResult(mrzResult = mrz)
         } else {
             val jsonString = Gson().toJson(mrz)
@@ -221,9 +247,7 @@ open class MRZAnalyzer(
         val data = Intent()
         Log.d(SmartScannerActivity.TAG, "Success from MRZ")
         Log.d(SmartScannerActivity.TAG, "value: $result")
-        data.putExtra(SmartScannerActivity.SCANNER_IMAGE_TYPE, imageResultType)
         data.putExtra(SmartScannerActivity.SCANNER_RESULT, result)
-        data.putExtra(ScannerConstants.MODE, mode)
         activity.setResult(Activity.RESULT_OK, data)
         activity.finish()
     }

@@ -28,9 +28,9 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import org.idpass.smartscanner.api.ScannerConstants
 import org.idpass.smartscanner.lib.SmartScannerActivity
-import org.idpass.smartscanner.lib.scanner.BaseImageAnalyzer
+import org.idpass.smartscanner.lib.platform.BaseImageAnalyzer
+import org.idpass.smartscanner.lib.platform.utils.BitmapUtils
 import org.idpass.smartscanner.lib.scanner.config.Modes
-import org.idpass.smartscanner.lib.utils.BitmapUtils
 
 class IDPassLiteAnalyzer(
         override var activity: Activity,
@@ -39,7 +39,7 @@ class IDPassLiteAnalyzer(
         private val onVerify: (ByteArray?) -> Unit
 ) : BaseImageAnalyzer(){
 
-    @SuppressLint("UnsafeExperimentalUsageError", "UnsafeOptInUsageError")
+    @SuppressLint("UnsafeExperimentalUsageError")
     override fun analyze(imageProxy: ImageProxy) {
         val bitmap = BitmapUtils.getBitmap(imageProxy)
         bitmap?.let { bf ->
