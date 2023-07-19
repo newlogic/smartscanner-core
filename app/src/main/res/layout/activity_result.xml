@@ -445,39 +445,6 @@
 
         </FrameLayout>
 
-        <FrameLayout
-            android:id="@+id/logos"
-            android:layout_width="180dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:visibility="gone"
-            android:layout_gravity="center_horizontal"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:layout_width="120dp"
-                    android:layout_height="50dp"
-                    android:src="@drawable/dswd_logo"/>
-
-                <ImageView
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:src="@drawable/aics_logo"/>
-
-            </LinearLayout>
-
-        </FrameLayout>
-
-
-
-
     </LinearLayout>
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/greenTick"
