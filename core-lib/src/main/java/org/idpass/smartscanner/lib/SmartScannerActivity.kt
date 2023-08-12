@@ -421,6 +421,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     else -> Size(640, 480)
                 }
                 val rotation = viewFinder.display.rotation
+                val rotation = if (orientation == Orientation.LANDSCAPE.value)
+                    Surface.ROTATION_90 else Surface.ROTATION_0                
                 // Used to bind the lifecycle of cameras to the lifecycle owner
                 cameraProvider = cameraProviderFuture.get()
                 // Preview

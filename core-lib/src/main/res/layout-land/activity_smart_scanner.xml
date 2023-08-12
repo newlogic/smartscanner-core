@@ -143,6 +143,18 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/crop_guide" />
 
+        <ImageView
+            android:id="@+id/rect_guide"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:layout_marginHorizontal="25dp"
+            android:contentDescription="@string/rectangle"
+            android:src="@drawable/rectangle_slim"
+            app:layout_constraintBottom_toBottomOf="@id/rect_image_crop"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:adjustViewBounds="true" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.appcompat.widget.AppCompatImageButton
