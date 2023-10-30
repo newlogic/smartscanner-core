@@ -412,6 +412,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
     @SuppressLint("ClickableViewAccessibility", "UnsafeOptInUsageError")
     private fun startCamera(analyzer: ImageAnalysis.Analyzer? = null, hasPDF417: Boolean = false) {
         viewFinder.post {
+            if (viewFinder.display == null) return@post
             this.getSystemService(Context.CAMERA_SERVICE) as CameraManager
             val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
             cameraProviderFuture.addListener({
