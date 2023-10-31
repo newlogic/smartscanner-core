@@ -175,3 +175,32 @@ fun Bitmap.cropCenter() : Bitmap {
         )
     }
 }
+
+/**
+*Checks if the image quality is within the blur threshold.
+*This will help with blurry images that will yield inaccurate results.
+*/
+fun Bitmap.isImageBlur(threshold: Double) : Boolean {
+    val width = this.width
+    val height = this.height
+    val pixels = IntArray(width * height)
+    this.getPixels(pixels, 0, width, 0, 0, width, height)
+
+    var sumVariance = 0.0
+    for (x in 0 until width) {
+        for (y in 0 until height) {
+            val pixel = pixels[y * width + x]
+            val red = (pixel shr 16) and 0xFF
+            val green = (pixel shr 8) and 0xFF
+            val blue = pixel and 0xFF
+
+            val gray = (0.2989 * red + 0.5870 * green + 0.1140 * blue).toInt()
+            sumVariance += gray * gray.toDouble()
+        }
+    }
+
+    val averageVariance = sumVariance / (width * height)
+    val blurThreshold = threshold * threshold  // Adjust the threshold as needed
+
+    return averageVariance < blurThreshold
+}

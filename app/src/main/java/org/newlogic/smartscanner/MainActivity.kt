@@ -80,6 +80,7 @@ class MainActivity : AppCompatActivity() {
         binding.itemBarcode.item.setOnClickListener { scanBarcode(BarcodeOptions.default) }
         binding.itemIdpassLite.item.setOnClickListener { scanIDPassLite() }
         binding.itemMrz.item.setOnClickListener { scanMRZ() }
+        binding.itemOcr.item.setOnClickListener { scanOCR() }
         binding.itemQr.item.setOnClickListener { scanQRCode() }
 //        binding.itemQrGzip.item.setOnClickListener { scanQRCodeGzip() }
         binding.itemNfc.item.setOnClickListener { scanNFC() }
@@ -139,6 +140,33 @@ class MainActivity : AppCompatActivity() {
                     isManualCapture = true,
                     orientation = getOrientation(preference),
                     showGuide = true
+                )
+            )
+        )
+        startActivityForResult(intent, OP_SCANNER)
+    }
+
+    private fun scanOCR() {
+        val intent = Intent(this, SmartScannerActivity::class.java)
+        intent.putExtra(
+            SmartScannerActivity.SCANNER_OPTIONS,
+            ScannerOptions(
+                mode = Modes.OCR.value,
+                language = getLanguage(preference),
+                ocrOptions = OCROptions(
+                    analyzeStart = 1000
+                ),
+                config = Config(
+                    branding = true,
+                    imageResultType = imageType,
+                    label = "",
+                    isManualCapture = false,
+                    orientation = getOrientation(preference),
+                    showOcrGuide = true,
+                    xGuide = 0.5,
+                    yGuide = 0.5,
+                    widthGuide = 150,
+                    heightGuide = 40
                 )
             )
         )

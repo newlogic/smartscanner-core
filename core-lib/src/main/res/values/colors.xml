@@ -11,10 +11,12 @@
   <color name="white">#FFFFFFFF</color>
   <color name="white_30">#DDDDDD</color>
   <color name="black">#FF000000</color>
+  <color name="black_25">#40000000</color>
   <color name="grey">#C3555555</color>
   <color name="lighter_grey">#DDDDDD</color>
   <color name="dark">#9A000000</color>
   <color name="transparent_grey">#4F000000</color>
+  <color name="transparent_white">#4FFFFFFF</color>
   <color name="transparent_dark_grey">#89837c</color>
   <color name="home_page_mode_item_subtitle">#CCFFFFFF</color>
   <color name="reticle_ripple">#9AFFFFFF</color>

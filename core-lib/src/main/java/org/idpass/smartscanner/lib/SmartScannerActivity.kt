@@ -68,6 +68,7 @@ import org.idpass.smartscanner.lib.idpasslite.IDPassManager
 import org.idpass.smartscanner.lib.mrz.MRZAnalyzer
 import org.idpass.smartscanner.lib.mrz.MrzUtils
 import org.idpass.smartscanner.lib.nfc.NFCScanAnalyzer
+import org.idpass.smartscanner.lib.ocr.OCRAnalyzer
 import org.idpass.smartscanner.lib.platform.utils.PlayStoreUtils
 import org.idpass.smartscanner.lib.scanner.BaseActivity
 import org.idpass.smartscanner.lib.scanner.ImageResult
@@ -119,6 +120,11 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
     private var closeButton: View? = null
     private var rectangle: View? = null
     private var rectangleGuide: View? = null
+    private var rectangleGuideOCR: View? = null
+    private var ocrGuideContainer: View? = null
+    private var widthGuideOCR: View? = null
+    private var xGuideView: View? = null
+    private var yGuideView: View? = null
     private var manualCapture: View? = null
     private var brandingImage: ImageView? = null
     private var captureLabelText: TextView? = null
@@ -165,6 +171,11 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         closeButton = findViewById(R.id.close_button)
         rectangle = findViewById(R.id.rect_image)
         rectangleGuide = findViewById(R.id.rect_guide)
+        rectangleGuideOCR = findViewById(R.id.scanner_overlay)
+        ocrGuideContainer = findViewById(R.id.ocr_guide_layout)
+        widthGuideOCR = findViewById(R.id.container_width)
+        xGuideView = findViewById(R.id.x_guide)
+        yGuideView = findViewById(R.id.y_guide)
         brandingImage = findViewById(R.id.branding_image)
         manualCapture = findViewById(R.id.manual_capture)
         captureLabelText = findViewById(R.id.capture_label_text)
@@ -172,13 +183,13 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         captureSubHeaderText = findViewById(R.id.capture_sub_header_text)
         // Scanner setup from intent
         hideActionBar()
-        if (intent.action != null)  {
+        if (intent.action != null) {
             scannerOptions = ScannerOptions.defaultForODK(intent.action).also { options ->
                 if (options == null) throw SmartScannerException("Error: Wrong intent action. Please see smartscanner-android-api for proper intent action strings.")
             }
         } else {
             // Use scanner options directly if no scanner type is called
-            val options : ScannerOptions? = intent.getParcelableExtra(SCANNER_OPTIONS)
+            val options: ScannerOptions? = intent.getParcelableExtra(SCANNER_OPTIONS)
             options?.let {
                 Log.d(TAG, "scannerOptions: $it")
                 scannerOptions = options
@@ -202,7 +213,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         val captureLog = scannerOptions?.sentryLogger?.captureLog
         val dsn = scannerOptions?.sentryLogger?.dsn
         if (captureLog == true) {
-            if (dsn != null && dsn.isNotEmpty() && dsn.isNotBlank() && dsn.isValidUrl() ) {
+            if (dsn != null && dsn.isNotEmpty() && dsn.isNotBlank() && dsn.isValidUrl()) {
                 // Sentry DSN init
                 Sentry.init { options: SentryOptions ->
                     options.dsn = dsn
@@ -222,13 +233,14 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
     private fun setupConfiguration() {
         runOnUiThread {
             val isMLKit = PlayStoreUtils.isPlayServicesAvailable(this)
-            var analyzer : ImageAnalysis.Analyzer? = null
+            var analyzer: ImageAnalysis.Analyzer? = null
             var hasPDF417 = false
 
             checkGuideView()
 
             if (mode == Modes.BARCODE.value) {
-                val barcodeStrings = scannerOptions?.barcodeOptions?.barcodeFormats ?: BarcodeFormat.default
+                val barcodeStrings =
+                    scannerOptions?.barcodeOptions?.barcodeFormats ?: BarcodeFormat.default
                 val barcodeFormats = barcodeStrings.map { BarcodeFormat.valueOf(it).value }
                 hasPDF417 = barcodeStrings.find { it == "PDF_417" }?.isNotEmpty() == true
                 analyzer = BarcodeAnalyzer(
@@ -292,6 +304,27 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 viewFinder.visibility = VISIBLE
                 barcodeScannerView?.visibility = GONE
             }
+            if (mode == Modes.OCR.value) {
+                analyzer = OCRAnalyzer(
+                    activity = this,
+                    intent = intent,
+                    imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
+                    analyzeStart = scannerOptions?.ocrOptions?.analyzeStart ?: 0L,
+                    //when scanning only the first text that will match the regex will be returned as value. Default value is .*
+                    regex = scannerOptions?.ocrOptions?.regex
+                        ?: intent.getStringExtra(ScannerConstants.OCR_REGEX),
+                    //specifies the type of value being scanned. eg. firstname, lastname, etc.
+                    type = scannerOptions?.ocrOptions?.type
+                        ?: intent.getStringExtra(ScannerConstants.OCR_TYPE),
+                    country = scannerOptions?.ocrOptions?.country
+                        ?: intent.getStringExtra(ScannerConstants.OCR_COUNTRY),
+                    isShowGuide = config?.showOcrGuide,
+                    //when manual capture is set to true. User is required to tap the capture button to analyze the image.
+                    manualCapture = config?.isManualCapture ?: false
+                )
+                viewFinder.visibility = VISIBLE
+                barcodeScannerView?.visibility = GONE
+            }
             if (mode == Modes.NFC_SCAN.value) {
                 val nfcOptions = scannerOptions?.nfcOptions
                 analyzer = NFCScanAnalyzer(
@@ -351,10 +384,16 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                             builder.append("${corner?.x},${corner?.y} ")
                         }
                         val cornersString = builder.toString()
-                        val rawValue =  barcodePdf417.text
+                        val rawValue = barcodePdf417.text
                         val imageFile = File(filePath)
-                        val imageResult = if (config?.imageResultType == ImageResultType.BASE_64.value) imageFile.encodeBase64() else filePath
-                        val barcodeResult = BarcodeResult(imagePath = filePath, image = imageResult, corners = cornersString, value = rawValue)
+                        val imageResult =
+                            if (config?.imageResultType == ImageResultType.BASE_64.value) imageFile.encodeBase64() else filePath
+                        val barcodeResult = BarcodeResult(
+                            imagePath = filePath,
+                            image = imageResult,
+                            corners = cornersString,
+                            value = rawValue
+                        )
 
                         val data = Intent()
                         val result = Gson().toJson(barcodeResult)
@@ -447,7 +486,9 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
                     .build()
                 // Select back camera
-                val cameraSelector = CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build()
+                val cameraSelector =
+                    CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK)
+                        .build()
                 try {
                     // Unbind use cases before rebinding
                     cameraProvider?.unbindAll()
@@ -484,18 +525,26 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     )
                     // Autofocus modes and Tap to focus
                     val camera2InterOp = Camera2Interop.Extender(imageAnalysisBuilder)
-                    camera2InterOp.setCaptureRequestOption(CaptureRequest.CONTROL_AF_MODE,CaptureRequest.CONTROL_AF_MODE_AUTO)
-                    camera2InterOp.setCaptureRequestOption(CaptureRequest.CONTROL_AE_MODE,CaptureRequest.CONTROL_AE_MODE_ON)
+                    camera2InterOp.setCaptureRequestOption(
+                        CaptureRequest.CONTROL_AF_MODE,
+                        CaptureRequest.CONTROL_AF_MODE_AUTO
+                    )
+                    camera2InterOp.setCaptureRequestOption(
+                        CaptureRequest.CONTROL_AE_MODE,
+                        CaptureRequest.CONTROL_AE_MODE_ON
+                    )
                     viewFinder.afterMeasured {
                         viewFinder.setOnTouchListener { _, event ->
                             return@setOnTouchListener when (event.action) {
                                 MotionEvent.ACTION_DOWN -> {
                                     true
                                 }
+
                                 MotionEvent.ACTION_UP -> {
-                                    val factory: MeteringPointFactory = SurfaceOrientedMeteringPointFactory(
-                                        viewFinder.width.toFloat(), viewFinder.height.toFloat()
-                                    )
+                                    val factory: MeteringPointFactory =
+                                        SurfaceOrientedMeteringPointFactory(
+                                            viewFinder.width.toFloat(), viewFinder.height.toFloat()
+                                        )
                                     val autoFocusPoint = factory.createPoint(event.x, event.y)
                                     try {
                                         camera?.cameraControl?.startFocusAndMetering(
@@ -512,6 +561,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                                     }
                                     true
                                 }
+
                                 else -> false // Unhandled event.
                             }
                         }
@@ -535,10 +585,12 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     bottomGuideline.setGuidelinePercent(0.7F)
                     topGuideline.setGuidelinePercent(0.25F)
                 }
+
                 ScannerSize.SMALL.value -> {
                     bottomGuideline.setGuidelinePercent(0.6F)
                     topGuideline.setGuidelinePercent(0.375F)
                 }
+
                 else -> {
                     bottomGuideline.setGuidelinePercent(0.625F)
                     topGuideline.setGuidelinePercent(0.275F)
@@ -555,7 +607,11 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         captureSubHeaderText?.text = config?.subHeader ?: String.empty()
         // font to use
         val defaultFont = when (config?.font) {
-            Fonts.NOTO_SANS_ARABIC.value -> ResourcesCompat.getFont(this, R.font.notosansarabic_regular)
+            Fonts.NOTO_SANS_ARABIC.value -> ResourcesCompat.getFont(
+                this,
+                R.font.notosansarabic_regular
+            )
+
             Fonts.ROBOTO.value -> ResourcesCompat.getFont(this, R.font.roboto_regular)
             else -> ResourcesCompat.getFont(this, R.font.sourcesanspro_regular)
         }
@@ -570,19 +626,29 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     coordinatorLayoutView.setBackgroundColor(color)
                 }
             } ?: run {
-                coordinatorLayoutView.setBackgroundColor(ContextCompat.getColor(this, R.color.transparent_grey))
+                coordinatorLayoutView.setBackgroundColor(
+                    ContextCompat.getColor(
+                        this,
+                        R.color.transparent_grey
+                    )
+                )
             }
         } catch (iae: IllegalArgumentException) {
             // This color string is not valid
             throw SmartScannerException("Please set proper color string in setting background. Example: '#ffc234' ")
         }
         // branding
-        brandingImage?.visibility = config?.branding?.let { if (it) VISIBLE else INVISIBLE } ?: run { INVISIBLE }
+        brandingImage?.visibility =
+            config?.branding?.let { if (it) VISIBLE else INVISIBLE } ?: run { INVISIBLE }
         // manual capture
         manualCapture?.visibility = config?.isManualCapture?.let {
             if (it) VISIBLE else GONE
         } ?: run {
-            if (intent.getBooleanExtra(ScannerConstants.MRZ_MANUAL_CAPTURE_EXTRA, false)) VISIBLE else GONE
+            if (intent.getBooleanExtra(
+                    ScannerConstants.MRZ_MANUAL_CAPTURE_EXTRA,
+                    false
+                )
+            ) VISIBLE else GONE
         }
         // language locale
         scannerOptions?.language?.let { language ->
@@ -609,7 +675,11 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 if (allPermissionsGranted()) {
                     setupConfiguration()
                 } else {
-                    val snackBar: Snackbar = Snackbar.make(coordinatorLayoutView, R.string.required_perms_not_given, Snackbar.LENGTH_INDEFINITE)
+                    val snackBar: Snackbar = Snackbar.make(
+                        coordinatorLayoutView,
+                        R.string.required_perms_not_given,
+                        Snackbar.LENGTH_INDEFINITE
+                    )
                     snackBar.setAction(R.string.settings) {
                         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                         val uri = Uri.fromParts("package", packageName, null)
@@ -622,7 +692,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         }
     }
 
-    private fun requestPermissions() = ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
+    private fun requestPermissions() =
+        ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
@@ -642,6 +713,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     }
                 }
             }
+
             R.id.manual_capture -> {
                 // hide capture button during image capture
                 manualCapture?.isEnabled = false
@@ -680,8 +752,12 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                                 .submit()
                                 .get()
                             bf.cacheImageToLocal(imageFile.path)
-                            val imageString = if (config?.imageResultType == ImageResultType.BASE_64.value) imageFile.encodeBase64() else imageFile.path
-                            val result: Any = if (mode == Modes.MRZ.value) MrzUtils.getImageOnly(imageString) else ImageResult(imageString)
+                            val imageString =
+                                if (config?.imageResultType == ImageResultType.BASE_64.value) imageFile.encodeBase64() else imageFile.path
+                            val result: Any =
+                                if (mode == Modes.MRZ.value) MrzUtils.getImageOnly(imageString) else ImageResult(
+                                    imageString
+                                )
                             data.putExtra(SCANNER_IMAGE_TYPE, config?.imageResultType)
                             data.putExtra(SCANNER_RESULT, Gson().toJson(result))
                             setResult(Activity.RESULT_OK, data)
@@ -707,7 +783,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
     }
 
     @SuppressLint("InflateParams")
-    private fun showIDPassLiteVerification(qrBytes: ByteArray)  {
+    private fun showIDPassLiteVerification(qrBytes: ByteArray) {
         val bottomSheetDialog = BottomSheetDialog(this)
         val sheetView = layoutInflater.inflate(R.layout.dialog_idpass_verify, null)
         bottomSheetDialog.setContentView(sheetView)
@@ -757,7 +833,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         if (measuredWidth > 0 && measuredHeight > 0) {
             block()
         } else {
-            viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+            viewTreeObserver.addOnGlobalLayoutListener(object :
+                ViewTreeObserver.OnGlobalLayoutListener {
                 override fun onGlobalLayout() {
                     if (measuredWidth > 0 && measuredHeight > 0) {
                         viewTreeObserver.removeOnGlobalLayoutListener(this)
@@ -770,11 +847,15 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
 
     private fun checkGuideView() {
         if (config != null && config?.showGuide == true) {
-            rectangleGuide?.alpha = 1f;
+            rectangleGuide?.alpha = 1f
+            ocrGuideContainer?.alpha = 0f
+
             config?.let { conf ->
                 if (conf.widthGuide != 0) {
                     val nWidth = TypedValue.applyDimension(
-                        TypedValue.COMPLEX_UNIT_DIP, conf.widthGuide.toFloat(), resources.displayMetrics
+                        TypedValue.COMPLEX_UNIT_DIP,
+                        conf.widthGuide.toFloat(),
+                        resources.displayMetrics
                     ).roundToInt()
                     rectangleGuide?.layoutParams?.width = nWidth
                 }
@@ -782,15 +863,74 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 // if height guide is not by default
                 if (conf.heightGuide != 70) {
                     val nHeight = TypedValue.applyDimension(
-                        TypedValue.COMPLEX_UNIT_DIP, conf.heightGuide.toFloat(), resources.displayMetrics
+                        TypedValue.COMPLEX_UNIT_DIP,
+                        conf.heightGuide.toFloat(),
+                        resources.displayMetrics
                     ).roundToInt()
                     rectangleGuide?.layoutParams?.height = nHeight
                 }
                 rectangleGuide?.requestLayout()
             }
 
+        } else  if (config != null && config?.showOcrGuide == true) {
+            ocrGuideContainer?.alpha = 1f
+            rectangleGuide?.alpha = 0f
+
+            config?.let { conf ->
+                if (conf.widthGuide != 0) {
+                    val nWidth = TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP,
+                        conf.widthGuide.toFloat(),
+                        resources.displayMetrics
+                    ).roundToInt()
+                    rectangleGuideOCR?.layoutParams?.width = nWidth
+                    widthGuideOCR?.layoutParams?.width = nWidth
+                }
+
+                // if height guide is not by default
+                if (conf.heightGuide != 70) {
+                    val nHeight = TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP,
+                        conf.heightGuide.toFloat(),
+                        resources.displayMetrics
+                    ).roundToInt()
+                    rectangleGuideOCR?.layoutParams?.height = nHeight
+                }
+
+                if (conf.xGuide != null && conf.yGuide != null) {
+                    viewFinder.post {
+                        //prevent xGuide from exceeding values 0.0-1.0
+                        val x = when {
+                            conf.xGuide.toFloat() > 1 -> 1f
+                            conf.xGuide.toFloat() < 0 -> 0f
+                            else -> conf.xGuide.toFloat()
+                        }
+
+                        //prevent yGuide from exceeding values 0.0-1.0
+                        val y = when {
+                            conf.yGuide.toFloat() > 1 -> 1f
+                            conf.yGuide.toFloat() < 0 -> 0f
+                            else -> conf.yGuide.toFloat()
+                        }
+
+                        //take into consideration the center point of the OCR guide.
+                        val xPercentage = (viewFinder.width.toFloat() * x).roundToInt() - (rectangleGuideOCR?.width?.div(2) ?: 0)
+                        val yPercentage = (viewFinder.height.toFloat() * y).roundToInt() - (rectangleGuideOCR?.height?.div(2) ?:0)
+
+                        //set OCR guide center point to specified x and y coordinates
+                        xGuideView?.layoutParams?.width = xPercentage
+                        yGuideView?.layoutParams?.height = yPercentage
+
+                        xGuideView?.requestLayout()
+                        yGuideView?.requestLayout()
+                    }
+                }
+                rectangleGuideOCR?.requestLayout()
+            }
+
         } else {
-            rectangleGuide?.alpha = 0f;
+            rectangleGuide?.alpha = 0f
+            ocrGuideContainer?.alpha = 0f
         }
     }
 }

@@ -14,22 +14,25 @@
         android:layout_width="wrap_content"
         android:layout_height="38dp"
         android:layout_marginStart="16dp"
+        android:padding="2dp"
         android:layout_marginTop="12dp"
-        android:src="@drawable/ic_scan_barcode"
+        android:src="@drawable/ic_scan_ocr"
+        android:scaleType="fitXY"
+        android:adjustViewBounds="true"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/txt_barcode"
+        android:id="@+id/txt_ocr"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:fontFamily="@font/sourcesanspro_medium"
-        android:text="@string/mode_barcode"
+        android:text="@string/mode_ocr"
         android:textColor="@color/newlogic_black"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/icon"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <View
@@ -39,6 +42,6 @@
         android:layout_marginTop="12dp"
         android:background="@color/transparent_dark_grey"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/icon" />
+        app:layout_constraintTop_toBottomOf="@+id/icon" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
