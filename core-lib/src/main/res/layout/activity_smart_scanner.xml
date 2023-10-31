@@ -90,8 +90,8 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <include
-            android:id="@+id/ocr_guide_layout"
-            layout="@layout/ocr_guide_layout"
+            android:id="@+id/guide_layout"
+            layout="@layout/guide_layout"
             android:layout_marginHorizontal="4dp"
             android:layout_marginVertical="4dp"
             android:layout_height="match_parent"
@@ -120,20 +120,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"/>
-
-        <ImageView
-            android:id="@+id/rect_guide"
-            android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:layout_marginHorizontal="21dp"
-            android:layout_marginBottom="30dp"
-            android:contentDescription="@string/rectangle"
-            android:src="@drawable/rectangle_slim"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            android:adjustViewBounds="true" />
-
 
         <RelativeLayout
             android:id="@+id/rect_bounding_layout"

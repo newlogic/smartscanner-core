@@ -120,7 +120,6 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
     private var closeButton: View? = null
     private var rectangle: View? = null
     private var rectangleGuide: View? = null
-    private var rectangleGuideOCR: View? = null
     private var ocrGuideContainer: View? = null
     private var widthGuideOCR: View? = null
     private var xGuideView: View? = null
@@ -170,9 +169,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         flashButton = findViewById(R.id.flash_button)
         closeButton = findViewById(R.id.close_button)
         rectangle = findViewById(R.id.rect_image)
-        rectangleGuide = findViewById(R.id.rect_guide)
-        rectangleGuideOCR = findViewById(R.id.scanner_overlay)
-        ocrGuideContainer = findViewById(R.id.ocr_guide_layout)
+        rectangleGuide = findViewById(R.id.scanner_overlay)
+        ocrGuideContainer = findViewById(R.id.guide_layout)
         widthGuideOCR = findViewById(R.id.container_width)
         xGuideView = findViewById(R.id.x_guide)
         yGuideView = findViewById(R.id.y_guide)
@@ -847,90 +845,108 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
 
     private fun checkGuideView() {
         if (config != null && config?.showGuide == true) {
-            rectangleGuide?.alpha = 1f
-            ocrGuideContainer?.alpha = 0f
-
-            config?.let { conf ->
-                if (conf.widthGuide != 0) {
-                    val nWidth = TypedValue.applyDimension(
-                        TypedValue.COMPLEX_UNIT_DIP,
-                        conf.widthGuide.toFloat(),
-                        resources.displayMetrics
-                    ).roundToInt()
-                    rectangleGuide?.layoutParams?.width = nWidth
-                }
-
-                // if height guide is not by default
-                if (conf.heightGuide != 70) {
-                    val nHeight = TypedValue.applyDimension(
-                        TypedValue.COMPLEX_UNIT_DIP,
-                        conf.heightGuide.toFloat(),
-                        resources.displayMetrics
-                    ).roundToInt()
-                    rectangleGuide?.layoutParams?.height = nHeight
-                }
-                rectangleGuide?.requestLayout()
-            }
-
+            showMRZGuide()
         } else  if (config != null && config?.showOcrGuide == true) {
-            ocrGuideContainer?.alpha = 1f
-            rectangleGuide?.alpha = 0f
+            showOCRGuide()
+        } else {
+            ocrGuideContainer?.alpha = 0f
+        }
+    }
 
-            config?.let { conf ->
-                if (conf.widthGuide != 0) {
-                    val nWidth = TypedValue.applyDimension(
+    private fun showMRZGuide() {
+        ocrGuideContainer?.alpha = 1f
+
+        config?.let { conf ->
+            viewFinder.post {
+                val width = if (conf.widthGuide == 0) {
+                    //set the default width
+                   (viewFinder.width - 21.toPx)
+                } else {
+                    TypedValue.applyDimension(
                         TypedValue.COMPLEX_UNIT_DIP,
                         conf.widthGuide.toFloat(),
                         resources.displayMetrics
                     ).roundToInt()
-                    rectangleGuideOCR?.layoutParams?.width = nWidth
-                    widthGuideOCR?.layoutParams?.width = nWidth
                 }
 
-                // if height guide is not by default
-                if (conf.heightGuide != 70) {
-                    val nHeight = TypedValue.applyDimension(
-                        TypedValue.COMPLEX_UNIT_DIP,
-                        conf.heightGuide.toFloat(),
-                        resources.displayMetrics
-                    ).roundToInt()
-                    rectangleGuideOCR?.layoutParams?.height = nHeight
-                }
+                rectangleGuide?.layoutParams?.width = width
+                widthGuideOCR?.layoutParams?.width = width
 
-                if (conf.xGuide != null && conf.yGuide != null) {
-                    viewFinder.post {
-                        //prevent xGuide from exceeding values 0.0-1.0
-                        val x = when {
-                            conf.xGuide.toFloat() > 1 -> 1f
-                            conf.xGuide.toFloat() < 0 -> 0f
-                            else -> conf.xGuide.toFloat()
-                        }
+                //set height
+                val nHeight = TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    conf.heightGuide.toFloat(),
+                    resources.displayMetrics
+                ).roundToInt()
+                rectangleGuide?.layoutParams?.height = nHeight
 
-                        //prevent yGuide from exceeding values 0.0-1.0
-                        val y = when {
-                            conf.yGuide.toFloat() > 1 -> 1f
-                            conf.yGuide.toFloat() < 0 -> 0f
-                            else -> conf.yGuide.toFloat()
-                        }
+                //set default position
 
-                        //take into consideration the center point of the OCR guide.
-                        val xPercentage = (viewFinder.width.toFloat() * x).roundToInt() - (rectangleGuideOCR?.width?.div(2) ?: 0)
-                        val yPercentage = (viewFinder.height.toFloat() * y).roundToInt() - (rectangleGuideOCR?.height?.div(2) ?:0)
+                val xPercentage = (viewFinder.width - width).div(2)
+                val yPercentage = viewFinder.height - nHeight - 30.toPx
 
-                        //set OCR guide center point to specified x and y coordinates
-                        xGuideView?.layoutParams?.width = xPercentage
-                        yGuideView?.layoutParams?.height = yPercentage
+                xGuideView?.layoutParams?.width = xPercentage
+                yGuideView?.layoutParams?.height = yPercentage
 
-                        xGuideView?.requestLayout()
-                        yGuideView?.requestLayout()
-                    }
-                }
-                rectangleGuideOCR?.requestLayout()
+                xGuideView?.requestLayout()
+                yGuideView?.requestLayout()
+            }
+            rectangleGuide?.requestLayout()
+        }
+    }
+    private fun showOCRGuide() {
+        ocrGuideContainer?.alpha = 1f
+
+        config?.let { conf ->
+            if (conf.widthGuide != 0) {
+                val nWidth = TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    conf.widthGuide.toFloat(),
+                    resources.displayMetrics
+                ).roundToInt()
+                rectangleGuide?.layoutParams?.width = nWidth
+                widthGuideOCR?.layoutParams?.width = nWidth
             }
 
-        } else {
-            rectangleGuide?.alpha = 0f
-            ocrGuideContainer?.alpha = 0f
+            // if height guide is not by default
+            if (conf.heightGuide != 70) {
+                val nHeight = TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    conf.heightGuide.toFloat(),
+                    resources.displayMetrics
+                ).roundToInt()
+                rectangleGuide?.layoutParams?.height = nHeight
+            }
+
+            if (conf.xGuide != null && conf.yGuide != null) {
+                viewFinder.post {
+                    //prevent xGuide from exceeding values 0.0-1.0
+                    val x = when {
+                        conf.xGuide.toFloat() > 1 -> 1f
+                        conf.xGuide.toFloat() < 0 -> 0f
+                        else -> conf.xGuide.toFloat()
+                    }
+
+                    //prevent yGuide from exceeding values 0.0-1.0
+                    val y = when {
+                        conf.yGuide.toFloat() > 1 -> 1f
+                        conf.yGuide.toFloat() < 0 -> 0f
+                        else -> conf.yGuide.toFloat()
+                    }
+
+                    //take into consideration the center point of the OCR guide.
+                    val xPercentage = (viewFinder.width.toFloat() * x).roundToInt() - (rectangleGuide?.width?.div(2) ?: 0)
+                    val yPercentage = (viewFinder.height.toFloat() * y).roundToInt() - (rectangleGuide?.height?.div(2) ?:0)
+
+                    //set OCR guide center point to specified x and y coordinates
+                    xGuideView?.layoutParams?.width = xPercentage
+                    yGuideView?.layoutParams?.height = yPercentage
+
+                    xGuideView?.requestLayout()
+                    yGuideView?.requestLayout()
+                }
+            }
+            rectangleGuide?.requestLayout()
         }
     }
 }
