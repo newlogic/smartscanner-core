@@ -12,6 +12,7 @@ ID scanning Android app and library. Supports MRZ, NFC, Barcodes, and [ID PASS L
 - Scan NFC
 - Scan Barcode
 - Scan [ID PASS Lite](https://github.com/idpass/idpass-lite)
+- Scan OCR
 - Supports Intent Call Out (ODK & Non-ODK)
 
 This repository also includes an Android [demo app](app) to test what the library can do.
@@ -42,13 +43,14 @@ If you want to build this library from source, instructions to do so can be foun
 
 The following table shows the intent actions available for each operation available in the library, both in ODK and Non-ODK:
 
-| Scan Operation |                                            ODK |                                    Non-ODK |
-| -------------- | ---------------------------------------------- | ------------------------------------------ |
+| Scan Operation | ODK                                            | Non-ODK                                    |
+|----------------|------------------------------------------------|--------------------------------------------|
 | MRZ            | `org.idpass.smartscanner.odk.MRZ_SCAN`         | `org.idpass.smartscanner.MRZ_SCAN`         |
 | NFC            | `org.idpass.smartscanner.odk.NFC_SCAN`         | `org.idpass.smartscanner.NFC_SCAN`         |
 | Barcode        | `org.idpass.smartscanner.odk.BARCODE_SCAN`     | `org.idpass.smartscanner.BARCODE_SCAN`     |
 | QR code        | `org.idpass.smartscanner.odk.QRCODE_SCAN`      | `org.idpass.smartscanner.QRCODE_SCAN`      |
 | ID PASS Lite   | `org.idpass.smartscanner.odk.IDPASS_LITE_SCAN` | `org.idpass.smartscanner.IDPASS_LITE_SCAN` |
+| OCR            | `org.idpass.smartscanner.odk.OCR_SCAN`         | `org.idpass.smartscanner.OCR_SCAN`         |
 
 To perform an operation, create an intent for the desired operation. This example shows how to call an intent to scan an MRZ (ODK):
 
