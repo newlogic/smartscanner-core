@@ -205,7 +205,7 @@ open class OCRAnalyzer(
         when (intent.action) {
             ScannerConstants.IDPASS_SMARTSCANNER_OCR_INTENT,
             ScannerConstants.IDPASS_SMARTSCANNER_ODK_OCR_INTENT -> {
-                sendBundleResult(barcodeResult = result)
+                sendBundleResult(ocrResult = result)
             }
 
             else -> {
@@ -226,20 +226,20 @@ open class OCRAnalyzer(
         activity.finish()
     }
 
-    private fun sendBundleResult(barcodeResult: OCRResult? = null) {
+    private fun sendBundleResult(ocrResult: OCRResult? = null) {
         val bundle = Bundle()
         Log.d(SmartScannerActivity.TAG, "Success from BARCODE")
         if (intent.action == ScannerConstants.IDPASS_SMARTSCANNER_ODK_OCR_INTENT) {
             bundle.putString(
                 ScannerConstants.IDPASS_ODK_INTENT_DATA,
-                barcodeResult?.value?.toString()
+                ocrResult?.value?.toString()
             )
         }
         bundle.putString(ScannerConstants.MODE, mode)
-        bundle.putString(ScannerConstants.OCR_IMAGE, barcodeResult?.imagePath)
-        bundle.putString(ScannerConstants.OCR_COUNTRY, barcodeResult?.country)
-        bundle.putString(ScannerConstants.OCR_TYPE, barcodeResult?.type)
-        bundle.putString(ScannerConstants.OCR_VALUE, barcodeResult?.value?.toString())
+        bundle.putString(ScannerConstants.OCR_IMAGE, ocrResult?.imagePath)
+        bundle.putString(ScannerConstants.OCR_COUNTRY, ocrResult?.country)
+        bundle.putString(ScannerConstants.OCR_TYPE, ocrResult?.type)
+        bundle.putString(ScannerConstants.OCR_VALUE, ocrResult?.value?.toString())
         val result = Intent()
         val prefix = if (intent.hasExtra(ScannerConstants.IDPASS_ODK_PREFIX_EXTRA)) {
             intent.getStringExtra(ScannerConstants.IDPASS_ODK_PREFIX_EXTRA)
