@@ -314,8 +314,6 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     //specifies the type of value being scanned. eg. firstname, lastname, etc.
                     type = scannerOptions?.ocrOptions?.type
                         ?: intent.getStringExtra(ScannerConstants.OCR_TYPE),
-                    country = scannerOptions?.ocrOptions?.country
-                        ?: intent.getStringExtra(ScannerConstants.OCR_COUNTRY),
                     isShowGuide = config?.showOcrGuide,
                     //when manual capture is set to true. User is required to tap the capture button to analyze the image.
                     manualCapture = config?.isManualCapture ?: false

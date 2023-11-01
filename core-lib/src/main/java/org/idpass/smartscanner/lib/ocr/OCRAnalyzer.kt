@@ -38,7 +38,6 @@ open class OCRAnalyzer(
     private val imageResultType: String,
     private val isShowGuide: Boolean? = false,
     private val regex: String? = "",
-    private val country: String? = "",
     private val type: String? = "",
     private val manualCapture: Boolean = false,
     private val analyzeStart: Long = 0L
@@ -197,7 +196,6 @@ open class OCRAnalyzer(
             imagePath = imagePath,
             image = imageString,
             regex = regex ?: OCRChecker.DEFAULT_REGEX_STRING,
-            country = country,
             value = result,
             type = type
         )
@@ -237,7 +235,6 @@ open class OCRAnalyzer(
         }
         bundle.putString(ScannerConstants.MODE, mode)
         bundle.putString(ScannerConstants.OCR_IMAGE, ocrResult?.imagePath)
-        bundle.putString(ScannerConstants.OCR_COUNTRY, ocrResult?.country)
         bundle.putString(ScannerConstants.OCR_TYPE, ocrResult?.type)
         bundle.putString(ScannerConstants.OCR_VALUE, ocrResult?.value?.toString())
         val result = Intent()
