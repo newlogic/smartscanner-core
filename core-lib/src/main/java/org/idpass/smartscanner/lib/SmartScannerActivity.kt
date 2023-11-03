@@ -120,8 +120,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
     private var closeButton: View? = null
     private var rectangle: View? = null
     private var rectangleGuide: View? = null
-    private var ocrGuideContainer: View? = null
-    private var widthGuideOCR: View? = null
+    private var guideContainer: View? = null
+    private var guideWidth: View? = null
     private var xGuideView: View? = null
     private var yGuideView: View? = null
     private var manualCapture: View? = null
@@ -170,8 +170,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         closeButton = findViewById(R.id.close_button)
         rectangle = findViewById(R.id.rect_image)
         rectangleGuide = findViewById(R.id.scanner_overlay)
-        ocrGuideContainer = findViewById(R.id.guide_layout)
-        widthGuideOCR = findViewById(R.id.container_width)
+        guideContainer = findViewById(R.id.guide_layout)
+        guideWidth = findViewById(R.id.guide_width)
         xGuideView = findViewById(R.id.x_guide)
         yGuideView = findViewById(R.id.y_guide)
         brandingImage = findViewById(R.id.branding_image)
@@ -307,14 +307,14 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     activity = this,
                     intent = intent,
                     imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
-                    analyzeStart = scannerOptions?.ocrOptions?.analyzeStart ?: 0L,
+                    analyzeStart = scannerOptions?.ocrOptions?.analyzeStart ?: 0,
                     //when scanning only the first text that will match the regex will be returned as value. Default value is .*
                     regex = scannerOptions?.ocrOptions?.regex
                         ?: intent.getStringExtra(ScannerConstants.OCR_REGEX),
                     //specifies the type of value being scanned. eg. firstname, lastname, etc.
                     type = scannerOptions?.ocrOptions?.type
                         ?: intent.getStringExtra(ScannerConstants.OCR_TYPE),
-                    isShowGuide = config?.showOcrGuide,
+                    isShowGuide = config?.showOcrGuide ?: false,
                     //when manual capture is set to true. User is required to tap the capture button to analyze the image.
                     manualCapture = config?.isManualCapture ?: false
                 )
@@ -842,17 +842,17 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
     }
 
     private fun checkGuideView() {
-        if (config != null && config?.showGuide == true) {
+        if (config?.showGuide == true) {
             showMRZGuide()
-        } else  if (config != null && config?.showOcrGuide == true) {
+        } else  if (config?.showOcrGuide == true) {
             showOCRGuide()
         } else {
-            ocrGuideContainer?.alpha = 0f
+            guideContainer?.alpha = 0f
         }
     }
 
     private fun showMRZGuide() {
-        ocrGuideContainer?.alpha = 1f
+        guideContainer?.alpha = 1f
 
         config?.let { conf ->
             viewFinder.post {
@@ -868,7 +868,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 }
 
                 rectangleGuide?.layoutParams?.width = width
-                widthGuideOCR?.layoutParams?.width = width
+                guideWidth?.layoutParams?.width = width
 
                 //set height
                 val nHeight = TypedValue.applyDimension(
@@ -893,7 +893,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         }
     }
     private fun showOCRGuide() {
-        ocrGuideContainer?.alpha = 1f
+        guideContainer?.alpha = 1f
 
         config?.let { conf ->
             if (conf.widthGuide != 0) {
@@ -903,7 +903,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     resources.displayMetrics
                 ).roundToInt()
                 rectangleGuide?.layoutParams?.width = nWidth
-                widthGuideOCR?.layoutParams?.width = nWidth
+                guideWidth?.layoutParams?.width = nWidth
             }
 
             // if height guide is not by default

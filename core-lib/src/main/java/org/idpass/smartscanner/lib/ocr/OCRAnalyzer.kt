@@ -36,11 +36,11 @@ open class OCRAnalyzer(
     override val intent: Intent,
     override val mode: String = Modes.OCR.value,
     private val imageResultType: String,
-    private val isShowGuide: Boolean? = false,
+    private val isShowGuide: Boolean = false,
     private val regex: String? = "",
     private val type: String? = "",
     private val manualCapture: Boolean = false,
-    private val analyzeStart: Long = 0L
+    private val analyzeStart: Long = 0
 ) : BaseImageAnalyzer() {
 
     private var captured = false
@@ -74,7 +74,7 @@ open class OCRAnalyzer(
                 captured = true
             }
 
-            if (isShowGuide != null && isShowGuide) {
+            if (isShowGuide) {
                 // try to cropped forcefully
 
                 // Crop preview area
