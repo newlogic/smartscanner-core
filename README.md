@@ -99,6 +99,8 @@ Refer to the [Result fields reference](https://github.com/idpass/smartscanner-co
 
 Refer to the [API Reference](https://github.com/idpass/smartscanner-core/wiki/API-Reference) for complete information about each scan operation and the different options available.
 
+Refer to the [SmartScanner intent extra reference](https://github.com/newlogic/smartscanner-core/wiki/SmartScannerActivity-Intent-extra-reference) for examples on how to pass different options intent extra to SmartScanner.
+
 Finally, for convenience we recommend using the [smartscanner-android-api](https://github.com/idpass/smartscanner-android-api) library which simplifies the app intent call out process.
 
 ## Running the demo app

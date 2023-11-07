@@ -104,18 +104,24 @@
                 tools:ignore="NestedWeights"
                 android:visibility="gone"/>
 
-            <TextView
-                android:id="@+id/text_result"
+            <ScrollView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:fontFamily="@font/sourcesanspro_regular"
-                android:text="@string/label_hex"
-                android:textColor="@color/newlogic_black"
-                android:textSize="16sp"
-                android:visibility="gone"
-                tools:ignore="MissingConstraints"
-                tools:text="54 65 73 74 20 51 52 20  Test QR\n43 6F 64 65              Code" />
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/text_result"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:fontFamily="@font/sourcesanspro_regular"
+                    android:text="@string/label_hex"
+                    android:textColor="@color/newlogic_black"
+                    android:textSize="16sp"
+                    android:visibility="gone"
+                    tools:ignore="MissingConstraints" />
+
+            </ScrollView>
+
         </LinearLayout>
 
         <Button

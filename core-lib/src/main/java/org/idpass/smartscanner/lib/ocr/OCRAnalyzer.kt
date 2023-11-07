@@ -141,6 +141,7 @@ open class OCRAnalyzer(
                         "OCR MLKit TextRecognition: success: $timeRequired ms"
                     )
                     var value = ""
+                    var array = ArrayList<String>()
                     val blocks = visionText.textBlocks
 
                     for (i in blocks.indices) {
@@ -148,20 +149,25 @@ open class OCRAnalyzer(
                         for (j in lines.indices) {
                             //check if text matches the given regex
                             if (OCRChecker.check(lines[j].text, regex)) {
-                                //returns only the first value that matches the regex.
-                                value = lines[j].text
-                                break
+                                value += if (value.isNotEmpty()) " " + lines[j].text else lines[j].text
+                                array.add(lines[j].text)
                             }
                         }
                     }
                     if (manualCapture) {
                         if (captured) processResult(
                             result = value,
+                            array = array,
                             bitmap = bf,
                             rotation = rotation
                         )
                     } else if (value.isNotEmpty() && !inputBitmap.isImageBlur(50.0) && startAnalyze) {
-                        processResult(result = value, bitmap = bf, rotation = rotation)
+                        processResult(
+                            result = value,
+                            array = array,
+                            bitmap = bf,
+                            rotation = rotation
+                        )
                     } else {
                         Log.d(
                             "${SmartScannerActivity.TAG}/SmartScanner",
@@ -180,7 +186,7 @@ open class OCRAnalyzer(
         }
     }
 
-    internal open fun processResult(result: String, bitmap: Bitmap, rotation: Int) {
+    internal open fun processResult(result: String, array: ArrayList<String>, bitmap: Bitmap, rotation: Int) {
         val imagePath = activity.cacheImagePath()
         bitmap.cropCenter().cacheImageToLocal(
             imagePath,
@@ -196,6 +202,7 @@ open class OCRAnalyzer(
             imagePath = imagePath,
             image = imageString,
             regex = regex ?: OCRChecker.DEFAULT_REGEX_STRING,
+            valuesArray = array,
             value = result,
             type = type
         )

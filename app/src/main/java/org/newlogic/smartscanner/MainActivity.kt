@@ -27,7 +27,6 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 import org.idpass.smartscanner.api.ScannerConstants
-import org.idpass.smartscanner.api.ScannerIntent
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_FAIL_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_HEADER_RESULT
@@ -39,7 +38,6 @@ import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_SIGNATURE_VERIFICATION
 import org.idpass.smartscanner.lib.nfc.NFCActivity
 import org.idpass.smartscanner.lib.scanner.config.*
-import org.idpass.smartscanner.lib.scanner.config.Config.Companion.OP_SCANNER
 import org.idpass.smartscanner.lib.scanner.config.Config.Companion.ORIENTATION
 import org.newlogic.smartscanner.databinding.ActivityMainBinding
 import org.newlogic.smartscanner.result.IDPassResultActivity
@@ -161,12 +159,7 @@ class MainActivity : AppCompatActivity() {
                     imageResultType = imageType,
                     label = "",
                     isManualCapture = false,
-                    orientation = getOrientation(preference),
-                    showOcrGuide = true,
-                    xGuide = 0.5,
-                    yGuide = 0.5,
-                    widthGuide = 150,
-                    heightGuide = 40
+                    orientation = getOrientation(preference)
                 )
             )
         )
