@@ -100,6 +100,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         const val SCANNER_JWT_CONFIG_UPDATE = "scanner_jwt_config_update"
     }
 
+    private val DEFAULT_HEIGHT = 70
     private val REQUEST_CODE_PERMISSIONS = 10
     private val REQUEST_CODE_PERMISSIONS_VERSION_R = 2296
     private val REQUIRED_PERMISSIONS = arrayOf(
@@ -907,7 +908,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             }
 
             // if height guide is not by default
-            if (conf.heightGuide != 70) {
+            if (conf.heightGuide != DEFAULT_HEIGHT) {
                 val nHeight = TypedValue.applyDimension(
                     TypedValue.COMPLEX_UNIT_DIP,
                     conf.heightGuide.toFloat(),
