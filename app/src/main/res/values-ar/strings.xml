@@ -12,6 +12,7 @@
     <string name="mode_barcode">الباركود</string>
     <string name="mode_idpass_lite">معرف باس لايت</string>
     <string name="mode_mrz">كود MRZ</string>
+    <string name="mode_ocr">OCR</string>
     <string name="mode_nfc">الجواز الالكتروني/بطاقة الهوية (NFC)</string>
     <string name="mode_pdf417">PDF417</string>
     <string name="mode_qr">كيو ار كود</string>

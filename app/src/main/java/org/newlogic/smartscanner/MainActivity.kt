@@ -27,7 +27,6 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 import org.idpass.smartscanner.api.ScannerConstants
-import org.idpass.smartscanner.api.ScannerIntent
 import org.idpass.smartscanner.lib.SmartScannerActivity
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_FAIL_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_HEADER_RESULT
@@ -39,7 +38,6 @@ import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_RESULT
 import org.idpass.smartscanner.lib.SmartScannerActivity.Companion.SCANNER_SIGNATURE_VERIFICATION
 import org.idpass.smartscanner.lib.nfc.NFCActivity
 import org.idpass.smartscanner.lib.scanner.config.*
-import org.idpass.smartscanner.lib.scanner.config.Config.Companion.OP_SCANNER
 import org.idpass.smartscanner.lib.scanner.config.Config.Companion.ORIENTATION
 import org.newlogic.smartscanner.databinding.ActivityMainBinding
 import org.newlogic.smartscanner.result.IDPassResultActivity
@@ -80,6 +78,7 @@ class MainActivity : AppCompatActivity() {
         binding.itemBarcode.item.setOnClickListener { scanBarcode(BarcodeOptions.default) }
         binding.itemIdpassLite.item.setOnClickListener { scanIDPassLite() }
         binding.itemMrz.item.setOnClickListener { scanMRZ() }
+        binding.itemOcr.item.setOnClickListener { scanOCR() }
         binding.itemQr.item.setOnClickListener { scanQRCode() }
 //        binding.itemQrGzip.item.setOnClickListener { scanQRCodeGzip() }
         binding.itemNfc.item.setOnClickListener { scanNFC() }
@@ -139,6 +138,28 @@ class MainActivity : AppCompatActivity() {
                     isManualCapture = true,
                     orientation = getOrientation(preference),
                     showGuide = true
+                )
+            )
+        )
+        startActivityForResult(intent, OP_SCANNER)
+    }
+
+    private fun scanOCR() {
+        val intent = Intent(this, SmartScannerActivity::class.java)
+        intent.putExtra(
+            SmartScannerActivity.SCANNER_OPTIONS,
+            ScannerOptions(
+                mode = Modes.OCR.value,
+                language = getLanguage(preference),
+                ocrOptions = OCROptions(
+                    analyzeStart = 1000
+                ),
+                config = Config(
+                    branding = true,
+                    imageResultType = imageType,
+                    label = "",
+                    isManualCapture = false,
+                    orientation = getOrientation(preference)
                 )
             )
         )

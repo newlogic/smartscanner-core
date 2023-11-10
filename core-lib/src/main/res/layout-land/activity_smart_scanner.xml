@@ -32,14 +32,13 @@
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.8" />
 
-
     <TextView
         android:id="@+id/capture_header_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:gravity="center"
         android:textColor="@color/white"
-        android:layout_marginTop="8dp"
         android:textDirection="anyRtl"
         android:textSize="14sp"
         android:textStyle="bold"
@@ -75,11 +74,23 @@
             android:id="@+id/view_finder"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginBottom="42dp"
-            android:layout_marginTop="4dp"
             android:layout_marginHorizontal="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="42dp"
             android:elevation="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintDimensionRatio="4:3"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <include
+            android:id="@+id/guide_layout"
+            layout="@layout/guide_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginHorizontal="4dp"
+            android:layout_marginBottom="42dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -98,27 +109,14 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:id="@+id/rect_guide"
-            android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:layout_marginHorizontal="25dp"
-            android:layout_marginBottom="66dp"
-            android:contentDescription="@string/rectangle"
-            android:src="@drawable/rectangle_slim"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            android:adjustViewBounds="true" />
-        
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/branding_image"
             android:layout_width="64dp"
             android:layout_height="32dp"
-            app:srcCompat="@drawable/ic_id_pass_logo_greyed"
             android:textColor="@color/white"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/rect_image" />
+            app:layout_constraintTop_toBottomOf="@+id/rect_image"
+            app:srcCompat="@drawable/ic_id_pass_logo_greyed" />
 
         <TextView
             android:id="@+id/capture_label_text"
@@ -148,9 +146,9 @@
             android:layout_height="0dp"
             android:layout_marginBottom="36dp"
             android:adjustViewBounds="false"
-            android:visibility="gone"
             android:contentDescription="@string/rectangle"
             android:src="@drawable/rectangle_white_with_crop"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -165,8 +163,8 @@
         android:layout_height="48dp"
         android:layout_marginEnd="16dp"
         android:src="@drawable/circle_photo_camera"
-        app:layout_constraintTop_toBottomOf="@+id/action_bar_menu"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@+id/action_bar_menu" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

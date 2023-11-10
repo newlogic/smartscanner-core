@@ -71,7 +71,7 @@ open class MRZAnalyzer(
                 setBrightness(3F)
             }
 
-            val rectGuide = activity.findViewById<ImageView>(R.id.rect_guide)
+            val rectGuide = activity.findViewById<ImageView>(R.id.scanner_overlay)
             val viewFinder = activity.findViewById<View>(R.id.view_finder)
             var inputBitmap = bf
             var inputRot = rotation

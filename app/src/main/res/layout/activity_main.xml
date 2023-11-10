@@ -113,6 +113,17 @@
                 app:layout_constraintTop_toBottomOf="@+id/item_pdf417" />
 
             <include
+                android:id="@+id/item_ocr"
+                layout="@layout/item_ocr"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="24dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/item_mrz" />
+
+            <include
                 android:id="@+id/item_nfc"
                 layout="@layout/item_nfc"
                 android:layout_width="match_parent"
@@ -121,7 +132,7 @@
                 android:layout_marginTop="4dp"
                 android:layout_marginEnd="24dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/item_mrz" />
+                app:layout_constraintTop_toBottomOf="@+id/item_ocr" />
 
             <include
                 android:id="@+id/item_qr"

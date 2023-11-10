@@ -15,16 +15,25 @@
  *
  *
  */
-package org.idpass.smartscanner.lib.scanner.config
+package org.idpass.smartscanner.lib.ocr
 
-enum class Modes (val value : String) {
-    BARCODE("barcode"),
-    CAPTURE_ONLY("capture-only"),
-    IDPASS_LITE("idpass-lite"),
-    MRZ("mrz"),
-    OCR("ocr"),
-    NFC_SCAN("nfc-scan"),
-    PDF_417("pdf417"),
-    QRCODE("qrcode"),
-    QRCODE_CONFIG("qrcode-config")
+object OCRChecker {
+
+    const val DEFAULT_REGEX_STRING = ".*"
+
+    fun check(
+        ocr: String,
+        regex: String? = DEFAULT_REGEX_STRING,
+    ): Boolean {
+
+        val pattern = if (regex.isNullOrEmpty() || regex == DEFAULT_REGEX_STRING) {
+            //default regex will pass all text. always return true
+            return true
+        } else {
+            //otherwise set regex and check text if it matches
+            Regex(regex)
+        }
+
+        return ocr.matches(pattern)
+    }
 }

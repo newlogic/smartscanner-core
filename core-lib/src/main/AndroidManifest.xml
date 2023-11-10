@@ -32,12 +32,14 @@
                 <action android:name="org.idpass.smartscanner.MRZ_SCAN" />
                 <action android:name="org.idpass.smartscanner.NFC_SCAN" />
                 <action android:name="org.idpass.smartscanner.QRCODE_SCAN" />
+                <action android:name="org.idpass.smartscanner.OCR_SCAN" />
                 <!--ODK bundle intent-->
                 <action android:name="org.idpass.smartscanner.odk.BARCODE_SCAN" />
                 <action android:name="org.idpass.smartscanner.odk.IDPASS_LITE_SCAN" />
                 <action android:name="org.idpass.smartscanner.odk.MRZ_SCAN" />
                 <action android:name="org.idpass.smartscanner.odk.NFC_SCAN" />
                 <action android:name="org.idpass.smartscanner.odk.QRCODE_SCAN" />
+                <action android:name="org.idpass.smartscanner.odk.OCR_SCAN" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

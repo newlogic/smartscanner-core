@@ -52,8 +52,7 @@
             android:text="@string/label_hex"
             android:textColor="@color/newlogic_black"
             android:textSize="14sp"
-            tools:ignore="MissingConstraints"
-            tools:text="54 65 73 74 20 51 52 20  Test QR\n43 6F 64 65              Code" />
+            tools:ignore="MissingConstraints" />
     </LinearLayout>
 
     <androidx.appcompat.widget.AppCompatEditText
