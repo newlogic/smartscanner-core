@@ -32,6 +32,7 @@ data class Config(
     val subHeader: String? = null,
     val label: String? = null,
     val orientation: String? = null,
+    val showSettings: Boolean = false,
     val showGuide: Boolean? = null,
     val showOcrGuide: Boolean? = null,
     val xGuide: Number? = null,
@@ -44,6 +45,11 @@ data class Config(
         const val CONFIG_PROFILE_NAME = "CONFIG_PROFILE_NAME"
         const val OP_SCANNER = 1001
         const val ORIENTATION = "ORIENTATION"
+        const val REGEX = "REGEX"
+        const val WIDTH_GUIDE = "WIDTH_GUIDE"
+        const val HEIGHT_GUIDE = "HEIGHT_GUIDE"
+        const val X_GUIDE = "X_GUIDE"
+        const val Y_GUIDE = "Y_GUIDE"
         const val SHARED = "SHARED"
 
         val default = Config(

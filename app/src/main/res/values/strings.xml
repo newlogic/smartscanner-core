@@ -46,6 +46,7 @@
     <string name="label_version">Version: %1$s</string>
     <string name="label_warning_invalid_composite_digit">Warning: This MRZ contains an invalid composite check digit.</string>
     <string name="label_orientation">ORIENTATION</string>
+    <string name="label_ocr_options">OCR SCANNING OPTIONS</string>
     <string name="label_portrait">Portrait</string>
     <string name="label_landscape">Landscape</string>
     <string name="label_config_profile">CONFIGURATION PROFILE</string>
@@ -61,6 +62,15 @@
     <string name="raw_result">Raw result</string>
     <string name="view_raw_result">View Raw Result</string>
     <string name="config_loaded">Configuration loaded successfully</string>
+    <string name="label_scanning_conditionality">Scanning conditionality</string>
+    <string name="desc_scanning_conditionality">Adding a scanning conditionality will prevent the scanner from capturing data that does not match the condition.</string>
+    <string name="label_regex">Regex</string>
+    <string name="label_ocr_guide">OCR Guide</string>
+    <string name="desc_ocr_guide">Changing the scanner frame size can help when the document size does not match the frame.</string>
+    <string name="label_width">Width</string>
+    <string name="label_height">Height</string>
+    <string name="label_distance_from_left">Distance from left</string>
+    <string name="label_distance_from_top">Distance from top</string>
     <!-- Strings used for fragments for navigation -->
 
 </resources>

@@ -93,11 +93,13 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         const val SCANNER_RAW_RESULT = "scanner_raw_result"
         const val SCANNER_HEADER_RESULT = "scanner_header_result"
         const val SCANNER_RESULT = "scanner_result"
+        const val SCANNER_INTENT_EXTRAS = "scanner_intent_extras"
         const val SCANNER_FAIL_RESULT = "scanner_fail_result"
         const val SCANNER_RESULT_BYTES = "scanner_result_bytes"
         const val SCANNER_IMAGE_TYPE = "scanner_image_type"
         const val SCANNER_SIGNATURE_VERIFICATION = "scanner_signature_verification"
         const val SCANNER_JWT_CONFIG_UPDATE = "scanner_jwt_config_update"
+        const val SCANNER_SETTINGS_CALL = "scanner_settings"
     }
 
     private val DEFAULT_HEIGHT = 70
@@ -118,6 +120,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
     private var orientation: String? = null
 
     private var flashButton: View? = null
+    private var settingsButton: View? = null
     private var closeButton: View? = null
     private var rectangle: View? = null
     private var rectangleGuide: View? = null
@@ -168,6 +171,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         viewFinder = findViewById(R.id.view_finder)
         barcodeScannerView = findViewById(R.id.view_finder_barcode)
         flashButton = findViewById(R.id.flash_button)
+        settingsButton = findViewById(R.id.settings_button)
         closeButton = findViewById(R.id.close_button)
         rectangle = findViewById(R.id.rect_image)
         rectangleGuide = findViewById(R.id.scanner_overlay)
@@ -180,6 +184,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         captureLabelText = findViewById(R.id.capture_label_text)
         captureHeaderText = findViewById(R.id.capture_header_text)
         captureSubHeaderText = findViewById(R.id.capture_sub_header_text)
+
         // Scanner setup from intent
         hideActionBar()
         if (intent.action != null) {
@@ -594,6 +599,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 }
             }
         }
+        //settings
+        settingsButton?.visibility = if (config?.showSettings == true) VISIBLE else GONE
         // flash
         flashButton?.visibility = if (isLedFlashAvailable(this)) VISIBLE else GONE
         // capture text label
@@ -657,6 +664,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         }
         // assign camera click listeners
         closeButton?.setOnClickListener(this)
+        settingsButton?.setOnClickListener(this)
         flashButton?.setOnClickListener(this)
         manualCapture?.setOnClickListener(this)
     }
@@ -699,6 +707,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
     override fun onClick(view: View) {
         when (view.id) {
             R.id.close_button -> onBackPressed()
+            R.id.settings_button -> showSettings()
             R.id.flash_button -> {
                 flashButton?.let {
                     if (it.isSelected) {
@@ -778,7 +787,15 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             camera?.cameraControl?.enableTorch(torch)
         }
     }
+    private fun showSettings() {
+        val data = Intent()
+        data.putExtra(SCANNER_SETTINGS_CALL, true)
+        data.putExtra(ScannerConstants.MODE, mode)
+        data.putExtra(SCANNER_INTENT_EXTRAS, scannerOptions)
 
+        setResult(Activity.RESULT_OK, data)
+        this.finish()
+    }
     @SuppressLint("InflateParams")
     private fun showIDPassLiteVerification(qrBytes: ByteArray) {
         val bottomSheetDialog = BottomSheetDialog(this)
@@ -845,7 +862,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
     private fun checkGuideView() {
         if (config?.showGuide == true) {
             showMRZGuide()
-        } else  if (config?.showOcrGuide == true) {
+        } else if (config?.showOcrGuide == true) {
             showOCRGuide()
         } else {
             guideContainer?.alpha = 0f
@@ -908,7 +925,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             }
 
             // if height guide is not by default
-            if (conf.heightGuide != DEFAULT_HEIGHT) {
+            if (conf.heightGuide != 0) {
                 val nHeight = TypedValue.applyDimension(
                     TypedValue.COMPLEX_UNIT_DIP,
                     conf.heightGuide.toFloat(),

@@ -45,6 +45,7 @@
     <string name="label_version">إصدار: %1$s</string>
     <string name="label_warning_invalid_composite_digit">تحذير: يحتوي MRZ هذا على رقم تحقق مركب غير صالح.</string>
     <string name="label_orientation">توجيه</string>
+    <string name="label_ocr_options">OCR SCANNING OPTIONS</string>
     <string name="label_portrait">لوحة</string>
     <string name="label_landscape">منظر جمالي</string>
     <string name="label_config_profile">ملف تعريف التكوين</string>
@@ -60,5 +61,13 @@
     <string name="raw_result">البيانات الخام</string>
     <string name="view_raw_result">عرض البيانات الخام</string>
     <string name="config_loaded">تم تحميل التكوين بنجاح</string>
-
+    <string name="label_scanning_conditionality">شرطية المسح</string>
+    <string name="desc_scanning_conditionality">إضافة شرطية للمسح ستمنع الماسح الضوئي من التقاط البيانات التي لا تتوافق مع الشرط.</string>
+    <string name="label_regex">تعبيرات النمط العادية (RegEx)</string>
+    <string name="label_ocr_guide">حجم إطار الماسح الضوئي</string>
+    <string name="desc_ocr_guide">تغيير حجم إطار الماسح الضوئي يمكن أن يساعد عندما لا يتوافق حجم المستند مع الإطار.</string>
+    <string name="label_width">العرض</string>
+    <string name="label_height">الارتفاع</string>
+    <string name="label_distance_from_left">المسافة من اليسار</string>
+    <string name="label_distance_from_top">المسافة من الأعلى</string>
 </resources>

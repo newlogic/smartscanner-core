@@ -110,7 +110,7 @@ class ResultActivity : AppCompatActivity() {
 
                 // Display for MRZ here
                 Modes.MRZ.value -> {
-                    displayResult(result = result, imageType = imageType)
+//                    displayResult(result = result, imageType = imageType)
                     // Check composite validity
                     val resultObj = JsonParser.parseString(result).asJsonObject
                     val validComposite = if (resultObj["validComposite"]!= null) resultObj["validComposite"].asBoolean else true
@@ -122,12 +122,10 @@ class ResultActivity : AppCompatActivity() {
                     }
                 }
 
-                // Display for QR Code here
-                Modes.QRCODE.value -> showListResult(result)
-
                 // Otherwise
-                else -> displayResult(result = result, imageType = imageType)
+//                else -> displayResult(result = result, imageType = imageType)
             }
+            showListResult(result)
         } else {
             // Result from intent extras is null, check bundle result instead
             val bundleResult = intent.getBundleExtra(BUNDLE_RESULT)
@@ -226,12 +224,28 @@ class ResultActivity : AppCompatActivity() {
         val dateOfBirth: String?
         val nationality: String?
         val documentNumber: String?
+
+        //ocr results
+        val image: String?
+        val imagePath: String?
+        val regex: String?
+        val value: String?
+        val valuesArray: String?
+
         val resultObject = JsonParser.parseString(result).asJsonObject
         givenNames = if (resultObject["givenNames"] != null) resultObject["givenNames"].asString else ""
         surname = if (resultObject["surname"]!= null) resultObject["surname"].asString else ""
         dateOfBirth = if (resultObject["dateOfBirth"]!= null) resultObject["dateOfBirth"].asString else ""
         nationality =  if (resultObject["nationality"]!= null) resultObject["nationality"].asString else ""
         documentNumber = if (resultObject["documentNumber"]!= null) resultObject["documentNumber"].asString else ""
+
+        //ocr results
+        image = if (resultObject["image"]!= null) resultObject["image"].asString else ""
+        imagePath = if (resultObject["imagePath"]!= null) resultObject["imagePath"].asString else ""
+        regex = if (resultObject["regex"]!= null) resultObject["regex"].asString else ""
+        value = if (resultObject["value"]!= null) resultObject["value"].asString else ""
+        valuesArray = if (resultObject["valuesArray"]!= null) resultObject["valuesArray"].toString() else ""
+
         if (givenNames != null) {
             if (givenNames.isNotEmpty()) dump.append("Given Name: ${givenNames}\n")
         }
@@ -246,6 +260,20 @@ class ResultActivity : AppCompatActivity() {
         }
         if (documentNumber != null) {
             if (documentNumber.isNotEmpty()) dump.append("Document Number: ${documentNumber}\n")
+        }
+        if (documentNumber != null) {
+            if (documentNumber.isNotEmpty()) dump.append("Document Number: ${documentNumber}\n")
+        }
+
+        //ocr results
+        if (regex != null) {
+            if (regex.isNotEmpty()) dump.append("Regex: ${regex}\n")
+        }
+        if (value != null) {
+            if (value.isNotEmpty()) dump.append("Value: ${value}\n")
+        }
+        if (valuesArray != null) {
+            if (valuesArray.isNotEmpty()) dump.append("Values Array: ${valuesArray}\n")
         }
         if (dump.isNotEmpty()) dump.append("-------------------------")
         return dump
@@ -275,7 +303,7 @@ class ResultActivity : AppCompatActivity() {
             try {
                 val value: String = jsonResult.get(mKey).toString()
 
-                resultList[mKey] = value
+                if (value.isNotEmpty()) resultList[mKey] = value
             } catch (e: JSONException) {
                 // TODO Something went wrong!
             }

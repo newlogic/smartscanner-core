@@ -33,6 +33,21 @@ object LanguageUtils {
         resources.updateConfiguration(config, resources.displayMetrics)
     }
 
+    fun changeLanguageIfNotMatch(context: Context, language: String) {
+        val locale = Locale(language)
+        if (context.resources.configuration.locale.language != locale.language) {
+            val config = Configuration()
+            val resources = context.resources
+            Locale.setDefault(locale)
+            config.locale = locale
+            resources.updateConfiguration(config, resources.displayMetrics)
+        }
+    }
+
+    fun getLocaleLanguage(context: Context): String {
+        return context.resources.configuration.locale.language
+    }
+
     /**
      * Determine if String s is right-to-left or RTL.
      * Example of RTL languages: Arabic, Hebrew, etc
