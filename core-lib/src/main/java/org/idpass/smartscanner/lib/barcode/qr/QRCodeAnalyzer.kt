@@ -154,6 +154,8 @@ class QRCodeAnalyzer(
 
             }
 
+            val jsonValue = rawValue?.let { getJwtStr(it) }
+
             if (isJson == true && result != null && result != rawValue) {
                 jsonPath?.let { path ->
                     val ctx = JsonPath.parse(result)

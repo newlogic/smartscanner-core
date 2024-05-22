@@ -39,7 +39,7 @@ class SmartScannerApplication : MultiDexApplication() {
     private class CrashReportingTree : Timber.Tree() {
         val crashlytics = FirebaseCrashlytics.getInstance()
         override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-            if (priority == Log.VERBOSE || priority == Log.DEBUG) {
+            if (priority == Log.VERBOSE || priority == Log.DEBUG || BuildConfig.BUILD_TYPE == "debug") {
                 return
             }
             crashlytics.log(message)
