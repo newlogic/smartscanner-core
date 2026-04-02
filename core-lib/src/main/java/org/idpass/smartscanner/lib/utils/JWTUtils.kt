@@ -90,21 +90,17 @@ object JWTUtils {
      * which public key to use
      */
     fun getWithSignedKey(rawValue: String, publicKey: String?): Jws<Claims> {
-        val parser = Jwts.parserBuilder()
-            .setSigningKeyResolver(object : SigningKeyResolverAdapter() {
-                override fun resolveSigningKey(
-                    header: JwsHeader<out JwsHeader<*>>?,
-                    claims: Claims?
-                ): Key {
-                    return lookupVerificationKey(header?.keyId, publicKey)
-                }
-            }).build()
-        return parser.parseClaimsJws(rawValue)
+        val parser = Jwts.parser()
+            .keyLocator { header ->
+                lookupVerificationKey((header as? JwsHeader)?.keyId, publicKey)
+            }
+            .build()
+        return parser.parseSignedClaims(rawValue)
     }
 
     fun Jws<Claims>.getJsonBody(): JSONObject {
         val json = JSONObject()
-        this.body.entries.iterator().forEach { (key, value) -> json.put(key, value) }
+        this.payload.entries.iterator().forEach { (key, value) -> json.put(key, value) }
         return json
     }
 

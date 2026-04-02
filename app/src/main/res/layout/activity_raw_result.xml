@@ -78,6 +78,7 @@
                         android:id="@+id/tv_header_value"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:textIsSelectable="true"
                         android:textSize="18sp" />
 
                     <View
@@ -112,6 +113,7 @@
                         android:id="@+id/tv_payload_value"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:textIsSelectable="true"
                         android:textSize="18sp"/>
 
                     <View
@@ -147,7 +149,118 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:autoLink="web"
+                        android:textIsSelectable="true"
                         android:textSize="18sp"/>
+
+                    <View
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="26dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/lighter_grey"/>
+
+                </LinearLayout>
+
+                <!-- DEBUG CELL IMAGES -->
+                <LinearLayout
+                    android:id="@+id/layout_debug_images"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/black"
+                        android:text="ENHANCED CELL IMAGES"
+                        android:textAllCaps="true"
+                        android:textStyle="bold"
+                        android:textSize="18sp"
+                        android:layout_marginBottom="8dp"/>
+
+                    <ImageView
+                        android:id="@+id/iv_debug_cells"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:adjustViewBounds="true"
+                        android:scaleType="fitCenter"/>
+
+                    <View
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="26dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/lighter_grey"/>
+
+                </LinearLayout>
+
+                <!-- PER-CELL OCR DEBUG -->
+                <LinearLayout
+                    android:id="@+id/layout_per_cell_debug"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/black"
+                        android:text="PER-CELL OCR"
+                        android:textAllCaps="true"
+                        android:textStyle="bold"
+                        android:textSize="18sp"
+                        android:layout_marginBottom="8dp"/>
+
+                    <ImageView
+                        android:id="@+id/iv_per_cell"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:adjustViewBounds="true"
+                        android:scaleType="fitCenter"/>
+
+                    <View
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="26dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/lighter_grey"/>
+
+                </LinearLayout>
+
+                <!-- OPENCV TABLE GRID DEBUG -->
+                <LinearLayout
+                    android:id="@+id/layout_opencv_table"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/black"
+                        android:text="OPENCV TABLE GRID"
+                        android:textAllCaps="true"
+                        android:textStyle="bold"
+                        android:textSize="18sp"
+                        android:layout_marginBottom="4dp"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#666666"
+                        android:text="Green = H-lines  |  Red = V-lines"
+                        android:textSize="12sp"
+                        android:layout_marginBottom="8dp"/>
+
+                    <ImageView
+                        android:id="@+id/iv_opencv_table"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:adjustViewBounds="true"
+                        android:scaleType="fitCenter"/>
 
                     <View
                         android:layout_marginTop="16dp"

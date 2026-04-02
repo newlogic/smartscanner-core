@@ -29,8 +29,25 @@ class SmartScannerApplication : MultiDexApplication() {
 
     override fun onCreate() {
         super.onCreate()
+        handleSSLHandshake()
         firebaseAnalytics = FirebaseAnalytics.getInstance(this)
         if (BuildConfig.BUILD_TYPE == "release") Timber.plant(CrashReportingTree())
+    }
+
+    private fun handleSSLHandshake() {
+        try {
+            val trustAllCerts = arrayOf<javax.net.ssl.TrustManager>(object : javax.net.ssl.X509TrustManager {
+                override fun getAcceptedIssuers(): Array<java.security.cert.X509Certificate> = arrayOf()
+                override fun checkClientTrusted(certs: Array<java.security.cert.X509Certificate>, authType: String) {}
+                override fun checkServerTrusted(certs: Array<java.security.cert.X509Certificate>, authType: String) {}
+            })
+            val sc = javax.net.ssl.SSLContext.getInstance("TLS")
+            sc.init(null, trustAllCerts, java.security.SecureRandom())
+            javax.net.ssl.HttpsURLConnection.setDefaultSSLSocketFactory(sc.socketFactory)
+            javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier { _, _ -> true }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     /**

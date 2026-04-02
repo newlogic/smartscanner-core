@@ -6,5 +6,8 @@ data class OCRResult(
     val regex: String,
     val valuesArray: ArrayList<String>,
     val value: Any?,
-    val type: String?
+    val type: String?,
+    val fields: Map<String, String>? = null,
+    val rawFields: Map<String, String>? = null,
+    val country: String? = null
 )

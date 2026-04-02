@@ -18,6 +18,7 @@
 
 package org.newlogic.smartscanner.result
 
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
@@ -25,6 +26,7 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import org.newlogic.smartscanner.R
 import org.newlogic.smartscanner.databinding.ActivityRawResultBinding
+import java.io.File
 
 class RawResultActivity : AppCompatActivity() {
 
@@ -76,6 +78,36 @@ class RawResultActivity : AppCompatActivity() {
         if (payload != null) {
             binding.tvPayloadValue.text = formatString(payload)
             binding.layoutPayload.visibility = VISIBLE
+        }
+
+        // Show debug enhanced cell images if available
+        val debugCellsFile = File(cacheDir, "debug_enhanced_cells.jpg")
+        if (debugCellsFile.exists()) {
+            val bitmap = BitmapFactory.decodeFile(debugCellsFile.absolutePath)
+            if (bitmap != null) {
+                binding.ivDebugCells.setImageBitmap(bitmap)
+                binding.layoutDebugImages.visibility = VISIBLE
+            }
+        }
+
+        // Show per-cell OCR debug composite if available
+        val perCellFile = File(cacheDir, "debug_per_cell.jpg")
+        if (perCellFile.exists()) {
+            val bitmap = BitmapFactory.decodeFile(perCellFile.absolutePath)
+            if (bitmap != null) {
+                binding.ivPerCell.setImageBitmap(bitmap)
+                binding.layoutPerCellDebug.visibility = VISIBLE
+            }
+        }
+
+        // Show OpenCV table grid debug image if available
+        val opencvTableFile = File(cacheDir, "debug_opencv_table.jpg")
+        if (opencvTableFile.exists()) {
+            val bitmap = BitmapFactory.decodeFile(opencvTableFile.absolutePath)
+            if (bitmap != null) {
+                binding.ivOpencvTable.setImageBitmap(bitmap)
+                binding.layoutOpencvTable.visibility = VISIBLE
+            }
         }
 
     }

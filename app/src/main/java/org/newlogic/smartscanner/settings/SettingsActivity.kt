@@ -57,6 +57,7 @@ class SettingsActivity : AppCompatActivity() {
         const val CONFIG_UPDATED = "CONFIG_UPDATED"
         const val OCR_SETTINGS_CALL = "OCR_SETTINGS_CALL"
         const val SCANNER_INTENT_EXTRAS = "SCANNER_INTENT_EXTRAS"
+        const val DEBUG_OVERLAY = "DEBUG_OVERLAY"
     }
 
 
@@ -128,6 +129,9 @@ class SettingsActivity : AppCompatActivity() {
         // Setup click listeners
         setupViewListeners(preference)
 
+        // Debug overlay toggle (enabled by default)
+        binding.switchDebugOverlay.isChecked = preference?.getBoolean(DEBUG_OVERLAY, true) ?: true
+
         //set ocr settings values based on saved values
         binding.regex.setText(preference?.getString(REGEX, "") ?: "")
         binding.widthGuide.setText((preference?.getInt(WIDTH_GUIDE, 0) ?: 0).toString())
@@ -163,6 +167,11 @@ class SettingsActivity : AppCompatActivity() {
             binding.landscapeCheck.visibility = View.INVISIBLE
             saveToPreference(key = ORIENTATION, value = PORTRAIT.value)
             binding.backspace.callOnClick()
+        }
+
+        // Debug overlay
+        binding.switchDebugOverlay.setOnCheckedChangeListener { _, isChecked ->
+            preference?.edit()?.putBoolean(DEBUG_OVERLAY, isChecked)?.apply()
         }
 
         // Go Back

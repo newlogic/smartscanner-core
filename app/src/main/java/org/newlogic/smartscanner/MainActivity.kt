@@ -17,13 +17,13 @@
  */
 package org.newlogic.smartscanner
 
-import android.annotation.SuppressLint
-import android.content.Context
+import android.app.Activity
 import android.content.Intent
 import android.content.SharedPreferences
 import android.nfc.NfcAdapter
 import android.os.Bundle
-import android.util.Log
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 import org.idpass.smartscanner.api.ScannerConstants
@@ -52,14 +52,12 @@ import org.newlogic.smartscanner.result.IDPassResultActivity
 import org.newlogic.smartscanner.result.ResultActivity
 import org.newlogic.smartscanner.settings.SettingsActivity
 import java.util.Locale
+import org.idpass.smartscanner.lib.R as LibR
 
 
 class MainActivity : AppCompatActivity() {
 
     companion object {
-
-        const val OP_SCANNER = 1001
-        const val OP_SETTINGS = 1002
         private val imageType = ImageResultType.PATH.value
 
         private fun sampleConfig(isManualCapture: Boolean, label: String = "", orientation : String? = Orientation.PORTRAIT.value) = Config(
@@ -69,15 +67,94 @@ class MainActivity : AppCompatActivity() {
             isManualCapture = isManualCapture,
             orientation = orientation
         )
+
     }
 
     private var preference : SharedPreferences? = null
     private lateinit var binding : ActivityMainBinding
     private var currentLanguage: String = Language.EN
+    private var jsonConfig: String? = null
+
+    private val scannerLauncher: ActivityResultLauncher<Intent> = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val intent = result.data
+            val bundle = intent?.getBundleExtra(ScannerConstants.RESULT)
+            val mIntent: Intent
+
+            if (bundle != null) {
+                // Get Result from Bundle Intent Call Out
+                if (bundle.getString(ScannerConstants.MODE) == Modes.IDPASS_LITE.value) {
+                    // Go to ID PASS Lite Results Screen via bundle
+                    mIntent = Intent(this, IDPassResultActivity::class.java)
+                    mIntent.putExtra(IDPassResultActivity.BUNDLE_RESULT, bundle)
+                } else {
+                    // Go to Results Screen via bundle
+                    mIntent = Intent(this, ResultActivity::class.java)
+                    mIntent.putExtra(ResultActivity.BUNDLE_RESULT, bundle)
+                }
+            } else {
+                // Get Result from Intent extras
+                if (intent?.getStringExtra(ScannerConstants.MODE) == Modes.IDPASS_LITE.value) {
+                    // Go to ID PASS Lite Results Screen
+                    val resultBytes = intent.getByteArrayExtra(SCANNER_RESULT_BYTES)
+                    mIntent = Intent(this, IDPassResultActivity::class.java)
+                    mIntent.putExtra(IDPassResultActivity.RESULT, resultBytes)
+                } else {
+
+                    // Check if it should go to the settings instead
+                    val isConfigUpdated = intent?.getBooleanExtra(SCANNER_JWT_CONFIG_UPDATE, false) ?: false
+
+                    // should go to settings
+                    if (isConfigUpdated) {
+                        val sIntent = Intent(this, SettingsActivity::class.java)
+                        sIntent.putExtra(SettingsActivity.CONFIG_UPDATED, true)
+                        startActivity(sIntent)
+                        return@registerForActivityResult
+                    }
+
+                    val isSettingsCall = intent?.getBooleanExtra(SCANNER_SETTINGS_CALL, false) ?: false
+
+                    // should go to settings
+                    if (isSettingsCall) {
+                        val extras = intent?.getParcelableExtra<ScannerOptions>(SCANNER_INTENT_EXTRAS)
+
+                        val sIntent = Intent(this, SettingsActivity::class.java)
+                        sIntent.putExtra(SettingsActivity.SCANNER_INTENT_EXTRAS, extras)
+                        if (intent?.getStringExtra(ScannerConstants.MODE) == Modes.OCR.value) {
+                            sIntent.putExtra(SettingsActivity.OCR_SETTINGS_CALL, true)
+                        }
+                        scannerLauncher.launch(sIntent)
+                        return@registerForActivityResult
+                    }
+
+                    // Go to Results Screen
+                    val resultData = intent?.getStringExtra(SCANNER_RESULT)
+                    val verified = intent?.getBooleanExtra(SCANNER_SIGNATURE_VERIFICATION, false)
+                    val rawResult = intent?.getStringExtra(SCANNER_RAW_RESULT)
+                    val failResult = intent?.getStringExtra(SCANNER_FAIL_RESULT)
+                    val headerResult = intent?.getStringExtra(SCANNER_HEADER_RESULT)
+
+                    mIntent = Intent(this, ResultActivity::class.java)
+                    mIntent.putExtra(ResultActivity.SIGNATURE_VERIFIED, verified)
+                    mIntent.putExtra(ResultActivity.IMAGE_TYPE, intent?.getStringExtra(SCANNER_IMAGE_TYPE))
+                    mIntent.putExtra(ResultActivity.RESULT, resultData)
+                    mIntent.putExtra(ResultActivity.FAIL_RESULT, failResult)
+                    mIntent.putExtra(ResultActivity.RAW_RESULT, rawResult)
+                    mIntent.putExtra(ResultActivity.HEADER_RESULT, headerResult)
+                    val mode = intent?.getStringExtra(ScannerConstants.MODE)
+                    if (mode == Modes.SCAN_ID_OCR.value || mode == Modes.OCR.value) {
+                        mIntent.putExtra(ResultActivity.SCAN_ID_OCR_CONFIG, jsonConfig)
+                    }
+                }
+            }
+            mIntent.putExtra(ScannerConstants.MODE, intent?.getStringExtra(ScannerConstants.MODE))
+            startActivity(mIntent)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        preference = getSharedPreferences(Config.SHARED, Context.MODE_PRIVATE)
+        preference = getSharedPreferences(Config.SHARED, MODE_PRIVATE)
         currentLanguage = preference?.getString(Language.NAME, Language.EN) ?: Language.EN
         LanguageUtils.changeLanguageIfNotMatch(this, currentLanguage)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -105,6 +182,7 @@ class MainActivity : AppCompatActivity() {
         binding.itemIdpassLite.item.setOnClickListener { scanIDPassLite() }
         binding.itemMrz.item.setOnClickListener { scanMRZ() }
         binding.itemOcr.item.setOnClickListener { scanOCR() }
+        binding.itemScanIdOcr.item.setOnClickListener { scanIDOCR() }
         binding.itemQr.item.setOnClickListener { scanQRCode() }
 //        binding.itemQrGzip.item.setOnClickListener { scanQRCodeGzip() }
         binding.itemNfc.item.setOnClickListener { scanNFC() }
@@ -133,7 +211,7 @@ class MainActivity : AppCompatActivity() {
                 barcodeOptions = barcodeOptions
             )
         )
-        startActivityForResult(intent, OP_SCANNER)
+        scannerLauncher.launch(intent)
     }
 
     private fun scanIDPassLite() {
@@ -147,7 +225,7 @@ class MainActivity : AppCompatActivity() {
                 config = sampleConfig(false).copy(showSettings = true)
             )
         )
-        startActivityForResult(intent, OP_SCANNER)
+        scannerLauncher.launch(intent)
     }
 
     private fun scanMRZ() {
@@ -168,7 +246,7 @@ class MainActivity : AppCompatActivity() {
                 )
             )
         )
-        startActivityForResult(intent, OP_SCANNER)
+        scannerLauncher.launch(intent)
     }
 
     private fun scanOCR() {
@@ -198,7 +276,46 @@ class MainActivity : AppCompatActivity() {
                 )
             )
         )
-        startActivityForResult(intent, OP_SCANNER)
+        scannerLauncher.launch(intent)
+    }
+
+    private fun scanIDOCR() {
+        val intent = Intent(this, SmartScannerActivity::class.java)
+
+        // ID scanning needs a guide to crop the preview to the card area.
+        // Use settings values if set, otherwise sensible defaults for an ID card.
+        val widthGuide = if (getWidthGuide() != null && getWidthGuide() != 0) getWidthGuide()!! else 300
+        val heightGuide = if (getHeightGuide() != null && getHeightGuide() != 0) getHeightGuide()!! else 190
+
+        // Uses built-in default country configs (Colombia, Venezuela) from DefaultCountryConfigs.
+        // Pass an empty list to use all defaults, or pass custom configs to override/extend.
+        intent.putExtra(
+            SmartScannerActivity.SCANNER_OPTIONS,
+            ScannerOptions(
+                mode = Modes.OCR.value,
+                language = getLanguage(),
+                ocrOptions = OCROptions(
+                    analyzeStart = 1000,
+                    regex = getRegex(),
+                    scanIDOCRCountryOptions = emptyList()
+                ),
+                config = Config(
+                    branding = true,
+                    imageResultType = imageType,
+                    label = "Scan ID",
+                    isManualCapture = false,
+                    showOcrGuide = true,
+                    showOcrDebug = isDebugOverlayEnabled(),
+                    orientation = getOrientation(),
+                    widthGuide = widthGuide,
+                    heightGuide = heightGuide,
+                    xGuide = getXGuide(),
+                    yGuide = getYGuide(),
+                    showSettings = true
+                )
+            )
+        )
+        scannerLauncher.launch(intent)
     }
 
     private fun scanNFC() {
@@ -222,8 +339,8 @@ class MainActivity : AppCompatActivity() {
                     )
                 )
             )
-            startActivityForResult(intent, OP_SCANNER)
-        } else Snackbar.make(binding.main, R.string.required_nfc_not_supported, Snackbar.LENGTH_LONG).show()
+            scannerLauncher.launch(intent)
+        } else Snackbar.make(binding.main, LibR.string.required_nfc_not_supported, Snackbar.LENGTH_LONG).show()
 
     }
 
@@ -238,7 +355,7 @@ class MainActivity : AppCompatActivity() {
                 config = sampleConfig(false).copy(showSettings = true)
             )
         )
-        startActivityForResult(intent, OP_SCANNER)
+        scannerLauncher.launch(intent)
     }
 
     private fun scanQRCode()  {
@@ -253,7 +370,7 @@ class MainActivity : AppCompatActivity() {
                 config = sampleConfig(false).copy(showSettings = true)
             )
         )
-        startActivityForResult(intent, OP_SCANNER)
+        scannerLauncher.launch(intent)
     }
 
     private fun getOrientation() = preference?.getString(ORIENTATION, Orientation.PORTRAIT.value)
@@ -263,94 +380,5 @@ class MainActivity : AppCompatActivity() {
     private fun getHeightGuide() = preference?.getInt(HEIGHT_GUIDE, 0)
     private fun getXGuide() = preference?.getFloat(X_GUIDE, 0f)
     private fun getYGuide() = preference?.getFloat(Y_GUIDE, 0f)
-
-    @SuppressLint("LogNotTimber")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
-        super.onActivityResult(requestCode, resultCode, intent)
-        Log.d(SmartScannerActivity.TAG, "Scanner requestCode $requestCode")
-        if (requestCode == OP_SETTINGS) {
-            if (resultCode == RESULT_OK) {
-                val extras: ScannerOptions? = intent?.getParcelableExtra(SettingsActivity.SCANNER_INTENT_EXTRAS)
-
-                val scannerIntent = Intent(this, SmartScannerActivity::class.java)
-                scannerIntent.putExtra(SmartScannerActivity.SCANNER_OPTIONS, extras)
-
-                startActivityForResult(scannerIntent, OP_SCANNER)
-            }
-        } else if (requestCode == OP_SCANNER) {
-            Log.d(SmartScannerActivity.TAG, "Scanner resultCode $resultCode")
-            if (resultCode == RESULT_OK) {
-                val bundle = intent?.getBundleExtra(ScannerConstants.RESULT)
-                val mIntent: Intent;
-
-                if (bundle != null) {
-                    // Get Result from Bundle Intent Call Out
-                    if (bundle.getString(ScannerConstants.MODE) == Modes.IDPASS_LITE.value) {
-                        // Go to ID PASS Lite Results Screen via bundle
-                        mIntent = Intent(this, IDPassResultActivity::class.java)
-                        mIntent.putExtra(IDPassResultActivity.BUNDLE_RESULT, bundle)
-                    } else {
-                        // Go to Results Screen via bundle
-                        mIntent = Intent(this, ResultActivity::class.java)
-                        mIntent.putExtra(ResultActivity.BUNDLE_RESULT, bundle)
-                    }
-                } else {
-                    // Get Result from Intent extras
-                    if (intent?.getStringExtra(ScannerConstants.MODE) == Modes.IDPASS_LITE.value) {
-                        // Go to ID PASS Lite Results Screen
-                        val resultBytes = intent.getByteArrayExtra(SCANNER_RESULT_BYTES)
-                        mIntent = Intent(this, IDPassResultActivity::class.java)
-                        mIntent.putExtra(IDPassResultActivity.RESULT, resultBytes)
-                    } else {
-
-                        // Check if it should go to the settings instead
-                        val isConfigUpdated = intent?.getBooleanExtra(SCANNER_JWT_CONFIG_UPDATE, false) ?: false
-
-                        // should go to settings
-                        if (isConfigUpdated) {
-                            val sIntent = Intent(this, SettingsActivity::class.java)
-                            sIntent.putExtra(SettingsActivity.CONFIG_UPDATED, true)
-                            startActivity(sIntent)
-                            return
-                        }
-
-                        val isSettingsCall = intent?.getBooleanExtra(SCANNER_SETTINGS_CALL, false) ?: false
-
-                        // should go to settings
-                        if (isSettingsCall) {
-                            val extras = intent?.getParcelableExtra<ScannerOptions>(SCANNER_INTENT_EXTRAS)
-
-                            val sIntent = Intent(this, SettingsActivity::class.java)
-                            sIntent.putExtra(SettingsActivity.SCANNER_INTENT_EXTRAS, extras)
-                            if (intent?.getStringExtra(ScannerConstants.MODE) == Modes.OCR.value) {
-                                sIntent.putExtra(SettingsActivity.OCR_SETTINGS_CALL, true)
-                            }
-                            startActivityForResult(sIntent, OP_SETTINGS)
-                            return
-                        }
-
-                        // Go to Results Screen
-                        val result = intent?.getStringExtra(SCANNER_RESULT)
-                        val verified = intent?.getBooleanExtra(SCANNER_SIGNATURE_VERIFICATION, false)
-                        val rawResult = intent?.getStringExtra(SCANNER_RAW_RESULT)
-                        val failResult = intent?.getStringExtra(SCANNER_FAIL_RESULT)
-                        val headerResult = intent?.getStringExtra(SCANNER_HEADER_RESULT)
-
-                        mIntent = Intent(this, ResultActivity::class.java)
-                        mIntent.putExtra(ResultActivity.SIGNATURE_VERIFIED, verified)
-                        mIntent.putExtra(ResultActivity.IMAGE_TYPE, intent?.getStringExtra(SCANNER_IMAGE_TYPE))
-                        mIntent.putExtra(ResultActivity.RESULT, result)
-                        mIntent.putExtra(ResultActivity.FAIL_RESULT, failResult)
-                        mIntent.putExtra(ResultActivity.RAW_RESULT, rawResult)
-                        mIntent.putExtra(ResultActivity.HEADER_RESULT, headerResult)
-
-                    }
-                }
-
-
-                mIntent.putExtra(ScannerConstants.MODE, intent?.getStringExtra(ScannerConstants.MODE))
-                startActivity(mIntent)
-            }
-        }
-    }
+    private fun isDebugOverlayEnabled() = preference?.getBoolean(SettingsActivity.DEBUG_OVERLAY, true) ?: true
 }

@@ -23,7 +23,7 @@ class BoundingBoxDraw(context: Context, var rect: Rect): View(context) {
     }
 
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
         canvas?.drawRect(rect.left.toFloat(), rect.top.toFloat(),  rect.right.toFloat(), rect.bottom.toFloat(), boundaryPaint)
