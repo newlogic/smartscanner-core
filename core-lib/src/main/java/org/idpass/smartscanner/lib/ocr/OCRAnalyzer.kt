@@ -30,6 +30,7 @@ import org.idpass.smartscanner.lib.scanner.BaseImageAnalyzer
 import org.idpass.smartscanner.lib.scanner.config.ImageResultType
 import org.idpass.smartscanner.lib.scanner.config.Modes
 import org.idpass.smartscanner.lib.scanner.config.ScanIDOCRCountryOptions
+import org.idpass.smartscanner.lib.scanner.config.ScanIDOCRField
 import org.idpass.smartscanner.lib.utils.BitmapUtils
 import org.idpass.smartscanner.lib.utils.extension.cacheImagePath
 import org.idpass.smartscanner.lib.utils.extension.cacheImageToLocal
@@ -68,6 +69,9 @@ open class OCRAnalyzer(
     private val isProcessing = AtomicBoolean(false)
     private var lastAnalyzedTimestamp = 0L
     private val textRecognizer by lazy { TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS) }
+    // Shared executor for cell-level OCR callbacks. Hoisted out of the per-field loop
+    // so each frame doesn't spin up N executors. Lazy so non-ID-scan modes pay nothing.
+    private val cellExecutor by lazy { java.util.concurrent.Executors.newSingleThreadExecutor() }
 
     // Cached view references for ID scan (initialized on UI thread in init)
     private var rectImageView: View? = null
@@ -527,6 +531,16 @@ open class OCRAnalyzer(
                     }
 
                     if (allAnchorsFound) {
+                        // Cell-OCR tasks are gathered during the per-field sweep and awaited once below,
+                        // so the camera analyzer thread blocks for a single overall timeout instead of
+                        // serialising N per-field waits.
+                        data class PendingCellOcr(
+                            val field: ScanIDOCRField,
+                            val searchRect: Rect,
+                            val task: com.google.android.gms.tasks.Task<com.google.mlkit.vision.text.Text>
+                        )
+                        val pendingCellOcr = mutableListOf<PendingCellOcr>()
+
                         for (field in country.ocrData) {
                             val anchors = allLines.filter { fuzzyContains(it.text, field.anchorValue) }
                             for (anchor in anchors) {
@@ -557,43 +571,11 @@ open class OCRAnalyzer(
                                 val useCellOcr = country.cellLevelOcr != false
 
                                 if (useCellOcr && cropW > 10 && cropH > 10) {
-                                    // Cell-level OCR: crop the bitmap to the search box and run dedicated OCR.
-                                    // Use a separate executor for callbacks to avoid deadlocking the main thread.
                                     val cellBitmap = Bitmap.createBitmap(croppedBitmap, cropLeft, cropTop, cropW, cropH)
                                     val cellImage = InputImage.fromBitmap(cellBitmap, 0)
-                                    val cellLatch = java.util.concurrent.CountDownLatch(1)
-                                    var cellText = ""
-                                    val cellExecutor = java.util.concurrent.Executors.newSingleThreadExecutor()
-
-                                    textRecognizer.process(cellImage)
-                                        .addOnSuccessListener(cellExecutor) { cellResult ->
-                                            cellText = cellResult.text
-                                                .replace('\n', ' ')
-                                                .replace("  ", " ")
-                                                .trim()
-                                            cellLatch.countDown()
-                                        }
-                                        .addOnFailureListener(cellExecutor) {
-                                            cellLatch.countDown()
-                                        }
-
-                                    try { cellLatch.await(1000, java.util.concurrent.TimeUnit.MILLISECONDS) } catch (_: Exception) {}
-
-                                    Log.d(SmartScannerActivity.TAG, "Cell OCR [${field.label}]: raw=\"$cellText\"")
-
-                                    if (cellText.isNotEmpty()) {
-                                        val processedText = if (field.regex != null) {
-                                            transformTextToMatchRegex(cellText, field.regex)
-                                        } else cellText
-
-                                        Log.d(SmartScannerActivity.TAG, "Cell OCR [${field.label}]: after regex=\"$processedText\"")
-                                        debugBoxes?.add(DebugOverlayView.DebugBox(searchRect, 0xFF00FF00.toInt(), "VALUE: $processedText"))
-
-                                        if (processedText.isNotEmpty()) {
-                                            val map = accumulatedResults.getOrPut(field.label) { mutableMapOf() }
-                                            map[processedText] = map.getOrDefault(processedText, 0) + 1
-                                        }
-                                    }
+                                    pendingCellOcr.add(
+                                        PendingCellOcr(field, searchRect, textRecognizer.process(cellImage))
+                                    )
                                 } else {
                                     // Line-intersection: find best matching line from full-image OCR
                                     val bestLine = allLines
@@ -634,6 +616,45 @@ open class OCRAnalyzer(
                                 }
                             }
                         }
+
+                        // Await all enqueued cell-OCR tasks in parallel under a single overall timeout.
+                        if (pendingCellOcr.isNotEmpty()) {
+                            val cellLatch = java.util.concurrent.CountDownLatch(pendingCellOcr.size)
+                            val cellResults = arrayOfNulls<String>(pendingCellOcr.size)
+                            pendingCellOcr.forEachIndexed { idx, p ->
+                                p.task
+                                    .addOnSuccessListener(cellExecutor) { result ->
+                                        cellResults[idx] = result.text
+                                            .replace('\n', ' ')
+                                            .replace("  ", " ")
+                                            .trim()
+                                        cellLatch.countDown()
+                                    }
+                                    .addOnFailureListener(cellExecutor) {
+                                        cellLatch.countDown()
+                                    }
+                            }
+                            try {
+                                cellLatch.await(2000, java.util.concurrent.TimeUnit.MILLISECONDS)
+                            } catch (_: Exception) {}
+
+                            pendingCellOcr.forEachIndexed { idx, p ->
+                                val cellText = cellResults[idx] ?: return@forEachIndexed
+                                if (cellText.isEmpty()) return@forEachIndexed
+                                val processedText = if (p.field.regex != null) {
+                                    transformTextToMatchRegex(cellText, p.field.regex)
+                                } else cellText
+
+                                Log.d(SmartScannerActivity.TAG, "Cell OCR [${p.field.label}]: raw=\"$cellText\" after regex=\"$processedText\"")
+                                debugBoxes?.add(DebugOverlayView.DebugBox(p.searchRect, 0xFF00FF00.toInt(), "VALUE: $processedText"))
+
+                                if (processedText.isNotEmpty()) {
+                                    val map = accumulatedResults.getOrPut(p.field.label) { mutableMapOf() }
+                                    map[processedText] = map.getOrDefault(processedText, 0) + 1
+                                }
+                            }
+                        }
+
                         validFramesCollected++
                     }
 

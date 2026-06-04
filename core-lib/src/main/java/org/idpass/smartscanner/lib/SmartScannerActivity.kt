@@ -771,7 +771,6 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             R.id.manual_capture -> {
                 // hide capture button during image capture
                 manualCapture?.isEnabled = false
-                cameraProvider?.unbindAll()
                 loading?.visibility = VISIBLE
                 val imageFile = File(cacheImagePath())
                 val outputFileOptions = ImageCapture.OutputFileOptions.Builder(imageFile).build()

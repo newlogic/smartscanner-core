@@ -27,9 +27,6 @@ android {
         vectorDrawables.useSupportLibrary = true
 
         buildConfigField("String", "BUILD_TIME", "\"$buildTime\"")
-
-        // Demo app always uses the full variant of core-lib
-        missingDimensionStrategy("variant", "full")
     }
 
     buildFeatures {
@@ -37,20 +34,11 @@ android {
         buildConfig = true
     }
 
-    // signingConfigs {
-    //     create("release") {
-    //         // Manually configure if needed
-    //     }
-    // }
-
+    // Demo app is debug-only. No release build is produced for the demo;
+    // the library is shipped via AAR from :core-lib instead.
     buildTypes {
         debug {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-        }
-        release {
-            isMinifyEnabled = false
-            // signingConfig = signingConfigs.getByName("release")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
