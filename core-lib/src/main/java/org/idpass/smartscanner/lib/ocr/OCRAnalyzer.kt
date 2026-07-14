@@ -330,29 +330,13 @@ open class OCRAnalyzer(
         val maxDist = (a.length * 0.35f).toInt().coerceAtLeast(1)
         val windowSize = a.length
         if (t.length < windowSize) {
-            return levenshtein(t, a) <= maxDist
+            return OCRScanLogic.levenshtein(t, a) <= maxDist
         }
         for (i in 0..t.length - windowSize) {
             val window = t.substring(i, (i + windowSize + 1).coerceAtMost(t.length))
-            if (levenshtein(window, a) <= maxDist) return true
+            if (OCRScanLogic.levenshtein(window, a) <= maxDist) return true
         }
         return false
-    }
-
-    private fun levenshtein(a: String, b: String): Int {
-        val m = a.length
-        val n = b.length
-        var prev = IntArray(n + 1) { it }
-        var curr = IntArray(n + 1)
-        for (i in 1..m) {
-            curr[0] = i
-            for (j in 1..n) {
-                val cost = if (a[i - 1] == b[j - 1]) 0 else 1
-                curr[j] = minOf(curr[j - 1] + 1, prev[j] + 1, prev[j - 1] + cost)
-            }
-            val tmp = prev; prev = curr; curr = tmp
-        }
-        return prev[n]
     }
 
     /**
@@ -377,7 +361,7 @@ open class OCRAnalyzer(
         for (i in 0..(t.length - a.length)) {
             for (len in a.length..(a.length + 1).coerceAtMost(t.length - i)) {
                 val window = t.substring(i, i + len)
-                val dist = levenshtein(window, a)
+                val dist = OCRScanLogic.levenshtein(window, a)
                 if (dist < bestDist) {
                     bestDist = dist
                     bestIdx = i
@@ -522,7 +506,7 @@ open class OCRAnalyzer(
                     }
                 } else {
                     val country = detectedCountry!!
-                    val maxFrames = country.maxFrames ?: 2
+                    val maxFrames = country.maxFrames ?: 3
                     totalAttempts++
 
                     // Check if all anchors are found in this frame
@@ -698,19 +682,11 @@ open class OCRAnalyzer(
                     }
 
                     if (validFramesCollected >= maxFrames) {
-                        // Process final result
-                        val rawFields = mutableMapOf<String, String>()
-                        val finalValues = ArrayList<String>()
+                        // Process final result — pick the most-frequently-read value per field.
+                        val rawFields = OCRScanLogic.pickBestValues(accumulatedResults)
+                        val finalValues = ArrayList(rawFields.values)
 
-                        accumulatedResults.forEach { (label, counts) ->
-                            val best = counts.maxByOrNull { it.value }
-                            if (best != null) {
-                                rawFields[label] = best.key
-                                finalValues.add(best.key)
-                            }
-                        }
-
-                        val finalFields = normalizeFields(rawFields, country)
+                        val finalFields = OCRScanLogic.normalizeFields(rawFields, country)
 
                         activity.runOnUiThread {
                             setRectColor(COLOR_COMPLETE)
@@ -756,83 +732,6 @@ open class OCRAnalyzer(
             }
 
         imageProxy.close()
-    }
-
-    // ==================== Field Normalization ====================
-
-    /**
-     * Parses a date string into yyyy-MM-dd based on the country's dateFormat.
-     * Handles: dd/MM/yyyy, dd-MM-yyyy, ddMMMyyyy (with month name lookup).
-     * Returns the original value if parsing fails.
-     */
-    private fun parseDate(value: String, dateFormat: String?, monthMap: Map<String, String>): String {
-        if (dateFormat == null) return value
-        try {
-            return when (dateFormat) {
-                "dd/MM/yyyy" -> {
-                    val parts = value.split("/")
-                    if (parts.size == 3) "${parts[2]}-${parts[1]}-${parts[0]}" else value
-                }
-                "dd-MM-yyyy" -> {
-                    val parts = value.split("-")
-                    if (parts.size == 3) "${parts[2]}-${parts[1]}-${parts[0]}" else value
-                }
-                "ddMMMyyyy" -> {
-                    // e.g. "19SEP2000" or "25NOV1980"
-                    val match = Regex("^(\\d{2})([A-Za-z]{3})(\\d{4})$").find(value) ?: return value
-                    val day = match.groupValues[1]
-                    val monthStr = match.groupValues[2].uppercase()
-                    val year = match.groupValues[3]
-                    val month = monthMap[monthStr] ?: return value
-                    "$year-$month-$day"
-                }
-                else -> value
-            }
-        } catch (e: Exception) {
-            return value
-        }
-    }
-
-    /**
-     * Remaps extracted fields from display labels to standardized keys,
-     * and normalizes date and gender values based on the country config.
-     */
-    private fun normalizeFields(
-        rawFields: Map<String, String>,
-        country: ScanIDOCRCountryOptions
-    ): Map<String, String> {
-        val labelToField = country.ocrData.associateBy { it.label }
-        val normalized = mutableMapOf<String, String>()
-
-        // Month name mapping for manual date parsing (covers Spanish and English)
-        val monthMap = mapOf(
-            "ENE" to "01", "FEB" to "02", "MAR" to "03", "ABR" to "04",
-            "MAY" to "05", "JUN" to "06", "JUL" to "07", "AGO" to "08",
-            "SEP" to "09", "OCT" to "10", "NOV" to "11", "DIC" to "12",
-            "JAN" to "01", "AUG" to "08", "DEC" to "12"
-        )
-
-        for ((label, value) in rawFields) {
-            val field = labelToField[label]
-            val outputKey = field?.key ?: label
-
-            val normalizedValue = when (outputKey) {
-                "dateOfBirth", "expiryDate" -> {
-                    parseDate(value.trim(), country.dateFormat, monthMap)
-                }
-                "gender" -> {
-                    val genderMap = country.genderMap
-                    if (genderMap != null) {
-                        genderMap[value.trim()] ?: genderMap[value.trim().uppercase()] ?: value
-                    } else value
-                }
-                else -> value
-            }
-
-            normalized[outputKey] = normalizedValue
-        }
-
-        return normalized
     }
 
     // ==================== Result Processing ====================

@@ -114,7 +114,9 @@ object DefaultCountryConfigs {
                 label = "Sex",
                 anchorValue = "Sexo",
                 searchBox = SearchBox(-0.2f, 1.0f, 1.0f, 1.5f),
-                regex = "[MF]",
+                // Permissive so lowercase / look-alike glyphs survive extraction and can be
+                // rescued by OCRScanLogic.resolveGender (a tight "[MF]" would drop them to empty).
+                regex = "[A-Za-z]",
                 key = "gender"
             )
         )
