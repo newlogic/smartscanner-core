@@ -1,0 +1,3 @@
+[submodule "smartscanner-mrz-parser"]
+	path = smartscanner-mrz-parser
+	url = git@github.com:idpass/smartscanner-mrz-parser.git

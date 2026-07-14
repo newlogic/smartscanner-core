@@ -59,7 +59,9 @@ data class MRZResult(
                     nationality = record.nationality,
                     sex = record.sex.toString(),
                     surname = record.surname,
-                    mrz = record.toMrz(),
+                    // Prefer the exact scanned MRZ captured at parse time; toMrz() is a lossy
+                    // rebuild (fixed 9-char document-number field) kept only as a fallback.
+                    mrz = record.rawMrz ?: record.toMrz(),
                     validComposite = record.validComposite
             )
         }
@@ -81,7 +83,9 @@ data class MRZResult(
                     nationality = record.nationality,
                     sex = record.sex.toString(),
                     surname = record.surname,
-                    mrz = record.toMrz(),
+                    // Prefer the exact scanned MRZ captured at parse time; toMrz() is a lossy
+                    // rebuild (fixed 9-char document-number field) kept only as a fallback.
+                    mrz = record.rawMrz ?: record.toMrz(),
                     optional = record.optional,
                     optional2 = record.optional2,
                     validComposite = record.validComposite
