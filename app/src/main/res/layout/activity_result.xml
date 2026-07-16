@@ -47,6 +47,17 @@
             android:padding="16dp">
 
             <TextView
+                android:id="@+id/tv_build_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="2dp"
+                android:gravity="end"
+                android:textSize="10sp"
+                android:textColor="#999999"
+                android:fontFamily="monospace"
+                android:visibility="gone" />
+
+            <TextView
                 android:id="@+id/image_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

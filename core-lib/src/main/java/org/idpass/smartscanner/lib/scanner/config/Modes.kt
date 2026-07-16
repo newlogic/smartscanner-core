@@ -26,5 +26,7 @@ enum class Modes (val value : String) {
     NFC_SCAN("nfc-scan"),
     PDF_417("pdf417"),
     QRCODE("qrcode"),
-    QRCODE_CONFIG("qrcode-config")
+    QRCODE_CONFIG("qrcode-config"),
+    @Deprecated("Use OCR mode with scanIDOCRCountryOptions instead")
+    SCAN_ID_OCR("manual-ocr")
 }

@@ -13,6 +13,8 @@
     <string name="mode_idpass_lite">ID PASS Lite</string>
     <string name="mode_mrz">MRZ Code</string>
     <string name="mode_ocr">OCR</string>
+    <string name="mode_scan_id_ocr">Scan ID OCR</string>
+    <string name="mode_scan_data_ocr">Scan Data OCR</string>
     <string name="mode_nfc">E-Passport/ID Card (NFC)</string>
     <string name="mode_pdf417">PDF417</string>
     <string name="mode_qr">QR Code</string>
@@ -71,6 +73,7 @@
     <string name="label_height">Height</string>
     <string name="label_distance_from_left">Distance from left</string>
     <string name="label_distance_from_top">Distance from top</string>
+    <string name="label_debug_overlay">DEBUG OVERLAY</string>
     <!-- Strings used for fragments for navigation -->
 
 </resources>

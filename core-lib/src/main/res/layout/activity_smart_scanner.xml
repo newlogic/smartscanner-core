@@ -49,6 +49,20 @@
         app:layout_constraintTop_toBottomOf="@+id/capture_header_text"
         tools:text="sub text" />
 
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/scan_progress"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="64dp"
+        android:layout_marginTop="8dp"
+        android:visibility="gone"
+        app:trackCornerRadius="4dp"
+        app:trackColor="#33FFFFFF"
+        app:indicatorColor="#FF1976D2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/capture_sub_header_text" />
+
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/top"
         android:layout_width="wrap_content"
@@ -177,14 +191,15 @@
 
     <ProgressBar
         android:id="@+id/loading"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:indeterminateTint="@color/white_30"
+        android:indeterminate="true"
+        android:elevation="10dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <FrameLayout
         android:id="@+id/fragment_holder"

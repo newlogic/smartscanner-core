@@ -35,10 +35,12 @@ data class Config(
     val showSettings: Boolean = false,
     val showGuide: Boolean? = null,
     val showOcrGuide: Boolean? = null,
+    val showOcrRegions: Boolean? = null,
     val xGuide: Number? = null,
     val yGuide: Number? = null,
     val widthGuide: Int = 0,
-    val heightGuide: Int = 70
+    val heightGuide: Int = 70,
+    val showOcrDebug: Boolean = false
 ) : Parcelable {
     companion object {
         const val CONFIG_PUB_KEY = "CONFIG_PUB_KEY"

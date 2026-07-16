@@ -18,32 +18,34 @@
 package org.newlogic.smartscanner.result
 
 import android.content.Intent
-import android.graphics.BitmapFactory
-import android.graphics.Paint
+import android.graphics.*
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.google.android.material.snackbar.Snackbar
+import com.google.gson.Gson
 import com.google.gson.JsonParser
 import org.idpass.smartscanner.api.ScannerConstants
+import org.idpass.smartscanner.lib.ocr.OCRResult
 import org.idpass.smartscanner.lib.scanner.config.ImageResultType
 import org.idpass.smartscanner.lib.scanner.config.Modes
 import org.idpass.smartscanner.lib.utils.extension.decodeBase64
 import org.idpass.smartscanner.lib.utils.extension.isJSONValid
+import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import org.newlogic.smartscanner.R
 import org.newlogic.smartscanner.adapters.RecyclerResultAdapter
 import org.newlogic.smartscanner.databinding.ActivityResultBinding
 import org.newlogic.smartscanner.result.RawResultActivity.Companion.PAYLOAD
-
 
 class ResultActivity : AppCompatActivity() {
 
@@ -55,6 +57,7 @@ class ResultActivity : AppCompatActivity() {
         const val BUNDLE_RESULT = "SCAN_BUNDLE_RESULT"
         const val IMAGE_TYPE = "SCAN_IMAGE_TYPE"
         const val SIGNATURE_VERIFIED = "SCAN_SIGNATURE_VERIFIED"
+        const val SCAN_ID_OCR_CONFIG = "SCAN_ID_OCR_CONFIG"
     }
 
     private lateinit var binding : ActivityResultBinding
@@ -63,8 +66,9 @@ class ResultActivity : AppCompatActivity() {
     private var headerResult : String? = null
     private var failResult : String? = null
     private var imageType : String? = null
-    private var resultList = mutableMapOf<String, String>();
+    private var resultList = mutableMapOf<String, String>()
     private var isVerifiedSignature: Boolean = false
+    private var scanIdOcrConfig: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,6 +88,7 @@ class ResultActivity : AppCompatActivity() {
         result = intent.getStringExtra(RESULT)
         imageType = intent.getStringExtra(IMAGE_TYPE)
         isVerifiedSignature = intent.getBooleanExtra(SIGNATURE_VERIFIED, false)
+        scanIdOcrConfig = intent.getStringExtra(SCAN_ID_OCR_CONFIG)
 
         binding.rvResultList.layoutManager = LinearLayoutManager(this)
         binding.rvResultList.adapter = RecyclerResultAdapter(resultList as HashMap<String, String>)
@@ -94,6 +99,9 @@ class ResultActivity : AppCompatActivity() {
         )
         binding.rvResultList.addItemDecoration(dividerItemDecoration)
         binding.btnViewRawResult.setOnClickListener { showRawResult() }
+
+        binding.tvBuildDate.text = "Build: ${org.newlogic.smartscanner.BuildConfig.BUILD_TIME}"
+        binding.tvBuildDate.visibility = VISIBLE
 
     }
 
@@ -107,11 +115,8 @@ class ResultActivity : AppCompatActivity() {
 
         if (result != null) {
             when (intent.getStringExtra(ScannerConstants.MODE)) {
-
-                // Display for MRZ here
                 Modes.MRZ.value -> {
-//                    displayResult(result = result, imageType = imageType)
-                    // Check composite validity
+                    displayResult(result = result, imageType = imageType)
                     val resultObj = JsonParser.parseString(result).asJsonObject
                     val validComposite = if (resultObj["validComposite"]!= null) resultObj["validComposite"].asBoolean else true
                     if (!validComposite) {
@@ -121,13 +126,14 @@ class ResultActivity : AppCompatActivity() {
                         snackBar.show()
                     }
                 }
-
-                // Otherwise
-//                else -> displayResult(result = result, imageType = imageType)
+                Modes.SCAN_ID_OCR.value,
+                Modes.OCR.value -> {
+                    displayOcrResult(result, imageType)
+                }
+                else -> displayResult(result = result, imageType = imageType)
             }
             showListResult(result)
         } else {
-            // Result from intent extras is null, check bundle result instead
             val bundleResult = intent.getBundleExtra(BUNDLE_RESULT)
             if (bundleResult != null) {
                 result = when (bundleResult.getString(ScannerConstants.MODE)) {
@@ -136,9 +142,6 @@ class ResultActivity : AppCompatActivity() {
                     Modes.MRZ.value -> bundleResult.getString(ScannerConstants.MRZ_RAW)
                     else -> null
                 }
-
-                // this should not show raw result, for this one it only needs the result directly
-                // we have to end this
                 finish()
                 showRawResult()
             } else {
@@ -146,6 +149,64 @@ class ResultActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    private fun displayOcrResult(result: String?, imageType: String?) {
+        if (result?.isJSONValid() == true) {
+            val ocrResult = Gson().fromJson(result, OCRResult::class.java)
+            val imageBitmap = if (imageType == ImageResultType.PATH.value) BitmapFactory.decodeFile(ocrResult.image) else ocrResult.image?.decodeBase64()
+            imageBitmap?.let {
+                val processedBitmap = scanIdOcrConfig?.let { config ->
+                    drawOcrRegions(it, config)
+                } ?: it
+
+                Glide.with(this)
+                    .load(processedBitmap)
+                    .fitCenter()
+                    .into(binding.imageResult)
+                binding.imageLabel.paintFlags = binding.imageLabel.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+                binding.imageLabel.visibility = VISIBLE
+                binding.imageResult.visibility = VISIBLE
+            }
+
+            ocrResult.fields?.let { resultList.putAll(it) }
+        }
+    }
+
+
+    private fun drawOcrRegions(bitmap: Bitmap, jsonConfig: String) : Bitmap {
+        try {
+            if (jsonConfig.trim().startsWith("[")) {
+                // Config is likely a JSONArray (Scan ID OCR Country Config), which doesn't match the point-based regions logic here.
+                // For now, return the original bitmap to avoid crash.
+                return bitmap
+            }
+            val jsonObject = JSONObject(jsonConfig)
+            val guideWidth = jsonObject.getInt("width")
+            val guideHeight = jsonObject.getInt("height")
+            val ocrRegions = jsonObject.getJSONArray("ocrRegions")
+
+            val mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
+            val canvas = Canvas(mutableBitmap)
+            val paint = Paint().apply {
+                color = Color.BLUE
+                style = Paint.Style.FILL
+            }
+
+            val scaleX = bitmap.width.toFloat() / guideWidth
+            val scaleY = bitmap.height.toFloat() / guideHeight
+
+            for (i in 0 until ocrRegions.length()) {
+                val region = ocrRegions.getJSONObject(i)
+                val x = region.getInt("x") * scaleX
+                val y = region.getInt("y") * scaleY
+                canvas.drawCircle(x, y, 10f, paint)
+            }
+            return mutableBitmap
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return bitmap
+        }
     }
 
     private fun displayResult(result: String? = null, imageType: String?) {
@@ -164,7 +225,7 @@ class ResultActivity : AppCompatActivity() {
                     val imageBitmap = if (imageType == ImageResultType.PATH.value) BitmapFactory.decodeFile(image) else image.decodeBase64()
                     Glide.with(this)
                             .load(imageBitmap)
-                            .optionalCenterCrop()
+                            .fitCenter()
                             .into(binding.imageResult)
                     binding.imageLabel.paintFlags = binding.imageLabel.paintFlags or Paint.UNDERLINE_TEXT_FLAG
                     binding.imageLabel.visibility = VISIBLE
@@ -269,13 +330,7 @@ class ResultActivity : AppCompatActivity() {
         if (regex != null) {
             if (regex.isNotEmpty()) dump.append("Regex: ${regex}\n")
         }
-        if (value != null) {
-            if (value.isNotEmpty()) dump.append("Value: ${value}\n")
-        }
-        if (valuesArray != null) {
-            if (valuesArray.isNotEmpty()) dump.append("Values Array: ${valuesArray}\n")
-        }
-        if (dump.isNotEmpty()) dump.append("-------------------------")
+        if (dump.isNotEmpty()) dump.append("-------------------------\n")
         return dump
     }
 
@@ -301,16 +356,27 @@ class ResultActivity : AppCompatActivity() {
         while (iResult.hasNext()) {
             val mKey: String = iResult.next()
             try {
-                val value: String = jsonResult.get(mKey).toString()
+                val valueObj = jsonResult.get(mKey)
+                val value: String = valueObj.toString()
 
-                if (value.isNotEmpty()) resultList[mKey] = value
+                if (value.isNotEmpty() && mKey != "image" && mKey != "imagePath" && mKey != "valuesArray" && mKey != "textBlocks" && mKey != "value") {
+                    if (mKey == "fields" && valueObj is JSONObject) {
+                        val iFields = valueObj.keys()
+                        while (iFields.hasNext()) {
+                            val fKey = iFields.next()
+                            resultList[fKey] = valueObj.getString(fKey)
+                        }
+                    } else {
+                        resultList[mKey] = value
+                    }
+                }
             } catch (e: JSONException) {
                 // TODO Something went wrong!
             }
         }
 
         binding.rvResultList.visibility = VISIBLE
-        binding.rvResultList.adapter?.notifyItemInserted(jsonResult.length())
+        binding.rvResultList.adapter?.notifyDataSetChanged()
 
         binding.tvInformation.visibility = GONE
         if (isVerifiedSignature) {

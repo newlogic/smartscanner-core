@@ -26,6 +26,7 @@ import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
 import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CaptureRequest
 import android.net.Uri
@@ -69,6 +70,10 @@ import org.idpass.smartscanner.lib.mrz.MRZAnalyzer
 import org.idpass.smartscanner.lib.mrz.MrzUtils
 import org.idpass.smartscanner.lib.nfc.NFCScanAnalyzer
 import org.idpass.smartscanner.lib.ocr.OCRAnalyzer
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import androidx.exifinterface.media.ExifInterface
+import org.idpass.smartscanner.lib.utils.BitmapUtils
 import org.idpass.smartscanner.lib.platform.utils.PlayStoreUtils
 import org.idpass.smartscanner.lib.scanner.BaseActivity
 import org.idpass.smartscanner.lib.scanner.ImageResult
@@ -134,6 +139,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
     private var captureHeaderText: TextView? = null
     private var captureSubHeaderText: TextView? = null
     private var barcodeScannerView: DecoratedBarcodeView? = null
+    private var ocrRegionsContainer: RelativeLayout? = null
+    private var loading: ProgressBar? = null
 
     private lateinit var modelLayoutView: View
     private lateinit var coordinatorLayoutView: View
@@ -184,6 +191,8 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         captureLabelText = findViewById(R.id.capture_label_text)
         captureHeaderText = findViewById(R.id.capture_header_text)
         captureSubHeaderText = findViewById(R.id.capture_sub_header_text)
+        ocrRegionsContainer = findViewById(R.id.rect_bounding_layout)
+        loading = findViewById(R.id.loading)
 
         // Scanner setup from intent
         hideActionBar()
@@ -241,6 +250,11 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             var hasPDF417 = false
 
             checkGuideView()
+
+            // Backwards compatibility: "manual-ocr" now handled by unified OCR
+            if (mode == Modes.SCAN_ID_OCR.value) {
+                mode = Modes.OCR.value
+            }
 
             if (mode == Modes.BARCODE.value) {
                 val barcodeStrings =
@@ -309,20 +323,34 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 barcodeScannerView?.visibility = GONE
             }
             if (mode == Modes.OCR.value) {
+                val ocrOpts = scannerOptions?.ocrOptions
+                val countryOptions = ocrOpts?.scanIDOCRCountryOptions
+
+                // Only resolve default country configs when scanIDOCRCountryOptions
+                // was explicitly provided (non-null). A null value means the caller
+                // wants simple regex-based OCR, not ID scanning.
+                val resolvedCountryOptions = if (countryOptions != null) {
+                    DefaultCountryConfigs.resolve(
+                        countryOptions,
+                        override = ocrOpts?.overrideDefaultCountryConfigs == true
+                    )
+                } else {
+                    null
+                }
+
                 analyzer = OCRAnalyzer(
                     activity = this,
                     intent = intent,
                     imageResultType = config?.imageResultType ?: ImageResultType.PATH.value,
-                    analyzeStart = scannerOptions?.ocrOptions?.analyzeStart ?: 0,
-                    //when scanning only the first text that will match the regex will be returned as value. Default value is .*
-                    regex = scannerOptions?.ocrOptions?.regex
+                    analyzeStart = ocrOpts?.analyzeStart ?: 0,
+                    regex = ocrOpts?.regex
                         ?: intent.getStringExtra(ScannerConstants.OCR_REGEX),
-                    //specifies the type of value being scanned. eg. firstname, lastname, etc.
-                    type = scannerOptions?.ocrOptions?.type
+                    type = ocrOpts?.type
                         ?: intent.getStringExtra(ScannerConstants.OCR_TYPE),
                     isShowGuide = config?.showOcrGuide ?: false,
-                    //when manual capture is set to true. User is required to tap the capture button to analyze the image.
-                    manualCapture = config?.isManualCapture ?: false
+                    manualCapture = config?.isManualCapture ?: false,
+                    scanIDOCRCountryOptions = resolvedCountryOptions,
+                    showDebugOverlay = config?.showOcrDebug ?: false
                 )
                 viewFinder.visibility = VISIBLE
                 barcodeScannerView?.visibility = GONE
@@ -355,15 +383,15 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             }
             if (mode == Modes.PDF_417.value) {
                 // Set zxing barcode view finder
-                val viewFinderBarcode = findViewById<ViewfinderView>(R.id.zxing_viewfinder_view)
+                val viewFinderBarcode = barcodeScannerView?.viewFinder
                 viewFinder.visibility = GONE
                 barcodeScannerView?.visibility = VISIBLE
                 barcodeScannerView?.initializeFromIntent(intent)
                 // remove black border, text info and laser
                 barcodeScannerView?.setStatusText("")
                 barcodeScannerView?.viewFinder?.visibility = GONE
-                viewFinderBarcode.setLaserVisibility(false)
-                viewFinderBarcode.setMaskColor(ContextCompat.getColor(this, R.color.transparent))
+                viewFinderBarcode?.setLaserVisibility(false)
+                viewFinderBarcode?.setMaskColor(ContextCompat.getColor(this, R.color.transparent))
                 // set PDF417 decoder and autofocus settings
                 barcodeScannerView?.barcodeView?.decoderFactory = PDF417DecoderFactory()
                 barcodeScannerView?.cameraSettings?.isContinuousFocusEnabled = true
@@ -450,6 +478,25 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         orientationEventListener.disable()
     }
 
+    /**
+     * Restart the camera preview after a failed capture attempt.
+     * Re-shows the viewFinder, re-enables the capture button, and hides the loading spinner.
+     */
+    fun restartCameraPreview() {
+        runOnUiThread {
+            viewFinder.visibility = VISIBLE
+            manualCapture?.isEnabled = true
+            manualCapture?.visibility = VISIBLE
+            flashButton?.visibility = if (isLedFlashAvailable(this)) VISIBLE else GONE
+            closeButton?.visibility = VISIBLE
+            guideContainer?.visibility = VISIBLE
+            captureLabelText?.visibility = VISIBLE
+            captureHeaderText?.visibility = VISIBLE
+            captureSubHeaderText?.visibility = VISIBLE
+            loading?.visibility = GONE
+        }
+    }
+
     @SuppressLint("ClickableViewAccessibility", "UnsafeOptInUsageError")
     private fun startCamera(analyzer: ImageAnalysis.Analyzer? = null, hasPDF417: Boolean = false) {
         viewFinder.post {
@@ -494,7 +541,6 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                 try {
                     // Unbind use cases before rebinding
                     cameraProvider?.unbindAll()
-                    // Bind use cases to camera
                     camera = if (analyzer != null) {
                         cameraProvider?.bindToLifecycle(
                             this,
@@ -520,7 +566,7 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                             }
                         )
                     }
-                    preview?.setSurfaceProvider(viewFinder.createSurfaceProvider())
+                    preview?.setSurfaceProvider(viewFinder.surfaceProvider)
                     Log.d(
                         TAG,
                         "Measured size: ${viewFinder.width}x${viewFinder.height}"
@@ -706,7 +752,9 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
 
     override fun onClick(view: View) {
         when (view.id) {
-            R.id.close_button -> onBackPressed()
+            R.id.close_button -> {
+                onBackPressed()
+            }
             R.id.settings_button -> showSettings()
             R.id.flash_button -> {
                 flashButton?.let {
@@ -723,9 +771,11 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
             R.id.manual_capture -> {
                 // hide capture button during image capture
                 manualCapture?.isEnabled = false
+                loading?.visibility = VISIBLE
                 val imageFile = File(cacheImagePath())
                 val outputFileOptions = ImageCapture.OutputFileOptions.Builder(imageFile).build()
-                imageCapture?.takePicture(outputFileOptions, cameraExecutor,
+                imageCapture?.takePicture(
+                    outputFileOptions, cameraExecutor,
                     object : ImageCapture.OnImageSavedCallback {
                         override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                             val data = Intent()
@@ -914,28 +964,35 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
         guideContainer?.alpha = 1f
 
         config?.let { conf ->
-            if (conf.widthGuide != 0) {
-                val nWidth = TypedValue.applyDimension(
-                    TypedValue.COMPLEX_UNIT_DIP,
-                    conf.widthGuide.toFloat(),
-                    resources.displayMetrics
-                ).roundToInt()
-                rectangleGuide?.layoutParams?.width = nWidth
-                guideWidth?.layoutParams?.width = nWidth
-            }
+            viewFinder.post { // Ensure viewFinder is measured
+                val calculatedGuideWidthPx = if (conf.widthGuide == 0) {
+                    (viewFinder.width - 21.toPx) // Default width if not specified
+                } else {
+                    TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP,
+                        conf.widthGuide.toFloat(),
+                        resources.displayMetrics
+                    ).roundToInt()
+                }
 
-            // if height guide is not by default
-            if (conf.heightGuide != 0) {
-                val nHeight = TypedValue.applyDimension(
-                    TypedValue.COMPLEX_UNIT_DIP,
-                    conf.heightGuide.toFloat(),
-                    resources.displayMetrics
-                ).roundToInt()
-                rectangleGuide?.layoutParams?.height = nHeight
-            }
+                val calculatedGuideHeightPx = if (conf.heightGuide == 0) {
+                    DEFAULT_HEIGHT.toPx // Use a reasonable default height if not specified, DEFAULT_HEIGHT is 70dp
+                } else {
+                    TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP,
+                        conf.heightGuide.toFloat(),
+                        resources.displayMetrics
+                    ).roundToInt()
+                }
 
-            if (conf.xGuide != null && conf.yGuide != null) {
-                viewFinder.post {
+                rectangleGuide?.layoutParams?.width = calculatedGuideWidthPx
+                guideWidth?.layoutParams?.width = calculatedGuideWidthPx
+                rectangleGuide?.layoutParams?.height = calculatedGuideHeightPx
+
+                var xGuideOffset = 0
+                var yGuideOffset = 0
+
+                if (conf.xGuide != null && conf.yGuide != null) {
                     //prevent xGuide from exceeding values 0.0-1.0
                     val x = when {
                         conf.xGuide.toFloat() > 1 -> 1f
@@ -951,18 +1008,63 @@ class SmartScannerActivity : BaseActivity(), OnClickListener {
                     }
 
                     //take into consideration the center point of the OCR guide.
-                    val xPercentage = (viewFinder.width.toFloat() * x).roundToInt() - (rectangleGuide?.width?.div(2) ?: 0)
-                    val yPercentage = (viewFinder.height.toFloat() * y).roundToInt() - (rectangleGuide?.height?.div(2) ?:0)
+                    xGuideOffset = (viewFinder.width.toFloat() * x).roundToInt() - (calculatedGuideWidthPx.div(2))
+                    yGuideOffset = (viewFinder.height.toFloat() * y).roundToInt() - (calculatedGuideHeightPx.div(2))
 
                     //set OCR guide center point to specified x and y coordinates
-                    xGuideView?.layoutParams?.width = xPercentage
-                    yGuideView?.layoutParams?.height = yPercentage
+                    xGuideView?.layoutParams?.width = xGuideOffset
+                    yGuideView?.layoutParams?.height = yGuideOffset
+                }
 
-                    xGuideView?.requestLayout()
-                    yGuideView?.requestLayout()
+                rectangleGuide?.requestLayout()
+                guideWidth?.requestLayout()
+                xGuideView?.requestLayout()
+                yGuideView?.requestLayout()
+
+                // Position ocrRegionsContainer to match the guide's position and size
+                ocrRegionsContainer?.apply {
+                    layoutParams?.width = calculatedGuideWidthPx
+                    layoutParams?.height = calculatedGuideHeightPx
+                    (layoutParams as? RelativeLayout.LayoutParams)?.leftMargin = xGuideOffset
+                    (layoutParams as? RelativeLayout.LayoutParams)?.topMargin = yGuideOffset
+                    requestLayout()
+                }
+
+                if (conf.showOcrRegions == true) {
+                    ocrRegionsContainer?.removeAllViews()
+                    scannerOptions?.ocrOptions?.ocrRegions?.let { regions ->
+                        for (region in regions) {
+                            val regionView = View(this@SmartScannerActivity)
+                            val dotSize = 40
+                            val params = RelativeLayout.LayoutParams(dotSize, dotSize)
+                            val shape = GradientDrawable()
+                            shape.shape = GradientDrawable.OVAL
+                            shape.setColor(Color.RED)
+                            regionView.background = shape
+
+                            // Determine the scaling reference based on conf.widthGuide and conf.heightGuide
+                            val scaleX = if (conf.widthGuide != 0) {
+                                region.x.toFloat() / conf.widthGuide
+                            } else {
+                                // If widthGuide is 0, assume region.x is normalized (0.0-1.0) and scale by calculatedGuideWidthPx
+                                region.x.toFloat()
+                            }
+
+                            val scaleY = if (conf.heightGuide != 0) {
+                                region.y.toFloat() / conf.heightGuide
+                            } else {
+                                // If heightGuide is 0, assume region.y is normalized (0.0-1.0) and scale by calculatedGuideHeightPx
+                                region.y.toFloat()
+                            }
+
+                            // Position relative to ocrRegionsContainer, which is now positioned correctly
+                            params.leftMargin = (scaleX * calculatedGuideWidthPx).toInt() - (dotSize / 2)
+                            params.topMargin = (scaleY * calculatedGuideHeightPx).toInt() - (dotSize / 2)
+                            ocrRegionsContainer?.addView(regionView, params)
+                        }
+                    }
                 }
             }
-            rectangleGuide?.requestLayout()
         }
     }
 }
