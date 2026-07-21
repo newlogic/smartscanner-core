@@ -42,6 +42,11 @@ android {
         jvmTarget = "21"
     }
 
+    testOptions {
+        // MrzParser (bundled parser) calls android.util.Log; let JVM unit tests use the stub.
+        unitTests.isReturnDefaultValues = true
+    }
+
     packaging {
         jniLibs {
             useLegacyPackaging = false
